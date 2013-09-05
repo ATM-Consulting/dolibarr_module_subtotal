@@ -1,0 +1,143 @@
+Module225000Name = Conformité
+Module225000Desc = Module de gestion des demandes de conformité
+
+# MENUS
+MenuTopConformite = Conformité
+MenuLeftConformite = Dossier de conformité
+MenuLeftConformiteNew = Nouveau
+MenuLeftConformiteList = Liste
+
+# TITLES
+TitleBrowserConformiteIndex = Gestion des demandes de conformité
+TitleBrowserConformiteCard = Dossier de conformité %s
+TitleBrowserConformiteList = Liste des dossiers de conformité
+TitleBrowserNormeList = Normes associées au dossier %s
+TitleBrowserPreuve = Rapports d'essai pour le dossier %s
+TitleConformiteList = Liste des dossiers de conformité
+TitleConformiteListForProduct = Liste des dossiers de conformité associés au produit
+TitleConformiteListForSociete = Liste des dossiers de conformité associés au tiers
+TitleConformiteCard = Fiche conformité
+TitleConformiteNormes = Normes associées au dossier
+TitleConformiteFileList = Fichiers générés
+TitlePreuveFileList = Fichiers attachés
+TitleAddNormesFree = Associer des spécifications additionnelles
+TitleAddNormesFromSearch = Associer des normes depuis la base
+TitleAddNewPreuve = Nouveau rapport d'essai
+
+# TABS
+TabConformiteCard = Fiche
+TabConformiteNorme = Association de normes
+TabConformitePreuve = Enregistrement de rapport
+
+# STATUTS
+DRAFT = Brouillon
+VALID = Validé
+SENT = Envoyé
+IN_PROGRESS = En cours
+CLOSED = Terminé
+WAITING = En attente
+OK = Ok
+KO = Ko
+
+# LISTE CONFORMITE
+ListTitleConformiteRef = N° dossier
+ListTitleConformiteStatus = Statut
+ListTitleConformiteSocCustomer = Client
+ListTitleConformiteSocSupplier = Fournisseur
+ListTitleConformiteSocLaboratory = Laboratoire
+ListTitleConformiteProduct = Produit
+ListTitleConformiteProductRefFourn = Référence fournisseur
+ListNoConformiteRecord = Il n'y a aucun dosier de conformité
+ListNoConformiteNormeRecord = Il n'y a aucune norme associée à ce dossier de conformité
+
+# DIVERS
+ShowConformite = Afficher conformité
+ShowNorme = Afficher norme
+
+# FICHE CONFORMITE
+TitleSectionGlobalInfos = Informations générales sur la demande de conformité
+TitleSectionRelatedInfos = Éléments relatifs à la demande de conformité
+TitleSectionTrackingInfos = Informations de suivi
+TitleSectionIndicators = Indicateurs
+LabelConformiteRef = N° dossier
+LabelConformiteStatus = Statut
+LabelConformiteAuthor = Auteur
+LabelConformiteProduct = Produit
+LabelConformiteProductRef = Référence produit
+LabelConformiteProductRefFourn = Référence fournisseur
+LabelConformiteSocCustomer = Client
+LabelConformiteSocSupplier = Fournisseur
+LabelConformiteSocLaboratory = Laboratoire
+LabelConformiteDateStart = Date de la demande
+LabelConformiteDateEnd = Date de clôture prévue
+LabelConformiteDateCre = Date de création
+LabelConformiteIndReportReceived = Rapports reçus
+LabelConformiteIndReportOk = Rapports OK
+
+# LISTE NORME
+ListTitleNormeRef = Référence norme
+ListTitleNormeLabel = Libellé norme
+ListTitleNormeService = Norme associée
+ListTitleNormeStatus = Statut
+ListTitleNormePreuveRef = Référence preuve
+ListTitleNormePreuveFiles = Fichier
+ListTitleNormePreuveDate = Date preuve
+ListTitleNormePreuveLaboratory = Laboratoire
+ListTitleNormeSelect = Sélection
+ListTitleNormeDelete = Suppression
+LabelNormeFreeRef = Référence
+LabelNormeFreeLabel = Libellé
+LabelNormeSearch = Recherche de normes
+LabelNormeSearchRef = Par référence ou libellé
+LabelNormeSearchCateg = Par catégorie
+
+# LISTE FICHIER
+ListTitleFileName = Nom du fichier
+ListTitleFileDate = Date
+ListTitleFileSize = Taille
+
+# FICHE RAPPORT
+LabelPreuveRef = Référence preuve
+LabelPreuveFile = Fichier joint
+LabelPreuveDate = Date preuve
+LabelPreuveLaboratory = Laboratoire
+LabelPreuveStatus = Statut
+
+# ACTIONS
+ActionCreate = Nouveau dossier de conformité
+ActionEdit = Modifier
+ActionValidate = Valider
+ActionDelete = Supprimer
+ActionSend = Envoyer par e-mail
+ActionClone = Cloner
+ActionSave = Enregistrer
+ActionCancel = Annuler
+ActionAddNormes = Associer des normes
+ActionAddSelectedNormes = Associer les normes sélectionnées
+ActionAddNormeFree = Associer la spécification renseignée
+ActionSearch = Rechercher
+ActionAddPreuve = Nouveau rapport d'essai
+ActionUnvalidate = Dévalider
+ActionReopen = Réouvrir
+ActionSetSent = Classer envoyé
+ActionClose = Clôturer
+ActionDownloadFile = Télécharger le fichier
+
+# MSG
+UnknownAction = Action inconnue : %s
+ActionNotPermitted = Action non autorisée : %s
+ConformiteSaved = Dossier de conformité enregistré %s
+ConformiteDeleted = Dossier de conformité %s supprimé
+ConformiteValidated = Dossier de conformité validé
+ConformiteUnvalidated = Dossier de conformité dévalidé
+ConformiteReopened = Dossier de conformité réouvert
+ConformiteSetSent = Dossier de conformité classé envoyé
+ConformiteInProgress = Dossier de conformité classé en cours
+ConformiteClosed = Dossier de conformité clôturé
+NormeAssociated = Norme ajoutée
+NormesAssociated = %s norme(s) associée(s)
+CloneCreated = Clone créé %s
+NormeRemoved = Norme %s retirée du dossier
+PreuveSaved = Rapport d'essai enregistré
+NoNormeSelected = Aucune norme sélectionnée
+FillMandatoryFields = Merci de remplir les champs obligatoires
