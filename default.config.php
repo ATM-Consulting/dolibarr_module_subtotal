@@ -10,6 +10,8 @@ if(!defined('INC_FROM_DOLIBARR') && defined('INC_FROM_CRON_SCRIPT')) {
 }
 elseif(!defined('INC_FROM_DOLIBARR')) {
 	include(ROOT."main.inc.php");
+} else {
+	global $dolibarr_main_db_host, $dolibarr_main_db_name, $dolibarr_main_db_user, $dolibarr_main_db_pass;
 }
 
 define('DB_HOST',$dolibarr_main_db_host);
