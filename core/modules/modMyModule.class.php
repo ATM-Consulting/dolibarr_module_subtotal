@@ -45,7 +45,7 @@ class modMyModule extends DolibarrModules
         // Id for module (must be unique).
         // Use a free id here
         // (See in Home -> System information -> Dolibarr for list of used modules id).
-        $this->numero = 10000;
+        $this->numero = 104000; // 104000 to 104999 for ATM CONSULTING
         // Key text used to identify module (for permissions, menus, etc...)
         $this->rights_class = 'mymodule';
 
@@ -67,7 +67,7 @@ class modMyModule extends DolibarrModules
         $this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
         // Where to store the module in setup page
         // (0=common,1=interface,2=others,3=very specific)
-        $this->special = 3;
+        $this->special = 0;
         // Name of image file used for this module.
         // If file is in theme/yourtheme/img directory under name object_pictovalue.png
         // use this->picto='pictovalue'
@@ -92,7 +92,7 @@ class modMyModule extends DolibarrModules
             // Set this to 1 if module has its own models directory
             //'models' => 0,
             // Set this to relative path of css if module has its own css file
-            'css' => '/mymodule/css/mycss.css.php',
+            //'css' => '/mymodule/css/mycss.css.php',
             // Set here all hooks context managed by module
             //'hooks' => array('hookcontext1','hookcontext2')
             // Set here all workflow context managed by module
@@ -437,7 +437,7 @@ class modMyModule extends DolibarrModules
 
         $result = $this->loadTables();
 
-        $url = dol_buildpath('/mymodule/script/create-maj-base.php', 1);
+        $url = dol_buildpath('/mymodule/script/create-maj-base.php', 2);
         file_get_contents($url);
 
         return $this->_init($sql, $options);
