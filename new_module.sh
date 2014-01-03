@@ -7,11 +7,10 @@ new_module_min=`echo $new_module | tr '[:upper:]' '[:lower:]'`
 cp -R $default_folder $new_module_min			# On copie le répertoire default dans le répertoire cible
 cd $new_module_min								# On se place dans le répertoire cible
 
-rm -r .git
+#rm -r .git
 rm -r .settings
 rm .project
 rm new_module.sh
-
 
 for fic in `find . -iname "*MyModule*" `
 do
@@ -20,8 +19,10 @@ do
 	sed -i 's/mymodule/'$new_module_min'/g' $fic
 	
 	# Renommage des fichiers
-	#OLDNAME=`echo $fic`
-	#NEWNAME=`echo $fic | sed 's/MyModule/'$new_module'/g'`
-	#NEWNAME=`echo $NEWNAME | sed 's/mymodule/'$new_module_min'/g'`
-	#mv $OLDNAME $NEWNAME
+	OLDNAME=`echo $fic`
+	NEWNAME=`echo $fic | sed 's/MyModule/'$new_module'/g'`
+	NEWNAME=`echo $NEWNAME | sed 's/mymodule/'$new_module_min'/g'`
+	mv $OLDNAME $NEWNAME
 done
+
+echo "Nouveau module $new_module préparé. Merci de supprimer le répertoire .git"
