@@ -33,7 +33,7 @@
 /**
  * Trigger class
  */
-class InterfaceMytrigger
+class InterfaceMyModuletrigger
 {
 
     private $db;

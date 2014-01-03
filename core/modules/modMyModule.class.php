@@ -80,7 +80,7 @@ class modMyModule extends DolibarrModules
         // for specific css file (eg: /mymodule/css/mymodule.css.php)
         $this->module_parts = array(
             // Set this to 1 if module has its own trigger directory
-            'triggers' => 1,
+            //'triggers' => 1,
             // Set this to 1 if module has its own login method directory
             //'login' => 0,
             // Set this to 1 if module has its own substitution function file
@@ -218,7 +218,7 @@ class modMyModule extends DolibarrModules
         $r = 0;
         // Example:
 
-        $this->boxes[$r][1] = "MyBox@mymodule";
+        $this->boxes[$r][1] = "mymodule_box@mymodule";
         $r ++;
         /*
           $this->boxes[$r][1] = "myboxb.php";
