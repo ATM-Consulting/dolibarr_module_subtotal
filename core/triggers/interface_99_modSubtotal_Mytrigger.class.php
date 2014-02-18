@@ -33,7 +33,7 @@
 /**
  * Trigger class
  */
-class Interfacetitretrigger
+class Interfacesubtotaltrigger
 {
 
     private $db;

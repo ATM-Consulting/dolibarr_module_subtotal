@@ -28,7 +28,7 @@ include_once DOL_DOCUMENT_ROOT . "/core/modules/DolibarrModules.class.php";
 /**
  * Description and activation class for module titre
  */
-class modtitre extends DolibarrModules
+class modSubtotal extends DolibarrModules
 {
 
     /**
@@ -48,7 +48,7 @@ class modtitre extends DolibarrModules
         // (See in Home -> System information -> Dolibarr for list of used modules id).
         $this->numero = 104777; // 104000 to 104999 for ATM CONSULTING
         // Key text used to identify module (for permissions, menus, etc...)
-        $this->rights_class = 'titre';
+        $this->rights_class = 'subtotal';
 
         // Family can be 'crm','financial','hr','projects','products','ecm','technic','other'
         // It is used to group modules in module setup page
@@ -60,7 +60,7 @@ class modtitre extends DolibarrModules
         // Module description
         // used if translation string 'ModuleXXXDesc' not found
         // (where XXX is value of numeric property 'numero' of module)
-        $this->description = "Description of module titre";
+        $this->description = "Module permettant l'ajout de sous-totaux et sous-totaux intermédiaires et le déplacement d'une ligne aisée de l'un dans l'autre";
         // Possible values for version are: 'development', 'experimental' or version
         $this->version = '1.0';
         // Key used in llx_const table to save module status enabled/disabled
@@ -74,7 +74,7 @@ class modtitre extends DolibarrModules
         // use this->picto='pictovalue'
         // If file is in module/img directory under name object_pictovalue.png
         // use this->picto='pictovalue@module'
-        $this->picto = 'titre@titre'; // mypicto@titre
+        $this->picto = 'subtotal@subtotal'; // mypicto@titre
         // Defined all module parts (triggers, login, substitutions, menus, css, etc...)
         // for default path (eg: /titre/core/xxxxx) (0=disable, 1=enable)
         // for specific path of parts (eg: /titre/core/modules/barcode)
@@ -117,7 +117,7 @@ class modtitre extends DolibarrModules
         $this->phpmin = array(5, 3);
         // Minimum version of Dolibarr required by module
         $this->need_dolibarr_version = array(3, 2);
-        $this->langfiles = array("titre@titre"); // langfiles@titre
+        $this->langfiles = array("subtotal@subtotal"); // langfiles@titre
         // Constants
         // List of particular constants to add when module is enabled
         // (key, 'chaine', value, desc, visible, 'current' or 'allentities', deleteonunactive)
@@ -167,9 +167,9 @@ class modtitre extends DolibarrModules
         // 'categories_x'		to add a tab in category view
         // (replace 'x' by type of category (0=product, 1=supplier, 2=customer, 3=member)
         // Dictionnaries
-        if (! isset($conf->titre->enabled)) {
-            $conf->titre=new stdClass();
-            $conf->titre->enabled = 0;
+        if (! isset($conf->subtotal->enabled)) {
+            $conf->subtotal=new stdClass();
+            $conf->subtotal->enabled = 0;
         }
         $this->dictionnaries = array();
         /* Example:
@@ -216,11 +216,7 @@ class modtitre extends DolibarrModules
         // Boxes
         // Add here list of php file(s) stored in core/boxes that contains class to show a box.
         $this->boxes = array(); // Boxes list
-        $r = 0;
-        // Example:
-
-        $this->boxes[$r][1] = "titre_box@titre";
-        $r ++;
+       
         /*
           $this->boxes[$r][1] = "myboxb.php";
           $r++;
@@ -438,8 +434,6 @@ class modtitre extends DolibarrModules
 
         $result = $this->loadTables();
 
-        $url = dol_buildpath('/titre/script/create-maj-base.php', 2);
-        file_get_contents($url);
 
         return $this->_init($sql, $options);
     }
@@ -469,6 +463,6 @@ class modtitre extends DolibarrModules
      */
     private function loadTables()
     {
-        return $this->_load_tables('/titre/sql/');
+        return $this->_load_tables('/subtotal/sql/');
     }
 }

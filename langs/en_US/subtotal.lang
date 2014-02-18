@@ -1,0 +1,4 @@
+ModuleTitreName = SubTotal
+ModuleTitreDesc = Module adding Subtotal in order, bill and propal
+title=Title
+subtotal= Subtotal
