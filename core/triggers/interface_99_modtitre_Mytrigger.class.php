@@ -18,7 +18,7 @@
 
 /**
  * 	\file		core/triggers/interface_99_modMyodule_Mytrigger.class.php
- * 	\ingroup	mymodule
+ * 	\ingroup	titre
  * 	\brief		Sample trigger
  * 	\remarks	You can create other triggers by copying this one
  * 				- File name should be either:
@@ -33,7 +33,7 @@
 /**
  * Trigger class
  */
-class InterfaceMyModuletrigger
+class Interfacetitretrigger
 {
 
     private $db;
@@ -54,7 +54,7 @@ class InterfaceMyModuletrigger
             . "They are provided for tutorial purpose only.";
         // 'development', 'experimental', 'dolibarr' or version
         $this->version = 'development';
-        $this->picto = 'mymodule@mymodule';
+        $this->picto = 'titre@titre';
     }
 
     /**
@@ -390,7 +390,8 @@ class InterfaceMyModuletrigger
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
         } elseif ($action == 'LINEBILL_INSERT') {
-            dol_syslog(
+				
+        	dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
         } elseif ($action == 'LINEBILL_DELETE') {

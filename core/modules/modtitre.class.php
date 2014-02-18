@@ -17,18 +17,18 @@
  */
 
 /**
- * 	\defgroup	mymodule	MyModule module
- * 	\brief		MyModule module descriptor.
- * 	\file		core/modules/modMyModule.class.php
- * 	\ingroup	mymodule
- * 	\brief		Description and activation file for module MyModule
+ * 	\defgroup	titre	titre module
+ * 	\brief		titre module descriptor.
+ * 	\file		core/modules/modtitre.class.php
+ * 	\ingroup	titre
+ * 	\brief		Description and activation file for module titre
  */
 include_once DOL_DOCUMENT_ROOT . "/core/modules/DolibarrModules.class.php";
 
 /**
- * Description and activation class for module MyModule
+ * Description and activation class for module titre
  */
-class modMyModule extends DolibarrModules
+class modtitre extends DolibarrModules
 {
 
     /**
@@ -36,6 +36,7 @@ class modMyModule extends DolibarrModules
      *
      * 	@param	DoliDB		$db	Database handler
      */
+     
     public function __construct($db)
     {
         global $langs, $conf;
@@ -45,13 +46,13 @@ class modMyModule extends DolibarrModules
         // Id for module (must be unique).
         // Use a free id here
         // (See in Home -> System information -> Dolibarr for list of used modules id).
-        $this->numero = 104000; // 104000 to 104999 for ATM CONSULTING
+        $this->numero = 104777; // 104000 to 104999 for ATM CONSULTING
         // Key text used to identify module (for permissions, menus, etc...)
-        $this->rights_class = 'mymodule';
+        $this->rights_class = 'titre';
 
         // Family can be 'crm','financial','hr','projects','products','ecm','technic','other'
         // It is used to group modules in module setup page
-        $this->family = "other";
+        $this->family = "technic";
         // Module label (no space allowed)
         // used if translation string 'ModuleXXXName' not found
         // (where XXX is value of numeric property 'numero' of module)
@@ -59,25 +60,25 @@ class modMyModule extends DolibarrModules
         // Module description
         // used if translation string 'ModuleXXXDesc' not found
         // (where XXX is value of numeric property 'numero' of module)
-        $this->description = "Description of module MyModule";
+        $this->description = "Description of module titre";
         // Possible values for version are: 'development', 'experimental' or version
-        $this->version = 'development';
+        $this->version = '1.0';
         // Key used in llx_const table to save module status enabled/disabled
         // (where MYMODULE is value of property name of module in uppercase)
         $this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
         // Where to store the module in setup page
         // (0=common,1=interface,2=others,3=very specific)
-        $this->special = 0;
+        $this->special = 2;
         // Name of image file used for this module.
         // If file is in theme/yourtheme/img directory under name object_pictovalue.png
         // use this->picto='pictovalue'
         // If file is in module/img directory under name object_pictovalue.png
         // use this->picto='pictovalue@module'
-        $this->picto = 'mymodule@mymodule'; // mypicto@mymodule
+        $this->picto = 'titre@titre'; // mypicto@titre
         // Defined all module parts (triggers, login, substitutions, menus, css, etc...)
-        // for default path (eg: /mymodule/core/xxxxx) (0=disable, 1=enable)
-        // for specific path of parts (eg: /mymodule/core/modules/barcode)
-        // for specific css file (eg: /mymodule/css/mymodule.css.php)
+        // for default path (eg: /titre/core/xxxxx) (0=disable, 1=enable)
+        // for specific path of parts (eg: /titre/core/modules/barcode)
+        // for specific css file (eg: /titre/css/titre.css.php)
         $this->module_parts = array(
             // Set this to 1 if module has its own trigger directory
             //'triggers' => 1,
@@ -92,20 +93,20 @@ class modMyModule extends DolibarrModules
             // Set this to 1 if module has its own models directory
             //'models' => 0,
             // Set this to relative path of css if module has its own css file
-            //'css' => '/mymodule/css/mycss.css.php',
+            //'css' => '/titre/css/mycss.css.php',
             // Set here all hooks context managed by module
-            //'hooks' => array('hookcontext1','hookcontext2')
+            'hooks' => array('invoicecard','propalcard','ordercard')
             // Set here all workflow context managed by module
             //'workflow' => array('order' => array('WORKFLOW_ORDER_AUTOCREATE_INVOICE'))
         );
 
         // Data directories to create when module is enabled.
-        // Example: this->dirs = array("/mymodule/temp");
+        // Example: this->dirs = array("/titre/temp");
         $this->dirs = array();
 
         // Config pages. Put here list of php pages
-        // stored into mymodule/admin directory, used to setup module.
-        $this->config_page_url = array("mymodule_setup.php@mymodule");
+        // stored into titre/admin directory, used to setup module.
+        $this->config_page_url = false;
 
         // Dependencies
         // List of modules id that must be enabled if this module is enabled
@@ -116,7 +117,7 @@ class modMyModule extends DolibarrModules
         $this->phpmin = array(5, 3);
         // Minimum version of Dolibarr required by module
         $this->need_dolibarr_version = array(3, 2);
-        $this->langfiles = array("mymodule@mymodule"); // langfiles@mymodule
+        $this->langfiles = array("titre@titre"); // langfiles@titre
         // Constants
         // List of particular constants to add when module is enabled
         // (key, 'chaine', value, desc, visible, 'current' or 'allentities', deleteonunactive)
@@ -142,9 +143,9 @@ class modMyModule extends DolibarrModules
         // Example:
         $this->tabs = array(
             //	// To add a new tab identified by code tabname1
-            //	'objecttype:+tabname1:Title1:langfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__',
+            //	'objecttype:+tabname1:Title1:langfile@titre:$user->rights->titre->read:/titre/mynewtab1.php?id=__ID__',
             //	// To add another new tab identified by code tabname2
-            //	'objecttype:+tabname2:Title2:langfile@mymodule:$user->rights->othermodule->read:/mymodule/mynewtab2.php?id=__ID__',
+            //	'objecttype:+tabname2:Title2:langfile@titre:$user->rights->othermodule->read:/titre/mynewtab2.php?id=__ID__',
             //	// To remove an existing tab identified by code tabname
             //	'objecttype:-tabname'
         );
@@ -166,16 +167,16 @@ class modMyModule extends DolibarrModules
         // 'categories_x'		to add a tab in category view
         // (replace 'x' by type of category (0=product, 1=supplier, 2=customer, 3=member)
         // Dictionnaries
-        if (! isset($conf->mymodule->enabled)) {
-            $conf->mymodule=new stdClass();
-            $conf->mymodule->enabled = 0;
+        if (! isset($conf->titre->enabled)) {
+            $conf->titre=new stdClass();
+            $conf->titre->enabled = 0;
         }
         $this->dictionnaries = array();
         /* Example:
           // This is to avoid warnings
-          if (! isset($conf->mymodule->enabled)) $conf->mymodule->enabled=0;
+          if (! isset($conf->titre->enabled)) $conf->titre->enabled=0;
           $this->dictionnaries=array(
-          'langs'=>'mymodule@mymodule',
+          'langs'=>'titre@titre',
           // List of tables we want to see into dictonnary editor
           'tabname'=>array(
           MAIN_DB_PREFIX."table1",
@@ -205,9 +206,9 @@ class modMyModule extends DolibarrModules
           'tabrowid'=>array("rowid","rowid","rowid"),
           // Condition to show each dictionnary
           'tabcond'=>array(
-          $conf->mymodule->enabled,
-          $conf->mymodule->enabled,
-          $conf->mymodule->enabled
+          $conf->titre->enabled,
+          $conf->titre->enabled,
+          $conf->titre->enabled
           )
           );
          */
@@ -218,7 +219,7 @@ class modMyModule extends DolibarrModules
         $r = 0;
         // Example:
 
-        $this->boxes[$r][1] = "mymodule_box@mymodule";
+        $this->boxes[$r][1] = "titre_box@titre";
         $r ++;
         /*
           $this->boxes[$r][1] = "myboxb.php";
@@ -257,18 +258,18 @@ class modMyModule extends DolibarrModules
         //	'fk_menu'=>0,
         //	// This is a Top menu entry
         //	'type'=>'top',
-        //	'titre'=>'MyModule top menu',
-        //	'mainmenu'=>'mymodule',
-        //	'leftmenu'=>'mymodule',
-        //	'url'=>'/mymodule/pagetop.php',
+        //	'titre'=>'titre top menu',
+        //	'mainmenu'=>'titre',
+        //	'leftmenu'=>'titre',
+        //	'url'=>'/titre/pagetop.php',
         //	// Lang file to use (without .lang) by module.
         //	// File must be in langs/code_CODE/ directory.
         //	'langs'=>'mylangfile',
         //	'position'=>100,
         //	// Define condition to show or hide menu entry.
-        //	// Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-        //	'enabled'=>'$conf->mymodule->enabled',
-        //	// Use 'perms'=>'$user->rights->mymodule->level1->level2'
+        //	// Use '$conf->titre->enabled' if entry must be visible if module is enabled.
+        //	'enabled'=>'$conf->titre->enabled',
+        //	// Use 'perms'=>'$user->rights->titre->level1->level2'
         //	// if you want your menu with a permission rules
         //	'perms'=>'1',
         //	'target'=>'',
@@ -282,18 +283,18 @@ class modMyModule extends DolibarrModules
         //	'fk_menu'=>'r=0',
         //	// This is a Left menu entry
         //	'type'=>'left',
-        //	'titre'=>'MyModule left menu',
-        //	'mainmenu'=>'mymodule',
-        //	'leftmenu'=>'mymodule',
-        //	'url'=>'/mymodule/pagelevel1.php',
+        //	'titre'=>'titre left menu',
+        //	'mainmenu'=>'titre',
+        //	'leftmenu'=>'titre',
+        //	'url'=>'/titre/pagelevel1.php',
         //	// Lang file to use (without .lang) by module.
         //	// File must be in langs/code_CODE/ directory.
         //	'langs'=>'mylangfile',
         //	'position'=>100,
         //	// Define condition to show or hide menu entry.
-        //	// Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-        //	'enabled'=>'$conf->mymodule->enabled',
-        //	// Use 'perms'=>'$user->rights->mymodule->level1->level2'
+        //	// Use '$conf->titre->enabled' if entry must be visible if module is enabled.
+        //	'enabled'=>'$conf->titre->enabled',
+        //	// Use 'perms'=>'$user->rights->titre->level1->level2'
         //	// if you want your menu with a permission rules
         //	'perms'=>'1',
         //	'target'=>'',
@@ -308,19 +309,19 @@ class modMyModule extends DolibarrModules
         //	'fk_menu'=>'fk_mainmenu=mainmenucode',
         //	// This is a Left menu entry
         //	'type'=>'left',
-        //	'titre'=>'MyModule left menu',
+        //	'titre'=>'titre left menu',
         //	'mainmenu'=>'mainmenucode',
-        //	'leftmenu'=>'mymodule',
-        //	'url'=>'/mymodule/pagelevel2.php',
+        //	'leftmenu'=>'titre',
+        //	'url'=>'/titre/pagelevel2.php',
         //	// Lang file to use (without .lang) by module.
         //	// File must be in langs/code_CODE/ directory.
         //	'langs'=>'mylangfile',
         //	'position'=>100,
         //	// Define condition to show or hide menu entry.
-        //	// Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
+        //	// Use '$conf->titre->enabled' if entry must be visible if module is enabled.
         //	// Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-        //	'enabled'=>'$conf->mymodule->enabled',
-        //	// Use 'perms'=>'$user->rights->mymodule->level1->level2'
+        //	'enabled'=>'$conf->titre->enabled',
+        //	// Use 'perms'=>'$user->rights->titre->level1->level2'
         //	// if you want your menu with a permission rules
         //	'perms'=>'1',
         //	'target'=>'',
@@ -437,7 +438,7 @@ class modMyModule extends DolibarrModules
 
         $result = $this->loadTables();
 
-        $url = dol_buildpath('/mymodule/script/create-maj-base.php', 2);
+        $url = dol_buildpath('/titre/script/create-maj-base.php', 2);
         file_get_contents($url);
 
         return $this->_init($sql, $options);
@@ -461,13 +462,13 @@ class modMyModule extends DolibarrModules
     /**
      * Create tables, keys and data required by module
      * Files llx_table1.sql, llx_table1.key.sql llx_data.sql with create table, create keys
-     * and create data commands must be stored in directory /mymodule/sql/
+     * and create data commands must be stored in directory /titre/sql/
      * This function is called by this->init
      *
      * 	@return		int		<=0 if KO, >0 if OK
      */
     private function loadTables()
     {
-        return $this->_load_tables('/mymodule/sql/');
+        return $this->_load_tables('/titre/sql/');
     }
 }
