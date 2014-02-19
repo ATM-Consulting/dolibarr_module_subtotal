@@ -224,18 +224,7 @@ class ActionsSubtotal
 								 
 								
 							}
-					 ?></td>
-					 <td align="right">
-						<?php	
-						
-							 if($line->qty==99) {
-							/* Total */
-							$total_line = $this->getTotalLineFromObject($object, $line);
-						
-								print price($total_line); 
-							}	
-						?>
-					</td><?
+					 ?></td><?
 					  if (! empty($conf->margin->enabled) && empty($user->societe_id)) {
 						 ?><td align="right" class="nowrap">&nbsp;</td>
 					  	<?php if (! empty($conf->global->DISPLAY_MARGIN_RATES) && $user->rights->margins->liretous) {?>
@@ -245,6 +234,25 @@ class ActionsSubtotal
 					  if (! empty($conf->global->DISPLAY_MARK_RATES) && $user->rights->margins->liretous) {?>
 					  	  <td align="right" class="nowrap">&nbsp;</td>
 					  <?php } } ?>
+					 
+					  <?php	
+						
+							 if($line->qty==99) {
+							/* Total */
+								$total_line = $this->getTotalLineFromObject($object, $line);
+								?>
+								<td align="right" style="font-weight:bold;"><?=price($total_line) ?></td>
+								<?
+								
+							}
+							 else {
+							 	
+								?>
+								<td>&nbsp;</td>
+								<?
+							 }	
+						?>
+					
 					<td align="center">
 						<?php
 							if($action=='editlinetitle' && $_REQUEST['lineid']==$line->id ) {
