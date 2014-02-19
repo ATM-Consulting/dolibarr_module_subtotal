@@ -1,3 +1,5 @@
 Module104777Name = Sous-Total
-Module104777Desc = Module permettant l'ajout de sous-totaux et sous-totaux intermédiaires et le déplacement d'une ligne aisée de l'un dans l'autre
+Module104777Desc = Permet l'ajout de titre et de sous-totaux sur les propositions commerciales, commandes et factures
 title=Titre du groupement
+AddTitle = Ajouter un titre
+AddSubTotal = Ajouter un total
