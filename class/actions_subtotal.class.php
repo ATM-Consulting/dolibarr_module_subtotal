@@ -199,6 +199,19 @@ class ActionsSubtotal
 						else if($object->element=='commande') $object->updateline($line->id,$_POST['linetitle'], 0,$line->qty,0,0,0,0,'HT',0,'','',9,0,0,null,0,'', $this->module_number);
 						
 					}
+					else if($action=='editlinetitle') {
+						?>
+						<script type="text/javascript">
+							$(document).ready(function() {
+								$('#addproduct').submit(function () {
+									$('input[name=saveEditlinetitle]').click();
+									return false;
+								}) ;
+							});
+							
+						</script>
+						<?
+					}
 					
 					
 					/* Titre */
