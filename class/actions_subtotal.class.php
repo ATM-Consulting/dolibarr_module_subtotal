@@ -41,8 +41,8 @@ class ActionsSubtotal
 				    	
 				?><script type="text/javascript">
 					$(document).ready(function() {
-						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" href="javascript:;" class="butAction">Ajouter un titre</a></div>');
-						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" href="javascript:;" class="butAction">Ajouter un total</a></div>');
+						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" href="javascript:;" class="butAction"><?= $langs->trans('AddTitle' )?></a></div>');
+						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" href="javascript:;" class="butAction"><?= $langs->trans('AddSubTotal')?></a></div>');
 						
 						
 						$('#add_title_line').click(function() {

@@ -1,3 +1,5 @@
 Module104777Name = SubTotal
-Module104777Desc = Module adding Subtotal in order, bill and propal
+Module104777Desc = Allows to add titles and subtotals in proposal, orders and invoices
 title=Title
+AddTitle = Add a title
+AddSubTotal = Add a subtotal
