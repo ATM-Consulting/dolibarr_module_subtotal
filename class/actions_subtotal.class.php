@@ -12,7 +12,7 @@ class ActionsSubtotal
       
     function formObjectOptions($parameters, &$object, &$action, $hookmanager) 
     {  
-      	global $langs,$db;
+      	global $langs,$db,$user;
 		
 		$langs->load('subtotal@subtotal');
 		
@@ -20,49 +20,54 @@ class ActionsSubtotal
 		
 		if(in_array('ordercard',$contexts) || in_array('propalcard',$contexts) || in_array('invoicecard',$contexts)) {
         	
-			if($object->element=='facture')$idvar = 'facid';
-			else $idvar='id';
+			if ($object->statut == 0  && $user->rights->{$object->element}->creer) {
 			
 			
-			if($action=='add_title_line') {
-				if($object->element=='facture') $object->addline($langs->trans('title'), 0,1,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
-				else if($object->element=='propal') $object->addline($langs->trans('title'), 0,1,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
-				else if($object->element=='commande') $object->addline($langs->trans('title'), 0,1,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
-    		}
-			else if($action=='add_total_line') {
-				if($object->element=='facture') $object->addline($langs->trans('subtotal'), 0,99,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
-				else if($object->element=='propal') $object->addline($langs->trans('subtotal'), 0,99,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
-				else if($object->element=='commande') $object->addline($langs->trans('subtotal'), 0,99,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
-    		}
-			
-			    	
-			?><script type="text/javascript">
-				$(document).ready(function() {
-					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" href="javascript:;" class="butAction">Ajouter un titre</a></div>');
-					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" href="javascript:;" class="butAction">Ajouter un total</a></div>');
-					
-					
-					$('#add_title_line').click(function() {
-						
-						$.get('?<?=$idvar ?>=<?=$object->id ?>&action=add_title_line', function() {
-							document.location.href='?<?=$idvar ?>=<?=$object->id ?>';
-						});
-						
-					});
-					
-					$('#add_total_line').click(function() {
-						
-						$.get('?<?=$idvar ?>=<?=$object->id ?>&action=add_total_line', function() {
-							document.location.href='?<?=$idvar ?>=<?=$object->id ?>';
-						});
-						
-					});
-					
-				});
+				if($object->element=='facture')$idvar = 'facid';
+				else $idvar='id';
 				
-			</script><?
-			
+				
+				if($action=='add_title_line') {
+					if($object->element=='facture') $object->addline($langs->trans('title'), 0,1,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
+					else if($object->element=='propal') $object->addline($langs->trans('title'), 0,1,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
+					else if($object->element=='commande') $object->addline($langs->trans('title'), 0,1,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
+	    		}
+				else if($action=='add_total_line') {
+					if($object->element=='facture') $object->addline($langs->trans('SubTotal'), 0,99,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
+					else if($object->element=='propal') $object->addline($langs->trans('SubTotal'), 0,99,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
+					else if($object->element=='commande') $object->addline($langs->trans('SubTotal'), 0,99,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
+	    		}
+				
+				    	
+				?><script type="text/javascript">
+					$(document).ready(function() {
+						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" href="javascript:;" class="butAction">Ajouter un titre</a></div>');
+						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" href="javascript:;" class="butAction">Ajouter un total</a></div>');
+						
+						
+						$('#add_title_line').click(function() {
+							
+							$.get('?<?=$idvar ?>=<?=$object->id ?>&action=add_title_line', function() {
+								document.location.href='?<?=$idvar ?>=<?=$object->id ?>';
+							});
+							
+						});
+						
+						$('#add_total_line').click(function() {
+							
+							$.get('?<?=$idvar ?>=<?=$object->id ?>&action=add_total_line', function() {
+								document.location.href='?<?=$idvar ?>=<?=$object->id ?>';
+							});
+							
+						});
+						
+					});
+					
+				</script><?
+			}
 		}
+			 
+			 
 			 
 		
 		return 0;
@@ -171,12 +176,12 @@ class ActionsSubtotal
 
 	function printObjectLine ($parameters, &$object, &$action, $hookmanager){
 		
-		global $conf,$langs;
+		global $conf,$langs,$user;
 		
 		$num = &$parameters['num'];
 		$line = &$parameters['line'];
 		$i = &$parameters['i'];
-	
+
 		$contexts = explode(':',$parameters['context']);
 	
 		if($line->special_code!=$this->module_number) {
@@ -187,58 +192,11 @@ class ActionsSubtotal
         	
 			if($object->element=='facture')$idvar = 'facid';
 			else $idvar='id';
-			
-			
-        		if($line->qty==99) {
-					/* Total */
-					
-					
-					$total_line = $this->getTotalLineFromObject($object, $line);
-					
-						?>
-					<tr class="drag drop" id="row-<?=$line->id ?>" style="background-color:#ddffdd; font-weight:bold;">
-					<td  align="right" colspan="5"><?=$line->description ?> : </td>
-					<td align="right">
-						<?=price($total_line) ?>
-					</td>
-					<td align="center">
-						&nbsp;
-					</td>
-
-					<td align="center">		
-						<a href="<?='?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id ?>">
-							<?=img_delete() ?>		
-						</a>
-					</td>
-
-					<?php if ($num > 1 && empty($conf->browser->phone)) { ?>
-					<td align="center" class="tdlineupdown">
-						<?php if ($i > 0) { ?>
-						<a class="lineupdown" href="<?='?'.$idvar.'='.$object->id.'&amp;action=up&amp;rowid='.$line->id ?>">
-						<?php echo img_up(); ?>
-						</a>
-						<?php } ?>
-						<?php if ($i < $num-1) { ?>
-						<a class="lineupdown" href="<?='?'.$idvar.'='.$object->id.'&amp;action=down&amp;rowid='.$line->id ?>">
-						<?php echo img_down(); ?>
-						</a>
-						<?php } ?>
-					</td>
-				    <?php } else { ?>
-				    <td align="center"<?php echo (empty($conf->browser->phone)?' class="tdlineupdown"':''); ?>></td>
-					<?php } ?>
-
-					</tr>
-					<?
-					
-					
-				}
-				else {
 					
 					if($action=='savelinetitle' && $_POST['lineid']===$line->id) {
-						if($object->element=='facture') $object->updateline($line->id,$_POST['linetitle'], 0,1,0,'','',0,0,0,'HT',0,9,0,0,null,0,'', $this->module_number);
-						else if($object->element=='propal') $object->updateline($line->id, 0,1,0,0,0,0, $_POST['linetitle'] ,'HT',0,$this->module_number,0,0,0,0,'',9);
-						else if($object->element=='commande') $object->updateline($line->id,$_POST['linetitle'], 0,1,0,0,0,0,'HT',0,'','',9,0,0,null,0,'', $this->module_number);
+						if($object->element=='facture') $object->updateline($line->id,$_POST['linetitle'], 0,$line->qty,0,'','',0,0,0,'HT',0,9,0,0,null,0,'', $this->module_number);
+						else if($object->element=='propal') $object->updateline($line->id, 0,$line->qty,0,0,0,0, $_POST['linetitle'] ,'HT',0,$this->module_number,0,0,0,0,'',9);
+						else if($object->element=='commande') $object->updateline($line->id,$_POST['linetitle'], 0,$line->qty,0,0,0,0,'HT',0,'','',9,0,0,null,0,'', $this->module_number);
 						
 					}
 					
@@ -246,21 +204,47 @@ class ActionsSubtotal
 					/* Titre */
 					//var_dump($line);
 					?>
-					<tr class="drag drop" id="row-<?=$line->id ?>" style="background-color:#fff;">
-					<td colspan="6" style=" font-weight:bold; font-style: italic "><?
+					<tr class="drag drop" id="row-<?=$line->id ?>" style="background-color:<?=   ($line->qty==99)?'#ddffdd':'#fff' ?>;">
+					<td colspan="5" style="font-weight:bold;  <?=($line->qty==99)?'text-align:right':' font-style: italic;' ?> "><?
+					
 							if($action=='editlinetitle' && $_REQUEST['lineid']===$line->id ) {
 								
-								print img_picto('', 'subtotal@subtotal');
+								 if($line->qty!=99) print img_picto('', 'subtotal@subtotal');
 								?>
 								<input type="text" name="line-title" id-line="<?=$line->id ?>" value="<?=addslashes($line->description) ?>" size="80" />
 								<?
 							}
 							else {
 								
-								print img_picto('', 'subtotal@subtotal').$line->description;
+							     if($line->qty!=99) print img_picto('', 'subtotal@subtotal');
+								
+								 print $line->description;
+								
+								 if($line->qty==99) { print ' : '; }
+								 
 								
 							}
 					 ?></td>
+					 <td align="right">
+						<?php	
+						
+							 if($line->qty==99) {
+							/* Total */
+							$total_line = $this->getTotalLineFromObject($object, $line);
+						
+								print price($total_line); 
+							}	
+						?>
+					</td><?
+					  if (! empty($conf->margin->enabled) && empty($user->societe_id)) {
+						 ?><td align="right" class="nowrap">&nbsp;</td>
+					  	<?php if (! empty($conf->global->DISPLAY_MARGIN_RATES) && $user->rights->margins->liretous) {?>
+					  	  <td align="right" class="nowrap">&nbsp;</td>
+					  	<?php
+					  }
+					  if (! empty($conf->global->DISPLAY_MARK_RATES) && $user->rights->margins->liretous) {?>
+					  	  <td align="right" class="nowrap">&nbsp;</td>
+					  <?php } } ?>
 					<td align="center">
 						<?php
 							if($action=='editlinetitle' && $_REQUEST['lineid']==$line->id ) {
@@ -287,11 +271,16 @@ class ActionsSubtotal
 								<?
 							}
 							else{
+								
+								if ($object->statut == 0  && $user->rights->{$object->element}->creer) {
+								
 								?>
 									<a href="<?='?'.$idvar.'='.$object->id.'&action=editlinetitle&lineid='.$line->id ?>">
 										<?=img_edit() ?>		
 									</a>
-								<?								
+								<?
+								
+								}								
 							}
 						?>
 					</td>
@@ -304,11 +293,15 @@ class ActionsSubtotal
 								<?
 							}
 							else{
+								if ($object->statut == 0  && $user->rights->{$object->element}->creer) {
+								
 								?>
 									<a href="<?='?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id ?>">
 										<?=img_delete() ?>		
 									</a>
 								<?								
+								
+								}
 							}
 						?>	
 						
@@ -316,26 +309,26 @@ class ActionsSubtotal
 
 					<?php if ($num > 1 && empty($conf->browser->phone)) { ?>
 					<td align="center" class="tdlineupdown">
-						<?php if ($i > 0) { ?>
+						<?php if ($i > 0 && ($object->statut == 0  && $user->rights->{$object->element}->creer)) { ?>
 						<a class="lineupdown" href="<?='?'.$idvar.'='.$object->id.'&amp;action=up&amp;rowid='.$line->id ?>">
 						<?php echo img_up(); ?>
 						</a>
 						<?php } ?>
-						<?php if ($i < $num-1) { ?>
+						<?php if ($i < $num-1 && ($object->statut == 0  && $user->rights->{$object->element}->creer)) { ?>
 						<a class="lineupdown" href="<?='?'.$idvar.'='.$object->id.'&amp;action=down&amp;rowid='.$line->id ?>">
 						<?php echo img_down(); ?>
 						</a>
 						<?php } ?>
 					</td>
 				    <?php } else { ?>
-				    <td align="center"<?php echo (empty($conf->browser->phone)?' class="tdlineupdown"':''); ?>></td>
+				    <td align="center"<?php echo ((empty($conf->browser->phone) && ($object->statut == 0  && $user->rights->{$object->element}->creer))?' class="tdlineupdown"':''); ?>></td>
 					<?php } ?>
 
 					</tr>
 					<?
 					
 					
-				}
+				
 			
 		}
 		

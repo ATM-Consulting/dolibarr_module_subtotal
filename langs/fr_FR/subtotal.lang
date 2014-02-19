@@ -1,4 +1,3 @@
 ModuleTitreName = Sous-Total
 ModuleTitreDesc = Module permettant l'ajout de sous-totaux et sous-totaux intermédiaires et le déplacement d'une ligne aisée de l'un dans l'autre
 title=Titre du groupement
-subtotal= Sous-Total
