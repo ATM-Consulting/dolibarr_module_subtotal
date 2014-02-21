@@ -227,12 +227,37 @@ class ActionsSubtotal
 						</script>
 						<?
 					}
-					
+					else {
+						if( strpos($conf->global->MAIN_VERSION_LAST_INSTALL,'3.4')!==false ) {
+							
+							?>
+							<script type="text/javascript">
+								$(document).ready(function() {
+									$('#tablelines tr[rel=subtotal]').mouseleave(function() {
+										
+										id_line =$(this).attr('id');
+										
+										$(this).find('td[rel=subtotal_total]').each(function() {
+											$.get(document.location.href, function(data) {
+												var total = $(data).find('#tablelines tr#'+id_line+' td[rel=subtotal_total]').html();
+												
+												$('#tablelines tr#'+id_line+' td[rel=subtotal_total]').html(total);
+												
+											});
+										});
+									});
+								});
+								
+							</script>
+							<?
+							
+						}
+					}
 					
 					/* Titre */
 					//var_dump($line);
 					?>
-					<tr class="drag drop" id="row-<?=$line->id ?>" style="background-color:<?=   ($line->qty==99)?'#ddffdd':'#fff' ?>;">
+					<tr class="drag drop" rel="subtotal" id="row-<?=$line->id ?>" style="background-color:<?=   ($line->qty==99)?'#ddffdd':'#fff' ?>;">
 					<td colspan="5" style="font-weight:bold;  <?=($line->qty==99)?'text-align:right':' font-style: italic;' ?> "><?
 					
 							if($action=='editlinetitle' && $_REQUEST['lineid']===$line->id ) {
@@ -269,7 +294,7 @@ class ActionsSubtotal
 							/* Total */
 								$total_line = $this->getTotalLineFromObject($object, $line);
 								?>
-								<td align="right" style="font-weight:bold;"><?=price($total_line) ?></td>
+								<td align="right" style="font-weight:bold;" rel="subtotal_total"><?=price($total_line) ?></td>
 								<?
 								
 							}
