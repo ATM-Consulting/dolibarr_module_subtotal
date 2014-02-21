@@ -12,31 +12,46 @@ class ActionsSubtotal
       
     function formObjectOptions($parameters, &$object, &$action, $hookmanager) 
     {  
-      	global $langs,$db,$user;
+      	global $langs,$db,$user, $conf;
 		
 		$langs->load('subtotal@subtotal');
 		
 		$contexts = explode(':',$parameters['context']);
 		
 		if(in_array('ordercard',$contexts) || in_array('propalcard',$contexts) || in_array('invoicecard',$contexts)) {
-        	
-			if ($object->statut == 0  && $user->rights->{$object->element}->creer) {
+        		
+        	if ($object->statut == 0  && $user->rights->{$object->element}->creer) {
 			
 			
 				if($object->element=='facture')$idvar = 'facid';
 				else $idvar='id';
 				
 				
-				if($action=='add_title_line') {
-					if($object->element=='facture') $object->addline($langs->trans('title'), 0,1,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
-					else if($object->element=='propal') $object->addline($langs->trans('title'), 0,1,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
-					else if($object->element=='commande') $object->addline($langs->trans('title'), 0,1,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
-	    		}
-				else if($action=='add_total_line') {
-					if($object->element=='facture') $object->addline($langs->trans('SubTotal'), 0,99,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
-					else if($object->element=='propal') $object->addline($langs->trans('SubTotal'), 0,99,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
-					else if($object->element=='commande') $object->addline($langs->trans('SubTotal'), 0,99,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
-	    		}
+				if($action=='add_title_line' || $action=='add_total_line') {
+					
+					if($action=='add_title_line') {
+						$title = $langs->trans('title');
+						$qty = 1;
+					}
+					else {
+						$title = $langs->trans('SubTotal');
+						$qty = 99;
+					}
+					
+	    		
+					if( strpos($conf->global->MAIN_VERSION_LAST_INSTALL,'3.4')!==false ) {
+						if($object->element=='facture') $object->addline($object->id, $title, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
+						else if($object->element=='propal') $object->addline($object->id,$title, 0,$qty,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
+						else if($object->element=='commande') $object->addline($object->id,$title, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
+						
+					}
+					else {
+						if($object->element=='facture') $object->addline($title, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
+						else if($object->element=='propal') $object->addline($title, 0,$qty,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
+						else if($object->element=='commande') $object->addline($title, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
+												
+					}
+				}
 				
 				    	
 				?><script type="text/javascript">
