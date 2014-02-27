@@ -289,7 +289,7 @@ class ActionsSubtotal
 								}
 								
 								?>
-								<input type="text" name="line-title" id-line="<?=$line->id ?>" value="<?=addslashes($line->label) ?>" size="80" /><br />
+								<input type="text" name="line-title" id-line="<?=$line->id ?>" value="<?=$line->label ?>" size="80" /><br />
 								<?
 								
 								if($line->qty!=99) {
