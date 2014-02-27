@@ -141,6 +141,15 @@ class ActionsSubtotal
  			if($object->lines[$i]->special_code == $this->module_number) {
 				$line = &$object->lines[$i]; 	
 				
+				if($line->label=='') {
+					$label = $line->desc;
+					$description='';
+				}
+				else {
+					$label = $line->label;
+					$description=$line->desc;
+				}
+				
 				if($line->qty==99) {
 					$pdf->SetXY ($posx, $posy-1);
 					$pdf->SetFillColor(230, 230, 230);
@@ -148,14 +157,23 @@ class ActionsSubtotal
 					
 					$pdf->SetXY ($posx, $posy);
 					$pdf->SetFont('', 'B', 9);
-					$pdf->MultiCell($w, $h-2, $outputlangs->convToOutputCharset($line->desc).' ', 0, 'R');
+					$pdf->MultiCell($w, $h-2, $outputlangs->convToOutputCharset($label).' ', 0, 'R');
 					
 				}	
 				else{
 					
 					$pdf->SetXY ($posx, $posy);
 					$pdf->SetFont('', 'BU', 9);
-					$pdf->MultiCell($w, $h-2, $outputlangs->convToOutputCharset($line->desc), 0, 'L');
+					$pdf->MultiCell($w, $h-2, $outputlangs->convToOutputCharset($label), 0, 'L');
+					
+					if($description) {
+						$posy = $pdf->GetY();
+						$pdf->SetXY ($posx, $posy);
+						$pdf->SetFont('', '', 8);
+						$pdf->MultiCell($w, $h-2, $outputlangs->convToOutputCharset($description), 0, 'L');
+						
+						
+					}
 					
 				}
 	
@@ -209,9 +227,12 @@ class ActionsSubtotal
 			else $idvar='id';
 					
 					if($action=='savelinetitle' && $_POST['lineid']===$line->id) {
-						if($object->element=='facture') $object->updateline($line->id,$_POST['linetitle'], 0,$line->qty,0,'','',0,0,0,'HT',0,9,0,0,null,0,'', $this->module_number);
-						else if($object->element=='propal') $object->updateline($line->id, 0,$line->qty,0,0,0,0, $_POST['linetitle'] ,'HT',0,$this->module_number,0,0,0,0,'',9);
-						else if($object->element=='commande') $object->updateline($line->id,$_POST['linetitle'], 0,$line->qty,0,0,0,0,'HT',0,'','',9,0,0,null,0,'', $this->module_number);
+						
+						$description = ($line->qty==99) ? '' : $_POST['linedescription'];
+						
+						if($object->element=='facture') $object->updateline($line->id,$description, 0,$line->qty,0,'','',0,0,0,'HT',0,9,0,0,null,0,$_POST['linetitle'], $this->module_number);
+						else if($object->element=='propal') $object->updateline($line->id, 0,$line->qty,0,0,0,0, $description ,'HT',0,$this->module_number,0,0,0,0,$_POST['linetitle'],9);
+						else if($object->element=='commande') $object->updateline($line->id,$description, 0,$line->qty,0,0,0,0,'HT',0,'','',9,0,0,null,0,$_POST['linetitle'], $this->module_number);
 						
 					}
 					else if($action=='editlinetitle') {
@@ -262,16 +283,32 @@ class ActionsSubtotal
 					
 							if($action=='editlinetitle' && $_REQUEST['lineid']===$line->id ) {
 								
-								 if($line->qty!=99) print img_picto('', 'subtotal@subtotal');
+								if($line->qty!=99) print img_picto('', 'subtotal@subtotal');
+								else {
+									if($line->label=='')$line->label = $line->description;
+								}
+								
 								?>
-								<input type="text" name="line-title" id-line="<?=$line->id ?>" value="<?=addslashes($line->description) ?>" size="80" />
+								<input type="text" name="line-title" id-line="<?=$line->id ?>" value="<?=addslashes($line->label) ?>" size="80" /><br />
 								<?
+								
+								if($line->qty!=99) {
+									?>
+									<textarea name="line-description" id-line="<?=$line->id ?>" cols="70" rows="2" /><?=$line->description ?></textarea>
+									<?
+								}
+								
 							}
 							else {
 								
 							     if($line->qty!=99) print img_picto('', 'subtotal@subtotal');
 								
-								 print $line->description;
+								 if (empty($line->label)) {
+								 	print  $line->description;
+								 } 
+								 else {
+								 	print '<span class="classfortooltip" title="'.$line->description.'">'.$line->label.'</span>';
+								 } 
 								
 								 if($line->qty==99) { print ' : '; }
 								 
@@ -315,7 +352,12 @@ class ActionsSubtotal
 									$(document).ready(function() {
 										$('input[name=saveEditlinetitle]').click(function () {
 											
-											$.post("<?='?'.$idvar.'='.$object->id ?>","&action=savelinetitle&lineid=<?=$line->id ?>&linetitle="+$('input[name=line-title]').val()
+											$.post("<?='?'.$idvar.'='.$object->id ?>",{
+													action:'savelinetitle'
+													,lineid:<?=$line->id ?>
+													,linetitle:$('input[name=line-title]').val()
+													,linedescription:$('textarea[name=line-description]').val()
+											}
 											,function() {
 												document.location.href="<?='?'.$idvar.'='.$object->id ?>";	
 											});

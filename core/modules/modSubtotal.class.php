@@ -430,7 +430,14 @@ class modSubtotal extends DolibarrModules
      */
     public function init($options = '')
     {
-        $sql = array();
+	  	global $conf;
+		
+		
+		if($conf->milestone->enabled) {
+			exit("Attention, ce module rentre ne conflit avec le module Jalon/Milestones. Merci de le désactiver auparavant.");
+		}
+      
+	    $sql = array();
 
         $result = $this->loadTables();
 
