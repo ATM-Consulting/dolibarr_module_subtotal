@@ -111,6 +111,8 @@ class modSubtotal extends DolibarrModules
         // Dependencies
         // List of modules id that must be enabled if this module is enabled
         $this->depends = array();
+
+	$this->conflictwith('modMilestone');
         // List of modules id to disable if this one is disabled
         $this->requiredby = array();
         // Minimum version of PHP required by module
@@ -433,10 +435,10 @@ class modSubtotal extends DolibarrModules
 	  	global $conf;
 		
 		
-		if($conf->milestone->enabled) {
+/*		if($conf->milestone->enabled) {
 			exit("Attention, ce module rentre ne conflit avec le module Jalon/Milestones. Merci de le désactiver auparavant.");
 		}
-      
+      */
 	    $sql = array();
 
         $result = $this->loadTables();
