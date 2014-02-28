@@ -1,0 +1,1 @@
+Si vous désirez activer la gestion des sous-sous-totaux, il faut mettre la variable SUBTOTAL_MANAGE_SUBSUBTOTAL dans configuration > divers à 1
