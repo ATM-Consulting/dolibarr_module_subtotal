@@ -78,7 +78,7 @@ class ActionsSubtotal
 						
 					});
 					
-				</script><?
+				</script><?php
 			}
 		}
 			 
@@ -246,7 +246,7 @@ class ActionsSubtotal
 							});
 							
 						</script>
-						<?
+						<?php
 					}
 					else {
 						if( strpos($conf->global->MAIN_VERSION_LAST_INSTALL,'3.4')!==false ) {
@@ -270,7 +270,7 @@ class ActionsSubtotal
 								});
 								
 							</script>
-							<?
+							<?php
 							
 						}
 					}
@@ -290,12 +290,12 @@ class ActionsSubtotal
 								
 								?>
 								<input type="text" name="line-title" id-line="<?=$line->id ?>" value="<?=$line->label ?>" size="80" /><br />
-								<?
+								<?php
 								
 								if($line->qty!=99) {
 									?>
 									<textarea name="line-description" id-line="<?=$line->id ?>" cols="70" rows="2" /><?=$line->description ?></textarea>
-									<?
+									<?php
 								}
 								
 							}
@@ -314,7 +314,7 @@ class ActionsSubtotal
 								 
 								
 							}
-					 ?></td><?
+					 ?></td><?php
 					  if (! empty($conf->margin->enabled) && empty($user->societe_id)) {
 						 ?><td align="right" class="nowrap">&nbsp;</td>
 					  	<?php if (! empty($conf->global->DISPLAY_MARGIN_RATES) && $user->rights->margins->liretous) {?>
@@ -332,14 +332,14 @@ class ActionsSubtotal
 								$total_line = $this->getTotalLineFromObject($object, $line);
 								?>
 								<td align="right" style="font-weight:bold;" rel="subtotal_total"><?=price($total_line) ?></td>
-								<?
+								<?php
 								
 							}
 							 else {
 							 	
 								?>
 								<td>&nbsp;</td>
-								<?
+								<?php
 							 }	
 						?>
 					
@@ -371,7 +371,7 @@ class ActionsSubtotal
 									});
 									
 								</script>
-								<?
+								<?php
 							}
 							else{
 								
@@ -381,7 +381,7 @@ class ActionsSubtotal
 									<a href="<?='?'.$idvar.'='.$object->id.'&action=editlinetitle&lineid='.$line->id ?>">
 										<?=img_edit() ?>		
 									</a>
-								<?
+								<?php
 								
 								}								
 							}
@@ -393,7 +393,7 @@ class ActionsSubtotal
 							if($action=='editlinetitle' && $_REQUEST['lineid']===$line->id ) {
 								?>
 								<input class="button" type="button" name="cancelEditlinetitle" value="<?=$langs->trans('Cancel') ?>" />
-								<?
+								<?php
 							}
 							else{
 								if ($object->statut == 0  && $user->rights->{$object->element}->creer) {
@@ -402,7 +402,7 @@ class ActionsSubtotal
 									<a href="<?='?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id ?>">
 										<?=img_delete() ?>		
 									</a>
-								<?								
+								<?php								
 								
 								}
 							}
@@ -428,7 +428,7 @@ class ActionsSubtotal
 					<?php } ?>
 
 					</tr>
-					<?
+					<?php
 					
 					
 				

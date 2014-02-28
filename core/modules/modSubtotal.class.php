@@ -1,5 +1,5 @@
 <?php
-/* <one line to give the program's name and a brief idea of what it does.>
+/* <Add title and subtotal in propal, order, invoice.>
  * Copyright (C) 2013 ATM Consulting <support@atm-consulting.fr>
  *
  * This program is free software: you can redistribute it and/or modify
