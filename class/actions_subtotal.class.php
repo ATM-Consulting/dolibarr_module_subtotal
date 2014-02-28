@@ -174,12 +174,23 @@ class ActionsSubtotal
 		foreach($parameters as $key=>$value) {
 			${$key} = $value;
 		}
-			
+		
 		if ($object->lines[$i]->product_type == 9)
 		{
 			
- 			if($object->lines[$i]->special_code == $this->module_number) {
-				$line = &$object->lines[$i]; 	
+			
+			if($object->lines[$i]->special_code == $this->module_number) {
+				
+				$pageBefore = $pdf->getPage();
+				
+				$line = &$object->lines[$i];
+					
+				
+			
+				if($line->pagebreak) {
+					$pdf->addPage();
+					$posy = $pdf->GetY();
+				}
 				
 				if($line->label=='') {
 					$label = $line->desc;
@@ -187,19 +198,19 @@ class ActionsSubtotal
 				}
 				else {
 					$label = $line->label;
-					$description=$line->desc;
+					$description=dol_htmlentitiesbr($line->desc);
 				}
 				
 				if($line->qty>90) {
-						
-					$pdf->SetXY ($posx, $posy-1);
-					if($line->qty==99)	$pdf->SetFillColor(230, 230, 230);
-					else 	$pdf->SetFillColor(240, 240, 240);
-					$pdf->MultiCell(200-$posx, $h+2.5, '', 0, '', 1);
+					
+					$pdf->SetXY ($posx, $posy);
+					if($line->qty==99)	$pdf->SetFillColor(230,230,230);
+					else 	$pdf->SetFillColor(240,240,240);
+					$pdf->MultiCell(200-$posx, $h, '', 0, '', 1);
 					
 					$pdf->SetXY ($posx, $posy);
 					$pdf->SetFont('', 'B', 9);
-					$pdf->MultiCell($w, $h-2, $outputlangs->convToOutputCharset($label).' ', 0, 'R');
+					$pdf->MultiCell($w, $h, $outputlangs->convToOutputCharset($label).' ', 0, 'R');
 					
 				}	
 				else{
@@ -207,13 +218,15 @@ class ActionsSubtotal
 					$pdf->SetXY ($posx, $posy);
 					if($line->qty==1)$pdf->SetFont('', 'BU', 9);
 					else $pdf->SetFont('', 'BUI', 9);
-					$pdf->MultiCell($w, $h-2, $outputlangs->convToOutputCharset($label), 0, 'L');
+					$pdf->MultiCell($w, $h, $outputlangs->convToOutputCharset($label), 0, 'L');
 					
-					if($description) {
+					if($description && !$hidedesc) {
 						$posy = $pdf->GetY();
-						$pdf->SetXY ($posx, $posy);
+						
 						$pdf->SetFont('', '', 8);
-						$pdf->MultiCell($w, $h-2, $outputlangs->convToOutputCharset($description), 0, 'L');
+						
+						$pdf->writeHTMLCell($w, $h, $posx, $posy, $outputlangs->convToOutputCharset($description), 0, 1, false, true, 'J',true);
+						
 						
 						
 					}
@@ -221,21 +234,22 @@ class ActionsSubtotal
 				}
 	
 				if($line->qty>90) {
-					
+						
 					$total = $this->getTotalLineFromObject($object, $line);
 					
-					$pdf->SetFont('', 'B', 9);
 					$pdf->SetXY($pdf->postotalht, $posy);
+					$pdf->SetFont('', 'B', 9);
 					$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($total), 0, 'R', 0);
 					
 				}
+				
+				$pageAfter = $pdf->getPage();
+				
+				if($pageAfter>$pageBefore) {
+					$line->pagebreak = true;
+				}
 	
-	
-				$nexy = $pdf->GetY();
-	
- 				
- 			}
-			
+			}
 			
 		}
 		else
