@@ -39,7 +39,7 @@ class ActionsSubtotal
 					}
 					
 	    		
-					if( strpos($conf->global->MAIN_VERSION_LAST_INSTALL,'3.4')!==false ) {
+					if( (float)DOL_VERSION <= 3.4 ) {
 						if($object->element=='facture') $object->addline($object->id, $title, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
 						else if($object->element=='propal') $object->addline($object->id,$title, 0,$qty,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
 						else if($object->element=='commande') $object->addline($object->id,$title, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
