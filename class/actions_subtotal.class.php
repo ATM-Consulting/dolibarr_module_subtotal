@@ -27,19 +27,26 @@ class ActionsSubtotal
 				else $idvar='id';
 				
 				
-				if($action=='add_title_line' || $action=='add_total_line') {
+				if($action=='add_title_line' || $action=='add_total_line' || $action=='add_subtitle_line' || $action=='add_subtotal_line') {
 					
 					if($action=='add_title_line') {
 						$title = $langs->trans('title');
 						$qty = 1;
+					}
+					else if($action=='add_subtitle_line') {
+						$title = $langs->trans('subtitle');
+						$qty = 2;
+					}
+					else if($action=='add_subtotal_line') {
+						$title = $langs->trans('SubSubTotal');
+						$qty = 98;
 					}
 					else {
 						$title = $langs->trans('SubTotal');
 						$qty = 99;
 					}
 					
-	    		
-					if( (float)DOL_VERSION <= 3.4 ) {
+	    			if( (float)DOL_VERSION <= 3.4 ) {
 						if($object->element=='facture') $object->addline($object->id, $title, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
 						else if($object->element=='propal') $object->addline($object->id,$title, 0,$qty,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
 						else if($object->element=='commande') $object->addline($object->id,$title, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
@@ -56,13 +63,36 @@ class ActionsSubtotal
 				    	
 				?><script type="text/javascript">
 					$(document).ready(function() {
+						
+						<?php
+							if($conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL==1) {
+								?>$('div.fiche div.tabsAction').append('<br /><br />');<?php
+							}
+						?>
+						
 						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" href="javascript:;" class="butAction"><?= $langs->trans('AddTitle' )?></a></div>');
 						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" href="javascript:;" class="butAction"><?= $langs->trans('AddSubTotal')?></a></div>');
-						
+
+						<?php
+							if($conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL==1) {
+							?>
+								$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_subtitle_line" href="javascript:;" class="butAction"><?= $langs->trans('AddSubTitle' )?></a></div>');
+								$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_subtotal_line" href="javascript:;" class="butAction"><?= $langs->trans('AddSubSubTotal')?></a></div>');
+		
+							<?php								
+							}
+						?>
 						
 						$('#add_title_line').click(function() {
 							
 							$.get('?<?=$idvar ?>=<?=$object->id ?>&action=add_title_line', function() {
+								document.location.href='?<?=$idvar ?>=<?=$object->id ?>';
+							});
+							
+						});
+						$('#add_subtitle_line').click(function() {
+							
+							$.get('?<?=$idvar ?>=<?=$object->id ?>&action=add_subtitle_line', function() {
 								document.location.href='?<?=$idvar ?>=<?=$object->id ?>';
 							});
 							
@@ -75,6 +105,15 @@ class ActionsSubtotal
 							});
 							
 						});
+						
+						$('#add_subtotal_line').click(function() {
+							
+							$.get('?<?=$idvar ?>=<?=$object->id ?>&action=add_subtotal_line', function() {
+								document.location.href='?<?=$idvar ?>=<?=$object->id ?>';
+							});
+							
+						});
+						
 						
 					});
 					
@@ -107,6 +146,7 @@ class ActionsSubtotal
 	function getTotalLineFromObject(&$object, &$line) {
 		
 		$rang = $line->rang;
+		$qty_line = $line->qty;
 		
 		$total = 0;
 		foreach($object->lines as $l) {
@@ -114,7 +154,7 @@ class ActionsSubtotal
 			if($l->rang>=$rang) {
 				return $total;
 			} 
-			else if($l->special_code==$this->module_number && $l->qty!=99) {
+			else if($l->special_code==$this->module_number && (($l->qty==1 && $qty_line==99) || ($l->qty==2 && $qty_line==98))   ) {
 				$total = 0;
 			}
 			else {
@@ -150,9 +190,11 @@ class ActionsSubtotal
 					$description=$line->desc;
 				}
 				
-				if($line->qty==99) {
+				if($line->qty>90) {
+						
 					$pdf->SetXY ($posx, $posy-1);
-					$pdf->SetFillColor(230, 230, 230);
+					if($line->qty==99)	$pdf->SetFillColor(230, 230, 230);
+					else 	$pdf->SetFillColor(240, 240, 240);
 					$pdf->MultiCell(200-$posx, $h+2.5, '', 0, '', 1);
 					
 					$pdf->SetXY ($posx, $posy);
@@ -163,7 +205,8 @@ class ActionsSubtotal
 				else{
 					
 					$pdf->SetXY ($posx, $posy);
-					$pdf->SetFont('', 'BU', 9);
+					if($line->qty==1)$pdf->SetFont('', 'BU', 9);
+					else $pdf->SetFont('', 'BUI', 9);
 					$pdf->MultiCell($w, $h-2, $outputlangs->convToOutputCharset($label), 0, 'L');
 					
 					if($description) {
@@ -177,7 +220,7 @@ class ActionsSubtotal
 					
 				}
 	
-				if($line->qty==99) {
+				if($line->qty>90) {
 					
 					$total = $this->getTotalLineFromObject($object, $line);
 					
@@ -240,7 +283,7 @@ class ActionsSubtotal
 						<script type="text/javascript">
 							$(document).ready(function() {
 								$('#addproduct').submit(function () {
-									$('input[name=saveEditlinetitle]').click();
+									$('input[name=saveEditlinetitle]').clic:20px;k();
 									return false;
 								}) ;
 							});
@@ -249,7 +292,7 @@ class ActionsSubtotal
 						<?php
 					}
 					else {
-						if( strpos($conf->global->MAIN_VERSION_LAST_INSTALL,'3.4')!==false ) {
+						if( (float)DOL_VERSION <= 3.4 ) {
 							
 							?>
 							<script type="text/javascript">
@@ -278,21 +321,30 @@ class ActionsSubtotal
 					/* Titre */
 					//var_dump($line);
 					?>
-					<tr class="drag drop" rel="subtotal" id="row-<?=$line->id ?>" style="background-color:<?=   ($line->qty==99)?'#ddffdd':'#fff' ?>;">
-					<td colspan="5" style="font-weight:bold;  <?=($line->qty==99)?'text-align:right':' font-style: italic;' ?> "><?
+					<tr class="drag drop" rel="subtotal" id="row-<?=$line->id ?>" style="<?php
+						   if($line->qty==99) print 'background-color:#ddffdd';
+						   else if($line->qty==98) print 'background-color:#ddddff;';
+						   else if($line->qty==2) print 'background-color:#eeeeff; ';
+						   else print 'background-color:#eeffee;' ;
+						   
+					?>;">
+					<td colspan="5" style="font-weight:bold;  <?=($line->qty>90)?'text-align:right':' font-style: italic;' ?> "><?php
 					
 							if($action=='editlinetitle' && $_REQUEST['lineid']===$line->id ) {
 								
-								if($line->qty!=99) print img_picto('', 'subtotal@subtotal');
-								else {
-									if($line->label=='')$line->label = $line->description;
+								if($line->qty==1) print img_picto('', 'subtotal@subtotal');
+								else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+								
+								if($line->label=='') {
+									$line->label = $line->description;
+									$line->description='';
 								}
 								
 								?>
 								<input type="text" name="line-title" id-line="<?=$line->id ?>" value="<?=$line->label ?>" size="80" /><br />
 								<?php
 								
-								if($line->qty!=99) {
+								if($line->qty<10) {
 									?>
 									<textarea name="line-description" id-line="<?=$line->id ?>" cols="70" rows="2" /><?=$line->description ?></textarea>
 									<?php
@@ -301,7 +353,8 @@ class ActionsSubtotal
 							}
 							else {
 								
-							     if($line->qty!=99) print img_picto('', 'subtotal@subtotal');
+							     if($line->qty==1) print img_picto('', 'subtotal@subtotal');
+								 else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 								
 								 if (empty($line->label)) {
 								 	print  $line->description;
@@ -310,7 +363,7 @@ class ActionsSubtotal
 								 	print '<span class="classfortooltip" title="'.$line->description.'">'.$line->label.'</span>';
 								 } 
 								
-								 if($line->qty==99) { print ' : '; }
+								 if($line->qty>90) { print ' : '; }
 								 
 								
 							}
@@ -327,7 +380,7 @@ class ActionsSubtotal
 					 
 					  <?php	
 						
-							 if($line->qty==99) {
+							 if($line->qty>90) {
 							/* Total */
 								$total_line = $this->getTotalLineFromObject($object, $line);
 								?>
