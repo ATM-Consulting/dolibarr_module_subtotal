@@ -167,6 +167,43 @@ class ActionsSubtotal
 		
 		return $total;
 	}
+	
+	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
+		$pdf->SetXY ($posx, $posy);
+		
+		if($line->qty==99)	$pdf->SetFillColor(230,230,230);
+		else 	$pdf->SetFillColor(240,240,240);
+		
+		$pdf->MultiCell(200-$posx, $h, '', 0, '', 1);
+		
+		$pdf->SetXY ($posx, $posy);
+		$pdf->SetFont('', 'B', 9);
+		$pdf->MultiCell($w, $h, $label.' ', 0, 'R');
+		
+		$total = $this->getTotalLineFromObject($object, $line);
+					
+		$pdf->SetXY($pdf->postotalht, $posy);
+		$pdf->SetFont('', 'B', 9);
+		$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($total), 0, 'R', 0);
+	}
+	function pdf_add_title(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
+			
+		$pdf->SetXY ($posx, $posy);
+		if($line->qty==1)$pdf->SetFont('', 'BU', 9);
+		else $pdf->SetFont('', 'BUI', 9);
+		$pdf->MultiCell($w, $h, $label, 0, 'L');
+		
+		if($description && !$hidedesc) {
+			$posy = $pdf->GetY();
+			
+			$pdf->SetFont('', '', 8);
+			
+			$pdf->writeHTMLCell($w, $h, $posx, $posy, $description, 0, 1, false, true, 'J',true);
+			
+			
+			
+		}
+	}
 
 	function pdf_writelinedesc($parameters=false, &$object, &$action='')
 	{
@@ -181,73 +218,56 @@ class ActionsSubtotal
 			
 			if($object->lines[$i]->special_code == $this->module_number) {
 				
-				$pageBefore = $pdf->getPage();
 				
 				$line = &$object->lines[$i];
 					
 				
 			
 				if($line->pagebreak) {
-					$pdf->addPage();
-					$posy = $pdf->GetY();
+				//	$pdf->addPage();
+				//	$posy = $pdf->GetY();
 				}
 				
 				if($line->label=='') {
-					$label = $line->desc;
+					$label = $outputlangs->convToOutputCharset($line->desc);
 					$description='';
 				}
 				else {
-					$label = $line->label;
-					$description=dol_htmlentitiesbr($line->desc);
+					$label = $outputlangs->convToOutputCharset($line->label);
+					$description=$outputlangs->convToOutputCharset(dol_htmlentitiesbr($line->desc));
 				}
 				
 				if($line->qty>90) {
-					
-					$pdf->SetXY ($posx, $posy);
-					if($line->qty==99)	$pdf->SetFillColor(230,230,230);
-					else 	$pdf->SetFillColor(240,240,240);
-					$pdf->MultiCell(200-$posx, $h, '', 0, '', 1);
-					
-					$pdf->SetXY ($posx, $posy);
-					$pdf->SetFont('', 'B', 9);
-					$pdf->MultiCell($w, $h, $outputlangs->convToOutputCharset($label).' ', 0, 'R');
-					
+					$pageBefore = $pdf->getPage();
+					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
+					$pageAfter = $pdf->getPage();	
+
+					if($pageAfter>$pageBefore) {
+						$pdf->rollbackTransaction(true);	
+						$pdf->addPage();
+						$posy = $pdf->GetY();
+						$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
+					}
+
 				}	
 				else{
-					
-					$pdf->SetXY ($posx, $posy);
-					if($line->qty==1)$pdf->SetFont('', 'BU', 9);
-					else $pdf->SetFont('', 'BUI', 9);
-					$pdf->MultiCell($w, $h, $outputlangs->convToOutputCharset($label), 0, 'L');
-					
-					if($description && !$hidedesc) {
+					$pageBefore = $pdf->getPage();
+						
+					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h); 
+					$pageAfter = $pdf->getPage();	
+
+					if($pageAfter>$pageBefore) {
+						$pdf->rollbackTransaction(true);
+						$pdf->addPage();
 						$posy = $pdf->GetY();
-						
-						$pdf->SetFont('', '', 8);
-						
-						$pdf->writeHTMLCell($w, $h, $posx, $posy, $outputlangs->convToOutputCharset($description), 0, 1, false, true, 'J',true);
-						
-						
-						
+						$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 					}
+					
 					
 				}
 	
-				if($line->qty>90) {
-						
-					$total = $this->getTotalLineFromObject($object, $line);
-					
-					$pdf->SetXY($pdf->postotalht, $posy);
-					$pdf->SetFont('', 'B', 9);
-					$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($total), 0, 'R', 0);
-					
-				}
 				
-				$pageAfter = $pdf->getPage();
 				
-				if($pageAfter>$pageBefore) {
-					$line->pagebreak = true;
-				}
 	
 			}
 			
