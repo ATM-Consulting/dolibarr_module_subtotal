@@ -366,7 +366,7 @@ class ActionsSubtotal
 					
 							if($action=='editlinetitle' && $_REQUEST['lineid']===$line->id ) {
 								
-								if($line->qty==1) print img_picto('', 'subtotal@subtotal');
+								if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
 								else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 								
 								if($line->label=='') {
@@ -387,7 +387,7 @@ class ActionsSubtotal
 							}
 							else {
 								
-							     if($line->qty==1) print img_picto('', 'subtotal@subtotal');
+							     if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
 								 else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 								
 								 if (empty($line->label)) {
