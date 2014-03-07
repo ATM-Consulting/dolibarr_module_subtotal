@@ -138,7 +138,7 @@ class ActionsSubtotal
         return 0;
     }
 	
-	function doActions($parameters, &$object, &$action, $hookmanager) {
+	function doActions($parameters, &$object, $action, $hookmanager) {
 		
 		if($action == 'builddoc') {
 			if (
