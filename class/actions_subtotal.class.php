@@ -137,7 +137,32 @@ class ActionsSubtotal
 		
         return 0;
     }
-
+	
+	function doActions($parameters, &$object, &$action, $hookmanager) {
+		
+		if($action == 'builddoc') {
+			if (
+				in_array('invoicecard',explode(':',$parameters['context']))
+				|| in_array('propalcard',explode(':',$parameters['context']))
+				|| in_array('ordercard',explode(':',$parameters['context']))
+			)
+	        {
+	        	
+	        	foreach($object->lines as &$line) {
+	        		
+					if ($line->product_type == 9 && $line->special_code == $this->module_number)
+					{
+						$line->total_ht = $this->getTotalLineFromObject($object, $line);
+						
+					}
+			
+	        	}
+	        }
+			
+		}
+		
+	}
+	
 	function formAddObjectLine ($parameters, &$object, &$action, $hookmanager) {
 		
 		
