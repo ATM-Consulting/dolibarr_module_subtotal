@@ -120,10 +120,7 @@ class ActionsSubtotal
 				</script><?php
 			}
 		}
-			 
-			 
-			 
-		
+
 		return 0;
 	}
      
@@ -160,12 +157,12 @@ class ActionsSubtotal
 	        }
 			
 		}
-		
+		return 0;
 	}
 	
 	function formAddObjectLine ($parameters, &$object, &$action, $hookmanager) {
 		
-		
+		return 0;
 	}
 
 	function getTotalLineFromObject(&$object, &$line) {
