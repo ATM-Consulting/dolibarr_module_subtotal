@@ -70,14 +70,14 @@ class ActionsSubtotal
 							}
 						?>
 						
-						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" href="javascript:;" class="butAction"><?= $langs->trans('AddTitle' )?></a></div>');
-						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" href="javascript:;" class="butAction"><?= $langs->trans('AddSubTotal')?></a></div>');
+						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddTitle' )?></a></div>');
+						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubTotal')?></a></div>');
 
 						<?php
 							if($conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL==1) {
 							?>
-								$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_subtitle_line" href="javascript:;" class="butAction"><?= $langs->trans('AddSubTitle' )?></a></div>');
-								$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_subtotal_line" href="javascript:;" class="butAction"><?= $langs->trans('AddSubSubTotal')?></a></div>');
+								$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_subtitle_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubTitle' )?></a></div>');
+								$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_subtotal_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubSubTotal')?></a></div>');
 		
 							<?php								
 							}
@@ -85,31 +85,31 @@ class ActionsSubtotal
 						
 						$('#add_title_line').click(function() {
 							
-							$.get('?<?=$idvar ?>=<?=$object->id ?>&action=add_title_line', function() {
-								document.location.href='?<?=$idvar ?>=<?=$object->id ?>';
+							$.get('?<?php echo $idvar ?>=<?php echo $object->id ?>&action=add_title_line', function() {
+								document.location.href='?<?php echo $idvar ?>=<?php echo $object->id ?>';
 							});
 							
 						});
 						$('#add_subtitle_line').click(function() {
 							
-							$.get('?<?=$idvar ?>=<?=$object->id ?>&action=add_subtitle_line', function() {
-								document.location.href='?<?=$idvar ?>=<?=$object->id ?>';
+							$.get('?<?php echo $idvar ?>=<?php echo $object->id ?>&action=add_subtitle_line', function() {
+								document.location.href='?<?php echo $idvar ?>=<?php echo $object->id ?>';
 							});
 							
 						});
 						
 						$('#add_total_line').click(function() {
 							
-							$.get('?<?=$idvar ?>=<?=$object->id ?>&action=add_total_line', function() {
-								document.location.href='?<?=$idvar ?>=<?=$object->id ?>';
+							$.get('?<?php echo $idvar ?>=<?php echo $object->id ?>&action=add_total_line', function() {
+								document.location.href='?<?php echo $idvar ?>=<?php echo $object->id ?>';
 							});
 							
 						});
 						
 						$('#add_subtotal_line').click(function() {
 							
-							$.get('?<?=$idvar ?>=<?=$object->id ?>&action=add_subtotal_line', function() {
-								document.location.href='?<?=$idvar ?>=<?=$object->id ?>';
+							$.get('?<?php echo $idvar ?>=<?php echo $object->id ?>&action=add_subtotal_line', function() {
+								document.location.href='?<?php echo $idvar ?>=<?php echo $object->id ?>';
 							});
 							
 						});
@@ -377,14 +377,14 @@ class ActionsSubtotal
 					/* Titre */
 					//var_dump($line);
 					?>
-					<tr class="drag drop" rel="subtotal" id="row-<?=$line->id ?>" style="<?php
+					<tr class="drag drop" rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 						   if($line->qty==99) print 'background-color:#ddffdd';
 						   else if($line->qty==98) print 'background-color:#ddddff;';
 						   else if($line->qty==2) print 'background-color:#eeeeff; ';
 						   else print 'background-color:#eeffee;' ;
 						   
 					?>;">
-					<td colspan="5" style="font-weight:bold;  <?=($line->qty>90)?'text-align:right':' font-style: italic;' ?> "><?php
+					<td colspan="5" style="font-weight:bold;  <?php echo ($line->qty>90)?'text-align:right':' font-style: italic;' ?> "><?php
 					
 							if($action=='editlinetitle' && $_REQUEST['lineid']===$line->id ) {
 								
@@ -397,12 +397,12 @@ class ActionsSubtotal
 								}
 								
 								?>
-								<input type="text" name="line-title" id-line="<?=$line->id ?>" value="<?=$line->label ?>" size="80" /><br />
+								<input type="text" name="line-title" id-line="<?php echo $line->id ?>" value="<?php echo $line->label ?>" size="80" /><br />
 								<?php
 								
 								if($line->qty<10) {
 									?>
-									<textarea name="line-description" id-line="<?=$line->id ?>" cols="70" rows="2" /><?=$line->description ?></textarea>
+									<textarea name="line-description" id-line="<?php echo $line->id ?>" cols="70" rows="2" /><?php echo $line->description ?></textarea>
 									<?php
 								}
 								
@@ -440,7 +440,7 @@ class ActionsSubtotal
 							/* Total */
 								$total_line = $this->getTotalLineFromObject($object, $line);
 								?>
-								<td align="right" style="font-weight:bold;" rel="subtotal_total"><?=price($total_line) ?></td>
+								<td align="right" style="font-weight:bold;" rel="subtotal_total"><?php echo price($total_line) ?></td>
 								<?php
 								
 							}
@@ -456,25 +456,25 @@ class ActionsSubtotal
 						<?php
 							if($action=='editlinetitle' && $_REQUEST['lineid']==$line->id ) {
 								?>
-								<input class="button" type="button" name="saveEditlinetitle" value="<?=$langs->trans('Save') ?>" />
+								<input class="button" type="button" name="saveEditlinetitle" value="<?php echo $langs->trans('Save') ?>" />
 								<script type="text/javascript">
 									$(document).ready(function() {
 										$('input[name=saveEditlinetitle]').click(function () {
 											
-											$.post("<?='?'.$idvar.'='.$object->id ?>",{
+											$.post("<?php echo '?'.$idvar.'='.$object->id ?>",{
 													action:'savelinetitle'
-													,lineid:<?=$line->id ?>
+													,lineid:<?php echo $line->id ?>
 													,linetitle:$('input[name=line-title]').val()
 													,linedescription:$('textarea[name=line-description]').val()
 											}
 											,function() {
-												document.location.href="<?='?'.$idvar.'='.$object->id ?>";	
+												document.location.href="<?php echo '?'.$idvar.'='.$object->id ?>";	
 											});
 											
 										});
 										
 										$('input[name=cancelEditlinetitle]').click(function () {
-											document.location.href="<?='?'.$idvar.'='.$object->id ?>";
+											document.location.href="<?php echo '?'.$idvar.'='.$object->id ?>";
 										});
 										
 									});
@@ -487,8 +487,8 @@ class ActionsSubtotal
 								if ($object->statut == 0  && $user->rights->{$object->element}->creer) {
 								
 								?>
-									<a href="<?='?'.$idvar.'='.$object->id.'&action=editlinetitle&lineid='.$line->id ?>">
-										<?=img_edit() ?>		
+									<a href="<?php echo '?'.$idvar.'='.$object->id.'&action=editlinetitle&lineid='.$line->id ?>">
+										<?php echo img_edit() ?>		
 									</a>
 								<?php
 								
@@ -501,15 +501,15 @@ class ActionsSubtotal
 						<?php
 							if($action=='editlinetitle' && $_REQUEST['lineid']===$line->id ) {
 								?>
-								<input class="button" type="button" name="cancelEditlinetitle" value="<?=$langs->trans('Cancel') ?>" />
+								<input class="button" type="button" name="cancelEditlinetitle" value="<?php echo $langs->trans('Cancel') ?>" />
 								<?php
 							}
 							else{
 								if ($object->statut == 0  && $user->rights->{$object->element}->creer) {
 								
 								?>
-									<a href="<?='?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id ?>">
-										<?=img_delete() ?>		
+									<a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id ?>">
+										<?php echo img_delete() ?>		
 									</a>
 								<?php								
 								
@@ -522,12 +522,12 @@ class ActionsSubtotal
 					<?php if ($num > 1 && empty($conf->browser->phone)) { ?>
 					<td align="center" class="tdlineupdown">
 						<?php if ($i > 0 && ($object->statut == 0  && $user->rights->{$object->element}->creer)) { ?>
-						<a class="lineupdown" href="<?='?'.$idvar.'='.$object->id.'&amp;action=up&amp;rowid='.$line->id ?>">
+						<a class="lineupdown" href="<?php echo '?'.$idvar.'='.$object->id.'&amp;action=up&amp;rowid='.$line->id ?>">
 						<?php echo img_up(); ?>
 						</a>
 						<?php } ?>
 						<?php if ($i < $num-1 && ($object->statut == 0  && $user->rights->{$object->element}->creer)) { ?>
-						<a class="lineupdown" href="<?='?'.$idvar.'='.$object->id.'&amp;action=down&amp;rowid='.$line->id ?>">
+						<a class="lineupdown" href="<?php echo '?'.$idvar.'='.$object->id.'&amp;action=down&amp;rowid='.$line->id ?>">
 						<?php echo img_down(); ?>
 						</a>
 						<?php } ?>
