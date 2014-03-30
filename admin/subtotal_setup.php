@@ -71,7 +71,7 @@ function showParameters() {
 	$html=new Form($db);
 	
 	
-	?><form action="<?=$_SERVER['PHP_SELF'] ?>" name="form1" method="POST" enctype="multipart/form-data">
+	?><form action="<?php echo $_SERVER['PHP_SELF'] ?>" name="form1" method="POST" enctype="multipart/form-data">
 		<input type="hidden" name="action" value="save" />
 	<table width="100%" class="noborder" style="background-color: #fff;">
 		<tr class="liste_titre">
@@ -83,11 +83,11 @@ function showParameters() {
 			
 				if($conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL==0) {
 					
-					 ?><a href="?action=save&TDivers[SUBTOTAL_MANAGE_SUBSUBTOTAL]=1"><?=img_picto($langs->trans("Disabled"),'switch_off'); ?></a><?php
+					 ?><a href="?action=save&TDivers[SUBTOTAL_MANAGE_SUBSUBTOTAL]=1"><?php echo img_picto($langs->trans("Disabled"),'switch_off'); ?></a><?php
 					
 				}
 				else {
-					 ?><a href="?action=save&TDivers[SUBTOTAL_MANAGE_SUBSUBTOTAL]=0"><?=img_picto($langs->trans("Activated"),'switch_on'); ?></a><?php
+					 ?><a href="?action=save&TDivers[SUBTOTAL_MANAGE_SUBSUBTOTAL]=0"><?php echo img_picto($langs->trans("Activated"),'switch_on'); ?></a><?php
 					
 				}
 			
