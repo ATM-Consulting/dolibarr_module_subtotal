@@ -3,3 +3,7 @@ Module104777Desc = Allows to add titles and subtotals in proposal, orders and in
 title=Title
 AddTitle = Add a title
 AddSubTotal = Add a subtotal
+SubSubTotal = Sub-subtotal
+AddSubTitle = Add a subtitle
+AddSubSubTotal = Add a sub-subtotal
+HideInnerLines = Hide the details inner titles

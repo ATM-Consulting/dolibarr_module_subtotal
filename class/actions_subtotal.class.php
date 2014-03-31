@@ -124,6 +124,29 @@ class ActionsSubtotal
 		return 0;
 	}
      
+	function formBuilddocOptions($parameters) {
+	/* Réponse besoin client */		
+			
+		global $conf, $langs, $bc, $var;
+			
+		$showInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
+	    $_SESSION['subtotal_hideInnerLines'] = $showInnerLines;
+			
+     	$out.= '<tr '.$bc[$var].'>
+     			<td colspan="4">
+     				<input type="checkbox" id="hideInnerLines" name="hideInnerLines" value="1" '.( (isset($_SESSION['subtotal_hideInnerLines']) && $_SESSION['subtotal_hideInnerLines']) ? 'checked="checked"' : '' ).' /> '
+     				.'<label for="hideInnerLines">'.$langs->trans('HideInnerLines').'</label>
+     				</td>
+     			</tr>';
+
+		$var = -$var;
+
+		$this->resprints = $out;
+		
+		
+        return 1;
+	} 
+	 
     function formEditProductOptions($parameters, &$object, &$action, $hookmanager) 
     {
 		
@@ -144,15 +167,14 @@ class ActionsSubtotal
 				|| in_array('ordercard',explode(':',$parameters['context']))
 			)
 	        {
-	        	
+	        		
+				$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
+					
 	        	foreach($object->lines as &$line) {
 	        		
-					if ($line->product_type == 9 && $line->special_code == $this->module_number)
-					{
+					if ($line->product_type == 9 && $line->special_code == $this->module_number) {
 						$line->total_ht = $this->getTotalLineFromObject($object, $line);
-						
 					}
-			
 	        	}
 	        }
 			
@@ -234,8 +256,25 @@ class ActionsSubtotal
 			${$key} = $value;
 		}
 		
-		if ($object->lines[$i]->product_type == 9)
-		{
+		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
+			
+	    if($hideInnerLines) {
+	    	
+			foreach($object->lines as &$line) {
+				
+				if ($line->product_type != 9) {
+					
+					$line->fk_parent_line = 1;
+		
+				}
+				
+			}
+			
+	    }
+	   
+	   
+	   
+		if ($object->lines[$i]->product_type == 9) {
 			
 			
 			if($object->lines[$i]->special_code == $this->module_number) {
@@ -294,10 +333,12 @@ class ActionsSubtotal
 			}
 			
 		}
-		else
-		{
-			$labelproductservice='- '.pdf_getlinedesc($object, $i, $outputlangs, $hideref, $hidedesc, $issupplierline);
-			$pdf->writeHTMLCell($w, $h, $posx, $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1);
+		else {
+			
+			if(!$hideInnerLines) {
+				$labelproductservice='- '.pdf_getlinedesc($object, $i, $outputlangs, $hideref, $hidedesc, $issupplierline);
+				$pdf->writeHTMLCell($w, $h, $posx, $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1);
+			}
 		}
 
 
