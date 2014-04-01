@@ -129,20 +129,28 @@ class ActionsSubtotal
 			
 		global $conf, $langs, $bc, $var;
 			
-		$showInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
-	    $_SESSION['subtotal_hideInnerLines'] = $showInnerLines;
+		$action = GETPOST('action');	
 			
-     	$out.= '<tr '.$bc[$var].'>
-     			<td colspan="4">
-     				<input type="checkbox" id="hideInnerLines" name="hideInnerLines" value="1" '.( (isset($_SESSION['subtotal_hideInnerLines']) && $_SESSION['subtotal_hideInnerLines']) ? 'checked="checked"' : '' ).' /> '
-     				.'<label for="hideInnerLines">'.$langs->trans('HideInnerLines').'</label>
-     				</td>
-     			</tr>';
-
-		$var = -$var;
-
-		$this->resprints = $out;
+		if (
+				in_array('invoicecard',explode(':',$parameters['context']))
+				|| in_array('propalcard',explode(':',$parameters['context']))
+				|| in_array('ordercard',explode(':',$parameters['context']))
+			)
+	        {	
+				$hideInnerLines	= isset( $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] : 0;
+					
+		     	$out.= '<tr '.$bc[$var].'>
+		     			<td colspan="4" align="right">
+		     				<label for="hideInnerLines">'.$langs->trans('HideInnerLines').'</label>
+		     				<input type="checkbox" id="hideInnerLines" name="hideInnerLines" value="1" '.(( $hideInnerLines ) ? 'checked="checked"' : '' ).' />
+		     			</td>
+		     			</tr>';
 		
+				$var = -$var;
+				
+				$this->resprints = $out;	
+			}
+			
 		
         return 1;
 	} 
@@ -159,18 +167,36 @@ class ActionsSubtotal
     }
 	
 	function doActions($parameters, &$object, $action, $hookmanager) {
-		
 		if($action == 'builddoc') {
+			
 			if (
 				in_array('invoicecard',explode(':',$parameters['context']))
 				|| in_array('propalcard',explode(':',$parameters['context']))
 				|| in_array('ordercard',explode(':',$parameters['context']))
 			)
 	        {
-	        		
-				$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
+	        	
+				if(in_array('invoicecard',explode(':',$parameters['context']))) {
+					$sessname = 'subtotal_hideInnerLines_facture';	
+				}
+				elseif(in_array('propalcard',explode(':',$parameters['context']))) {
+					$sessname = 'subtotal_hideInnerLines_propal';	
+				}
+				elseif(in_array('ordercard',explode(':',$parameters['context']))) {
+					$sessname = 'subtotal_hideInnerLines_commande';	
+				}
+				else {
+					$sessname = 'subtotal_hideInnerLines_unknown';
+				}
+								
+		
+				$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
+				$_SESSION[$sessname] = $hideInnerLines;		
 					
-	        	foreach($object->lines as &$line) {
+	    
+				
+				
+	           	foreach($object->lines as &$line) {
 	        		
 					if ($line->product_type == 9 && $line->special_code == $this->module_number) {
 						$line->total_ht = $this->getTotalLineFromObject($object, $line);
@@ -215,26 +241,51 @@ class ActionsSubtotal
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		$pdf->SetXY ($posx, $posy);
 		
-		if($line->qty==99)	$pdf->SetFillColor(230,230,230);
-		else 	$pdf->SetFillColor(240,240,240);
+
+		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
+		if(!$hideInnerLines) {
+
+			if($line->qty==99)	$pdf->SetFillColor(230,230,230);
+			else 	$pdf->SetFillColor(240,240,240);
 		
-		$pdf->MultiCell(200-$posx, $h, '', 0, '', 1);
+		
+			$pdf->MultiCell(200-$posx, $h, '', 0, '', 1);
+			
+		}
+				
+		if($hideInnerLines) {
+			$pdf->SetFont('', '', 9);
+		}
+		else {
+			$pdf->SetFont('', 'B', 9);
+		}
 		
 		$pdf->SetXY ($posx, $posy);
-		$pdf->SetFont('', 'B', 9);
 		$pdf->MultiCell($w, $h, $label.' ', 0, 'R');
 		
 		$total = $this->getTotalLineFromObject($object, $line);
 					
 		$pdf->SetXY($pdf->postotalht, $posy);
-		$pdf->SetFont('', 'B', 9);
 		$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($total), 0, 'R', 0);
 	}
 	function pdf_add_title(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 			
 		$pdf->SetXY ($posx, $posy);
-		if($line->qty==1)$pdf->SetFont('', 'BU', 9);
-		else $pdf->SetFont('', 'BUI', 9);
+		
+		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
+		if($hideInnerLines) {
+
+			if($line->qty==1)$pdf->SetFont('', '', 9);
+			else $pdf->SetFont('', 'I', 9);
+			
+		}
+		else {
+
+			if($line->qty==1)$pdf->SetFont('', 'BU', 9);
+			else $pdf->SetFont('', 'BUI', 9);
+			
+		}
+		
 		$pdf->MultiCell($w, $h, $label, 0, 'L');
 		
 		if($description && !$hidedesc) {
