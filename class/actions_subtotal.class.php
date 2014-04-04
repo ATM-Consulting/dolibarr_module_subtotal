@@ -138,15 +138,28 @@ class ActionsSubtotal
 			)
 	        {	
 				$hideInnerLines	= isset( $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] : 0;
+				$hidedetails	= isset( $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] : 0;	
 					
-		     	$out.= '<tr '.$bc[$var].'>
+					
+		     	/*$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
 		     				<label for="hideInnerLines">'.$langs->trans('HideInnerLines').'</label>
 		     				<input type="checkbox" id="hideInnerLines" name="hideInnerLines" value="1" '.(( $hideInnerLines ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
-		
 				$var = -$var;
+				 
+				 */
+				
+				$out.= '<tr '.$bc[$var].'>
+		     			<td colspan="4" align="right">
+		     				<label for="hideInnerLines">'.$langs->trans('SubTotalhidedetails').'</label>
+		     				<input type="checkbox" id="hidedetails" name="hidedetails" value="1" '.(( $hidedetails ) ? 'checked="checked"' : '' ).' />
+		     			</td>
+		     			</tr>';
+				$var = -$var;
+				 
+				
 				
 				$this->resprints = $out;	
 			}
@@ -308,24 +321,33 @@ class ActionsSubtotal
 		}
 		
 		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
-			
-	    if($hideInnerLines) {
-	    	
-			foreach($object->lines as &$line) {
-				
-				if ($line->product_type != 9) {
-					
-					$line->fk_parent_line = 1;
+		$hideTotal = (int)isset($_REQUEST['hideTotal']);	
 		
-				}
+		if($object->lines[$i]->special_code == $this->module_number) {
+			if ($hideInnerLines || $hideTotal) { // si c une ligne de titre
+		    	$fk_parent_line=0;
+				foreach($object->lines as $k=>&$line) {
+					if($hideInnerLines) {
+						if($line->product_type==9 && $line->rowid>0) $fk_parent_line = $line->rowid;
+					
+						if ($line->product_type != 9) { // jusqu'au prochain titre ou total
+							$line->fk_parent_line = $fk_parent_line;
 				
-			}
-			
-	    }
+						}
+						
+
+					}
+
+					if($hideTotal) {
+						$line->total = 0;
+						$line->subprice= 0;
+					}
+
+				}
+		    }
+		}
 	   
-	   
-	   
-		if ($object->lines[$i]->product_type == 9) {
+	   if ($object->lines[$i]->product_type == 9) {
 			
 			
 			if($object->lines[$i]->special_code == $this->module_number) {
@@ -359,6 +381,7 @@ class ActionsSubtotal
 						$pdf->addPage();
 						$posy = $pdf->GetY();
 						$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
+						$posy = $pdf->GetY();
 					}
 
 				}	
@@ -373,6 +396,7 @@ class ActionsSubtotal
 						$pdf->addPage();
 						$posy = $pdf->GetY();
 						$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
+						$posy = $pdf->GetY();
 					}
 					
 					
@@ -386,10 +410,14 @@ class ActionsSubtotal
 		}
 		else {
 			
-			if(!$hideInnerLines) {
-				$labelproductservice='- '.pdf_getlinedesc($object, $i, $outputlangs, $hideref, $hidedesc, $issupplierline);
+			if($hideInnerLines) {
+				$pdf->rollbackTransaction(true);
+			}
+			else {
+				$labelproductservice=pdf_getlinedesc($object, $i, $outputlangs, $hideref, $hidedesc, $issupplierline);
 				$pdf->writeHTMLCell($w, $h, $posx, $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1);
 			}
+			
 		}
 
 

@@ -7,3 +7,4 @@ SubSubTotal = Sub-subtotal
 AddSubTitle = Add a subtitle
 AddSubSubTotal = Add a sub-subtotal
 HideInnerLines = Hide the details inner titles
+SubTotalhidedetails = Hide the price for lines inner titles
