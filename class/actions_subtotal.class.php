@@ -191,21 +191,27 @@ class ActionsSubtotal
 	        	
 				if(in_array('invoicecard',explode(':',$parameters['context']))) {
 					$sessname = 'subtotal_hideInnerLines_facture';	
+					$sessname2 = 'subtotal_hidedetails_facture';
 				}
 				elseif(in_array('propalcard',explode(':',$parameters['context']))) {
-					$sessname = 'subtotal_hideInnerLines_propal';	
+					$sessname = 'subtotal_hideInnerLines_propal';
+					$sessname2 = 'subtotal_hidedetails_propal';	
 				}
 				elseif(in_array('ordercard',explode(':',$parameters['context']))) {
-					$sessname = 'subtotal_hideInnerLines_commande';	
+					$sessname = 'subtotal_hideInnerLines_commande';
+					$sessname2 = 'subtotal_hidedetails_commande';	
 				}
 				else {
 					$sessname = 'subtotal_hideInnerLines_unknown';
+					$sessname2 = 'subtotal_hidedetails_unknown';
 				}
 								
 		
 				$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
 				$_SESSION[$sessname] = $hideInnerLines;		
-					
+				
+				$hidedetails= (int)isset($_REQUEST['hidedetails']);	
+				$_SESSION[$sessname2] = $hidedetails;			
 	    
 				
 				
@@ -321,10 +327,10 @@ class ActionsSubtotal
 		}
 		
 		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
-		$hideTotal = (int)isset($_REQUEST['hideTotal']);	
+		$hidedetails = (int)isset($_REQUEST['hidedetails']);	
 		
 		if($object->lines[$i]->special_code == $this->module_number) {
-			if ($hideInnerLines || $hideTotal) { // si c une ligne de titre
+			if ($hideInnerLines) { // si c une ligne de titre
 		    	$fk_parent_line=0;
 				foreach($object->lines as $k=>&$line) {
 					if($hideInnerLines) {
