@@ -465,7 +465,7 @@ class ActionsSubtotal
 						<script type="text/javascript">
 							$(document).ready(function() {
 								$('#addproduct').submit(function () {
-									$('input[name=saveEditlinetitle]').clic:20px;k();
+									$('input[name=saveEditlinetitle]').click();
 									return false;
 								}) ;
 							});
