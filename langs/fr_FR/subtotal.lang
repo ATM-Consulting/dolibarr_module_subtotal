@@ -9,3 +9,4 @@ AddSubTitle = Ajouter un sous-titre
 AddSubSubTotal = Ajouter un sous-sous-total
 HideInnerLines = Cacher le détail des ensembles
 SubTotalhidedetails = Cacher le prix des lignes des ensembles
+YourTitleLabel=Saisissez votre titre

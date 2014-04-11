@@ -30,11 +30,13 @@ class ActionsSubtotal
 				if($action=='add_title_line' || $action=='add_total_line' || $action=='add_subtitle_line' || $action=='add_subtotal_line') {
 					
 					if($action=='add_title_line') {
-						$title = $langs->trans('title');
+						$title = GETPOST('title');
+						if(empty($title)) $title = $langs->trans('title');
 						$qty = 1;
 					}
 					else if($action=='add_subtitle_line') {
-						$title = $langs->trans('subtitle');
+						$title = GETPOST('title');
+						if(empty($title)) $title = $langs->trans('subtitle');
 						$qty = 2;
 					}
 					else if($action=='add_subtotal_line') {
@@ -85,16 +87,30 @@ class ActionsSubtotal
 						
 						$('#add_title_line').click(function() {
 							
-							$.get('?<?php echo $idvar ?>=<?php echo $object->id ?>&action=add_title_line', function() {
-								document.location.href='?<?php echo $idvar ?>=<?php echo $object->id ?>';
-							});
+							var titre = window.prompt("<?php echo $langs->trans('YourTitleLabel') ?>", "<?php echo $langs->trans('title') ?>");
+							
+							if(titre!=null) {
+								
+								$.get('?<?php echo $idvar ?>=<?php echo $object->id ?>&action=add_title_line&title='+encodeURIComponent(titre), function() {
+									document.location.href='?<?php echo $idvar ?>=<?php echo $object->id ?>';
+								});
+								
+								
+							}
 							
 						});
 						$('#add_subtitle_line').click(function() {
+							var titre = window.prompt("<?php echo $langs->trans('YourTitleLabel') ?>", "<?php echo $langs->trans('title') ?>");
 							
-							$.get('?<?php echo $idvar ?>=<?php echo $object->id ?>&action=add_subtitle_line', function() {
-								document.location.href='?<?php echo $idvar ?>=<?php echo $object->id ?>';
-							});
+							if(titre!=null) {
+								
+								$.get('?<?php echo $idvar ?>=<?php echo $object->id ?>&action=add_subtitle_line&title='+encodeURIComponent(titre), function() {
+									document.location.href='?<?php echo $idvar ?>=<?php echo $object->id ?>';
+								});
+								
+								
+							}
+							
 							
 						});
 						
@@ -153,7 +169,7 @@ class ActionsSubtotal
 				
 				$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
-		     				<label for="hideInnerLines">'.$langs->trans('SubTotalhidedetails').'</label>
+		     				<label for="hidedetails">'.$langs->trans('SubTotalhidedetails').'</label>
 		     				<input type="checkbox" id="hidedetails" name="hidedetails" value="1" '.(( $hidedetails ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
