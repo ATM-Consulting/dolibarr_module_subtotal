@@ -11,7 +11,7 @@
 	 print $sql.";<br />";
 	
 	$sql = "UPDATE ".MAIN_DB_PREFIX."propaldet 
-		SET fk_parent=0
+		SET fk_parent_line=0
 	 WHERE 1";
 	 
 	 print $sql.";<br />";
@@ -25,7 +25,7 @@
 	 print $sql.";<br />";
 
 	$sql = "UPDATE ".MAIN_DB_PREFIX."facturedet 
-		SET fk_parent=0
+		SET fk_parent_line=0
 	 WHERE 1";
 	 
 	 print $sql.";<br />";
@@ -40,7 +40,7 @@
 	 print $sql.";<br />";
 	
 	$sql = "UPDATE ".MAIN_DB_PREFIX."commandedet 
-		SET fk_parent=0
+		SET fk_parent_line=0
 	 WHERE 1";
 	 
 	 print $sql.";<br />";
