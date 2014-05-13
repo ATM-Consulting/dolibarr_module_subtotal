@@ -516,6 +516,8 @@ class ActionsSubtotal
 						}
 					}
 					
+					if(empty($line->description)) $line->description = $line->desc;
+					
 					/* Titre */
 					//var_dump($line);
 					?>
