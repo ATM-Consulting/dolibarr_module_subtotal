@@ -1,0 +1,12 @@
+Module104777Name = SubTotal
+Module104777Desc = Le permite agregar títulos y subtotales de las propuestas de negocios, pedidos y facturas
+title=Título del grupo 
+subtitle=Subgrupo título 
+AddTitle = Ajouter un titre
+SubSubTotal = Sub-Total parcial
+AddSubTotal = Añadir subtotal 
+AddSubTitle = Agregar un título 
+AddSubSubTotal = Agregar un subtotal 
+HideInnerLines = Ocultar Detalles conjuntos 
+SubTotalhidedetails = líneas precios Ocultar conjuntos 
+YourTitleLabel=Ingrese su título
