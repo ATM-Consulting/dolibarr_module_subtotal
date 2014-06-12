@@ -255,8 +255,9 @@ class ActionsSubtotal
 		
 		$total = 0;
 		foreach($object->lines as $l) {
-			
+			//print $l->rang.'>='.$rang.' '.$total.'<br/>';
 			if($l->rang>=$rang) {
+				//echo 'return!<br>';
 				return $total;
 			} 
 			else if($l->special_code==$this->module_number && (($l->qty==1 && $qty_line==99) || ($l->qty==2 && $qty_line==98))   ) {
@@ -299,7 +300,9 @@ class ActionsSubtotal
 		$pdf->MultiCell($w, $h, $label.' ', 0, 'R');
 		
 		$total = $this->getTotalLineFromObject($object, $line);
-					
+		
+		$line->total_ht = $total;
+		$line->total = $total;
 		$pdf->SetXY($pdf->postotalht, $posy);
 		$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($total), 0, 'R', 0);
 	}
@@ -335,9 +338,16 @@ class ActionsSubtotal
 		}
 	}
 
+	function pdf_writelinedesc_ref($parameters=false, &$object, &$action='') {
+	// ultimate PDF hook O_o
+		
+		return $this->pdf_writelinedesc($parameters,$object,$action);
+		
+	}
+
 	function pdf_writelinedesc($parameters=false, &$object, &$action='')
 	{
-		
+
 		foreach($parameters as $key=>$value) {
 			${$key} = $value;
 		}
