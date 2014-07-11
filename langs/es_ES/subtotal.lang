@@ -10,3 +10,4 @@ AddSubSubTotal = Agregar un subtotal
 HideInnerLines = Ocultar Detalles conjuntos 
 SubTotalhidedetails = líneas precios Ocultar conjuntos 
 YourTitleLabel=Ingrese su título
+deleteWithAllLines=Eliminar todas las líneas con contenido

@@ -61,6 +61,18 @@ class ActionsSubtotal
 												
 					}
 				}
+				else if($action==='ask_deleteallline') {
+						$form=new Form($db);
+						
+						$lineid = GETPOST('lineid','integer');
+						$TIdForGroup = $this->getArrayOfLineForAGroup($object, $lineid);
+					
+						$nbLines = count($TIdForGroup);
+					
+						$formconfirm=$form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id.'&lineid='.$lineid, $langs->trans('deleteWithAllLines'), $langs->trans('ConfirmDeleteAllThisLines',$nbLines), 'confirm_delete_all_lines','',0,1);
+						print $formconfirm;
+				}
+
 				
 				    	
 				?><script type="text/javascript">
@@ -196,7 +208,7 @@ class ActionsSubtotal
     }
 	
 	function doActions($parameters, &$object, $action, $hookmanager) {
-		if($action == 'builddoc') {
+		if($action === 'builddoc') {
 			
 			if (
 				in_array('invoicecard',explode(':',$parameters['context']))
@@ -240,12 +252,63 @@ class ActionsSubtotal
 	        }
 			
 		}
+		else if($action === 'confirm_delete_all_lines' && GETPOST('confirm')=='yes') {
+			
+			$Tab = $this->getArrayOfLineForAGroup($object, GETPOST('lineid'));
+			
+			foreach($Tab as $idLine) {
+				
+					if($object->element=='facture') $object->deleteline($idLine);
+					else if($object->element=='propal') $object->deleteline($idLine);
+					else if($object->element=='commande') $object->deleteline($idLine);
+			}
+			
+			header('location:?id='.$object->id);
+			exit;
+			
+		}
+
 		return 0;
 	}
 	
 	function formAddObjectLine ($parameters, &$object, &$action, $hookmanager) {
 		
 		return 0;
+	}
+
+	function getArrayOfLineForAGroup(&$object, $lineid) {
+		
+		$rang = $line->rang;
+		$qty_line = $line->qty;
+		
+		$total = 0;
+		
+		$found = false;
+		
+		$Tab= array();
+		
+		foreach($object->lines as $l) {
+		
+			if($l->rowid == $lineid) {
+				$found = true;
+				$qty_line = $l->qty;
+			}
+			
+			if($found) {
+				
+				$Tab[] = $l->rowid;
+				
+				if($l->special_code==$this->module_number && (($l->qty==99 && $qty_line==1) || ($l->qty==98 && $qty_line==2))   ) {
+					break; // end of story
+				}
+			}
+			
+			
+		}
+		
+		
+		return $Tab;
+		
 	}
 
 	function getTotalLineFromObject(&$object, &$line) {
@@ -651,7 +714,7 @@ class ActionsSubtotal
 						?>
 					</td>
 
-					<td align="center">	
+					<td align="center" nowrap="nowrap">	
 						<?php
 							if($action=='editlinetitle' && $_REQUEST['lineid']===$line->id ) {
 								?>
@@ -668,6 +731,14 @@ class ActionsSubtotal
 								<?php								
 								
 								}
+								
+								if($line->qty<10) {
+									
+								?><a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id ?>">
+										<?php echo img_picto('deleteWithAllLines', 'delete_all.png@subtotal', $other) ?>		
+									</a><?php								
+								}
+																	
 							}
 						?>	
 						

@@ -9,3 +9,4 @@ AddSubSubTotal = Add a sub-subtotal
 HideInnerLines = Hide the details inner titles
 SubTotalhidedetails = Hide the price for lines inner titles
 YourTitleLabel=Your title ?
+deleteWithAllLines=Delete all lines included in title
