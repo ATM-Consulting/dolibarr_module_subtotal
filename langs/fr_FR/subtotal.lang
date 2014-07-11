@@ -12,3 +12,4 @@ SubTotalhidedetails = Cacher le prix des lignes des ensembles
 YourTitleLabel=Saisissez votre titre
 deleteWithAllLines=Supprimer avec toutes les lignes contenues
 ConfirmDeleteAllThisLines=Confirmez-vous la suppression de %s lignes ?
+AddBreakPageBefore=Ajouter un saut de page avant.

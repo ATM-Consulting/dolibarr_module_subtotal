@@ -340,13 +340,11 @@ class ActionsSubtotal
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		$pdf->SetXY ($posx, $posy);
 		
-
 		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
 		if(!$hideInnerLines) {
 
 			if($line->qty==99)	$pdf->SetFillColor(230,230,230);
 			else 	$pdf->SetFillColor(240,240,240);
-		
 		
 			$pdf->MultiCell(200-$posx, $h, '', 0, '', 1);
 			
@@ -360,7 +358,7 @@ class ActionsSubtotal
 		}
 		
 		$pdf->SetXY ($posx, $posy);
-		$pdf->MultiCell($w, $h, $label.' ', 0, 'R');
+		$pdf->MultiCell($w, $h, $label." ", 0, 'R');
 		
 		$total = $this->getTotalLineFromObject($object, $line);
 		
@@ -449,12 +447,10 @@ class ActionsSubtotal
 				
 				
 				$line = &$object->lines[$i];
-					
 				
-			
-				if($line->pagebreak) {
-				//	$pdf->addPage();
-				//	$posy = $pdf->GetY();
+				if($line->info_bits>0) { // PAGE BREAK
+					$pdf->addPage();
+					$posy = $pdf->GetY();
 				}
 				
 				if($line->label=='') {
@@ -470,15 +466,19 @@ class ActionsSubtotal
 					$pageBefore = $pdf->getPage();
 					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 					$pageAfter = $pdf->getPage();	
-
+/*
 					if($pageAfter>$pageBefore) {
+						print "ST $pageAfter>$pageBefore<br>";
 						$pdf->rollbackTransaction(true);	
-						$pdf->addPage();
+						$pdf->addPage('','', true);
 						$posy = $pdf->GetY();
 						$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 						$posy = $pdf->GetY();
+						print 'add ST'.$pdf->getPage().'<br />';
 					}
-
+	*/				
+					$posy = $pdf->GetY();
+					
 				}	
 				else{
 					$pageBefore = $pdf->getPage();
@@ -486,20 +486,20 @@ class ActionsSubtotal
 					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h); 
 					$pageAfter = $pdf->getPage();	
 
-					if($pageAfter>$pageBefore) {
+					/*if($pageAfter>$pageBefore) {
+						print "T $pageAfter>$pageBefore<br>";
 						$pdf->rollbackTransaction(true);
-						$pdf->addPage();
+						$pdf->addPage('','', true);
+						print 'add T'.$pdf->getPage().' '.$line->rowid.' '.$pdf->GetY().' '.$posy.'<br />';
+						
 						$posy = $pdf->GetY();
 						$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 						$posy = $pdf->GetY();
 					}
-					
-					
+				*/
+					$posy = $pdf->GetY();
 				}
-	
-				
-				
-	
+//	if($line->rowid==47) exit;
 			}
 			
 		}
@@ -542,11 +542,12 @@ class ActionsSubtotal
 					
 					if($action=='savelinetitle' && $_POST['lineid']===$line->id) {
 						
-						$description = ($line->qty==99) ? '' : $_POST['linedescription'];
+						$description = ($line->qty>90) ? '' : GETPOST('linedescription');
+						$pagebreak = (int)GETPOST('pagebreak');						
 						
-						if($object->element=='facture') $object->updateline($line->id,$description, 0,$line->qty,0,'','',0,0,0,'HT',0,9,0,0,null,0,$_POST['linetitle'], $this->module_number);
-						else if($object->element=='propal') $object->updateline($line->id, 0,$line->qty,0,0,0,0, $description ,'HT',0,$this->module_number,0,0,0,0,$_POST['linetitle'],9);
-						else if($object->element=='commande') $object->updateline($line->id,$description, 0,$line->qty,0,0,0,0,'HT',0,'','',9,0,0,null,0,$_POST['linetitle'], $this->module_number);
+						if($object->element=='facture') $object->updateline($line->id,$description, 0,$line->qty,0,'','',0,0,0,'HT',$pagebreak,9,0,0,null,0,$_POST['linetitle'], $this->module_number);
+						else if($object->element=='propal') $object->updateline($line->id, 0,$line->qty,0,0,0,0, $description ,'HT',$pagebreak,$this->module_number,0,0,0,0,$_POST['linetitle'],9);
+						else if($object->element=='commande') $object->updateline($line->id,$description, 0,$line->qty,0,0,0,0,'HT',$pagebreak,'','',9,0,0,null,0,$_POST['linetitle'], $this->module_number);
 						
 					}
 					else if($action=='editlinetitle') {
@@ -614,7 +615,10 @@ class ActionsSubtotal
 								}
 								
 								?>
-								<input type="text" name="line-title" id-line="<?php echo $line->id ?>" value="<?php echo $line->label ?>" size="80" /><br />
+								<input type="text" name="line-title" id-line="<?php echo $line->id ?>" value="<?php echo $line->label ?>" size="80" />
+								
+								<input type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="1" <?php print ($line->info_bits == 1) ? 'checked="checked"' : '' ?> /> <label for="subtotal-pagebreak"><?php print $langs->trans('AddBreakPageBefore') ?></label>
+								<br />
 								<?php
 								
 								if($line->qty<10) {
@@ -635,6 +639,8 @@ class ActionsSubtotal
 								 else {
 								 	print '<span class="classfortooltip" title="'.$line->description.'">'.$line->label.'</span>';
 								 } 
+								
+								 if($line->info_bits == 1) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
 								
 								 if($line->qty>90) { print ' : '; }
 								 
@@ -683,6 +689,7 @@ class ActionsSubtotal
 													,lineid:<?php echo $line->id ?>
 													,linetitle:$('input[name=line-title]').val()
 													,linedescription:$('textarea[name=line-description]').val()
+													,pagebreak:($('input[name=line-pagebreak]').is(':checked') ? 1 : 0)
 											}
 											,function() {
 												document.location.href="<?php echo '?'.$idvar.'='.$object->id ?>";	
@@ -735,7 +742,7 @@ class ActionsSubtotal
 								if($line->qty<10) {
 									
 								?><a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id ?>">
-										<?php echo img_picto('deleteWithAllLines', 'delete_all.png@subtotal', $other) ?>		
+										<?php echo img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal') ?>		
 									</a><?php								
 								}
 																	
