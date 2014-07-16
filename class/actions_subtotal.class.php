@@ -505,7 +505,6 @@ class ActionsSubtotal
 			
 			if($hideInnerLines) {
 				$pdf->rollbackTransaction(true);
-				$pdf->writeHTMLCell($w, $h, $posx, $posy, "batman", 0, 1);
 			}
 			else {
 				$labelproductservice=pdf_getlinedesc($object, $i, $outputlangs, $hideref, $hidedesc, $issupplierline);
