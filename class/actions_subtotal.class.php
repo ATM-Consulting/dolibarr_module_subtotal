@@ -169,7 +169,7 @@ class ActionsSubtotal
 				$hidedetails	= isset( $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] : 0;	
 					
 					
-		     	/*$out.= '<tr '.$bc[$var].'>
+		     	$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
 		     				<label for="hideInnerLines">'.$langs->trans('HideInnerLines').'</label>
 		     				<input type="checkbox" id="hideInnerLines" name="hideInnerLines" value="1" '.(( $hideInnerLines ) ? 'checked="checked"' : '' ).' />
@@ -177,7 +177,7 @@ class ActionsSubtotal
 		     			</tr>';
 				$var = -$var;
 				 
-				 */
+				 
 				
 				$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
@@ -425,10 +425,8 @@ class ActionsSubtotal
 					
 						if ($line->product_type != 9) { // jusqu'au prochain titre ou total
 							$line->fk_parent_line = $fk_parent_line;
-				
 						}
-						
-
+				
 					}
 
 					if($hideTotal) {
@@ -507,6 +505,7 @@ class ActionsSubtotal
 			
 			if($hideInnerLines) {
 				$pdf->rollbackTransaction(true);
+				$pdf->writeHTMLCell($w, $h, $posx, $posy, "batman", 0, 1);
 			}
 			else {
 				$labelproductservice=pdf_getlinedesc($object, $i, $outputlangs, $hideref, $hidedesc, $issupplierline);
