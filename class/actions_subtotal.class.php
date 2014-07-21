@@ -172,7 +172,7 @@ class ActionsSubtotal
 		     	$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
 		     				<label for="hideInnerLines">'.$langs->trans('HideInnerLines').'</label>
-		     				<input type="checkbox" id="hideInnerLines" name="hideInnerLines" value="1" '.(( $hideInnerLines ) ? 'checked="checked"' : '' ).' />
+		     				<input type="checkbox" onclick="if($(this).is(\':checked\')) { $(\'#hidedetails\').attr(\'checked\', \'checked\')  }" id="hideInnerLines" name="hideInnerLines" value="1" '.(( $hideInnerLines ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
 				$var = -$var;
@@ -279,7 +279,8 @@ class ActionsSubtotal
 	function getArrayOfLineForAGroup(&$object, $lineid) {
 		
 		$rang = $line->rang;
-		$qty_line = $line->qty;
+		$qty_line = $line->qty;var_dump($line);
+		
 		
 		$total = 0;
 		
@@ -360,12 +361,16 @@ class ActionsSubtotal
 		$pdf->SetXY ($posx, $posy);
 		$pdf->MultiCell($w, $h, $label." ", 0, 'R');
 		
-		$total = $this->getTotalLineFromObject($object, $line);
+		if($line->total==0) {
+			$total = $this->getTotalLineFromObject($object, $line);
 		
-		$line->total_ht = $total;
-		$line->total = $total;
+			$line->total_ht = $total;
+			$line->total = $total;
+			
+		}
+		
 		$pdf->SetXY($pdf->postotalht, $posy);
-		$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($total), 0, 'R', 0);
+		$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($line->total), 0, 'R', 0);
 	}
 	function pdf_add_title(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 			
@@ -419,22 +424,38 @@ class ActionsSubtotal
 		if($object->lines[$i]->special_code == $this->module_number) {
 			if ($hideInnerLines) { // si c une ligne de titre
 		    	$fk_parent_line=0;
+				$TLines =array();
+			
 				foreach($object->lines as $k=>&$line) {
-					if($hideInnerLines) {
-						if($line->product_type==9 && $line->rowid>0) $fk_parent_line = $line->rowid;
 					
-						if ($line->product_type != 9) { // jusqu'au prochain titre ou total
-							$line->fk_parent_line = $fk_parent_line;
-						}
+					if($line->product_type==9 && $line->rowid>0) {
+						$fk_parent_line = $line->rowid;
+						
+						if($line->qty>90 && $line->total==0) {
+							$total = $this->getTotalLineFromObject($object, $line);
+						
+							$line->total_ht = $total;
+							$line->total = $total;
+						} 
+						$TLines[] = $line;
+						
+					} 
 				
+					if ($line->product_type != 9) { // jusqu'au prochain titre ou total
+						//$line->fk_parent_line = $fk_parent_line;
+						
 					}
-
-					if($hideTotal) {
+				
+					/*if($hideTotal) {
 						$line->total = 0;
 						$line->subprice= 0;
-					}
+					}*/
 
 				}
+				
+				$object->lines = $TLines;
+				
+				if($i>count($object->lines)) return 1;
 		    }
 		}
 	   
@@ -777,4 +798,12 @@ class ActionsSubtotal
 		return 0;
 
 	}
+
+
+
+
+
+
+
+
 }
