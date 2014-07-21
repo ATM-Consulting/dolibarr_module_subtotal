@@ -279,7 +279,7 @@ class ActionsSubtotal
 	function getArrayOfLineForAGroup(&$object, $lineid) {
 		
 		$rang = $line->rang;
-		$qty_line = $line->qty;var_dump($line);
+		$qty_line = $line->qty;
 		
 		
 		$total = 0;
