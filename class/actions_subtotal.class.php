@@ -750,20 +750,22 @@ class ActionsSubtotal
 							else{
 								if ($object->statut == 0  && $user->rights->{$object->element}->creer) {
 								
-								?>
-									<a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id ?>">
-										<?php echo img_delete() ?>		
-									</a>
-								<?php								
-								
-								}
-								
-								if($line->qty<10) {
+									?>
+										<a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id ?>">
+											<?php echo img_delete() ?>		
+										</a>
+									<?php								
 									
-								?><a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id ?>">
-										<?php echo img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal') ?>		
-									</a><?php								
+									
+									if($line->qty<10) {
+										
+									?><a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id ?>">
+											<?php echo img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal') ?>		
+										</a><?php								
+									}
+									
 								}
+								
 																	
 							}
 						?>	
