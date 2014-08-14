@@ -48,18 +48,7 @@ class ActionsSubtotal
 						$qty = 99;
 					}
 					
-	    			if( (float)DOL_VERSION <= 3.4 ) {
-						if($object->element=='facture') $object->addline($object->id, $title, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
-						else if($object->element=='propal') $object->addline($object->id,$title, 0,$qty,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
-						else if($object->element=='commande') $object->addline($object->id,$title, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
-						
-					}
-					else {
-						if($object->element=='facture') $object->addline($title, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
-						else if($object->element=='propal') $object->addline($title, 0,$qty,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
-						else if($object->element=='commande') $object->addline($title, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
-												
-					}
+	    			$this->addSubTotalLine($object, $title, $qty);
 				}
 				else if($action==='ask_deleteallline') {
 						$form=new Form($db);
@@ -801,11 +790,16 @@ class ActionsSubtotal
 
 	}
 
-
-
-
-
-
-
-
+	function addSubTotalLine(&$object, $label, $qty) {
+		if( (float)DOL_VERSION <= 3.4 ) {
+			if($object->element=='facture') $object->addline($object->id, $label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
+			else if($object->element=='propal') $object->addline($object->id,$label, 0,$qty,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
+			else if($object->element=='commande') $object->addline($object->id,$label, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
+		}
+		else {
+			if($object->element=='facture') $object->addline($label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
+			else if($object->element=='propal') $object->addline($label, 0,$qty,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
+			else if($object->element=='commande') $object->addline($label, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
+		}
+	}
 }
