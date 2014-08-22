@@ -599,6 +599,10 @@ class ActionsSubtotal
 					}
 					
 					if(empty($line->description)) $line->description = $line->desc;
+					$colspan = 5;
+					if($conf->margin->enabled) $colspan++;
+					if($conf->global->DISPLAY_MARGIN_RATES) $colspan++;
+					if($conf->global->DISPLAY_MARK_RATES) $colspan++;
 					
 					/* Titre */
 					//var_dump($line);
@@ -610,7 +614,7 @@ class ActionsSubtotal
 						   else print 'background-color:#eeffee;' ;
 						   
 					?>;">
-					<td colspan="5" style="font-weight:bold;  <?php echo ($line->qty>90)?'text-align:right':' font-style: italic;' ?> "><?php
+					<td colspan="<?php echo $colspan; ?>" style="font-weight:bold;  <?php echo ($line->qty>90)?'text-align:right':' font-style: italic;' ?> "><?php
 					
 							if($action=='editlinetitle' && $_REQUEST['lineid']===$line->id ) {
 								
@@ -654,16 +658,7 @@ class ActionsSubtotal
 								 
 								
 							}
-					 ?></td><?php
-					  if (! empty($conf->margin->enabled) && empty($user->societe_id)) {
-						 ?><td align="right" class="nowrap">&nbsp;</td>
-					  	<?php if (! empty($conf->global->DISPLAY_MARGIN_RATES) && $user->rights->margins->liretous) {?>
-					  	  <td align="right" class="nowrap">&nbsp;</td>
-					  	<?php
-					  }
-					  if (! empty($conf->global->DISPLAY_MARK_RATES) && $user->rights->margins->liretous) {?>
-					  	  <td align="right" class="nowrap">&nbsp;</td>
-					  <?php } } ?>
+					 ?></td>
 					 
 					  <?php	
 						
