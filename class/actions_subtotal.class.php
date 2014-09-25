@@ -358,7 +358,7 @@ class ActionsSubtotal
 			else if($l->special_code==$this->module_number && (($l->qty==1 && $qty_line==99) || ($l->qty==2 && $qty_line==98))   ) {
 				$total = 0;
 			}
-			else {
+			elseif($l->product_type!=9) {
 				$total +=$l->total_ht;	
 			}
 			
