@@ -196,6 +196,48 @@ class ActionsSubtotal
         return 0;
     }
 	
+	function ODTSubstitutionLine($parameters, &$object, $action, $hookmanager) {
+		
+		if($action === 'builddoc') {
+			
+			$line = &$parameters['line'];
+			$object = &$parameters['object'];
+			$substitutionarray = &$parameters['substitutionarray'];
+			
+			
+			if($line->product_type == 9 && $line->special_code == $this->module_number) {
+				$substitutionarray['line_modsubtotal'] = true;	
+					
+				$substitutionarray['line_price_ht']
+					 = $substitutionarray['line_price_vat'] 
+					 = $substitutionarray['line_price_ttc']
+					 = $substitutionarray['line_vatrate']
+					 = $substitutionarray['line_qty'] 
+					 = ''; 
+					 
+				
+				if($line->qty>90) {
+					$substitutionarray['line_modsubtotal_total'] = true;
+					
+					$substitutionarray['line_price_ht'] = $substitutionarray['line_price_ttc'] = $this->getTotalLineFromObject($object, $line);
+				}
+				else{
+					$substitutionarray['line_modsubtotal_title'] = true;
+				}
+				
+				
+			}	
+			else{
+				$substitutionarray['line_not_modsubtotal'] = true;
+			}
+			
+		
+			
+		}
+		
+		
+	}
+	
 	function doActions($parameters, &$object, $action, $hookmanager) {
 		if($action === 'builddoc') {
 			
