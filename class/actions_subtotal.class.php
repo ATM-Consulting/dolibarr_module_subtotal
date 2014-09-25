@@ -204,7 +204,6 @@ class ActionsSubtotal
 			$object = &$parameters['object'];
 			$substitutionarray = &$parameters['substitutionarray'];
 			
-			
 			if($line->product_type == 9 && $line->special_code == $this->module_number) {
 				$substitutionarray['line_modsubtotal'] = true;	
 					
@@ -229,6 +228,7 @@ class ActionsSubtotal
 			}	
 			else{
 				$substitutionarray['line_not_modsubtotal'] = true;
+				$substitutionarray['line_modsubtotal'] = false;
 			}
 			
 		
