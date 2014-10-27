@@ -206,21 +206,19 @@ class ActionsSubtotal
 			
 			if($line->product_type == 9 && $line->special_code == $this->module_number) {
 				$substitutionarray['line_modsubtotal'] = true;	
-					
+				
 				$substitutionarray['line_price_ht']
 					 = $substitutionarray['line_price_vat'] 
 					 = $substitutionarray['line_price_ttc']
 					 = $substitutionarray['line_vatrate']
 					 = $substitutionarray['line_qty'] 
-					 = ''; 
-					 
+					 = '';
 				
 				if($line->qty>90) {
 					$substitutionarray['line_modsubtotal_total'] = true;
 					
 					$substitutionarray['line_price_ht'] = $substitutionarray['line_price_ttc'] = $this->getTotalLineFromObject($object, $line);
-				}
-				else{
+				} else {
 					$substitutionarray['line_modsubtotal_title'] = true;
 				}
 				
@@ -231,10 +229,7 @@ class ActionsSubtotal
 				$substitutionarray['line_modsubtotal'] = false;
 			}
 			
-		
-			
 		}
-		
 		
 	}
 	
@@ -246,8 +241,7 @@ class ActionsSubtotal
 				|| in_array('propalcard',explode(':',$parameters['context']))
 				|| in_array('ordercard',explode(':',$parameters['context']))
 			)
-	        {
-	        	
+	        {								
 				if(in_array('invoicecard',explode(':',$parameters['context']))) {
 					$sessname = 'subtotal_hideInnerLines_facture';	
 					$sessname2 = 'subtotal_hidedetails_facture';
@@ -265,17 +259,13 @@ class ActionsSubtotal
 					$sessname2 = 'subtotal_hidedetails_unknown';
 				}
 								
-		
-				$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
+				$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
 				$_SESSION[$sessname] = $hideInnerLines;		
 				
 				$hidedetails= (int)isset($_REQUEST['hidedetails']);	
-				$_SESSION[$sessname2] = $hidedetails;			
-	    
-				
+				$_SESSION[$sessname2] = $hidedetails;
 				
 	           	foreach($object->lines as &$line) {
-	        		
 					if ($line->product_type == 9 && $line->special_code == $this->module_number) {
 						$line->total_ht = $this->getTotalLineFromObject($object, $line);
 					}
@@ -288,10 +278,9 @@ class ActionsSubtotal
 			$Tab = $this->getArrayOfLineForAGroup($object, GETPOST('lineid'));
 			
 			foreach($Tab as $idLine) {
-				
-					if($object->element=='facture') $object->deleteline($idLine);
-					else if($object->element=='propal') $object->deleteline($idLine);
-					else if($object->element=='commande') $object->deleteline($idLine);
+				if($object->element=='facture') $object->deleteline($idLine);
+				else if($object->element=='propal') $object->deleteline($idLine);
+				else if($object->element=='commande') $object->deleteline($idLine);
 			}
 			
 			header('location:?id='.$object->id);
@@ -303,20 +292,17 @@ class ActionsSubtotal
 	}
 	
 	function formAddObjectLine ($parameters, &$object, &$action, $hookmanager) {
-		
 		return 0;
 	}
 
 	function getArrayOfLineForAGroup(&$object, $lineid) {
-		
 		$rang = $line->rang;
 		$qty_line = $line->qty;
-		
 		
 		$total = 0;
 		
 		$found = false;
-		
+
 		$Tab= array();
 		
 		foreach($object->lines as $l) {
@@ -349,6 +335,7 @@ class ActionsSubtotal
 		$qty_line = $line->qty;
 		
 		$total = 0;
+		
 		foreach($object->lines as $l) {
 			//print $l->rang.'>='.$rang.' '.$total.'<br/>';
 			if($l->rang>=$rang) {
@@ -359,7 +346,7 @@ class ActionsSubtotal
 				$total = 0;
 			}
 			elseif($l->product_type!=9) {
-				$total +=$l->total_ht;	
+				$total += $l->total_ht;
 			}
 			
 			
@@ -372,32 +359,25 @@ class ActionsSubtotal
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		$pdf->SetXY ($posx, $posy);
 		
-		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
-		if(!$hideInnerLines) {
-
-			if($line->qty==99)	$pdf->SetFillColor(230,230,230);
-			else 	$pdf->SetFillColor(240,240,240);
-		
-			$pdf->MultiCell(200-$posx, $h, '', 0, '', 1);
-			
-		}
+		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
 				
-		if($hideInnerLines) {
-			$pdf->SetFont('', '', 9);
-		}
-		else {
-			$pdf->SetFont('', 'B', 9);
-		}
+		if($line->qty==99)
+			$pdf->SetFillColor(230,230,230);
+		else
+			$pdf->SetFillColor(240,240,240);
 		
+		$pdf->MultiCell(200-$posx, $h, '', 0, '', 1);	
+				
+		$pdf->SetFont('', 'B', 9);
+
 		$pdf->SetXY ($posx, $posy);
 		$pdf->MultiCell($w, $h, $label." ", 0, 'R');
 		
-		if($line->total==0) {
+		if($line->total == 0) {
 			$total = $this->getTotalLineFromObject($object, $line);
 		
 			$line->total_ht = $total;
 			$line->total = $total;
-			
 		}
 		
 		$pdf->SetXY($pdf->postotalht, $posy);
@@ -410,7 +390,7 @@ class ActionsSubtotal
 		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
 		if($hideInnerLines) {
 
-			if($line->qty==1)$pdf->SetFont('', '', 9);
+			if($line->qty==1)$pdf->SetFont('', 'BU', 9);
 			else $pdf->SetFont('', 'I', 9);
 			
 		}
@@ -429,9 +409,7 @@ class ActionsSubtotal
 			$pdf->SetFont('', '', 8);
 			
 			$pdf->writeHTMLCell($w, $h, $posx, $posy, $description, 0, 1, false, true, 'J',true);
-			
-			
-			
+
 		}
 	}
 
@@ -444,7 +422,6 @@ class ActionsSubtotal
 
 	function pdf_writelinedesc($parameters=false, &$object, &$action='')
 	{
-
 		foreach($parameters as $key=>$value) {
 			${$key} = $value;
 		}
@@ -494,8 +471,6 @@ class ActionsSubtotal
 			
 			
 			if($object->lines[$i]->special_code == $this->module_number) {
-				
-				
 				$line = &$object->lines[$i];
 				
 				if($line->info_bits>0) { // PAGE BREAK
@@ -532,7 +507,7 @@ class ActionsSubtotal
 				}	
 				else{
 					$pageBefore = $pdf->getPage();
-						
+
 					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h); 
 					$pageAfter = $pdf->getPage();	
 
@@ -594,7 +569,7 @@ class ActionsSubtotal
 						
 						$description = ($line->qty>90) ? '' : GETPOST('linedescription');
 						$pagebreak = (int)GETPOST('pagebreak');						
-						
+
 						if($object->element=='facture') $object->updateline($line->id,$description, 0,$line->qty,0,'','',0,0,0,'HT',$pagebreak,9,0,0,null,0,$_POST['linetitle'], $this->module_number);
 						else if($object->element=='propal') $object->updateline($line->id, 0,$line->qty,0,0,0,0, $description ,'HT',$pagebreak,$this->module_number,0,0,0,0,$_POST['linetitle'],9);
 						else if($object->element=='commande') $object->updateline($line->id,$description, 0,$line->qty,0,0,0,0,'HT',$pagebreak,'','',9,0,0,null,0,$_POST['linetitle'], $this->module_number);
@@ -614,7 +589,7 @@ class ActionsSubtotal
 						<?php
 					}
 					else {
-						if( (float)DOL_VERSION <= 3.4 ) {
+						if((float)DOL_VERSION <= 3.4) {
 							
 							?>
 							<script type="text/javascript">
