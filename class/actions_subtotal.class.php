@@ -384,14 +384,16 @@ class ActionsSubtotal
 		$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($line->total), 0, 'R', 0);
 	}
 	function pdf_add_title(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
-			
+		
+		global $db;
+		
 		$pdf->SetXY ($posx, $posy);
 		
 		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
 		if($hideInnerLines) {
 
 			if($line->qty==1)$pdf->SetFont('', 'BU', 9);
-			else $pdf->SetFont('', 'I', 9);
+			else $pdf->SetFont('', dolibarr_get_const($db, "SUBTOTAL_STYLE_TITRES_SI_LIGNES_CACHEES"), 9);
 			
 		}
 		else {

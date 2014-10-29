@@ -125,13 +125,13 @@ class modSubtotal extends DolibarrModules
         // (key, 'chaine', value, desc, visible, 'current' or 'allentities', deleteonunactive)
         // Example:
         $this->const = array(
-            //	0=>array(
-            //		'MYMODULE_MYNEWCONST1',
-            //		'chaine',
-            //		'myvalue',
-            //		'This is a constant to add',
-            //		1
-            //	),
+            	0=>array(
+            		'SUBTOTAL_STYLE_TITRES_SI_LIGNES_CACHEES',
+            		'chaine',
+            		'I',
+            		'Définit le style (B : gras, I : Italique, U : Souligné) des sous titres lorsque le détail des lignes et des ensembles est caché',
+            		1
+            	)
             //	1=>array(
             //		'MYMODULE_MYNEWCONST2',
             //		'chaine',
