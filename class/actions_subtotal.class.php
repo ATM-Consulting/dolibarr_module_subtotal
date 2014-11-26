@@ -646,16 +646,22 @@ class ActionsSubtotal
 								}
 								
 								?>
-								<input type="text" name="line-title" id-line="<?php echo $line->id ?>" value="<?php echo $line->label ?>" size="80" />
-								
+								<label>
+									<input type="text" name="line-title" id-line="<?php echo $line->id ?>"
+									       value="<?php echo $line->label ?>" size="80"/>
+								</label>
+
 								<input type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="1" <?php print ($line->info_bits == 1) ? 'checked="checked"' : '' ?> /> <label for="subtotal-pagebreak"><?php print $langs->trans('AddBreakPageBefore') ?></label>
 								<br />
 								<?php
 								
 								if($line->qty<10) {
 									?>
-									<textarea name="line-description" id-line="<?php echo $line->id ?>" cols="70" rows="2"><?php echo $line->description ?></textarea>
-									<?php
+									<label>
+										<textarea name="line-description" id-line="<?php echo $line->id ?>" cols="70"
+										          rows="2"><?php echo $line->description ?></textarea>
+									</label>
+								<?php
 								}
 								
 							}
