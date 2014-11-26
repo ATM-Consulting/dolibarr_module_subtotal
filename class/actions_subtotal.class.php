@@ -1,15 +1,15 @@
 <?php
 class ActionsSubtotal
-{ 
-     /** Overloading the doActions function : replacing the parent's function with the one below 
-      *  @param      parameters  meta datas of the hook (context, etc...) 
-      *  @param      object             the object you want to process (an invoice if you are in invoice module, a propale in propale's module, etc...) 
-      *  @param      action             current action (if set). Generally create or edit or null 
-      *  @return       void 
-      */
+{
+	/** Overloading the doActions function : replacing the parent's function with the one below
+	 * @param      $parameters  array           meta datas of the hook (context, etc...)
+	 * @param      $object      CommonObject    the object you want to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @param      $action      string          current action (if set). Generally create or edit or null
+	 * @param      $hookmanager HookManager     current hook manager
+	 * @return     void
+	 */
      var $module_number = 104777;
- 
-      
+
     function formObjectOptions($parameters, &$object, &$action, $hookmanager) 
     {  
       	global $langs,$db,$user, $conf;
