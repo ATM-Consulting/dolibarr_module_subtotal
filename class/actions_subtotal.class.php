@@ -654,7 +654,7 @@ class ActionsSubtotal
 								
 								if($line->qty<10) {
 									?>
-									<textarea name="line-description" id-line="<?php echo $line->id ?>" cols="70" rows="2" /><?php echo $line->description ?></textarea>
+									<textarea name="line-description" id-line="<?php echo $line->id ?>" cols="70" rows="2"><?php echo $line->description ?></textarea>
 									<?php
 								}
 								

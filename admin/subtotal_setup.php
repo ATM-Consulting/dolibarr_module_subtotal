@@ -108,12 +108,11 @@ function showParameters() {
 	<tr class="liste_titre">
 		<td>A propos</td>
 		<td align="center">&nbsp;</td>
-		</tr>
-		<tr class="impair">
-			<td valign="top">Module développé par </td>
-			<td align="center">
-				<a href="http://www.atm-consulting.fr/" target="_blank">ATM Consulting</a>
-			</td>
+	</tr>
+	<tr class="impair">
+		<td valign="top">Module développé par </td>
+		<td align="center">
+			<a href="http://www.atm-consulting.fr/" target="_blank">ATM Consulting</a>
 		</td>
 	</tr>
 </table>
