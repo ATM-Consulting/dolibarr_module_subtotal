@@ -8,7 +8,7 @@ class ActionsSubtotal
 	 * @param      $hookmanager HookManager     current hook manager
 	 * @return     void
 	 */
-     var $module_number = 104777;
+     public $module_number = 104777;
 
     function formObjectOptions($parameters, &$object, &$action, $hookmanager) 
     {  
