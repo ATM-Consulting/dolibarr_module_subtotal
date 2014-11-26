@@ -415,14 +415,14 @@ class ActionsSubtotal
 		}
 	}
 
-	function pdf_writelinedesc_ref($parameters=false, &$object, &$action='') {
+	function pdf_writelinedesc_ref($parameters=array(), &$object, &$action='') {
 	// ultimate PDF hook O_o
 		
 		return $this->pdf_writelinedesc($parameters,$object,$action);
 		
 	}
 
-	function pdf_writelinedesc($parameters=false, &$object, &$action='')
+	function pdf_writelinedesc($parameters=array(), &$object, &$action='')
 	{
 		foreach($parameters as $key=>$value) {
 			${$key} = $value;
