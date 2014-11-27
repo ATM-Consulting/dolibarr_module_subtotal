@@ -233,6 +233,41 @@ class ActionsSubtotal
 		
 	}
 	
+	function createFrom($parameters, &$object, $action, $hookmanager) {
+	
+		if (
+				in_array('invoicecard',explode(':',$parameters['context']))
+				|| in_array('propalcard',explode(':',$parameters['context']))
+				|| in_array('ordercard',explode(':',$parameters['context']))
+		) {
+			
+			global $db;
+			
+			$objFrom = $parameters['objFrom'];
+			
+			foreach($objFrom->lines as $k=> &$lineOld) {
+				
+					if($lineOld->product_type == 9 && $lineOld->info_bits > 0 ) {
+							
+							$line = & $object->lines[$k];
+				
+							$idLine = (int) ($line->id ? $line->id : $line->rowid); 
+				
+							$db->query("UPDATE ".MAIN_DB_PREFIX.$line->table_element."
+							SET info_bits=".(int)$lineOld->info_bits."
+							WHERE rowid = ".$idLine."
+							");
+						
+					}
+				
+				
+			}
+			
+			
+		}
+		
+	}
+	
 	function doActions($parameters, &$object, $action, $hookmanager) {
 		if($action === 'builddoc') {
 			
@@ -702,7 +737,7 @@ class ActionsSubtotal
 									       value="<?php echo $line->label ?>" size="80"/>
 								</label>
 
-								<input type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="1" <?php print ($line->info_bits == 1) ? 'checked="checked"' : '' ?> /> <label for="subtotal-pagebreak"><?php print $langs->trans('AddBreakPageBefore') ?></label>
+								<input type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="8" <?php print ($line->info_bits > 0) ? 'checked="checked"' : '' ?> /> <label for="subtotal-pagebreak"><?php print $langs->trans('AddBreakPageBefore') ?></label>
 								<br />
 								<?php
 								
@@ -728,7 +763,7 @@ class ActionsSubtotal
 								 	print '<span class="classfortooltip" title="'.$line->description.'">'.$line->label.'</span>';
 								 } 
 								
-								 if($line->info_bits == 1) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
+								 if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
 								
 								 if($line->qty>90) { print ' : '; }
 								 
@@ -768,7 +803,7 @@ class ActionsSubtotal
 													,lineid:<?php echo $line->id ?>
 													,linetitle:$('input[name=line-title]').val()
 													,linedescription:$('textarea[name=line-description]').val()
-													,pagebreak:($('input[name=line-pagebreak]').is(':checked') ? 1 : 0)
+													,pagebreak:($('input[name=line-pagebreak]').is(':checked') ? 8 : 0)
 											}
 											,function() {
 												document.location.href="<?php echo '?'.$idvar.'='.$object->id ?>";	
