@@ -1,15 +1,15 @@
 <?php
 class ActionsSubtotal
-{ 
-     /** Overloading the doActions function : replacing the parent's function with the one below 
-      *  @param      parameters  meta datas of the hook (context, etc...) 
-      *  @param      object             the object you want to process (an invoice if you are in invoice module, a propale in propale's module, etc...) 
-      *  @param      action             current action (if set). Generally create or edit or null 
-      *  @return       void 
-      */
-     var $module_number = 104777;
- 
-      
+{
+	/** Overloading the doActions function : replacing the parent's function with the one below
+	 * @param      $parameters  array           meta datas of the hook (context, etc...)
+	 * @param      $object      CommonObject    the object you want to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @param      $action      string          current action (if set). Generally create or edit or null
+	 * @param      $hookmanager HookManager     current hook manager
+	 * @return     void
+	 */
+     public $module_number = 104777;
+
     function formObjectOptions($parameters, &$object, &$action, $hookmanager) 
     {  
       	global $langs,$db,$user, $conf;
@@ -278,8 +278,17 @@ class ActionsSubtotal
 			$Tab = $this->getArrayOfLineForAGroup($object, GETPOST('lineid'));
 			
 			foreach($Tab as $idLine) {
+				/**
+				 * @var $object Facture
+				 */
 				if($object->element=='facture') $object->deleteline($idLine);
+				/**
+				 * @var $object Propal
+				 */
 				else if($object->element=='propal') $object->deleteline($idLine);
+				/**
+				 * @var $object Commande
+				 */
 				else if($object->element=='commande') $object->deleteline($idLine);
 			}
 			
@@ -355,7 +364,18 @@ class ActionsSubtotal
 		
 		return $total;
 	}
-	
+
+	/**
+	 * @param $pdf          TCPDF               PDF object
+	 * @param $object       CommonObject        dolibarr object
+	 * @param $line         CommonObjectLine    dolibarr object line
+	 * @param $label        string
+	 * @param $description  string
+	 * @param $posx         float               horizontal position
+	 * @param $posy         float               vertical position
+	 * @param $w            float               width
+	 * @param $h            float               height
+	 */
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		$pdf->SetXY ($posx, $posy);
 		
@@ -383,6 +403,18 @@ class ActionsSubtotal
 		$pdf->SetXY($pdf->postotalht, $posy);
 		$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($line->total), 0, 'R', 0);
 	}
+
+	/**
+	 * @param $pdf          TCPDF               PDF object
+	 * @param $object       CommonObject        dolibarr object
+	 * @param $line         CommonObjectLine    dolibarr object line
+	 * @param $label        string
+	 * @param $description  string
+	 * @param $posx         float               horizontal position
+	 * @param $posy         float               vertical position
+	 * @param $w            float               width
+	 * @param $h            float               height
+	 */
 	function pdf_add_title(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		
 		global $db;
@@ -415,15 +447,20 @@ class ActionsSubtotal
 		}
 	}
 
-	function pdf_writelinedesc_ref($parameters=false, &$object, &$action='') {
+	function pdf_writelinedesc_ref($parameters=array(), &$object, &$action='') {
 	// ultimate PDF hook O_o
 		
 		return $this->pdf_writelinedesc($parameters,$object,$action);
 		
 	}
 
-	function pdf_writelinedesc($parameters=false, &$object, &$action='')
+	function pdf_writelinedesc($parameters=array(), &$object, &$action='')
 	{
+		/**
+		 * @var $pdf    TCPDF
+		 */
+		global $pdf;
+
 		foreach($parameters as $key=>$value) {
 			${$key} = $value;
 		}
@@ -545,9 +582,14 @@ class ActionsSubtotal
 
 		return 1;
 	}
-	
-	
 
+	/**
+	 * @param $parameters   array
+	 * @param $object       CommonObject
+	 * @param $action       string
+	 * @param $hookmanager  HookManager
+	 * @return int
+	 */
 	function printObjectLine ($parameters, &$object, &$action, $hookmanager){
 		
 		global $conf,$langs,$user;
@@ -570,10 +612,19 @@ class ActionsSubtotal
 					if($action=='savelinetitle' && $_POST['lineid']===$line->id) {
 						
 						$description = ($line->qty>90) ? '' : GETPOST('linedescription');
-						$pagebreak = (int)GETPOST('pagebreak');						
+						$pagebreak = (int)GETPOST('pagebreak');
 
+						/**
+						 * @var $object Facture
+						 */
 						if($object->element=='facture') $object->updateline($line->id,$description, 0,$line->qty,0,'','',0,0,0,'HT',$pagebreak,9,0,0,null,0,$_POST['linetitle'], $this->module_number);
+						/**
+						* @var $object Propal
+						*/
 						else if($object->element=='propal') $object->updateline($line->id, 0,$line->qty,0,0,0,0, $description ,'HT',$pagebreak,$this->module_number,0,0,0,0,$_POST['linetitle'],9);
+						/**
+						 * @var $object Commande
+						 */
 						else if($object->element=='commande') $object->updateline($line->id,$description, 0,$line->qty,0,0,0,0,'HT',$pagebreak,'','',9,0,0,null,0,$_POST['linetitle'], $this->module_number);
 						
 					}
@@ -646,16 +697,22 @@ class ActionsSubtotal
 								}
 								
 								?>
-								<input type="text" name="line-title" id-line="<?php echo $line->id ?>" value="<?php echo $line->label ?>" size="80" />
-								
+								<label>
+									<input type="text" name="line-title" id-line="<?php echo $line->id ?>"
+									       value="<?php echo $line->label ?>" size="80"/>
+								</label>
+
 								<input type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="1" <?php print ($line->info_bits == 1) ? 'checked="checked"' : '' ?> /> <label for="subtotal-pagebreak"><?php print $langs->trans('AddBreakPageBefore') ?></label>
 								<br />
 								<?php
 								
 								if($line->qty<10) {
 									?>
-									<textarea name="line-description" id-line="<?php echo $line->id ?>" cols="70" rows="2" /><?php echo $line->description ?></textarea>
-									<?php
+									<label>
+										<textarea name="line-description" id-line="<?php echo $line->id ?>" cols="70"
+										          rows="2"><?php echo $line->description ?></textarea>
+									</label>
+								<?php
 								}
 								
 							}
@@ -806,13 +863,31 @@ class ActionsSubtotal
 
 	function addSubTotalLine(&$object, $label, $qty) {
 		if( (float)DOL_VERSION <= 3.4 ) {
+			/**
+			 * @var $object Facture
+			 */
 			if($object->element=='facture') $object->addline($object->id, $label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
+			/**
+			 * @var $object Propal
+			 */
 			else if($object->element=='propal') $object->addline($object->id,$label, 0,$qty,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
+			/**
+			 * @var $object Commande
+			 */
 			else if($object->element=='commande') $object->addline($object->id,$label, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
 		}
 		else {
+			/**
+			 * @var $object Facture
+			 */
 			if($object->element=='facture') $object->addline($label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
+			/**
+			 * @var $object Propal
+			 */
 			else if($object->element=='propal') $object->addline($label, 0,$qty,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
+			/**
+			 * @var $object Commande
+			 */
 			else if($object->element=='commande') $object->addline($label, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
 		}
 	}
