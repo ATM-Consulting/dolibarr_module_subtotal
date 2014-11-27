@@ -452,7 +452,7 @@ class ActionsSubtotal
 	 */
 	function pdf_add_title(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		
-		global $db;
+		global $db,$conf;
 		
 		$pdf->SetXY ($posx, $posy);
 		
@@ -460,7 +460,7 @@ class ActionsSubtotal
 		if($hideInnerLines) {
 
 			if($line->qty==1)$pdf->SetFont('', 'BU', 9);
-			else $pdf->SetFont('', dolibarr_get_const($db, "SUBTOTAL_STYLE_TITRES_SI_LIGNES_CACHEES"), 9);
+			else $pdf->SetFont('', $conf->global->SUBTOTAL_STYLE_TITRES_SI_LIGNES_CACHEES, 9);
 			
 		}
 		else {
