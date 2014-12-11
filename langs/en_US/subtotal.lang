@@ -1,12 +1,15 @@
 Module104777Name = SubTotal
 Module104777Desc = Allows to add titles and subtotals in proposal, orders and invoices
 title=Title
+subtitle=Subtitle
 AddTitle = Add a title
-AddSubTotal = Add a subtotal
 SubSubTotal = Sub-subtotal
+AddSubTotal = Add a subtotal
 AddSubTitle = Add a subtitle
 AddSubSubTotal = Add a sub-subtotal
 HideInnerLines = Hide the details inner titles
 SubTotalhidedetails = Hide the price for lines inner titles
 YourTitleLabel=Your title ?
 deleteWithAllLines=Delete all lines included in title
+ConfirmDeleteAllThisLines=Delete %s lines ?
+AddBreakPageBefore=Add pagebreak before this item.

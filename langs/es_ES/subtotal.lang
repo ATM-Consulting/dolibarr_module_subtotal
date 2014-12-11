@@ -11,3 +11,5 @@ HideInnerLines = Ocultar Detalles conjuntos
 SubTotalhidedetails = líneas precios Ocultar conjuntos 
 YourTitleLabel=Ingrese su título
 deleteWithAllLines=Eliminar todas las líneas con contenido
+ConfirmDeleteAllThisLines=¿Confirma usted la supresión de líneas% s?
+AddBreakPageBeforeAñadir salto de página delante.
