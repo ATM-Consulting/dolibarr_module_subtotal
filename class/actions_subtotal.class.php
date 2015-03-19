@@ -147,7 +147,7 @@ class ActionsSubtotal
 		global $conf, $langs, $bc, $var;
 			
 		$action = GETPOST('action');	
-			
+		
 		if (
 				in_array('invoicecard',explode(':',$parameters['context']))
 				|| in_array('propalcard',explode(':',$parameters['context']))
@@ -504,25 +504,29 @@ class ActionsSubtotal
 		$hidedetails = (int)isset($_REQUEST['hidedetails']);	
 		
 		if($object->lines[$i]->special_code == $this->module_number) {
+		
 			if ($hideInnerLines) { // si c une ligne de titre
 		    	$fk_parent_line=0;
 				$TLines =array();
 			
-				foreach($object->lines as $k=>&$line) {
-					
-					if($line->product_type==9 && $line->rowid>0) {
+				foreach($object->lines as $k=>&$line) 
+				{
+					if($line->product_type==9 && $line->rowid>0) 
+					{
 						$fk_parent_line = $line->rowid;
 						
-						if($line->qty>90 && $line->total==0) {
+						if($line->qty>90 && $line->total==0) 
+						{
 							$total = $this->getTotalLineFromObject($object, $line);
 						
 							$line->total_ht = $total;
 							$line->total = $total;
 						} 
-						$TLines[] = $line;
 						
 					} 
 				
+					$TLines[] = $line; //Ce tableau ré-écrit $object->lines à la fin de la boucle, à ne pas mettre dans le if ci-dessus (sinon on perd le sous-total sur le PDF)
+					
 					if ($line->product_type != 9) { // jusqu'au prochain titre ou total
 						//$line->fk_parent_line = $fk_parent_line;
 						
