@@ -525,7 +525,17 @@ class ActionsSubtotal
 						
 					} 
 				
-					$TLines[] = $line; //Ce tableau ré-écrit $object->lines à la fin de la boucle, à ne pas mettre dans le if ci-dessus (sinon on perd le sous-total sur le PDF)
+					if ($hideInnerLines)
+					{
+						if($line->product_type==9 && $line->rowid>0) 
+						{
+							$TLines[] = $line; //Cas où je doit cacher les produits et afficher uniquement les sous-totaux avec les titres
+						}
+					}
+					elseif ($hidedetails)
+					{
+						$TLines[] = $line; //Cas où je cache uniquement les prix des produits	
+					}
 					
 					if ($line->product_type != 9) { // jusqu'au prochain titre ou total
 						//$line->fk_parent_line = $fk_parent_line;
