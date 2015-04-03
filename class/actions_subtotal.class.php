@@ -73,14 +73,14 @@ class ActionsSubtotal
 							}
 						?>
 						
-						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddTitle' )?></a></div>');
-						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubTotal')?></a></div>');
+						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" rel="add_title_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddTitle' )?></a></div>');
+						$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" rel="add_total_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubTotal')?></a></div>');
 
 						<?php
 							if($conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL==1) {
 							?>
-								$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_subtitle_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubTitle' )?></a></div>');
-								$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_subtotal_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubSubTotal')?></a></div>');
+								$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_subtitle_line" rel="add_subtitle_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubTitle' )?></a></div>');
+								$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_subtotal_line" rel="add_subtotal_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubSubTotal')?></a></div>');
 		
 							<?php								
 							}
@@ -114,7 +114,7 @@ class ActionsSubtotal
                              
 						}
 						
-						$('#add_title_line').click(function() {
+						$('a[rel=add_title_line]').click(function() {
 							
 							
 							promptSubTotal("<?php echo $langs->trans('YourTitleLabel') ?>"
@@ -125,7 +125,7 @@ class ActionsSubtotal
 							
 							
 						});
-						$('#add_subtitle_line').click(function() {
+						$('a[rel=add_subtitle_line]').click(function() {
 						    
 						    promptSubTotal(
 						        "<?php echo $langs->trans('YourTitleLabel') ?>"
@@ -136,7 +136,7 @@ class ActionsSubtotal
 						    
 						});
 						
-						$('#add_total_line').click(function() {
+						$('a[rel=add_total_line]').click(function() {
 							
 							$.get('?<?php echo $idvar ?>=<?php echo $object->id ?>&action=add_total_line', function() {
 								document.location.href='?<?php echo $idvar ?>=<?php echo $object->id ?>';
@@ -144,7 +144,7 @@ class ActionsSubtotal
 							
 						});
 						
-						$('#add_subtotal_line').click(function() {
+						$('a[rel=add_subtotal_line]').click(function() {
 							
 							$.get('?<?php echo $idvar ?>=<?php echo $object->id ?>&action=add_subtotal_line', function() {
 								document.location.href='?<?php echo $idvar ?>=<?php echo $object->id ?>';
