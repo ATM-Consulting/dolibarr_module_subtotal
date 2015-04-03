@@ -795,7 +795,14 @@ class ActionsSubtotal
 								 	print  $line->description;
 								 } 
 								 else {
-								 	print '<span class="classfortooltip" title="'.$line->description.'">'.$line->label.'</span>';
+								     
+                                    if (! empty($conf->global->PRODUIT_DESC_IN_FORM)) {
+                                        print $line->label.'<br><span style="font-weight:normal;">'.dol_htmlentitiesbr($line->description).'</span>';
+                                    }
+                                    else{
+                                        print '<span class="classfortooltip" title="'.$line->description.'">'.$line->label.'</span>';    
+                                    }
+								 	
 								 } 
 								
 								 if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
