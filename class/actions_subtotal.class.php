@@ -86,33 +86,54 @@ class ActionsSubtotal
 							}
 						?>
 						
+						function promptSubTotal(titleDialog, label, url_to, url_ajax) {
+						    
+						     $( "#dialog-prompt-subtotal" ).remove();
+						     $('body').append('<div id="dialog-prompt-subtotal"><input id="sub-total-title" size=30 value="'+label+'" /></div>');
+						    
+						     $( "#dialog-prompt-subtotal" ).dialog({
+                                resizable: false,
+                                height:140,
+                                modal: true,
+                                title: titleDialog,
+                                buttons: {
+                                    "Ok": function() {
+                                        
+                                        $.get(url_ajax+'&title='+encodeURIComponent( $(this).find('#sub-total-title').val() ), function() {
+                                            document.location.href=url_to;
+                                        })
+
+                                            $( this ).dialog( "close" );
+                                        
+                                    },
+                                    "<?php echo $langs->trans('Cancel') ?>": function() {
+                                        $( this ).dialog( "close" );
+                                    }
+                                }
+                             });
+                             
+						}
+						
 						$('#add_title_line').click(function() {
 							
-							var titre = window.prompt("<?php echo $langs->trans('YourTitleLabel') ?>", "<?php echo $langs->trans('title') ?>");
 							
-							if(titre!=null) {
-								
-								$.get('?<?php echo $idvar ?>=<?php echo $object->id ?>&action=add_title_line&title='+encodeURIComponent(titre), function() {
-									document.location.href='?<?php echo $idvar ?>=<?php echo $object->id ?>';
-								});
-								
-								
-							}
+							promptSubTotal("<?php echo $langs->trans('YourTitleLabel') ?>"
+							     , "<?php echo $langs->trans('title') ?>"
+							     , '?<?php echo $idvar ?>=<?php echo $object->id ?>'
+							     , '?<?php echo $idvar ?>=<?php echo $object->id ?>&action=add_title_line'
+							);
+							
 							
 						});
 						$('#add_subtitle_line').click(function() {
-							var titre = window.prompt("<?php echo $langs->trans('YourTitleLabel') ?>", "<?php echo $langs->trans('title') ?>");
-							
-							if(titre!=null) {
-								
-								$.get('?<?php echo $idvar ?>=<?php echo $object->id ?>&action=add_subtitle_line&title='+encodeURIComponent(titre), function() {
-									document.location.href='?<?php echo $idvar ?>=<?php echo $object->id ?>';
-								});
-								
-								
-							}
-							
-							
+						    
+						    promptSubTotal(
+						        "<?php echo $langs->trans('YourTitleLabel') ?>"
+						        , "<?php echo $langs->trans('title') ?>"
+						        , '?<?php echo $idvar ?>=<?php echo $object->id ?>'
+                                , '?<?php echo $idvar ?>=<?php echo $object->id ?>&action=add_subtitle_line'
+						    );
+						    
 						});
 						
 						$('#add_total_line').click(function() {
