@@ -91,7 +91,7 @@ class modSubtotal extends DolibarrModules
             // Set this to 1 if module has its own barcode directory
             //'barcode' => 0,
             // Set this to 1 if module has its own models directory
-            //'models' => 0,
+            'models' => 1,
             // Set this to relative path of css if module has its own css file
             //'css' => '/titre/css/mycss.css.php',
             // Set here all hooks context managed by module
