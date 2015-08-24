@@ -435,7 +435,11 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 					$pdf->MultiCell($this->posxqty-$this->posxup-0.8, 3, $up_excl_tax, 0, 'R', 0);
 
 					// Quantity
-					$qty = pdf_getlineqty($object, $i, $outputlangs, $hidedetails);
+					if ($hidedetails && $conf->global->HIDE_PRICES_OPTION_SHOW_QTY) {
+						$qty = pdf_getlineqty($object, $i, $outputlangs, 0);
+					} else {
+						$qty = pdf_getlineqty($object, $i, $outputlangs, $hidedetails);
+					}
 					$pdf->SetXY($this->posxqty, $curY);
 					$pdf->MultiCell($this->posxdiscount-$this->posxqty-0.8, 3, $qty, 0, 'R');	// Enough for 6 chars
 
