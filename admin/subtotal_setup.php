@@ -142,17 +142,19 @@ function showParameters() {
 			</td>				
 		</tr>
 		
-		<tr>
-			<td>Afficher la quantité sur les lignes de sous-total (uniquement dans le cas d'un produit virtuel ajouté)</td>
-			<td style="text-align: right;">
-				<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
-					<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
-					<input type="hidden" name="action" value="set_SUBTOTAL_SHOW_QTY_ON_TITLES" />
-					<?php echo $html->selectyesno("SUBTOTAL_SHOW_QTY_ON_TITLES",$conf->global->SUBTOTAL_SHOW_QTY_ON_TITLES,1); ?>
-					<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
-				</form>
-			</td>				
-		</tr>
+		<?php if ($conf->clilacevenements->enabled) { ?>
+			<tr>
+				<td>Afficher la quantité sur les lignes de sous-total (uniquement dans le cas d'un produit virtuel ajouté)</td>
+				<td style="text-align: right;">
+					<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
+						<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
+						<input type="hidden" name="action" value="set_SUBTOTAL_SHOW_QTY_ON_TITLES" />
+						<?php echo $html->selectyesno("SUBTOTAL_SHOW_QTY_ON_TITLES",$conf->global->SUBTOTAL_SHOW_QTY_ON_TITLES,1); ?>
+						<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
+					</form>
+				</td>				
+			</tr>
+		<?php } ?>	
 		
 		<tr>
 			<td>Masquer les totaux</td>
