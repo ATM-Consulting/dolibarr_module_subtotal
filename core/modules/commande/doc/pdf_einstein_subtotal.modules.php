@@ -378,7 +378,7 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 					$pdf->MultiCell($this->posxqty-$this->posxup-0.8, 3, $up_excl_tax, 0, 'R', 0);
 
 					// Quantity
-					if ($hidedetails && $conf->global->HIDE_PRICES_OPTION_SHOW_QTY) {
+					if ($hidedetails && $conf->global->SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY) {
 						$qty = pdf_getlineqty($object, $i, $outputlangs, 0);
 					} else {
 						$qty = pdf_getlineqty($object, $i, $outputlangs, $hidedetails);

@@ -49,6 +49,20 @@ if($action=='save') {
 	
 }
 
+if (preg_match('/set_(.*)/',$action,$reg))
+{
+	$code=$reg[1];
+	if (dolibarr_set_const($db, $code, GETPOST($code), 'chaine', 0, '', $conf->entity) > 0)
+	{
+		header("Location: ".$_SERVER["PHP_SELF"]);
+		exit;
+	}
+	else
+	{
+		dol_print_error($db);
+	}
+}
+
 
 /***************************************************
 * PAGE
@@ -93,11 +107,65 @@ function showParameters() {
 			
 			?></td>				
 		</tr>
-
 		
 	</table>
 	</form>
 	
+	<br />
+		
+	<table width="100%" class="noborder" style="background-color: #fff;">
+		<tr class="liste_titre">
+			<td colspan="2">Paramètrage de l'option "Cacher le prix des lignes des ensembles"</td>
+		</tr>
+		
+		<tr>
+			<td>Afficher la quantité sur les lignes de produit</td>
+			<td style="text-align: right;">
+				<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
+					<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
+					<input type="hidden" name="action" value="set_SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY" />
+					<?php echo $html->selectyesno("SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY",$conf->global->SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY,1); ?>
+					<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
+				</form>
+			</td>				
+		</tr>
+		
+		<tr>
+			<td>Masquer uniquement les prix pour les produits se trouvant dans un ensemble</td>
+			<td style="text-align: right;">
+				<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
+					<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
+					<input type="hidden" name="action" value="set_SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES" />
+					<?php echo $html->selectyesno("SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES",$conf->global->SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES,1); ?>
+					<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
+				</form>
+			</td>				
+		</tr>
+		
+		<tr>
+			<td>Afficher la quantité sur les lignes de sous-total (uniquement dans le cas d'un produit virtuel ajouté)</td>
+			<td style="text-align: right;">
+				<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
+					<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
+					<input type="hidden" name="action" value="set_SUBTOTAL_SHOW_QTY_ON_TITLES" />
+					<?php echo $html->selectyesno("SUBTOTAL_SHOW_QTY_ON_TITLES",$conf->global->SUBTOTAL_SHOW_QTY_ON_TITLES,1); ?>
+					<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
+				</form>
+			</td>				
+		</tr>
+		
+		<tr>
+			<td>Masquer les totaux</td>
+			<td style="text-align: right;">
+				<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
+					<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
+					<input type="hidden" name="action" value="set_SUBTOTAL_HIDE_DOCUMENT_TOTAL" />
+					<?php echo $html->selectyesno("SUBTOTAL_HIDE_DOCUMENT_TOTAL",$conf->global->SUBTOTAL_HIDE_DOCUMENT_TOTAL,1); ?>
+					<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
+				</form>
+			</td>				
+		</tr>
+	</table>
 	
 	<br /><br />
 	<?php
