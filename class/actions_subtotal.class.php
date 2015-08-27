@@ -436,6 +436,8 @@ class ActionsSubtotal
 		$pdf->SetXY ($posx, $posy);
 		
 		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
+		
+		$hidePriceOnSubtotalLines = (int) isset($_REQUEST['hide_price_on_subtotal_lines']);
 				
 		if($line->qty==99)
 			$pdf->SetFillColor(230,230,230);
@@ -449,15 +451,17 @@ class ActionsSubtotal
 		$pdf->SetXY ($posx, $posy);
 		$pdf->MultiCell($w, $h, $label." ", 0, 'R');
 		
-		if($line->total == 0) {
-			$total = $this->getTotalLineFromObject($object, $line);
-		
-			$line->total_ht = $total;
-			$line->total = $total;
+		if (!$hidePriceOnSubtotalLines) {
+			if($line->total == 0) {
+				$total = $this->getTotalLineFromObject($object, $line);
+			
+				$line->total_ht = $total;
+				$line->total = $total;
+			}
+			
+			$pdf->SetXY($pdf->postotalht, $posy);
+			$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($line->total), 0, 'R', 0);
 		}
-		
-		$pdf->SetXY($pdf->postotalht, $posy);
-		$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($line->total), 0, 'R', 0);
 	}
 
 	/**
@@ -567,7 +571,6 @@ class ActionsSubtotal
 						$line->total = 0;
 						$line->subprice= 0;
 					}*/
-
 				}
 				
 				$object->lines = $TLines;
