@@ -363,52 +363,63 @@ class pdf_azur_subtotal extends ModelePDFPropales
 				$TPackageInfos = array();
 				$TChilds = array();
 				$package_qty = 0;
+				$TStack = array();
 				
 				// Loop on each lines
 				for ($i = 0 ; $i < $nblignes ; $i++)
 				{
+					$package_qty = $TStack[count($TStack) - 1]['package_qty'];
+					$inPackage = count($TStack) > 0;
+					
 					// Ligne de titre
-					if ($object->lines[$i]->product_type == 9 && $object->lines[$i]->qty < 99) {
+					if ($object->lines[$i]->product_type == 9 && $object->lines[$i]->qty < 97 && $object->lines[$i]->fk_product > 0) {
 						$inPackage = true;
 						
 						if ($conf->global->SUBTOTAL_SHOW_QTY_ON_TITLES) {
-							$TPackageInfos = array();
-							$TChilds = array();
-							$package_qty = 0;
-							
 							if (!empty($object->lines[$i]->fk_product)) {
 								$product = new Product($db);
 								$product->fetch($object->lines[$i]->fk_product);
 								
 								$TChilds = $product->getChildsArbo($product->id);
+								
+								$TStack[count($TStack)] = array(
+									'childs' => $TChilds,
+									'package' => array(),
+									'package_qty' => 0
+								);
 							}
 						}
 					}
 					
 					if ($conf->global->SUBTOTAL_SHOW_QTY_ON_TITLES) {
 						if ($inPackage && $object->lines[$i]->product_type != 9 && $object->lines[$i]->fk_product > 0) {
-							$TPackageInfos[$object->lines[$i]->fk_product] += $object->lines[$i]->qty;
+							$TStack[count($TStack) - 1]['package'][$object->lines[$i]->fk_product] += $object->lines[$i]->qty;
 						}
 					}
 						
 					// Ligne de sous-total
-					if ($inPackage && $object->lines[$i]->product_type == 9 && $object->lines[$i]->qty == 99) {
-						$inPackage = false;
+					if ($inPackage && $object->lines[$i]->product_type == 9 && $object->lines[$i]->qty >= 97) {
+						if (count($TStack) <= 1) {
+							$inPackage = false;
+						}
 						
 						if ($conf->global->SUBTOTAL_SHOW_QTY_ON_TITLES) {
 							// Comparaison pour déterminer la quantité de package
-							$TProducts = array_keys($TPackageInfos);
-							$TProductsChilds = array_keys($TChilds);
+							$TProducts = array_keys($TStack[count($TStack) - 1]['package']);
+							$TProductsChilds = array_keys($TStack[count($TStack) - 1]['childs']);
 							
 							if ($TProductsChilds == $TProducts) {
 								// Il s'agit d'un package
 								// On récupére la quantité
 								$first_child_id = $TProducts[0];
-								$document_qty = $TPackageInfos[$first_child_id];
-								$base_qty = $TChilds[$first_child_id][1];
+								$document_qty = $TStack[count($TStack) - 1]['package'][$first_child_id];
+								$base_qty = $TStack[count($TStack) - 1]['childs'][$first_child_id][1];
 								
-								$package_qty = $document_qty / $base_qty;
+								$TStack[count($TStack) - 1]['package_qty'] = $document_qty / $base_qty;
+								$package_qty = $TStack[count($TStack) - 1]['package_qty'];
 							}
+							
+							array_pop($TStack);
 						}
 					}
 					
