@@ -131,18 +131,6 @@ function showParameters() {
 		</tr>
 		
 		<tr>
-			<td>Masquer uniquement les prix pour les produits se trouvant dans un ensemble</td>
-			<td style="text-align: right;">
-				<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
-					<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
-					<input type="hidden" name="action" value="set_SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES" />
-					<?php echo $html->selectyesno("SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES",$conf->global->SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES,1); ?>
-					<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
-				</form>
-			</td>				
-		</tr>
-		
-		<tr>
 			<td>Masquer les totaux</td>
 			<td style="text-align: right;">
 				<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
@@ -162,6 +150,18 @@ function showParameters() {
 						<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
 						<input type="hidden" name="action" value="set_SUBTOTAL_SHOW_QTY_ON_TITLES" />
 						<?php echo $html->selectyesno("SUBTOTAL_SHOW_QTY_ON_TITLES",$conf->global->SUBTOTAL_SHOW_QTY_ON_TITLES,1); ?>
+						<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
+					</form>
+				</td>				
+			</tr>
+			
+			<tr>
+				<td>Masquer uniquement les prix pour les produits se trouvant dans un ensemble</td>
+				<td style="text-align: right;">
+					<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
+						<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
+						<input type="hidden" name="action" value="set_SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES" />
+						<?php echo $html->selectyesno("SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES",$conf->global->SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES,1); ?>
 						<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
 					</form>
 				</td>				
