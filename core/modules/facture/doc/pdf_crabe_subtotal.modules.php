@@ -359,12 +359,18 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 									'package' => array(),
 									'package_qty' => 0
 								);
+								
+								// Si on se trouvait déjà dans un package, on rajoute ce produit à la liste des produits
+								// du précédent package
+								if (count($TStack) > 1) {
+									$TStack[count($TStack) - 2]['package'][$object->lines[$i]->fk_product] += $object->lines[$i]->qty;
+								}
 							}
 						}
 					}
 					
 					if ($conf->global->SUBTOTAL_SHOW_QTY_ON_TITLES) {
-						if ($inPackage && $object->lines[$i]->fk_product > 0) {
+						if ($inPackage && $object->lines[$i]->product_type != 9 && $object->lines[$i]->fk_product > 0) {
 							$TStack[count($TStack) - 1]['package'][$object->lines[$i]->fk_product] += $object->lines[$i]->qty;
 						}
 					}
@@ -375,7 +381,6 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 						}
 						
 						if ($conf->global->SUBTOTAL_SHOW_QTY_ON_TITLES) {
-							
 							// Comparaison pour déterminer la quantité de package
 							$TProducts = array_keys($TStack[count($TStack) - 1]['package']);
 							$TProductsChilds = array_keys($TStack[count($TStack) - 1]['childs']);
