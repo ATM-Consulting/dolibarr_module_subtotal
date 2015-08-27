@@ -387,6 +387,12 @@ class pdf_azur_subtotal extends ModelePDFPropales
 									'package' => array(),
 									'package_qty' => 0
 								);
+								
+								// Si on se trouvait déjà dans un package, on rajoute ce produit à la liste des produits
+								// du précédent package
+								if (count($TStack) > 1) {
+									$TStack[count($TStack) - 2]['package'][$object->lines[$i]->fk_product] += $object->lines[$i]->qty;
+								}
 							}
 						}
 					}
