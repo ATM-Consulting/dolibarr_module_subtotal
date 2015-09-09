@@ -754,6 +754,11 @@ class ActionsSubtotal
 		return 1;
 	}
 
+	/**
+	 * Permet de récupérer le titre lié au sous-total
+	 * 
+	 * @return string
+	 */
 	function getTitle(&$object, &$currentLine)
 	{
 		$res = '';
@@ -767,7 +772,6 @@ class ActionsSubtotal
 			if ($line->product_type == 9 && $line->special_code == $this->module_number && $line->qty == $qty_search) 
 			{
 				$res = ($line->label) ? $line->label : (($line->description) ? $line->description : $line->desc);
-				break;
 			}
 		}
 		
