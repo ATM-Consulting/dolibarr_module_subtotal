@@ -124,6 +124,22 @@ function showParameters() {
 			?></td>				
 		</tr>
 		
+		<tr class="pair">
+			<td>Activer l'utilisation avancé</td><td><?php
+			
+				if(empty($conf->global->SUBTOTAL_USE_NEW_FORMAT)) {
+					
+					 ?><a href="?action=save&TDivers[SUBTOTAL_USE_NEW_FORMAT]=1"><?php echo img_picto($langs->trans("Disabled"),'switch_off'); ?></a><?php
+					
+				}
+				else {
+					 ?><a href="?action=save&TDivers[SUBTOTAL_USE_NEW_FORMAT]=0"><?php echo img_picto($langs->trans("Activated"),'switch_on'); ?></a><?php
+					
+				}
+			
+			?></td>				
+		</tr>
+		
 	</table>
 	</form>
 	
@@ -146,7 +162,7 @@ function showParameters() {
 			</td>				
 		</tr>
 		
-		<tr>
+		<tr class="pair">
 			<td>Masquer les totaux</td>
 			<td style="text-align: right;">
 				<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
@@ -171,7 +187,7 @@ function showParameters() {
 				</td>				
 			</tr>
 			
-			<tr>
+			<tr class="pair">
 				<td>Masquer uniquement les prix pour les produits se trouvant dans un ensemble</td>
 				<td style="text-align: right;">
 					<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
@@ -188,21 +204,6 @@ function showParameters() {
 	<br /><br />
 	<?php
 }
-?>
-
-<table width="100%" class="noborder">
-	<tr class="liste_titre">
-		<td>A propos</td>
-		<td align="center">&nbsp;</td>
-	</tr>
-	<tr class="impair">
-		<td valign="top">Module développé par </td>
-		<td align="center">
-			<a href="http://www.atm-consulting.fr/" target="_blank">ATM Consulting</a>
-		</td>
-	</tr>
-</table>
-<?php
 
 // Put here content of your page
 // ...
