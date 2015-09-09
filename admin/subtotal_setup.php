@@ -125,7 +125,7 @@ function showParameters() {
 		</tr>
 		
 		<tr class="pair">
-			<td>Activer l'utilisation avancé</td><td><?php
+			<td>Activer l'utilisation avancée</td><td><?php
 			
 				if(empty($conf->global->SUBTOTAL_USE_NEW_FORMAT)) {
 					
