@@ -695,6 +695,9 @@ class ActionsSubtotal
 				}
 				
 				if($line->qty>90) {
+					
+					if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)	$label .= ' '.$this->getTitle($object, $line);
+					
 					$pageBefore = $pdf->getPage();
 					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 					$pageAfter = $pdf->getPage();	
@@ -751,6 +754,26 @@ class ActionsSubtotal
 		return 1;
 	}
 
+	function getTitle(&$object, &$currentLine)
+	{
+		$res = '';
+		
+		foreach ($object->lines as $line)
+		{
+			if ($line->id == $currentLine->id) break;
+			
+			$qty_search = 100 - $currentLine->qty;
+			
+			if ($line->product_type == 9 && $line->special_code == $this->module_number && $line->qty == $qty_search) 
+			{
+				$res = ($line->label) ? $line->label : (($line->description) ? $line->description : $line->desc);
+				break;
+			}
+		}
+		
+		return $res;
+	}
+	
 	/**
 	 * @param $parameters   array
 	 * @param $object       CommonObject
@@ -923,7 +946,8 @@ class ActionsSubtotal
 								 }
 								
 								 if (empty($line->label)) {
-								 	print  $line->description;
+								 	if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) print  $line->description.' '.$this->getTitle($object, $line);
+									else print  $line->description;
 								 } 
 								 else {
 								     
