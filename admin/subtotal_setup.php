@@ -25,9 +25,15 @@
  *		\remarks	Put here some comments
  */
 // Change this following line to use the correct relative path (../, ../../, etc)
-require '../config.php';
-// Change this following line to use the correct relative path from htdocs (do not remove DOL_DOCUMENT_ROOT)
-dol_include_once('/core/lib/admin.lib.php');
+// Dolibarr environment
+$res = @include("../../main.inc.php"); // From htdocs directory
+if (! $res) {
+    $res = @include("../../../main.inc.php"); // From "custom" directory
+}
+
+// Libraries
+require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
+require_once '../lib/subtotal.lib.php';
 
 $langs->load("subtotal@subtotal");
 
@@ -76,6 +82,16 @@ llxHeader('','Gestion de sous-total, à propos','');
 
 $linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToModuleList").'</a>';
 print_fiche_titre('Gestion de subtotal',$linkback,'setup');
+
+// Configuration header
+$head = subtotalAdminPrepareHead();
+dol_fiche_head(
+    $head,
+    'settings',
+    $langs->trans("Module104777Name"),
+    0,
+    "subtotal@subtotal"
+);
 
 showParameters();
 
