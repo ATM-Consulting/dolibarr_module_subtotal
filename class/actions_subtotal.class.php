@@ -899,7 +899,8 @@ class ActionsSubtotal
 								
 								if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
 								{
-									print img_picto('', 'subsubtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;color:#0075DE;">'.$line->qty.'</span>&nbsp;&nbsp;';
+									$qty_displayed = ($line->qty >=1 && $line->qty <= 9) ? $line->qty : 100 - $line->qty;
+									print img_picto('', 'subsubtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;color:#0075DE;">'.$qty_displayed.'</span>&nbsp;&nbsp;';
 								}
 								else
 								{
@@ -1070,16 +1071,6 @@ class ActionsSubtotal
 
 					<?php if ($num > 1 && empty($conf->browser->phone)) { ?>
 					<td align="center" class="tdlineupdown">
-						<?php if ($i > 0 && ($object->statut == 0  && $user->rights->{$object->element}->creer)) { ?>
-						<a class="lineupdown" href="<?php echo $_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&amp;action=up&amp;rowid='.$line->id ?>">
-						<?php echo img_up(); ?>
-						</a>
-						<?php } ?>
-						<?php if ($i < $num-1 && ($object->statut == 0  && $user->rights->{$object->element}->creer)) { ?>
-						<a class="lineupdown" style="display:block;" href="<?php echo '?'.$idvar.'='.$object->id.'&amp;action=down&amp;rowid='.$line->id ?>">
-						<?php echo img_down(); ?>
-						</a>
-						<?php } ?>
 					</td>
 				    <?php } else { ?>
 				    <td align="center"<?php echo ((empty($conf->browser->phone) && ($object->statut == 0  && $user->rights->{$object->element}->creer))?' class="tdlineupdown"':''); ?>></td>
