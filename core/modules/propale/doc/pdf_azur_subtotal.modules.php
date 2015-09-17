@@ -571,7 +571,7 @@ class pdf_azur_subtotal extends ModelePDFPropales
 					if ($object->lines[$i]->remise_percent)
 					{
 						$pdf->SetXY($this->posxdiscount-2, $curY);
-						$remise_percent = pdf_getlineremisepercent($object, $i, $outputlangs, $hidedetails);
+						$remise_percent = pdf_getlineremisepercent($object, $i, $outputlangs, 0);
 						$pdf->MultiCell($this->postotalht-$this->posxdiscount+2, 3, $remise_percent, 0, 'R');
 					}
 
