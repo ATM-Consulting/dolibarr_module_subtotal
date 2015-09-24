@@ -524,7 +524,7 @@ class ActionsSubtotal
 	 * @param $h            float               height
 	 */
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
-		global $conf;
+		/*global $conf;
 		
 		$pdf->SetXY ($posx, $posy);
 		
@@ -556,7 +556,7 @@ class ActionsSubtotal
 			
 			$pdf->SetXY($pdf->postotalht, $posy);
 			$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($line->total), 0, 'R', 0);
-		}
+		}*/
 	}
 
 	/**
@@ -615,6 +615,39 @@ class ActionsSubtotal
 	}
 	
 	function pdf_getlinetotalexcltax($parameters=array(), &$object, &$action='') {
+		global $conf;
+		
+		$pdf->SetXY ($posx, $posy);
+		
+		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
+		
+		$hidePriceOnSubtotalLines = (int) isset($_REQUEST['hide_price_on_subtotal_lines']);
+				
+		if($line->qty==99)
+			$pdf->SetFillColor(220,220,220);
+		elseif ($line->qty==98)
+			$pdf->SetFillColor(230,230,230);
+		else
+			$pdf->SetFillColor(240,240,240);
+		
+		$pdf->MultiCell(200-$posx, $h, '', 0, '', 1);	
+				
+		$pdf->SetFont('', 'B', 9);
+
+		$pdf->SetXY ($posx, $posy);
+		$pdf->MultiCell($w, $h, $label." ", 0, 'R');
+		
+		if (!$hidePriceOnSubtotalLines) {
+			if($line->total == 0) {
+				$total = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
+			
+				$line->total_ht = $total;
+				$line->total = $total;
+			}
+			
+			$pdf->SetXY($pdf->postotalht, $posy);
+			$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($line->total), 0, 'R', 0);
+		}
 		
 		$this->resprints = ' ';
 	}
