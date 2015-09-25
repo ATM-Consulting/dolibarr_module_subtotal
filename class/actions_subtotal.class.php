@@ -906,6 +906,7 @@ class ActionsSubtotal
 					if($conf->margin->enabled) $colspan++;
 					if($conf->global->DISPLAY_MARGIN_RATES) $colspan++;
 					if($conf->global->DISPLAY_MARK_RATES) $colspan++;
+					if($object->element == 'facture' && $conf->global->INVOICE_USE_SITUATION && $object->type == Facture::TYPE_SITUATION) $colspan++;
 					
 					/* Titre */
 					//var_dump($line);
