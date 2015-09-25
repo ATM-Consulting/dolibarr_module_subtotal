@@ -8,8 +8,9 @@ class ActionsSubtotal
 	 * @param      $hookmanager HookManager     current hook manager
 	 * @return     void
 	 */
-     public $module_number = 104777;
-
+    
+    var $module_number = 104777;
+    
     function formObjectOptions($parameters, &$object, &$action, $hookmanager) 
     {  
       	global $langs,$db,$user, $conf;
@@ -49,8 +50,8 @@ class ActionsSubtotal
 						$title = $langs->trans('SubTotal');
 						$qty = $level ? 100-$level : 99;
 					}
-					
-	    			$this->addSubTotalLine($object, $title, $qty);
+					dol_include_once('/subtotal/class/subtotal.class.php');
+	    			TSubtotal::addSubTotalLine($object, $title, $qty);
 				}
 				else if($action==='ask_deleteallline') {
 						$form=new Form($db);
@@ -831,7 +832,7 @@ class ActionsSubtotal
 		$i = &$parameters['i'];
 
 		$contexts = explode(':',$parameters['context']);
-	
+
 		if($line->special_code!=$this->module_number) {
 			null;
 		}	
@@ -1125,34 +1126,5 @@ class ActionsSubtotal
 
 	}
 
-	function addSubTotalLine(&$object, $label, $qty) {
-		if( (float)DOL_VERSION <= 3.4 ) {
-			/**
-			 * @var $object Facture
-			 */
-			if($object->element=='facture') $object->addline($object->id, $label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
-			/**
-			 * @var $object Propal
-			 */
-			else if($object->element=='propal') $object->addline($object->id,$label, 0,$qty,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
-			/**
-			 * @var $object Commande
-			 */
-			else if($object->element=='commande') $object->addline($object->id,$label, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
-		}
-		else {
-			/**
-			 * @var $object Facture
-			 */
-			if($object->element=='facture') $object->addline($label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
-			/**
-			 * @var $object Propal
-			 */
-			else if($object->element=='propal') $object->addline($label, 0,$qty,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
-			/**
-			 * @var $object Commande
-			 */
-			else if($object->element=='commande') $object->addline($label, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
-		}
-	}
+	
 }
