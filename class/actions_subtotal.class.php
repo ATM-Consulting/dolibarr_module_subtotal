@@ -609,6 +609,43 @@ class ActionsSubtotal
 		
 	}
 
+	function pdf_getlineqty($parameters=array(), &$object, &$action='') {
+		
+		$this->resprints = ' ';
+	}
+	
+	function pdf_getlinetotalexcltax($parameters=array(), &$object, &$action='') {
+		
+		
+		$this->resprints = ' ';
+	}
+	
+	function pdf_getlinetotalwithtax($parameters=array(), &$object, &$action='') {
+		
+		$this->resprints = ' ';
+	}
+	
+	function pdf_getlineunit($parameters=array(), &$object, &$action='') {
+		
+		$this->resprints = ' ';
+	}
+	
+	function pdf_getlineupexcltax($parameters=array(), &$object, &$action='') {
+		
+		$this->resprints = ' ';
+	}
+	
+	function pdf_getlineupwithtax($parameters=array(), &$object, &$action='') {
+		
+		$this->resprints = ' ';
+	}
+	
+	function pdf_getlinevatrate($parameters=array(), &$object, &$action='') {
+		
+		$this->resprints = ' ';
+	}
+		
+
 	function pdf_writelinedesc($parameters=array(), &$object, &$action='')
 	{
 		/**
