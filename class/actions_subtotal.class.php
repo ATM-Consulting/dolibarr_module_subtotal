@@ -8,8 +8,9 @@ class ActionsSubtotal
 	 * @param      $hookmanager HookManager     current hook manager
 	 * @return     void
 	 */
-     public $module_number = 104777;
-
+    
+    var $module_number = 104777;
+    
     function formObjectOptions($parameters, &$object, &$action, $hookmanager) 
     {  
       	global $langs,$db,$user, $conf;
@@ -49,8 +50,8 @@ class ActionsSubtotal
 						$title = $langs->trans('SubTotal');
 						$qty = $level ? 100-$level : 99;
 					}
-					
-	    			$this->addSubTotalLine($object, $title, $qty);
+					dol_include_once('/subtotal/class/subtotal.class.php');
+	    			TSubtotal::addSubTotalLine($object, $title, $qty);
 				}
 				else if($action==='ask_deleteallline') {
 						$form=new Form($db);
@@ -405,6 +406,14 @@ class ActionsSubtotal
 				
 	           	foreach($object->lines as &$line) {
 					if ($line->product_type == 9 && $line->special_code == $this->module_number) {
+					    
+                        if($line->qty>90) {
+                            $line->modsubtotal_total = 1;
+                        }
+                        else{
+                            $line->modsubtotal_title = 1;
+                        }
+                        
 						$line->total_ht = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
 					}
 	        	}
@@ -476,7 +485,7 @@ class ActionsSubtotal
 		
 	}
 
-	function getTotalLineFromObject(&$object, &$line, $use_leve=false) {
+	function getTotalLineFromObject(&$object, &$line, $use_level=false) {
 		
 		$rang = $line->rang;
 		$qty_line = $line->qty;
@@ -489,17 +498,7 @@ class ActionsSubtotal
 				//echo 'return!<br>';
 				return $total;
 			} 
-			else if($l->special_code==$this->module_number && (
-					($l->qty==1 && $qty_line==99) || 
-					($l->qty==2 && $qty_line==98) || 
-					($l->qty==3 && $qty_line==97) || 
-					($l->qty==4 && $qty_line==96) || 
-					($l->qty==5 && $qty_line==95) || 
-					($l->qty==6 && $qty_line==94) || 
-					($l->qty==7 && $qty_line==93) || 
-					($l->qty==8 && $qty_line==92) || 
-					($l->qty==9 && $qty_line==91) 
-				  )) 
+			else if($l->special_code==$this->module_number && $l->qty == 100 - $qty_line) 
 		  	{
 				$total = 0;
 			}
@@ -831,7 +830,7 @@ class ActionsSubtotal
 		$i = &$parameters['i'];
 
 		$contexts = explode(':',$parameters['context']);
-	
+
 		if($line->special_code!=$this->module_number) {
 			null;
 		}	
@@ -1126,34 +1125,5 @@ class ActionsSubtotal
 
 	}
 
-	function addSubTotalLine(&$object, $label, $qty) {
-		if( (float)DOL_VERSION <= 3.4 ) {
-			/**
-			 * @var $object Facture
-			 */
-			if($object->element=='facture') $object->addline($object->id, $label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
-			/**
-			 * @var $object Propal
-			 */
-			else if($object->element=='propal') $object->addline($object->id,$label, 0,$qty,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
-			/**
-			 * @var $object Commande
-			 */
-			else if($object->element=='commande') $object->addline($object->id,$label, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
-		}
-		else {
-			/**
-			 * @var $object Facture
-			 */
-			if($object->element=='facture') $object->addline($label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, $this->module_number);
-			/**
-			 * @var $object Propal
-			 */
-			else if($object->element=='propal') $object->addline($label, 0,$qty,0,0,0,0,0,'HT',0,0,9,-1, $this->module_number);
-			/**
-			 * @var $object Commande
-			 */
-			else if($object->element=='commande') $object->addline($label, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, $this->module_number);
-		}
-	}
+	
 }
