@@ -525,8 +525,6 @@ class ActionsSubtotal
 	 */
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		global $conf;
-
-		if (!empty($conf->global->INVOICE_USE_SITUATION)) $w -= 14;	
 		
 		$pdf->SetXY ($posx, $posy);
 		
@@ -575,8 +573,6 @@ class ActionsSubtotal
 	function pdf_add_title(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		
 		global $db,$conf;
-		
-		if (!empty($conf->global->INVOICE_USE_SITUATION)) $w -= 14;
 		
 		$pdf->SetXY ($posx, $posy);
 		
