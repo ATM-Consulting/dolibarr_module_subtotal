@@ -65,6 +65,7 @@ class ActionsSubtotal
 						print $formconfirm;
 				}
 
+				// New format is for 3.8
 				if ($conf->global->SUBTOTAL_USE_NEW_FORMAT) 
 				{
 					$this->printNewFormat($object, $conf, $langs, $idvar);
@@ -524,6 +525,8 @@ class ActionsSubtotal
 	 */
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		global $conf;
+
+		if (!empty($conf->global->INVOICE_USE_SITUATION)) $w -= 14;	
 		
 		$pdf->SetXY ($posx, $posy);
 		
@@ -573,9 +576,11 @@ class ActionsSubtotal
 		
 		global $db,$conf;
 		
+		if (!empty($conf->global->INVOICE_USE_SITUATION)) $w -= 14;
+		
 		$pdf->SetXY ($posx, $posy);
 		
-		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
+		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
 		if($hideInnerLines) {
 
 			if($line->qty==1)$pdf->SetFont('', 'BU', 9);
