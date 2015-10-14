@@ -645,6 +645,10 @@ class ActionsSubtotal
 		$this->resprints = ' ';
 	}
 		
+	function pdf_getlineprogress($parameters=array(), &$object, &$action='') {
+		
+		$this->resprints = ' ';
+	}
 
 	function pdf_writelinedesc($parameters=array(), &$object, &$action='')
 	{
