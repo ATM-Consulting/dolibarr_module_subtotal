@@ -526,8 +526,6 @@ class ActionsSubtotal
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		global $conf;
 		
-		$pdf->SetXY ($posx, $posy);
-		
 		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
 		
 		$hidePriceOnSubtotalLines = (int) isset($_REQUEST['hide_price_on_subtotal_lines']);
@@ -539,12 +537,16 @@ class ActionsSubtotal
 		else
 			$pdf->SetFillColor(240,240,240);
 		
-		$pdf->MultiCell(200-$posx, $h, '', 0, '', 1);	
-				
 		$pdf->SetFont('', 'B', 9);
 
-		$pdf->SetXY ($posx, $posy);
-		$pdf->MultiCell($w, $h, $label." ", 0, 'R');
+		$y1 = $pdf->GetY();
+		//Print label 
+		$pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'R',true);
+		$y2 = $pdf->GetY();
+		
+		//Print background
+		$pdf->SetXY($posx, $posy);
+		$pdf->MultiCell(200-$posx, $y2-$y1-2, '', 0, '', 1);
 		
 		if (!$hidePriceOnSubtotalLines) {
 			if($line->total == 0) {
