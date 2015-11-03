@@ -1119,7 +1119,7 @@ class ActionsSubtotal
 					<?php
 					
 					
-				
+			return 1;	
 			
 		}
 		
