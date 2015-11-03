@@ -1041,7 +1041,7 @@ class ActionsSubtotal
 								 } 
 								 else {
 								     
-                                    if (! empty($conf->global->PRODUIT_DESC_IN_FORM)) {
+                                    if (! empty($conf->global->PRODUIT_DESC_IN_FORM) && !empty($line->description)) {
                                         print $line->label.'<br><span style="font-weight:normal;">'.dol_htmlentitiesbr($line->description).'</span>';
                                     }
                                     else{
