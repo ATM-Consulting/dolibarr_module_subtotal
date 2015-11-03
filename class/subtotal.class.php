@@ -1,5 +1,6 @@
 <?php
 
+
 class TSubtotal {
 	
 	static $module_number = 104777;
@@ -10,6 +11,7 @@ class TSubtotal {
 			/**
 			 * @var $object Facture
 			 */
+
 			if($object->element=='facture') $res =  $object->addline($object->id, $label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, TSubtotal::$module_number);
 			/**
 			 * @var $object Propal
@@ -19,11 +21,13 @@ class TSubtotal {
 			 * @var $object Commande
 			 */
 			else if($object->element=='commande') $res =  $object->addline($object->id,$label, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, TSubtotal::$module_number);
+
 		}
 		else {
 			/**
 			 * @var $object Facture
 			 */
+
 			if($object->element=='facture') $res =  $object->addline($label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, TSubtotal::$module_number);
 			/**
 			 * @var $object Propal
@@ -36,6 +40,5 @@ class TSubtotal {
 		}
 	
 	}
-	
 	
 }

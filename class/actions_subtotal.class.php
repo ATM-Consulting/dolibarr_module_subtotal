@@ -65,6 +65,7 @@ class ActionsSubtotal
 						print $formconfirm;
 				}
 
+				// New format is for 3.8
 				if ($conf->global->SUBTOTAL_USE_NEW_FORMAT) 
 				{
 					$this->printNewFormat($object, $conf, $langs, $idvar);
@@ -406,6 +407,14 @@ class ActionsSubtotal
 				
 	           	foreach($object->lines as &$line) {
 					if ($line->product_type == 9 && $line->special_code == $this->module_number) {
+					    
+                        if($line->qty>90) {
+                            $line->modsubtotal_total = 1;
+                        }
+                        else{
+                            $line->modsubtotal_title = 1;
+                        }
+                        
 						$line->total_ht = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
 					}
 	        	}
@@ -477,7 +486,7 @@ class ActionsSubtotal
 		
 	}
 
-	function getTotalLineFromObject(&$object, &$line, $use_leve=false) {
+	function getTotalLineFromObject(&$object, &$line, $use_level=false) {
 		
 		$rang = $line->rang;
 		$qty_line = $line->qty;
@@ -490,17 +499,7 @@ class ActionsSubtotal
 				//echo 'return!<br>';
 				return $total;
 			} 
-			else if($l->special_code==$this->module_number && (
-					($l->qty==1 && $qty_line==99) || 
-					($l->qty==2 && $qty_line==98) || 
-					($l->qty==3 && $qty_line==97) || 
-					($l->qty==4 && $qty_line==96) || 
-					($l->qty==5 && $qty_line==95) || 
-					($l->qty==6 && $qty_line==94) || 
-					($l->qty==7 && $qty_line==93) || 
-					($l->qty==8 && $qty_line==92) || 
-					($l->qty==9 && $qty_line==91) 
-				  )) 
+			else if($l->special_code==$this->module_number && $l->qty == 100 - $qty_line) 
 		  	{
 				$total = 0;
 			}
@@ -527,8 +526,6 @@ class ActionsSubtotal
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		global $conf;
 		
-		$pdf->SetXY ($posx, $posy);
-		
 		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
 		
 		$hidePriceOnSubtotalLines = (int) isset($_REQUEST['hide_price_on_subtotal_lines']);
@@ -540,12 +537,16 @@ class ActionsSubtotal
 		else
 			$pdf->SetFillColor(240,240,240);
 		
-		$pdf->MultiCell(200-$posx, $h, '', 0, '', 1);	
-				
 		$pdf->SetFont('', 'B', 9);
 
-		$pdf->SetXY ($posx, $posy);
-		$pdf->MultiCell($w, $h, $label." ", 0, 'R');
+		$y1 = $pdf->GetY();
+		//Print label 
+		$pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'R',true);
+		$y2 = $pdf->GetY();
+		
+		//Print background
+		$pdf->SetXY($posx, $posy);
+		$pdf->MultiCell(200-$posx, $y2-$y1-2, '', 0, '', 1);
 		
 		if (!$hidePriceOnSubtotalLines) {
 			if($line->total == 0) {
@@ -577,7 +578,7 @@ class ActionsSubtotal
 		
 		$pdf->SetXY ($posx, $posy);
 		
-		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
+		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
 		if($hideInnerLines) {
 
 			if($line->qty==1)$pdf->SetFont('', 'BU', 9);
@@ -646,6 +647,10 @@ class ActionsSubtotal
 		$this->resprints = ' ';
 	}
 		
+	function pdf_getlineprogress($parameters=array(), &$object, &$action='') {
+		
+		$this->resprints = ' ';
+	}
 
 	function pdf_writelinedesc($parameters=array(), &$object, &$action='')
 	{
@@ -907,6 +912,7 @@ class ActionsSubtotal
 					if($conf->global->DISPLAY_MARGIN_RATES) $colspan++;
 					if($conf->global->DISPLAY_MARK_RATES) $colspan++;
 					if($object->element == 'facture' && $conf->global->INVOICE_USE_SITUATION && $object->type == Facture::TYPE_SITUATION) $colspan++;
+					if($conf->global->PRODUCT_USE_UNITS) $colspan++;
 					
 					/* Titre */
 					//var_dump($line);

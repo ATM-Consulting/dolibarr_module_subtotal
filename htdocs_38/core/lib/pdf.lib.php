@@ -1569,6 +1569,8 @@ function pdf_getlineremisepercent($object,$i,$outputlangs,$hidedetails=0)
  */
 function pdf_getlineprogress($object, $i, $outputlangs, $hidedetails = 0, $hookmanager = null)
 {
+	global $hookmanager;
+	
 	if ($object->lines[$i]->special_code != 3) {
 		if (is_object($hookmanager) && (($object->lines[$i]->product_type == 9 && !empty($object->lines[$i]->special_code)) || !empty($object->lines[$i]->fk_parent_line))) {
 			$special_code = $object->lines[$i]->special_code;
