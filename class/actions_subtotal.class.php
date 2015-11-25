@@ -1026,12 +1026,20 @@ class ActionsSubtotal
 								<?php
 								
 								if($line->qty<10) {
-									?>
-									<label>
-										<textarea name="line-description" id-line="<?php echo $line->id ?>" cols="70"
-										          rows="2"><?php echo $line->description ?></textarea>
-									</label>
-								<?php
+									// WYSIWYG editor
+									require_once DOL_DOCUMENT_ROOT . '/core/class/doleditor.class.php';
+									$nbrows = ROWS_2;
+									$cked_enabled = (!empty($conf->global->FCKEDITOR_ENABLE_DETAILS) ? $conf->global->FCKEDITOR_ENABLE_DETAILS : 0);
+									if (!empty($conf->global->MAIN_INPUT_DESC_HEIGHT)) {
+										$nbrows = $conf->global->MAIN_INPUT_DESC_HEIGHT;
+									}
+									$toolbarname = 'dolibarr_details';
+									if (!empty($conf->global->FCKEDITOR_ENABLE_DETAILS_FULL)) {
+										$toolbarname = 'dolibarr_notes';
+									}
+									$doleditor = new DolEditor('line-description', $line->description, '', 100, $toolbarname, '',
+										false, true, $cked_enabled, $nbrows, '98%');
+									$doleditor->Create();
 								}
 								
 							}
@@ -1101,12 +1109,15 @@ class ActionsSubtotal
 								<script type="text/javascript">
 									$(document).ready(function() {
 										$('input[name=saveEditlinetitle]').click(function () {
-											
 											$.post("<?php echo '?'.$idvar.'='.$object->id ?>",{
 													action:'savelinetitle'
 													,lineid:<?php echo $line->id ?>
 													,linetitle:$('input[name=line-title]').val()
-													,linedescription:$('textarea[name=line-description]').val()
+												<?php if ($cked_enabled) { ?>
+													,linedescription: CKEDITOR.instances['line-description'].getData()
+												<?php } else { ?>
+													, linedescription: $('textarea[name=line-description]').val()
+												<?php } ?>
 													,pagebreak:($('input[name=line-pagebreak]').is(':checked') ? 8 : 0)
 											}
 											,function() {
