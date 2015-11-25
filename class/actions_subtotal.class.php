@@ -407,7 +407,7 @@ class ActionsSubtotal
 	           	foreach($object->lines as &$line) {
 					if ($line->product_type == 9 && $line->special_code == $this->module_number) {
 					    
-                        if($line->qty>90) {
+                        if($line->qty>=90) {
                             $line->modsubtotal_total = 1;
                         }
                         else{
