@@ -408,7 +408,7 @@ class ActionsSubtotal
 	           	foreach($object->lines as &$line) {
 					if ($line->product_type == 9 && $line->special_code == $this->module_number) {
 					    
-                        if($line->qty>90) {
+                        if($line->qty>=90) {
                             $line->modsubtotal_total = 1;
                         }
                         else{
@@ -629,7 +629,9 @@ class ActionsSubtotal
 			
 			$this->resprints = ' ';
 			
-			return 1;
+			if((float)DOL_VERSION>=3.8) {
+				return 1;
+			}
 			
 		}
 		
@@ -641,7 +643,9 @@ class ActionsSubtotal
 			
 			$this->resprints = ' ';
 			
-			return 1;
+			if((float)DOL_VERSION>=3.8) {
+				return 1;
+			}
 			
 		}
 	}
@@ -651,7 +655,9 @@ class ActionsSubtotal
 			
 			$this->resprints = ' ';
 		
-			return 1;
+			if((float)DOL_VERSION>=3.8) {
+				return 1;
+			}
 		}
 	}
 	
@@ -659,7 +665,9 @@ class ActionsSubtotal
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 		
-			return 1;
+			if((float)DOL_VERSION>=3.8) {
+				return 1;
+			}
 		}
 	}
 	
@@ -667,28 +675,37 @@ class ActionsSubtotal
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 		
-			return 1;
+			if((float)DOL_VERSION>=3.8) {
+				return 1;
+			}
 		}
 	}
 	
 	function pdf_getlineupwithtax($parameters=array(), &$object, &$action='') {
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
-			return 1;
+			if((float)DOL_VERSION>=3.8) {
+				return 1;
+			}
 		}
 	}
 	
 	function pdf_getlinevatrate($parameters=array(), &$object, &$action='') {
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
-			return 1;
+			
+			if((float)DOL_VERSION>=3.8) {
+				return 1;
+			}
 		}
 	}
 		
 	function pdf_getlineprogress($parameters=array(), &$object, &$action='') {
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
-			return 1;
+			if((float)DOL_VERSION>=3.8) {
+				return 1;
+			}
 		}
 	}
 
