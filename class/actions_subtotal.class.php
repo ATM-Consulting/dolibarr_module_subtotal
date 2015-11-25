@@ -65,6 +65,7 @@ class ActionsSubtotal
 						print $formconfirm;
 				}
 
+				// New format is for 3.8
 				if ($conf->global->SUBTOTAL_USE_NEW_FORMAT) 
 				{
 					$this->printNewFormat($object, $conf, $langs, $idvar);
@@ -525,8 +526,6 @@ class ActionsSubtotal
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		global $conf;
 		
-		$pdf->SetXY ($posx, $posy);
-		
 		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
 		
 		$hidePriceOnSubtotalLines = (int) isset($_REQUEST['hide_price_on_subtotal_lines']);
@@ -538,12 +537,16 @@ class ActionsSubtotal
 		else
 			$pdf->SetFillColor(240,240,240);
 		
-		$pdf->MultiCell(200-$posx, $h, '', 0, '', 1);	
-				
 		$pdf->SetFont('', 'B', 9);
 
-		$pdf->SetXY ($posx, $posy);
-		$pdf->MultiCell($w, $h, $label." ", 0, 'R');
+		$y1 = $pdf->GetY();
+		//Print label 
+		$pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'R',true);
+		$y2 = $pdf->GetY();
+		
+		//Print background
+		$pdf->SetXY($posx, $posy);
+		$pdf->MultiCell(200-$posx, $y2-$y1-2, '', 0, '', 1);
 		
 		if (!$hidePriceOnSubtotalLines) {
 			if($line->total == 0) {
@@ -575,7 +578,7 @@ class ActionsSubtotal
 		
 		$pdf->SetXY ($posx, $posy);
 		
-		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
+		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
 		if($hideInnerLines) {
 
 			if($line->qty==1)$pdf->SetFont('', 'BU', 9);
@@ -608,42 +611,86 @@ class ActionsSubtotal
 		
 	}
 
+	function isModSubtotalLine(&$parameters, &$object) {
+		
+		$i = & $parameters['i'];
+		
+		if($object->lines[$i]->special_code == $this->module_number && $object->lines[$i]->product_type == 9) {
+			return true;
+		}
+		
+		return false;
+		
+	}
+
 	function pdf_getlineqty($parameters=array(), &$object, &$action='') {
 		
-		$this->resprints = ' ';
+		if($this->isModSubtotalLine($parameters,$object) ){
+			
+			$this->resprints = ' ';
+			
+			return 1;
+			
+		}
+		
 	}
 	
 	function pdf_getlinetotalexcltax($parameters=array(), &$object, &$action='') {
 		
-		
-		$this->resprints = ' ';
+		if($this->isModSubtotalLine($parameters,$object) ){
+			
+			$this->resprints = ' ';
+			
+			return 1;
+			
+		}
 	}
 	
 	function pdf_getlinetotalwithtax($parameters=array(), &$object, &$action='') {
+		if($this->isModSubtotalLine($parameters,$object) ){
+			
+			$this->resprints = ' ';
 		
-		$this->resprints = ' ';
+			return 1;
+		}
 	}
 	
 	function pdf_getlineunit($parameters=array(), &$object, &$action='') {
+		if($this->isModSubtotalLine($parameters,$object) ){
+			$this->resprints = ' ';
 		
-		$this->resprints = ' ';
+			return 1;
+		}
 	}
 	
 	function pdf_getlineupexcltax($parameters=array(), &$object, &$action='') {
+		if($this->isModSubtotalLine($parameters,$object) ){
+			$this->resprints = ' ';
 		
-		$this->resprints = ' ';
+			return 1;
+		}
 	}
 	
 	function pdf_getlineupwithtax($parameters=array(), &$object, &$action='') {
-		
-		$this->resprints = ' ';
+		if($this->isModSubtotalLine($parameters,$object) ){
+			$this->resprints = ' ';
+			return 1;
+		}
 	}
 	
 	function pdf_getlinevatrate($parameters=array(), &$object, &$action='') {
-		
-		$this->resprints = ' ';
+		if($this->isModSubtotalLine($parameters,$object) ){
+			$this->resprints = ' ';
+			return 1;
+		}
 	}
 		
+	function pdf_getlineprogress($parameters=array(), &$object, &$action='') {
+		if($this->isModSubtotalLine($parameters,$object) ){
+			$this->resprints = ' ';
+			return 1;
+		}
+	}
 
 	function pdf_writelinedesc($parameters=array(), &$object, &$action='')
 	{
@@ -659,7 +706,7 @@ class ActionsSubtotal
 		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
 		$hidedetails = (int)isset($_REQUEST['hidedetails']);	
 		
-		if($object->lines[$i]->special_code == $this->module_number) {
+		if($this->isModSubtotalLine($parameters,$object) ){
 		
 			if ($hideInnerLines) { // si c une ligne de titre
 		    	$fk_parent_line=0;
@@ -708,12 +755,11 @@ class ActionsSubtotal
 				
 				if($i>count($object->lines)) return 1;
 		    }
-		}
-	   
-	   if ($object->lines[$i]->product_type == 9) {
+		
+	 
 			
 			
-			if($object->lines[$i]->special_code == $this->module_number) {
+			
 				$line = &$object->lines[$i];
 				
 				if($line->info_bits>0) { // PAGE BREAK
@@ -771,9 +817,10 @@ class ActionsSubtotal
 					$posy = $pdf->GetY();
 				}
 //	if($line->rowid==47) exit;
-			}
 			
+			return 1;
 		}
+		/* TODO je desactive parce que je comprends pas PH Style, mais à test
 		else {
 			
 			if($hideInnerLines) {
@@ -784,10 +831,10 @@ class ActionsSubtotal
 				$pdf->writeHTMLCell($w, $h, $posx, $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1);
 			}
 			
-		}
+		}*/
 
 
-		return 1;
+		
 	}
 
 	/**
@@ -831,7 +878,7 @@ class ActionsSubtotal
 
 		$contexts = explode(':',$parameters['context']);
 
-		if($line->special_code!=$this->module_number) {
+		if($line->special_code!=$this->module_number || $line->product_type!=9) {
 			null;
 		}	
 		else if (in_array('invoicecard',$contexts) || in_array('propalcard',$contexts) || in_array('ordercard',$contexts)) 
@@ -905,6 +952,7 @@ class ActionsSubtotal
 					if($conf->global->DISPLAY_MARGIN_RATES) $colspan++;
 					if($conf->global->DISPLAY_MARK_RATES) $colspan++;
 					if($object->element == 'facture' && $conf->global->INVOICE_USE_SITUATION && $object->type == Facture::TYPE_SITUATION) $colspan++;
+					if($conf->global->PRODUCT_USE_UNITS) $colspan++;
 					
 					/* Titre */
 					//var_dump($line);
@@ -993,7 +1041,7 @@ class ActionsSubtotal
 								 } 
 								 else {
 								     
-                                    if (! empty($conf->global->PRODUIT_DESC_IN_FORM)) {
+                                    if (! empty($conf->global->PRODUIT_DESC_IN_FORM) && !empty($line->description)) {
                                         print $line->label.'<br><span style="font-weight:normal;">'.dol_htmlentitiesbr($line->description).'</span>';
                                     }
                                     else{
@@ -1117,7 +1165,7 @@ class ActionsSubtotal
 					<?php
 					
 					
-				
+			return 1;	
 			
 		}
 		
