@@ -539,14 +539,12 @@ class ActionsSubtotal
 		
 		$pdf->SetFont('', 'B', 9);
 
-		$y1 = $pdf->GetY();
-		//Print label 
 		$pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'R',true);
-		$y2 = $pdf->GetY();
 		
 		//Print background
+		$cell_height = $pdf->getStringHeight($w, $label);
 		$pdf->SetXY($posx, $posy);
-		$pdf->MultiCell(200-$posx, $y2-$y1-2, '', 0, '', 1);
+		$pdf->MultiCell(200-$posx, $cell_height, '', 0, '', 1);
 		
 		if (!$hidePriceOnSubtotalLines) {
 			if($line->total == 0) {
@@ -559,6 +557,9 @@ class ActionsSubtotal
 			$pdf->SetXY($pdf->postotalht, $posy);
 			$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($line->total), 0, 'R', 0);
 		}
+		
+		$posy = $posy + $cell_height;
+		$pdf->SetXY($posx, $posy); 
 	}
 
 	/**
@@ -742,7 +743,7 @@ class ActionsSubtotal
 							$line->total_ht = $total;
 							$line->total = $total;
 						} 
-						
+							
 					} 
 				
 					if ($hideInnerLines)
