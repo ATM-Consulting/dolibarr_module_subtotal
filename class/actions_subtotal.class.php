@@ -701,7 +701,7 @@ class ActionsSubtotal
 		}
 	}
 		
-	function pdf_getlineprogress($parameters=array(), &$object, &$action='') {
+	function pdf_getlineprogress($parameters=array(), &$object, &$action) {
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 			if((float)DOL_VERSION>=3.8) {
@@ -709,8 +709,8 @@ class ActionsSubtotal
 			}
 		}
 	}
-
-	function pdf_writelinedesc($parameters=array(), &$object, &$action='')
+	
+	function beforePDFCreation($parameters=array(), &$object, &$action)
 	{
 		/**
 		 * @var $pdf    TCPDF
@@ -721,10 +721,8 @@ class ActionsSubtotal
 			${$key} = $value;
 		}
 		
-		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);	
-		$hidedetails = (int)isset($_REQUEST['hidedetails']);	
-		
-		if($this->isModSubtotalLine($parameters,$object) ){
+		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
+		$hidedetails = (int)isset($_REQUEST['hidedetails']);
 		
 			if ($hideInnerLines) { // si c une ligne de titre
 		    	$fk_parent_line=0;
@@ -773,10 +771,23 @@ class ActionsSubtotal
 				
 				if($i>count($object->lines)) return 1;
 		    }
+	}
+
+	function pdf_writelinedesc($parameters=array(), &$object, &$action)
+	{
+		/**
+		 * @var $pdf    TCPDF
+		 */
+		global $pdf,$conf;
+
+		foreach($parameters as $key=>$value) {
+			${$key} = $value;
+		}
 		
-	 
-			
-			
+		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
+		$hidedetails = (int)isset($_REQUEST['hidedetails']);
+		
+		if($this->isModSubtotalLine($parameters,$object) ){			
 			
 				$line = &$object->lines[$i];
 				
