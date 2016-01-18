@@ -769,7 +769,11 @@ class ActionsSubtotal
 				
 				$object->lines = $TLines;
 				
-				if($i>count($object->lines)) return 1;
+				if($i>count($object->lines)) {
+					$this->resprints = '';
+					return 0;
+					
+				}
 		    }
 	}
 
