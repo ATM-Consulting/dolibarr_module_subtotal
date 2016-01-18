@@ -614,7 +614,13 @@ class ActionsSubtotal
 
 	function isModSubtotalLine(&$parameters, &$object) {
 		
-		$i = & $parameters['i'];
+		if(is_array($parameters)) {
+			$i = & $parameters['i'];	
+		}
+		else {
+			$i = (int)$parameters;
+		}
+		
 		
 		if($object->lines[$i]->special_code == $this->module_number && $object->lines[$i]->product_type == 9) {
 			return true;
@@ -710,6 +716,41 @@ class ActionsSubtotal
 		}
 	}
 	
+	function add_numerotation(&$object) {
+		global $conf;
+		
+		if(!empty($conf->global->SUBTOTAL_USE_NUMEROTATION)) {
+		
+			$TLevelTitre = array();
+		
+			foreach($object->lines as $k=>&$line) 
+			{
+					if($line->product_type==9 && $line->rowid>0 && $this->isModSubtotalLine($k, $object)) 
+					{
+							
+						if($line->qty>=90) $level = 100 - $line->qty;
+						else $level = $line->qty;
+						
+						if(!isset($TLevelTitre[$level]))$TLevelTitre[$level] = 1;
+						
+						if($line->label=='') {
+							$line->label = empty($line->description) ? $line->desc : $line->description;
+							$line->description=$line->desc='';
+						}
+						
+						$pre = '';
+						for($ii = 1; $ii<=$level; $ii++) $pre.=$TLevelTitre[$ii].'.';
+						$line->label = $pre.' '.$line->label;
+						
+						if($line->qty>=90) $TLevelTitre[$level]++;
+						
+					}
+			
+			}
+		}
+		
+	}
+	
 	function beforePDFCreation($parameters=array(), &$object, &$action)
 	{
 		/**
@@ -720,6 +761,10 @@ class ActionsSubtotal
 		foreach($parameters as $key=>$value) {
 			${$key} = $value;
 		}
+		
+		
+		$this->add_numerotation($object);	
+		
 		
 		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
 		$hidedetails = (int)isset($_REQUEST['hidedetails']);

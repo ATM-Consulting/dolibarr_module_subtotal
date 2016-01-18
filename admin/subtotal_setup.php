@@ -109,7 +109,7 @@ function showParameters() {
 		</tr>
 		
 		<tr>
-			<td>Activer la gestion des sous-sous-totaux</td><td><?php
+			<td><?php echo $langs->trans('SUBTOTAL_MANAGE_SUBSUBTOTAL') ?></td><td><?php
 			
 				if($conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL==0) {
 					
@@ -125,7 +125,7 @@ function showParameters() {
 		</tr>
 		
 		<tr class="pair">
-			<td>Activer l'utilisation avancée</td><td><?php
+			<td><?php echo $langs->trans('SUBTOTAL_USE_NEW_FORMAT') ?></td><td><?php
 			
 				if(empty($conf->global->SUBTOTAL_USE_NEW_FORMAT)) {
 					
@@ -139,7 +139,26 @@ function showParameters() {
 			
 			?></td>				
 		</tr>
-		
+<?php
+	if((float)DOL_VERSION>=3.8) {
+?>		<tr class="pair">
+			<td><?php echo $langs->trans('SUBTOTAL_USE_NUMEROTATION') ?></td><td><?php
+			
+				if(empty($conf->global->SUBTOTAL_USE_NUMEROTATION)) {
+					
+					 ?><a href="?action=save&TDivers[SUBTOTAL_USE_NUMEROTATION]=1"><?php echo img_picto($langs->trans("Disabled"),'switch_off'); ?></a><?php
+					
+				}
+				else {
+					 ?><a href="?action=save&TDivers[SUBTOTAL_USE_NUMEROTATION]=0"><?php echo img_picto($langs->trans("Activated"),'switch_on'); ?></a><?php
+					
+				}
+			
+			?></td>				
+		</tr>
+<?php
+}
+?>
 	</table>
 	</form>
 	
