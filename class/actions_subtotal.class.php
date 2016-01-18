@@ -751,6 +751,17 @@ class ActionsSubtotal
 		
 	}
 	
+	function setDocTVA(&$pdf, &$object) {
+		
+		$hidedetails = (int)isset($_REQUEST['hidedetails']);
+		
+		if(empty($hidedetails)) return false;
+		
+		// TODO can't add VAT to document without lines... :-/
+		
+		return true;
+	}
+	
 	function beforePDFCreation($parameters=array(), &$object, &$action)
 	{
 		/**
@@ -762,6 +773,7 @@ class ActionsSubtotal
 			${$key} = $value;
 		}
 		
+		$this->setDocTVA($pdf, $object);
 		
 		$this->add_numerotation($object);	
 		
@@ -772,6 +784,8 @@ class ActionsSubtotal
 			if ($hideInnerLines) { // si c une ligne de titre
 		    	$fk_parent_line=0;
 				$TLines =array();
+			
+				$original_count=count($object->lines);
 			
 				foreach($object->lines as $k=>&$line) 
 				{
@@ -813,11 +827,10 @@ class ActionsSubtotal
 				}
 				
 				$object->lines = $TLines;
-				
+				//var_dump($original_count,$i,count($object->lines));
 				if($i>count($object->lines)) {
 					$this->resprints = '';
 					return 0;
-					
 				}
 		    }
 	}
