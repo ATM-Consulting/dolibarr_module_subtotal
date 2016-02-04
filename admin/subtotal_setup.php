@@ -224,6 +224,8 @@ function showParameters() {
 	<?php
 }
 
+dol_fiche_end();
+
 // Put here content of your page
 // ...
 
