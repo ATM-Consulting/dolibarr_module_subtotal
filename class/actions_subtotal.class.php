@@ -1243,7 +1243,7 @@ class ActionsSubtotal
 									
 									
 									if($line->qty<10) {
-										
+// TODO: it seems not working with old milestones lines (want to delete all lines of the document										
 									?><a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id ?>">
 											<?php echo img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal') ?>		
 										</a><?php								
