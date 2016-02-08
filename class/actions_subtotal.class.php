@@ -314,7 +314,8 @@ class ActionsSubtotal
 					 = $substitutionarray['line_price_vat'] 
 					 = $substitutionarray['line_price_ttc']
 					 = $substitutionarray['line_vatrate']
-					 = $substitutionarray['line_qty'] 
+					 = $substitutionarray['line_qty']
+					 = $substitutionarray['line_up'] 
 					 = '';
 				
 				if($line->qty>90) {
