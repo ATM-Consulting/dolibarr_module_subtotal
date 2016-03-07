@@ -298,7 +298,7 @@ class ActionsSubtotal
         return 0;
     }
 	
-	function ODTSubstitutionLine($parameters, &$object, $action, $hookmanager) {
+	function ODTSubstitutionLine(&$parameters, &$object, $action, $hookmanager) {
 		global $conf;
 		
 		if($action === 'builddoc') {
@@ -308,7 +308,7 @@ class ActionsSubtotal
 			$substitutionarray = &$parameters['substitutionarray'];
 			
 			if($line->product_type == 9 && $line->special_code == $this->module_number) {
-				$substitutionarray['line_modsubtotal'] = true;	
+				$substitutionarray['line_modsubtotal'] = 1;	
 				
 				$substitutionarray['line_price_ht']
 					 = $substitutionarray['line_price_vat'] 
@@ -321,7 +321,10 @@ class ActionsSubtotal
 				if($line->qty>90) {
 					$substitutionarray['line_modsubtotal_total'] = true;
 					
-					$substitutionarray['line_price_ht'] = $substitutionarray['line_price_ttc'] = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
+					list($total, $total_tva, $total_ttc) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
+					$substitutionarray['line_price_ht'] = $total;
+					$substitutionarray['line_price_vat'] = $total_tva;
+					$substitutionarray['line_price_ttc'] = $total_ttc;
 				} else {
 					$substitutionarray['line_modsubtotal_title'] = true;
 				}
@@ -330,7 +333,7 @@ class ActionsSubtotal
 			}	
 			else{
 				$substitutionarray['line_not_modsubtotal'] = true;
-				$substitutionarray['line_modsubtotal'] = false;
+				$substitutionarray['line_modsubtotal'] = 0;
 			}
 			
 		}
@@ -487,30 +490,37 @@ class ActionsSubtotal
 		
 	}
 
-	function getTotalLineFromObject(&$object, &$line, $use_level=false) {
+	function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=0) {
 		
 		$rang = $line->rang;
 		$qty_line = $line->qty;
 		
 		$total = 0;
+		$total_tva = 0;
+		$total_ttc = 0;
 
 		foreach($object->lines as $l) {
 			//print $l->rang.'>='.$rang.' '.$total.'<br/>';
 			if($l->rang>=$rang) {
 				//echo 'return!<br>';
-				return $total;
+				if (!$return_all) return $total;
+				else return array($total, $total_tva, $total_ttc);
 			} 
 			else if($l->special_code==$this->module_number && $l->qty == 100 - $qty_line) 
 		  	{
 				$total = 0;
+				$total_tva = 0;
+				$total_ttc = 0;
 			}
 			elseif($l->product_type!=9) {
 				$total += $l->total_ht;
+				$total_tva += $l->total_tva;
+				$total_ttc += $l->total_ttc;
 			}
 			
 		}
-		
-		return $total;
+		if (!$return_all) return $total;
+		else return array($total, $total_tva, $total_ttc);
 	}
 
 	/**
@@ -549,10 +559,12 @@ class ActionsSubtotal
 		
 		if (!$hidePriceOnSubtotalLines) {
 			if($line->total == 0) {
-				$total = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
+				list($total, $total_tva, $total_ttc) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
 			
 				$line->total_ht = $total;
 				$line->total = $total;
+				$line->total_tva = $total_tva;
+				$line->total_ttc = $total_ttc;
 			}
 			
 			$pdf->SetXY($pdf->postotalht, $posy);
