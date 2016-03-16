@@ -49,7 +49,7 @@ if($action=='save') {
 	
 	foreach($_REQUEST['TDivers'] as $name=>$param) {
 		
-		dolibarr_set_const($db, $name, $param);
+		dolibarr_set_const($db, $name, $param,'chaine', 0, '', $conf->entity);
 		
 	}
 	
