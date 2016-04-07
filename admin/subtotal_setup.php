@@ -96,72 +96,70 @@ dol_fiche_head(
 showParameters();
 
 function showParameters() {
-	global $db,$conf,$langs;
+	global $db,$conf,$langs,$bc;
 	
 	$html=new Form($db);
 	
+	$var=false;
+	print '<table class="noborder" width="100%">';
+	print '<tr class="liste_titre">';
+	print '<td>'.$langs->trans("Parameters").'</td>'."\n";
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
 	
-	?><form action="<?php echo $_SERVER['PHP_SELF'] ?>" name="form1" method="POST" enctype="multipart/form-data">
-		<input type="hidden" name="action" value="save" />
-	<table width="100%" class="noborder" style="background-color: #fff;">
-		<tr class="liste_titre">
-			<td colspan="2">Paramètres</td>
-		</tr>
-		
-		<tr>
-			<td><?php echo $langs->trans('SUBTOTAL_MANAGE_SUBSUBTOTAL') ?></td><td><?php
-			
-				if($conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL==0) {
-					
-					 ?><a href="?action=save&TDivers[SUBTOTAL_MANAGE_SUBSUBTOTAL]=1"><?php echo img_picto($langs->trans("Disabled"),'switch_off'); ?></a><?php
-					
-				}
-				else {
-					 ?><a href="?action=save&TDivers[SUBTOTAL_MANAGE_SUBSUBTOTAL]=0"><?php echo img_picto($langs->trans("Activated"),'switch_on'); ?></a><?php
-					
-				}
-			
-			?></td>				
-		</tr>
-		
-		<tr class="pair">
-			<td><?php echo $langs->trans('SUBTOTAL_USE_NEW_FORMAT') ?></td><td><?php
-			
-				if(empty($conf->global->SUBTOTAL_USE_NEW_FORMAT)) {
-					
-					 ?><a href="?action=save&TDivers[SUBTOTAL_USE_NEW_FORMAT]=1"><?php echo img_picto($langs->trans("Disabled"),'switch_off'); ?></a><?php
-					
-				}
-				else {
-					 ?><a href="?action=save&TDivers[SUBTOTAL_USE_NEW_FORMAT]=0"><?php echo img_picto($langs->trans("Activated"),'switch_on'); ?></a><?php
-					
-				}
-			
-			?></td>				
-		</tr>
-<?php
-	if((float)DOL_VERSION>=3.8) {
-?>		<tr class="pair">
-			<td><?php echo $langs->trans('SUBTOTAL_USE_NUMEROTATION') ?></td><td><?php
-			
-				if(empty($conf->global->SUBTOTAL_USE_NUMEROTATION)) {
-					
-					 ?><a href="?action=save&TDivers[SUBTOTAL_USE_NUMEROTATION]=1"><?php echo img_picto($langs->trans("Disabled"),'switch_off'); ?></a><?php
-					
-				}
-				else {
-					 ?><a href="?action=save&TDivers[SUBTOTAL_USE_NUMEROTATION]=0"><?php echo img_picto($langs->trans("Activated"),'switch_on'); ?></a><?php
-					
-				}
-			
-			?></td>				
-		</tr>
-<?php
-}
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_MANAGE_SUBSUBTOTAL").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_MANAGE_SUBSUBTOTAL');
+	print '</td></tr>';
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_USE_NEW_FORMAT").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_USE_NEW_FORMAT');
+	print '</td></tr>';
+	
+	if((float)DOL_VERSION>=3.8)
+	{
+		$var=!$var;
+		print '<tr '.$bc[$var].'>';
+		print '<td>'.$langs->trans("SUBTOTAL_USE_NUMEROTATION").'</td>';
+		print '<td align="center" width="20">&nbsp;</td>';
+		print '<td align="center" width="300">';
+		print ajax_constantonoff('SUBTOTAL_USE_NUMEROTATION');
+		print '</td></tr>';	
+	}
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_ADD_BLOCK").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ALLOW_ADD_BLOCK');
+	print '</td></tr>';
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_EDIT_BLOCK").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ALLOW_EDIT_BLOCK');
+	print '</td></tr>';
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_REMOVE_BLOCK").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ALLOW_REMOVE_BLOCK');
+	print '</td></tr>';
+
+	print '</table>';
 ?>
-	</table>
-	</form>
-	
 	<br />
 		
 	<table width="100%" class="noborder" style="background-color: #fff;">

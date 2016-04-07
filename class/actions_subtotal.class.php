@@ -83,6 +83,8 @@ class ActionsSubtotal
      
 	function printNewFormat(&$object, &$conf, &$langs, $idvar)
 	{
+		if (empty($conf->global->SUBTOTAL_ALLOW_ADD_BLOCK)) return false;
+		
 		?>
 		 	<script type="text/javascript">
 				$(document).ready(function() {
@@ -147,6 +149,8 @@ class ActionsSubtotal
 	 
 	function printOldFormat(&$object, &$conf, &$langs, $idvar)
 	{
+		if (empty($conf->global->SUBTOTAL_ALLOW_ADD_BLOCK)) return false;
+		
 		?>
 			<script type="text/javascript">
 				$(document).ready(function() {
@@ -1176,7 +1180,7 @@ class ActionsSubtotal
 							/* Total */
 								$total_line = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
 								?>
-								<td align="right" style="font-weight:bold;" rel="subtotal_total"><?php echo price($total_line) ?></td>
+								<td class="nowrap" align="right" style="font-weight:bold;" rel="subtotal_total"><?php echo price($total_line) ?></td>
 								<?php
 								
 							}
@@ -1224,7 +1228,7 @@ class ActionsSubtotal
 							}
 							else{
 								
-								if ($object->statut == 0  && $user->rights->{$object->element}->creer) {
+								if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK)) {
 								
 								?>
 									<a href="<?php echo '?'.$idvar.'='.$object->id.'&action=editlinetitle&lineid='.$line->id ?>">
@@ -1245,7 +1249,7 @@ class ActionsSubtotal
 								<?php
 							}
 							else{
-								if ($object->statut == 0  && $user->rights->{$object->element}->creer) {
+								if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK)) {
 								
 									?>
 										<a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id ?>">
