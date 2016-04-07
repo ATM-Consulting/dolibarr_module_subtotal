@@ -19,3 +19,6 @@ SubtotalLabel=<b>Sous-total : </b>
 SUBTOTAL_MANAGE_SUBSUBTOTAL=Activer la gestion des sous-sous-totaux
 SUBTOTAL_USE_NEW_FORMAT=Activer l'utilisation avancée
 SUBTOTAL_USE_NUMEROTATION=Activer la numérotation automatique sur le PDF
+SUBTOTAL_ALLOW_ADD_BLOCK=Autoriser l'ajout d'un titre et sous-total
+SUBTOTAL_ALLOW_EDIT_BLOCK=Autoriser l'edition d'un titre ou sous-total
+SUBTOTAL_ALLOW_REMOVE_BLOCK=Autoriser la suppression d'un titre ou sous-total
