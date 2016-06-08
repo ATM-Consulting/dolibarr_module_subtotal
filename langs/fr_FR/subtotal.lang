@@ -22,3 +22,4 @@ SUBTOTAL_USE_NUMEROTATION=Activer la numérotation automatique sur le PDF
 SUBTOTAL_ALLOW_ADD_BLOCK=Autoriser l'ajout d'un titre et sous-total
 SUBTOTAL_ALLOW_EDIT_BLOCK=Autoriser l'edition d'un titre ou sous-total
 SUBTOTAL_ALLOW_REMOVE_BLOCK=Autoriser la suppression d'un titre ou sous-total
+SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE=Permettre l'ajout d'une ligne libre et/ou produit directement sous un titre

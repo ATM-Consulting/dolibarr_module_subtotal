@@ -65,6 +65,11 @@ class ActionsSubtotal
 						print $formconfirm;
 				}
 
+				if (!empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE))
+				{
+					$this->showSelectTitleToAdd($object);
+				}
+
 				// New format is for 3.8
 				if ($conf->global->SUBTOTAL_USE_NEW_FORMAT) 
 				{
@@ -247,6 +252,34 @@ class ActionsSubtotal
 		<?php
 	}
 	 
+	 
+	function showSelectTitleToAdd(&$object)
+	{
+		dol_include_once('/subtotal/class/subtotal.class.php');
+		$TTitle = TSubtotal::getAllTitleFromDocument($object);
+		
+		?>
+		<script type="text/javascript">
+			$(function() {
+				var add_button = $("#addline");
+				
+				if (add_button.length > 0)
+				{
+					var select_title = $("<select id='under_title' name='under_title'></select>");
+					select_title.append($("<option value='-1'></option>"));
+					
+					<?php foreach ($TTitle as &$line) { ?>
+						select_title.append($("<option value='<?php echo $line->rang; ?>'><?php echo !empty($line->desc) ? $line->desc : $line->label; ?></option>"));
+					<?php } ?>
+					
+					add_button.before(select_title);
+				}
+			});
+		</script>
+		<?php
+	}
+	
+	
 	function formBuilddocOptions($parameters) {
 	/* Réponse besoin client */		
 			
