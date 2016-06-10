@@ -121,7 +121,7 @@ class Interfacesubtotaltrigger
         if (!empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) && in_array($action, array('LINEPROPAL_INSERT', 'LINEORDER_INSERT', 'LINEBILL_INSERT')))
 		{
 			
-			$rang = GETPOST('under_title', 'int');
+			$rang = GETPOST('under_title', 'int'); // Rang du titre
 			if ($rang > 0)
 			{
 				switch ($action) {
@@ -142,21 +142,17 @@ class Interfacesubtotaltrigger
 						break;
 				}
 				
-				// UPDATE Rang
-				dol_include_once('/core/class/genericobject.class.php');
-				$row=new GenericObject($this->db);
-				$row->table_element_line = $parent->table_element_line;
-				$row->fk_element = $parent->fk_element;
-				$row->id = $parent->id;
-				
 				foreach ($parent->lines as &$line)
 				{
+					// Si (ma ligne courrante n'est pas celle que je viens d'ajouter) et que (le rang courrant est supérieure au rang du titre)
 					if ($object->id != $line->id && $line->rang > $rang)
 					{
-						$row->updateRangOfLine($line->id, $line->rang+1);
+						// Update du rang de toutes les lignes suivant mon titre
+						$parent->updateRangOfLine($line->id, $line->rang+1);
 					}
 				}
 				
+				// Update du rang de la ligne fraichement ajouté pour la déplacer sous mon titre
 				$parent->updateRangOfLine($object->id, $rang+1);
 			}
 			
