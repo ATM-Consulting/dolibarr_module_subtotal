@@ -1293,7 +1293,7 @@ class ActionsSubtotal
 									if($line->qty<10) {
 										
 									?><a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id ?>">
-											<?php echo img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal') ?>		
+											<?php if ((float) DOL_VERSION >= 3.8) echo img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal'); else echo img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal'); ?>		
 										</a><?php								
 									}
 									
