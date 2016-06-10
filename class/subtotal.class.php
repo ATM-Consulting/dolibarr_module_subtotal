@@ -40,5 +40,22 @@ class TSubtotal {
 		}
 	
 	}
+
+	public static function getAllTitleFromDocument(&$object)
+	{
+		$TRes = array();
+		if (!empty($object->lines))
+		{
+			foreach ($object->lines as $k => &$line)
+			{
+				if ($line->product_type == 9 && $line->qty < 10)
+				{
+					$TRes[] = $line;
+				}
+			}
+		}
+		
+		return $TRes;
+	}
 	
 }

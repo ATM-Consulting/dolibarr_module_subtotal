@@ -116,6 +116,51 @@ class Interfacesubtotaltrigger
         // Put here code you want to execute when a Dolibarr business events occurs.
         // Data and type of action are stored into $object and $action
         // Users
+        
+        
+        if (!empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) && in_array($action, array('LINEPROPAL_INSERT', 'LINEORDER_INSERT', 'LINEBILL_INSERT')))
+		{
+			
+			$rang = GETPOST('under_title', 'int'); // Rang du titre
+			if ($rang > 0)
+			{
+				switch ($action) {
+					case 'LINEPROPAL_INSERT':
+						$parent = new Propal($this->db);
+						$parent->fetch($object->fk_propal);
+						break;
+					case 'LINEORDER_INSERT':
+						$parent = new Commande($this->db);
+						$parent->fetch($object->fk_commande);
+						break;
+					case 'LINEBILL_INSERT':
+						$parent = new Facture($this->db);
+						$parent->fetch($object->fk_facture);
+						break;
+					default:
+						$parent = $object;
+						break;
+				}
+				
+				foreach ($parent->lines as &$line)
+				{
+					// Si (ma ligne courrante n'est pas celle que je viens d'ajouter) et que (le rang courrant est supérieure au rang du titre)
+					if ($object->id != $line->id && $line->rang > $rang)
+					{
+						// Update du rang de toutes les lignes suivant mon titre
+						$parent->updateRangOfLine($line->id, $line->rang+1);
+					}
+				}
+				
+				// Update du rang de la ligne fraichement ajouté pour la déplacer sous mon titre
+				$parent->updateRangOfLine($object->id, $rang+1);
+			}
+			
+		}
+        
+        
+        
+        
         if ($action == 'USER_LOGIN') {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
