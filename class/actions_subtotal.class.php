@@ -258,6 +258,7 @@ class ActionsSubtotal
 		global $langs;
 		
 		dol_include_once('/subtotal/class/subtotal.class.php');
+		dol_include_once('/subtotal/lib/subtotal.lib.php');
 		$TTitle = TSubtotal::getAllTitleFromDocument($object);
 		
 		?>
@@ -268,12 +269,7 @@ class ActionsSubtotal
 				if (add_button.length > 0)
 				{
 					add_button.closest('tr').prev('tr.liste_titre').children('td:last').addClass('center').text("<?php echo $langs->trans('subtotal_title_to_add_under_title'); ?>");
-					var select_title = $("<select id='under_title' name='under_title' class='maxwidth200'></select>");
-					select_title.append($("<option value='-1'></option>"));
-					
-					<?php foreach ($TTitle as &$line) { ?>
-						select_title.append($("<option value='<?php echo $line->rang; ?>'><?php echo !empty($line->desc) ? $line->desc : $line->label; ?></option>"));
-					<?php } ?>
+					var select_title = $(<?php echo json_encode(getHtmlSelectTitle($object)); ?>);
 					
 					add_button.before(select_title);
 				}
