@@ -46,3 +46,17 @@ function subtotalAdminPrepareHead()
     return $head;
 }
 
+function getHtmlSelectTitle(&$object)
+{
+	dol_include_once('/subtotal/class/subtotal.class.php');
+	$TTitle = TSubtotal::getAllTitleFromDocument($object);
+	$html = '<select name="under_title" class="under_title maxwidth200"><option value="-1"></option>';
+	
+	foreach ($TTitle as &$line)
+	{
+		$html .= '<option value="'.$line->rang.'">'.(!empty($line->desc) ? $line->desc : $line->label).'</option>';
+	}
+	
+	$html .= '</select>';
+	return $html;
+}
