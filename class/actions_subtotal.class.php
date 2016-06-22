@@ -591,6 +591,8 @@ class ActionsSubtotal
 
 		$pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'R',true);
 		
+		//$pageAfter = $pdf->getPage();
+		
 		//Print background
 		$cell_height = $pdf->getStringHeight($w, $label);
 		$pdf->SetXY($posx, $posy);
@@ -607,13 +609,14 @@ class ActionsSubtotal
 			}
 			
 			$pdf->SetXY($pdf->postotalht, $posy);
+			$pdf->SetAutoPageBreak( $pageBreakOriginalValue );
 			$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($line->total), 0, 'R', 0);
 		}
 		
 		$posy = $posy + $cell_height;
 		$pdf->SetXY($posx, $posy); 
+			
 		
-		$pdf->SetAutoPageBreak( $pageBreakOriginalValue );
 	}
 
 	/**
