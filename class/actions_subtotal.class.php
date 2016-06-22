@@ -576,6 +576,9 @@ class ActionsSubtotal
 		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
 		
 		$hidePriceOnSubtotalLines = (int) isset($_REQUEST['hide_price_on_subtotal_lines']);
+		
+		$pageBreakOriginalValue = $pdf->AcceptPageBreak();
+		$pdf->SetAutoPageBreak( false );
 				
 		if($line->qty==99)
 			$pdf->SetFillColor(220,220,220);
@@ -609,6 +612,8 @@ class ActionsSubtotal
 		
 		$posy = $posy + $cell_height;
 		$pdf->SetXY($posx, $posy); 
+		
+		$pdf->SetAutoPageBreak( $pageBreakOriginalValue );
 	}
 
 	/**
