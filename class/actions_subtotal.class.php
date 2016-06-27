@@ -578,11 +578,14 @@ class ActionsSubtotal
 		$hidePriceOnSubtotalLines = (int) isset($_REQUEST['hide_price_on_subtotal_lines']);
 		
 		$pageBreakOriginalValue = $pdf->AcceptPageBreak();
-		$pdf->SetAutoPageBreak( false );
 		$sweetsThief = function ($pdf) {
-    		return $pdf->bMargin ;
+	    		return $pdf->bMargin ;
 		};
-		$bMargin = Closure::bind($sweetsThief, null, $pdf);
+		$sweetsThief = Closure::bind($sweetsThief, null, $pdf);
+
+		$bMargin  = $sweetsThief($pdf);
+
+		$pdf->SetAutoPageBreak( false );
 			
 		if($line->qty==99)
 			$pdf->SetFillColor(220,220,220);
@@ -594,8 +597,8 @@ class ActionsSubtotal
 		$pdf->SetFont('', 'B', 9);
 
 		$pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'R',true);
-		
-		//$pageAfter = $pdf->getPage();
+//		var_dump($bMargin);
+		$pageAfter = $pdf->getPage();
 		
 		//Print background
 		$cell_height = $pdf->getStringHeight($w, $label);
