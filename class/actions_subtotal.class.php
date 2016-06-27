@@ -579,7 +579,11 @@ class ActionsSubtotal
 		
 		$pageBreakOriginalValue = $pdf->AcceptPageBreak();
 		$pdf->SetAutoPageBreak( false );
-				
+		$sweetsThief = function ($pdf) {
+    		return $pdf->bMargin ;
+		};
+		$bMargin = Closure::bind($sweetsThief, null, $pdf);
+			
 		if($line->qty==99)
 			$pdf->SetFillColor(220,220,220);
 		elseif ($line->qty==98)
@@ -609,7 +613,7 @@ class ActionsSubtotal
 			}
 			
 			$pdf->SetXY($pdf->postotalht, $posy);
-			$pdf->SetAutoPageBreak( $pageBreakOriginalValue );
+			$pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
 			$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($line->total), 0, 'R', 0);
 		}
 		
