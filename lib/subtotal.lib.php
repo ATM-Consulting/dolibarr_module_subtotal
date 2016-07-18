@@ -50,7 +50,7 @@ function getHtmlSelectTitle(&$object)
 {
 	dol_include_once('/subtotal/class/subtotal.class.php');
 	$TTitle = TSubtotal::getAllTitleFromDocument($object);
-	$html = '<select name="under_title" class="under_title maxwidth200"><option value="-1"></option>';
+	$html = '<select onChange="$(\'select[name=under_title]\').val(this.value);" name="under_title" class="under_title maxwidth200"><option value="-1"></option>';
 	
 	foreach ($TTitle as &$line)
 	{
