@@ -659,14 +659,15 @@ class ActionsSubtotal
 		
 		$pdf->MultiCell($w, $h, $label, 0, 'L');
 		
-		if($description && !$hidedesc) {
+		// there might be description from milestone title lines
+		//if($description && !$hidedesc) {
 			$posy = $pdf->GetY();
 			
 			$pdf->SetFont('', '', 8);
 			
 			$pdf->writeHTMLCell($w, $h, $posx, $posy, $description, 0, 1, false, true, 'J',true);
 
-		}
+		//}
 	}
 
 	function pdf_writelinedesc_ref($parameters=array(), &$object, &$action='') {
@@ -1232,9 +1233,9 @@ class ActionsSubtotal
 								
 							}
 							 else {
-							 	
+							 	// lines from milestones had subtotal on title lines
 								?>
-								<td>&nbsp;</td>
+								<td align="right" style="font-weight:bold;" rel="subtotal_total"><?php if ($line->total_ht > 0) echo price($line->total_ht) ?></td>
 								<?php
 							 }	
 						?>
@@ -1306,7 +1307,7 @@ class ActionsSubtotal
 									
 									
 									if($line->qty<10) {
-										
+// TODO: it seems not working with old milestones lines (want to delete all lines of the document										
 									?><a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id ?>">
 											<?php if ((float) DOL_VERSION >= 3.8) echo img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal'); else echo img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal'); ?>		
 										</a><?php								
@@ -1339,5 +1340,21 @@ class ActionsSubtotal
 
 	}
 
+	// lines from milestones had subtotal on the line
+	function pdf_getlinetotalexcltax($parameters, &$object, &$action)
+	{
+		global $conf, $outputlangs;
+	
+		foreach($parameters as $key=>$value) {
+			${$key} = $value;
+		}
+	
+		$sign=1;
+	
+		if (isset($object->type) && $object->type == 2 && ! empty($conf->global->INVOICE_POSITIVE_CREDIT_NOTE)) $sign=-1;
+	
+		if (!empty($object->lines[$i]->total_ht)) return price($sign * $object->lines[$i]->total_ht, 0, $outputlangs);
+		else return '';
+	}
 	
 }
