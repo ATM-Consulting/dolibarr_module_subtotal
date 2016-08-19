@@ -116,7 +116,8 @@ class Interfacesubtotaltrigger
         // Put here code you want to execute when a Dolibarr business events occurs.
         // Data and type of action are stored into $object and $action
         // Users
-        
+        dol_include_once('/subtotal/class/subtotal.class.php');
+        $langs->load('subtotal@subtotal');
         
         if (!empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) && in_array($action, array('LINEPROPAL_INSERT', 'LINEORDER_INSERT', 'LINEBILL_INSERT')))
 		{
@@ -158,7 +159,51 @@ class Interfacesubtotaltrigger
 			
 		}
         
-        
+		
+        if ($action == 'LINEBILL_INSERT' && $object->special_code != TSubtotal::$module_number)
+		{
+			$subtotal_add_title_bloc_from_orderstoinvoice = GETPOST('subtotal_add_title_bloc_from_orderstoinvoice');
+			if (!empty($subtotal_add_title_bloc_from_orderstoinvoice))
+			{
+				global $subtotal_current_rang, $subtotal_bloc_previous_fk_commande, $subtotal_bloc_already_add_title;
+				
+				$current_fk_commande = TSubtotal::getOrderIdFromLineId($this->db, $object->origin_id);
+				$last_fk_commandedet = TSubtotal::getLastLineOrderId($this->db, $current_fk_commande);
+				
+				$facture = new Facture($this->db);
+				if ($facture->fetch($object->fk_facture) > 0)
+				{
+					$rang = !empty($subtotal_current_rang) ? $subtotal_current_rang : $object->rang;
+					// Si le fk_commande courrant est différent alors on change de commande => ajout d'un titre
+					if ($current_fk_commande != $subtotal_bloc_previous_fk_commande) 
+					{
+						$commande = new Commande($this->db);
+						$commande->fetch($current_fk_commande);
+						
+						$label = $conf->global->SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE;
+						if (empty($label)) $label = 'Commande [__REFORDER__] - Référence client : [__REFCUSTOMER__]';
+						$label = str_replace(array('__REFORDER__', '__REFCUSTOMER__'), array($commande->ref, $commande->ref_client), $label);
+						
+						TSubtotal::addTitle($facture, $label, 1, $rang);
+						$rang++;
+					}
+					
+					$object->rang = $rang;
+					$facture->updateRangOfLine($object->id, $rang);
+					$rang++;
+						
+					// Est-ce qu'il s'agit de la dernière ligne de la commande d'origine ? Si oui alors on ajout un sous-total
+					if ($last_fk_commandedet == $object->origin_id) 
+					{
+						TSubtotal::addTotal($facture, $langs->trans('SubTotal'), 1, $rang);
+						$rang++;
+					}
+				}
+				
+				$subtotal_bloc_previous_fk_commande = $current_fk_commande;
+				$subtotal_current_rang = $rang;
+			}
+		}
         
         
         if ($action == 'USER_LOGIN') {
