@@ -82,6 +82,18 @@ class ActionsSubtotal
 				
 			}
 		}
+		elseif ((!empty($parameters['currentcontext']) && $parameters['currentcontext'] == 'orderstoinvoice') || in_array('orderstoinvoice',$contexts))
+		{
+			?>
+			<script type="text/javascript">
+				$(function() {
+					var tr = $("<tr><td><?php echo $langs->trans('subtotal_add_title_bloc_from_orderstoinvoice'); ?></td><td><input type='checkbox' value='1' name='subtotal_add_title_bloc_from_orderstoinvoice' checked='checked' /></td></tr>")
+					$("textarea[name=note]").closest('tr').after(tr);
+				});
+			</script>
+			<?php
+			
+		}
 
 		return 0;
 	}
