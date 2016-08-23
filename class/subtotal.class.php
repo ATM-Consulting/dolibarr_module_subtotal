@@ -90,4 +90,37 @@ class TSubtotal {
 		if ($resql && ($row = $db->fetch_object($resql))) return $row->rowid;
 		else return false;
 	}
+	
+	public function getParentTitleOfLine(&$object, $i)
+	{
+		if ($i <= 0) return false;
+		
+		$skip_title = 0;
+		// Je parcours les lignes précédentes
+		while ($i--)
+		{
+			$line = &$object->lines[$i];
+			// S'il s'agit d'un titre
+			if ($line->product_type == 9 && $line->qty <= 10 && $line->qty >= 1)
+			{
+				if ($skip_title)
+				{
+					$skip_title--;
+					continue;
+				}
+				
+				//@INFO J'ai ma ligne titre qui contient ma ligne, par contre je check pas s'il y a un sous-total
+				return $line;
+				break;
+			}
+			elseif ($line->product_type == 9 && $line->qty >= 90 && $line->qty <= 99)
+			{
+				// Il s'agit d'un sous-total, ça veut dire que le prochain titre théoriquement doit être ignorer (je travail avec un incrément au cas ou je croise plusieurs sous-totaux)
+				$skip_title++;
+			}
+		}
+
+		return false;
+	}
+	
 }

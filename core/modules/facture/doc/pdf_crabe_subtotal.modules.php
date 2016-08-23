@@ -71,7 +71,8 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 
 		$this->db = $db;
 		$this->name = "crabe_subtotal";
-		$this->description = 'Modèle de facture incluant des spécificités pour le module sous-total.';
+		// J'ajoute l'annotation "déprécié" mais à garder... des fois qu'un client avec une vieille version utilise les modèles PDF custom
+		$this->description = 'Modèle de facture incluant des spécificités pour le module sous-total. (déprécié)';
 
 		// Dimension page pour format A4
 		$this->type = 'pdf';

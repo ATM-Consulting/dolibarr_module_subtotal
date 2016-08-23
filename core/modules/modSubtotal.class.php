@@ -62,7 +62,7 @@ class modSubtotal extends DolibarrModules
         // (where XXX is value of numeric property 'numero' of module)
         $this->description = "Module permettant l'ajout de sous-totaux et sous-totaux intermédiaires et le déplacement d'une ligne aisée de l'un dans l'autre";
         // Possible values for version are: 'development', 'experimental' or version
-        $this->version = '1.7.0';
+        $this->version = '1.7.1';
         // Key used in llx_const table to save module status enabled/disabled
         // (where MYMODULE is value of property name of module in uppercase)
         $this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
@@ -135,6 +135,8 @@ class modSubtotal extends DolibarrModules
 				,1=>array('SUBTOTAL_ALLOW_ADD_BLOCK', 'chaine', '1', 'Permet l\'ajout de titres et sous-totaux')
 				,2=>array('SUBTOTAL_ALLOW_EDIT_BLOCK', 'chaine', '1', 'Permet de modifier titres et sous-totaux')
 				,3=>array('SUBTOTAL_ALLOW_REMOVE_BLOCK', 'chaine', '1', 'Permet de supprimer les titres et sous-totaux')
+				,4=>array('SUBTOTAL_TITLE_STYLE', 'chaine', 'BU')
+				,5=>array('SUBTOTAL_SUBTOTAL_STYLE', 'chaine', 'B')
             //	1=>array(
             //		'MYMODULE_MYNEWCONST2',
             //		'chaine',
@@ -143,6 +145,9 @@ class modSubtotal extends DolibarrModules
             //		0
             //	)
         );
+		
+
+
 
         // Array to add new pages in new tabs
         // Example:
