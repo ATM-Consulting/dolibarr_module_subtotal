@@ -181,14 +181,6 @@ function showParameters() {
 	
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("SUBTOTAL_SHOW_QTY_WITH_HIDEDETAILS", $langs->trans('SubTotalhidedetails')).'</td>';
-	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="center" width="300">';
-	print ajax_constantonoff('SUBTOTAL_SHOW_QTY_WITH_HIDEDETAILS');
-	print '</td></tr>';
-	
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
 	print '<td>'.$langs->trans("SUBTOTAL_TITLE_STYLE").'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="right" width="300">';
