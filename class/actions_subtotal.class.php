@@ -82,6 +82,18 @@ class ActionsSubtotal
 				
 			}
 		}
+		elseif ((!empty($parameters['currentcontext']) && $parameters['currentcontext'] == 'orderstoinvoice') || in_array('orderstoinvoice',$contexts))
+		{
+			?>
+			<script type="text/javascript">
+				$(function() {
+					var tr = $("<tr><td><?php echo $langs->trans('subtotal_add_title_bloc_from_orderstoinvoice'); ?></td><td><input type='checkbox' value='1' name='subtotal_add_title_bloc_from_orderstoinvoice' checked='checked' /></td></tr>")
+					$("textarea[name=note]").closest('tr').after(tr);
+				});
+			</script>
+			<?php
+			
+		}
 
 		return 0;
 	}
@@ -593,9 +605,8 @@ class ActionsSubtotal
 			$pdf->SetFillColor(230,230,230);
 		else
 			$pdf->SetFillColor(240,240,240);
-		
 		$pdf->SetFont('', 'B', 9);
-
+		
 		$pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'R',true);
 //		var_dump($bMargin);
 		$pageAfter = $pdf->getPage();
@@ -667,6 +678,7 @@ class ActionsSubtotal
 			$pdf->writeHTMLCell($w, $h, $posx, $posy, $description, 0, 1, false, true, 'J',true);
 
 		}
+		
 	}
 
 	function pdf_writelinedesc_ref($parameters=array(), &$object, &$action='') {
@@ -938,17 +950,17 @@ class ActionsSubtotal
 					$pageBefore = $pdf->getPage();
 					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 					$pageAfter = $pdf->getPage();	
-/*
+
 					if($pageAfter>$pageBefore) {
-						print "ST $pageAfter>$pageBefore<br>";
+						//print "ST $pageAfter>$pageBefore<br>";
 						$pdf->rollbackTransaction(true);	
 						$pdf->addPage('','', true);
 						$posy = $pdf->GetY();
 						$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 						$posy = $pdf->GetY();
-						print 'add ST'.$pdf->getPage().'<br />';
+						//print 'add ST'.$pdf->getPage().'<br />';
 					}
-	*/				
+				
 					$posy = $pdf->GetY();
 					
 				}	
@@ -958,6 +970,7 @@ class ActionsSubtotal
 					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h); 
 					$pageAfter = $pdf->getPage();	
 
+					
 					/*if($pageAfter>$pageBefore) {
 						print "T $pageAfter>$pageBefore<br>";
 						$pdf->rollbackTransaction(true);

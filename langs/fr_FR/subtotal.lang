@@ -24,3 +24,6 @@ SUBTOTAL_ALLOW_EDIT_BLOCK=Autoriser l'edition d'un titre ou sous-total
 SUBTOTAL_ALLOW_REMOVE_BLOCK=Autoriser la suppression d'un titre ou sous-total
 SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE=Permettre l'ajout d'une ligne libre et/ou produit directement sous un titre
 subtotal_title_to_add_under_title=Ajouter sous
+SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE=Texte des titres lors de la facturation via onglet client -> bouton "Facturer commandes"
+SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info=Clés de remplacement :<br /><b>__REFORDER__</b> = Référence de la commande<br /><b>__REFCUSTOMER__</b> = Référence client de la commande
+subtotal_add_title_bloc_from_orderstoinvoice=Ajouter un bloc titre et sous-total entre chaque commande
