@@ -155,6 +155,7 @@ class Interfacesubtotaltrigger
 				
 				// Update du rang de la ligne fraichement ajouté pour la déplacer sous mon titre
 				$parent->updateRangOfLine($object->id, $rang+1);
+				$object->rang = $rang+1;
 			}
 			
 		}
