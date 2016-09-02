@@ -27,4 +27,4 @@ subtotal_title_to_add_under_title=Ajouter sous
 SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE=Texte des titres lors de la facturation via onglet client -> bouton "Facturer commandes"
 SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info=Clés de remplacement :<br /><b>__REFORDER__</b> = Référence de la commande<br /><b>__REFCUSTOMER__</b> = Référence client de la commande
 subtotal_add_title_bloc_from_orderstoinvoice=Ajouter un bloc titre et sous-total entre chaque commande
-SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK=L'ajout sous un titre ce fera en fin de bloc 
+SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK=L'ajout sous un titre se fera en fin de section 
