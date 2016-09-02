@@ -589,15 +589,21 @@ class ActionsSubtotal
 		
 		$hidePriceOnSubtotalLines = (int) isset($_REQUEST['hide_price_on_subtotal_lines']);
 		
-		$pageBreakOriginalValue = $pdf->AcceptPageBreak();
-		$sweetsThief = function ($pdf) {
-	    		return $pdf->bMargin ;
-		};
-		$sweetsThief = Closure::bind($sweetsThief, null, $pdf);
+		$set_pagebreak_margin = false;
+		if(method_exists('Closure','bind')) {
+			$pageBreakOriginalValue = $pdf->AcceptPageBreak();
+			$sweetsThief = function ($pdf) {
+		    		return $pdf->bMargin ;
+			};
+			$sweetsThief = Closure::bind($sweetsThief, null, $pdf);
+	
+			$bMargin  = $sweetsThief($pdf);
+	
+			$pdf->SetAutoPageBreak( false );
 
-		$bMargin  = $sweetsThief($pdf);
-
-		$pdf->SetAutoPageBreak( false );
+			$set_pagebreak_margin = true;			
+		}
+		
 			
 		if($line->qty==99)
 			$pdf->SetFillColor(220,220,220);
@@ -627,8 +633,11 @@ class ActionsSubtotal
 			}
 			
 			$pdf->SetXY($pdf->postotalht, $posy);
-			$pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
+			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
 			$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($line->total), 0, 'R', 0);
+		}
+		else{
+			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
 		}
 		
 		$posy = $posy + $cell_height;
