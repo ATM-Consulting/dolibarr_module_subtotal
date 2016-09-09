@@ -1514,7 +1514,8 @@ class pdf_azur_subtotal extends ModelePDFPropales
 	function _pagefoot(&$pdf,$object,$outputlangs,$hidefreetext=0)
 	{
 		$showdetails=0;
-		return pdf_pagefoot($pdf,$outputlangs,'PROPALE_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche,$this->page_hauteur,$object,$showdetails,$hidefreetext);
+		$free_text = (float)DOL_VERSION > 3.8 ? 'PROPOSAL_FREE_TEXT' : 'PROPALE_FREE_TEXT';
+		return pdf_pagefoot($pdf,$outputlangs,$free_text,$this->emetteur,$this->marge_basse,$this->marge_gauche,$this->page_hauteur,$object,$showdetails,$hidefreetext);
 	}
 
 }

@@ -1629,7 +1629,8 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 	function _pagefoot(&$pdf,$object,$outputlangs,$hidefreetext=0)
 	{
 		$showdetails=0;
-		return pdf_pagefoot($pdf,$outputlangs,'FACTURE_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche,$this->page_hauteur,$object,$showdetails,$hidefreetext);
+		$free_text = (float)DOL_VERSION > 3.8 ? 'INVOICE_FREE_TEXT' : 'FACTURE_FREE_TEXT';
+		return pdf_pagefoot($pdf,$outputlangs,$free_text,$this->emetteur,$this->marge_basse,$this->marge_gauche,$this->page_hauteur,$object,$showdetails,$hidefreetext);
 	}
 
 }
