@@ -52,9 +52,11 @@ function getHtmlSelectTitle(&$object)
 	$TTitle = TSubtotal::getAllTitleFromDocument($object);
 	$html = '<select onChange="$(\'select[name=under_title]\').val(this.value);" name="under_title" class="under_title maxwidth200"><option value="-1"></option>';
 	
+	$nbsp = '&nbsp;';
 	foreach ($TTitle as &$line)
 	{
-		$html .= '<option value="'.$line->rang.'">'.(!empty($line->desc) ? $line->desc : $line->label).'</option>';
+		$str = str_repeat($nbsp, ($line->qty - 1) * 3);
+		$html .= '<option value="'.$line->rang.'">'.$str.(!empty($line->desc) ? $line->desc : $line->label).'</option>';
 	}
 	
 	$html .= '</select>';

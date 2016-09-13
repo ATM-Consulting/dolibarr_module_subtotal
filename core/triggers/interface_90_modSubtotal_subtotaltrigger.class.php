@@ -98,7 +98,55 @@ class Interfacesubtotaltrigger
             return $langs->trans("Unknown");
         }
     }
-
+	
+	public function addToBegin(&$parent, &$object, $rang)
+	{
+		foreach ($parent->lines as &$line)
+		{
+			// Si (ma ligne courrante n'est pas celle que je viens d'ajouter) et que (le rang courrant est supérieure au rang du titre)
+			if ($object->id != $line->id && $line->rang > $rang)
+			{
+				// Update du rang de toutes les lignes suivant mon titre
+				$parent->updateRangOfLine($line->id, $line->rang+1);
+			}
+		}
+		
+		// Update du rang de la ligne fraichement ajouté pour la déplacer sous mon titre
+		$parent->updateRangOfLine($object->id, $rang+1);
+		$object->rang = $rang+1;
+	}
+	
+	public function addToEnd(&$parent, &$object, $rang)
+	{
+		$title_level = -1;
+		$subtotal_line_found = false;
+		foreach ($parent->lines as $k => &$line)
+		{
+			if ($line->rang < $rang) continue;
+			elseif ($line->rang == $rang) // Je suis sur la ligne de titre où je souhaite ajouter ma nouvelle ligne en fin de bloc
+			{
+				$title_level = $line->qty;
+			}
+			elseif (!$subtotal_line_found && $title_level > -1 && ($line->qty == 100 - $title_level)) // Le level de mon titre a été trouvé avant, donc maintenant je vais m'arrêter jusqu'à trouver un sous-total
+			{
+				$subtotal_line_found = true;
+				$rang = $line->rang;
+			}
+			
+			
+			if ($subtotal_line_found)
+			{
+				$parent->updateRangOfLine($line->id, $line->rang+1);
+			}
+		}
+		
+		if ($subtotal_line_found)
+		{
+			$parent->updateRangOfLine($object->id, $rang);
+			$object->rang = $rang;
+		}
+	}
+	
     /**
      * Function called when a Dolibarrr business event is done.
      * All functions "run_trigger" are triggered if file
@@ -143,18 +191,9 @@ class Interfacesubtotaltrigger
 						break;
 				}
 				
-				foreach ($parent->lines as &$line)
-				{
-					// Si (ma ligne courrante n'est pas celle que je viens d'ajouter) et que (le rang courrant est supérieure au rang du titre)
-					if ($object->id != $line->id && $line->rang > $rang)
-					{
-						// Update du rang de toutes les lignes suivant mon titre
-						$parent->updateRangOfLine($line->id, $line->rang+1);
-					}
-				}
+				if (!empty($conf->global->SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK)) $this->addToEnd($parent, $object, $rang);
+				else $this->addToBegin($parent, $object, $rang);
 				
-				// Update du rang de la ligne fraichement ajouté pour la déplacer sous mon titre
-				$parent->updateRangOfLine($object->id, $rang+1);
 			}
 			
 		}
