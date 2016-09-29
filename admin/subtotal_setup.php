@@ -243,9 +243,8 @@ function showParameters() {
 			</td>				
 		</tr>
 		
-		<!-- J'ajoute l'annotation "déprécié" mais à garder... des fois qu'un client avec une vieille version utilise les modèles PDF custom -->
 		<tr class="pair">
-			<td>Masquer les totaux (déprécié)</td>
+			<td>Masquer les totaux</td>
 			<td style="text-align: right;">
 				<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
 					<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
