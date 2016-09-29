@@ -19,7 +19,15 @@ SubtotalLabel=<b>Subtotal: </b>
 SUBTOTAL_MANAGE_SUBSUBTOTAL=Enable the sub-subtotal function
 SUBTOTAL_USE_NEW_FORMAT=Enable the advenced functionnality
 SUBTOTAL_USE_NUMEROTATION=Enable the auto numbering on PDF
+SUBTOTAL_ALLOW_ADD_BLOCK=Allow add title and subtotal
+SUBTOTAL_ALLOW_EDIT_BLOCK=Allow edit title and subtotal
+SUBTOTAL_ALLOW_REMOVE_BLOCK=Allow delete title and subtotal
+SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE=Can add line directly under title
+subtotal_title_to_add_under_title=Add under
 SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE=Text des titres lors la facturation via onglet client -> bouton "Facturer commandes"
 SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info=Clés de remplacement :<br /><b>__REFORDER__</b> = Référence de la commande<br /><b>__REFCUSTOMER__</b> = Référence client de la commande
 subtotal_add_title_bloc_from_orderstoinvoice=Add subtitle and subtotal block between each order
 SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK=The adding under title will do at end block
+SUBTOTAL_TITLE_STYLE=Title style (B = bold, U = underline, I = italic)
+SUBTOTAL_SUBTOTAL_STYLE=Subtotals style (B = bold, U = underline, I = italic)
+SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES=Get one line with title and subtotal if "%s" is enabled (experimental)

@@ -311,7 +311,7 @@ class ActionsSubtotal
 		     	$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
 		     				<label for="hideInnerLines">'.$langs->trans('HideInnerLines').'</label>
-		     				<input type="checkbox" onclick="if($(this).is(\':checked\')) { $(\'#hidedetails\').attr(\'checked\', \'checked\')  }" id="hideInnerLines" name="hideInnerLines" value="1" '.(( $hideInnerLines ) ? 'checked="checked"' : '' ).' />
+		     				<input type="checkbox" onclick="if($(this).is(\':checked\')) { $(\'#hidedetails\').prop(\'checked\', \'checked\')  }" id="hideInnerLines" name="hideInnerLines" value="1" '.(( $hideInnerLines ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
 				$var = -$var;
@@ -451,10 +451,10 @@ class ActionsSubtotal
 					$sessname2 = 'subtotal_hidedetails_unknown';
 				}
 								
-				$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
+				$hideInnerLines = (int)GETPOST('hideInnerLines');
 				$_SESSION[$sessname] = $hideInnerLines;		
 				
-				$hidedetails= (int)isset($_REQUEST['hidedetails']);	
+				$hidedetails= (int)GETPOST('hidedetails');	
 				$_SESSION[$sessname2] = $hidedetails;
 				
 	           	foreach($object->lines as &$line) {
@@ -583,11 +583,16 @@ class ActionsSubtotal
 	 * @param $h            float               height
 	 */
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
-		global $conf;
+		global $conf,$subtotal_last_title_posy;
 		
-		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
+		$hideInnerLines = (int)GETPOST('hideInnerLines');
+		if (!empty($conf->global->SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES) && $hideInnerLines && !empty($subtotal_last_title_posy))
+		{
+			$posy = $subtotal_last_title_posy;
+			$subtotal_last_title_posy = null;
+		}
 		
-		$hidePriceOnSubtotalLines = (int) isset($_REQUEST['hide_price_on_subtotal_lines']);
+		$hidePriceOnSubtotalLines = (int) GETPOST('hide_price_on_subtotal_lines');
 		
 		$set_pagebreak_margin = false;
 		if(method_exists('Closure','bind')) {
@@ -611,7 +616,11 @@ class ActionsSubtotal
 			$pdf->SetFillColor(230,230,230);
 		else
 			$pdf->SetFillColor(240,240,240);
-		$pdf->SetFont('', 'B', 9);
+		
+		$style = '';
+		if (!empty($conf->global->SUBTOTAL_SUBTOTAL_STYLE)) $style = $conf->global->SUBTOTAL_SUBTOTAL_STYLE;
+		
+		$pdf->SetFont('', $style, 9);
 		
 		$pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'R',true);
 //		var_dump($bMargin);
@@ -659,21 +668,28 @@ class ActionsSubtotal
 	 */
 	function pdf_add_title(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		
-		global $db,$conf;
+		global $db,$conf,$subtotal_last_title_posy;
 		
+		$subtotal_last_title_posy = $posy;
 		$pdf->SetXY ($posx, $posy);
 		
-		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
+		$hideInnerLines = (int)GETPOST('hideInnerLines');
+		
+		$style = '';
+		if (!empty($conf->global->SUBTOTAL_TITLE_STYLE)) $style = $conf->global->SUBTOTAL_TITLE_STYLE;
+		
 		if($hideInnerLines) {
-
-			if($line->qty==1)$pdf->SetFont('', 'BU', 9);
-			else $pdf->SetFont('', $conf->global->SUBTOTAL_STYLE_TITRES_SI_LIGNES_CACHEES, 9);
-			
+			if($line->qty==1)$pdf->SetFont('', $style, 9);
+			else 
+			{
+				if (!empty($conf->global->SUBTOTAL_STYLE_TITRES_SI_LIGNES_CACHEES)) $style = $conf->global->SUBTOTAL_STYLE_TITRES_SI_LIGNES_CACHEES;
+				$pdf->SetFont('', $style, 9);
+			}
 		}
 		else {
 
-			if($line->qty==1)$pdf->SetFont('', 'BU', 9);
-			else $pdf->SetFont('', 'BUI', 9);
+			if($line->qty==1)$pdf->SetFont('', $style, 9);
+			else $pdf->SetFont('', $style, 9);
 			
 		}
 		
@@ -716,6 +732,7 @@ class ActionsSubtotal
 	}
 
 	function pdf_getlineqty($parameters=array(), &$object, &$action='') {
+		global $conf;
 		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			
@@ -726,11 +743,20 @@ class ActionsSubtotal
 			}
 			
 		}
+		elseif (!empty($conf->global->SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY))
+		{
+			$hideInnerLines = (int)GETPOST('hideInnerLines');
+			$hidedetails = (int)GETPOST('hidedetails');
+			if (empty($hideInnerLines) && !empty($hidedetails))
+			{
+				$this->resprints = $object->lines[$parameters['i']]->qty;
+			}
+		}
 		
+		return 0;
 	}
 	
 	function pdf_getlinetotalexcltax($parameters=array(), &$object, &$action='') {
-		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			
 			$this->resprints = ' ';
@@ -740,6 +766,8 @@ class ActionsSubtotal
 			}
 			
 		}
+		
+		return 0;
 	}
 	
 	function pdf_getlinetotalwithtax($parameters=array(), &$object, &$action='') {
@@ -751,6 +779,8 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
+		
+		return 0;
 	}
 	
 	function pdf_getlineunit($parameters=array(), &$object, &$action='') {
@@ -761,6 +791,8 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
+		
+		return 0;
 	}
 	
 	function pdf_getlineupexcltax($parameters=array(), &$object, &$action='') {
@@ -771,6 +803,8 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
+		
+		return 0;
 	}
 	
 	function pdf_getlineupwithtax($parameters=array(), &$object, &$action='') {
@@ -780,6 +814,8 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
+		
+		return 0;
 	}
 	
 	function pdf_getlinevatrate($parameters=array(), &$object, &$action='') {
@@ -790,6 +826,8 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
+		
+		return 0;
 	}
 		
 	function pdf_getlineprogress($parameters=array(), &$object, &$action) {
@@ -799,6 +837,8 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
+		
+		return 0;
 	}
 	
 	function add_numerotation(&$object) {
@@ -838,7 +878,7 @@ class ActionsSubtotal
 	
 	function setDocTVA(&$pdf, &$object) {
 		
-		$hidedetails = (int)isset($_REQUEST['hidedetails']);
+		$hidedetails = (int)GETPOST('hidedetails');
 		
 		if(empty($hidedetails)) return false;
 		
@@ -854,6 +894,8 @@ class ActionsSubtotal
 		 */
 		global $pdf,$conf;
 
+		dol_include_once('/subtotal/class/subtotal.class.php');
+
 		foreach($parameters as $key=>$value) {
 			${$key} = $value;
 		}
@@ -863,61 +905,66 @@ class ActionsSubtotal
 		$this->add_numerotation($object);	
 		
 		
-		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
-		$hidedetails = (int)isset($_REQUEST['hidedetails']);
+		$hideInnerLines = (int)GETPOST('hideInnerLines');
+		$hidedetails = (int)GETPOST('hidedetails');
 		
-			if ($hideInnerLines) { // si c une ligne de titre
-		    	$fk_parent_line=0;
-				$TLines =array();
+		if ($hideInnerLines) { // si c une ligne de titre
+	    	$fk_parent_line=0;
+			$TLines =array();
+		
+			$original_count=count($object->lines);
+		
+			foreach($object->lines as $k=>&$line) 
+			{
+				if($line->product_type==9 && $line->rowid>0) 
+				{
+					$fk_parent_line = $line->rowid;
+					
+					if($line->qty>90 && $line->total==0) 
+					{
+						$total = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
+					
+						$line->total_ht = $total;
+						$line->total = $total;
+					} 
+						
+				} 
 			
-				$original_count=count($object->lines);
-			
-				foreach($object->lines as $k=>&$line) 
+				if ($hideInnerLines)
 				{
 					if($line->product_type==9 && $line->rowid>0) 
 					{
-						$fk_parent_line = $line->rowid;
-						
-						if($line->qty>90 && $line->total==0) 
-						{
-							$total = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
-						
-							$line->total_ht = $total;
-							$line->total = $total;
-						} 
-							
-					} 
+						$TLines[] = $line; //Cas où je doit cacher les produits et afficher uniquement les sous-totaux avec les titres
+					}
+					elseif (!TSubtotal::getParentTitleOfLine($object, $k)) {
+						$TLines[] = $line;
+					}
+				}
+				elseif ($hidedetails)
+				{
+					$TLines[] = $line; //Cas où je cache uniquement les prix des produits	
+				}
 				
-					if ($hideInnerLines)
-					{
-						if($line->product_type==9 && $line->rowid>0) 
-						{
-							$TLines[] = $line; //Cas où je doit cacher les produits et afficher uniquement les sous-totaux avec les titres
-						}
-					}
-					elseif ($hidedetails)
-					{
-						$TLines[] = $line; //Cas où je cache uniquement les prix des produits	
-					}
+				if ($line->product_type != 9) { // jusqu'au prochain titre ou total
+					//$line->fk_parent_line = $fk_parent_line;
 					
-					if ($line->product_type != 9) { // jusqu'au prochain titre ou total
-						//$line->fk_parent_line = $fk_parent_line;
-						
-					}
-				
-					/*if($hideTotal) {
-						$line->total = 0;
-						$line->subprice= 0;
-					}*/
 				}
-				
-				$object->lines = $TLines;
-				//var_dump($original_count,$i,count($object->lines));
-				if($i>count($object->lines)) {
-					$this->resprints = '';
-					return 0;
-				}
-		    }
+			
+				/*if($hideTotal) {
+					$line->total = 0;
+					$line->subprice= 0;
+				}*/
+			}
+			
+			$object->lines = $TLines;
+			//var_dump($original_count,$i,count($object->lines));
+			if($i>count($object->lines)) {
+				$this->resprints = '';
+				return 0;
+			}
+	    }
+		
+		return 0;
 	}
 
 	function pdf_writelinedesc($parameters=array(), &$object, &$action)
@@ -931,8 +978,8 @@ class ActionsSubtotal
 			${$key} = $value;
 		}
 		
-		$hideInnerLines = (int)isset($_REQUEST['hideInnerLines']);
-		$hidedetails = (int)isset($_REQUEST['hidedetails']);
+		$hideInnerLines = (int)GETPOST('hideInnerLines');
+		$hidedetails = (int)GETPOST('hidedetails');
 		
 		if($this->isModSubtotalLine($parameters,$object) ){			
 			
@@ -997,6 +1044,11 @@ class ActionsSubtotal
 			
 			return 1;
 		}
+		elseif (empty($object->lines[$parameters['i']]))
+		{
+			$this->resprints = -1;
+		}
+
 		/* TODO je desactive parce que je comprends pas PH Style, mais à test
 		else {
 			
