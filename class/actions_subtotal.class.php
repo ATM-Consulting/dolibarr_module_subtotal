@@ -617,7 +617,7 @@ class ActionsSubtotal
 		else
 			$pdf->SetFillColor(240,240,240);
 		
-		$style = '';
+		$style = 'B';
 		if (!empty($conf->global->SUBTOTAL_SUBTOTAL_STYLE)) $style = $conf->global->SUBTOTAL_SUBTOTAL_STYLE;
 		
 		$pdf->SetFont('', $style, 9);
@@ -675,7 +675,9 @@ class ActionsSubtotal
 		
 		$hideInnerLines = (int)GETPOST('hideInnerLines');
 		
-		$style = '';
+		
+ 
+		$style = ($line->qty==1) ? 'BU' : 'BUI';
 		if (!empty($conf->global->SUBTOTAL_TITLE_STYLE)) $style = $conf->global->SUBTOTAL_TITLE_STYLE;
 		
 		if($hideInnerLines) {
@@ -688,7 +690,7 @@ class ActionsSubtotal
 		}
 		else {
 
-			if($line->qty==1)$pdf->SetFont('', $style, 9);
+			if($line->qty==1)$pdf->SetFont('', $style, 9); //TODO if super utile
 			else $pdf->SetFont('', $style, 9);
 			
 		}
