@@ -301,7 +301,6 @@ function pdfBuildThirdpartyName($thirdparty, Translate $outputlangs)
 {
 	//Recipient name
 	$socname = '';
-
 	// On peut utiliser le nom de la societe du contact
 	if ($thirdparty instanceof Societe) {
 		if (!empty($thirdparty->name_alias)) {
@@ -332,7 +331,6 @@ function pdfBuildThirdpartyName($thirdparty, Translate $outputlangs)
 function pdf_build_address($outputlangs,$sourcecompany,$targetcompany='',$targetcontact='',$usecontact=0,$mode='source')
 {
 	global $conf;
-
 	$stringaddress = '';
 
 	if ($mode == 'source' && ! is_object($sourcecompany)) return -1;
