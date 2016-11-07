@@ -370,6 +370,7 @@ class ActionsSubtotal
 					$substitutionarray['line_modsubtotal_total'] = true;
 					
 					list($total, $total_tva, $total_ttc) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
+					
 					$substitutionarray['line_price_ht'] = $total;
 					$substitutionarray['line_price_vat'] = $total_tva;
 					$substitutionarray['line_price_ttc'] = $total_ttc;
@@ -546,13 +547,14 @@ class ActionsSubtotal
 		$total = 0;
 		$total_tva = 0;
 		$total_ttc = 0;
-
+		$TTotal_tva = array();
+		
 		foreach($object->lines as $l) {
 			//print $l->rang.'>='.$rang.' '.$total.'<br/>';
 			if($l->rang>=$rang) {
 				//echo 'return!<br>';
 				if (!$return_all) return $total;
-				else return array($total, $total_tva, $total_ttc);
+				else return array($total, $total_tva, $total_ttc, $TTotal_tva);
 			} 
 			else if($l->special_code==$this->module_number && $l->qty == 100 - $qty_line) 
 		  	{
@@ -563,12 +565,13 @@ class ActionsSubtotal
 			elseif($l->product_type!=9) {
 				$total += $l->total_ht;
 				$total_tva += $l->total_tva;
+				$TTotal_tva[$l->tva_tx] += $l->total_tva;
 				$total_ttc += $l->total_ttc;
 			}
 			
 		}
 		if (!$return_all) return $total;
-		else return array($total, $total_tva, $total_ttc);
+		else return array($total, $total_tva, $total_ttc, $TTotal_tva);
 	}
 
 	/**
@@ -924,10 +927,17 @@ class ActionsSubtotal
 					
 					if($line->qty>90 && $line->total==0) 
 					{
-						$total = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
-					
+						/*$total = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
+						
 						$line->total_ht = $total;
 						$line->total = $total;
+						*/
+						list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
+						
+						$line->TTotal_tva = $TTotal_tva;
+						$line->total_ht = $total;
+						$line->total_tva = $total_tva;
+						$line->total = $total_ttc;
 					} 
 						
 				} 

@@ -511,7 +511,7 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 					if ($object->remise_percent) $localtax2ligne-=($localtax2ligne*$object->remise_percent)/100;
 
 					$vatrate=(string) $object->lines[$i]->tva_tx;
-
+					
 					// Retrieve type from database for backward compatibility with old records
 					if ((! isset($localtax1_type) || $localtax1_type=='' || ! isset($localtax2_type) || $localtax2_type=='') // if tax type not defined
 					&& (! empty($localtax1_rate) || ! empty($localtax2_rate))) // and there is local tax
@@ -529,7 +529,18 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 
 					if (($object->lines[$i]->info_bits & 0x01) == 0x01) $vatrate.='*';
 					if (! isset($this->tva[$vatrate])) 				$this->tva[$vatrate]='';
-					$this->tva[$vatrate] += $tvaligne;
+					
+					if (!empty($object->lines[$i]->TTotal_tva))
+					{
+						foreach ($object->lines[$i]->TTotal_tva as $vatrate => $tvaligne)
+						{
+							$this->tva[$vatrate] += $tvaligne;
+						}
+					}
+					else {
+						// standard
+						$this->tva[$vatrate] += $tvaligne;
+					}
 
 					// Add line
 					if (! empty($conf->global->MAIN_PDF_DASH_BETWEEN_LINES) && $i < ($nblignes - 1))
