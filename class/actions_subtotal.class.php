@@ -743,7 +743,10 @@ class ActionsSubtotal
 			
 			$this->resprints = ' ';
 			
-			if((float)DOL_VERSION>=3.8) {
+			if((float)DOL_VERSION<=3.4) {
+				return '';
+			}
+			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 			
@@ -766,7 +769,10 @@ class ActionsSubtotal
 			
 			$this->resprints = ' ';
 			
-			if((float)DOL_VERSION>=3.8) {
+			if((float)DOL_VERSION<=3.4) {
+				return '';
+			}
+			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 			
@@ -780,7 +786,10 @@ class ActionsSubtotal
 			
 			$this->resprints = ' ';
 		
-			if((float)DOL_VERSION>=3.8) {
+			if((float)DOL_VERSION<=3.4) {
+				return '';
+			}
+			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 		}
@@ -792,7 +801,10 @@ class ActionsSubtotal
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 		
-			if((float)DOL_VERSION>=3.8) {
+			if((float)DOL_VERSION<=3.4) {
+				return '';
+			}
+			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 		}
@@ -804,7 +816,10 @@ class ActionsSubtotal
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 		
-			if((float)DOL_VERSION>=3.8) {
+			if((float)DOL_VERSION<=3.4) {
+				return '';
+			}
+			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 		}
@@ -815,7 +830,10 @@ class ActionsSubtotal
 	function pdf_getlineupwithtax($parameters=array(), &$object, &$action='') {
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
-			if((float)DOL_VERSION>=3.8) {
+			if((float)DOL_VERSION<=3.4) {
+				return '';
+			}
+			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 		}
@@ -827,7 +845,10 @@ class ActionsSubtotal
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 			
-			if((float)DOL_VERSION>=3.8) {
+			if((float)DOL_VERSION<=3.4) {
+				return '';
+			}
+			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 		}
@@ -838,7 +859,10 @@ class ActionsSubtotal
 	function pdf_getlineprogress($parameters=array(), &$object, &$action) {
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
-			if((float)DOL_VERSION>=3.8) {
+			if((float)DOL_VERSION<=3.4) {
+				return '';
+			}
+			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 		}
