@@ -961,7 +961,7 @@ class ActionsSubtotal
 						$line->TTotal_tva = $TTotal_tva;
 						$line->total_ht = $total;
 						$line->total_tva = $total_tva;
-						$line->total = $total_ttc;
+						$line->total = $line->total_ht;
 					} 
 						
 				} 
