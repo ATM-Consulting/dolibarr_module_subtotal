@@ -876,6 +876,7 @@ class ActionsSubtotal
 		if(!empty($conf->global->SUBTOTAL_USE_NUMEROTATION)) {
 		
 			$TLevelTitre = array();
+			$prevlevel = 0;
 		
 			foreach($object->lines as $k=>&$line) 
 			{
@@ -885,7 +886,15 @@ class ActionsSubtotal
 						if($line->qty>=90) $level = 100 - $line->qty;
 						else $level = $line->qty;
 						
-						if(!isset($TLevelTitre[$level]))$TLevelTitre[$level] = 1;
+						if(!isset($TLevelTitre[$level])) {
+							$TLevelTitre[$level] = 0;
+						}
+						
+						if($prevlevel > $level) {
+							$TLevelTitre[$prevlevel] = 0;
+						}
+						$prevlevel = $level;
+						$TLevelTitre[$level]++;
 						
 						if($line->label=='') {
 							$line->label = empty($line->description) ? $line->desc : $line->description;
@@ -895,9 +904,6 @@ class ActionsSubtotal
 						$pre = '';
 						for($ii = 1; $ii<=$level; $ii++) $pre.=$TLevelTitre[$ii].'.';
 						$line->label = $pre.' '.$line->label;
-						
-						if($line->qty>=90) $TLevelTitre[$level]++;
-						
 					}
 			
 			}
