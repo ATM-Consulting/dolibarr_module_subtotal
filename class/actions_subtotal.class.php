@@ -880,35 +880,55 @@ class ActionsSubtotal
 		
 			foreach($object->lines as $k=>&$line) 
 			{
-					if($line->product_type==9 && $line->rowid>0 && $this->isModSubtotalLine($k, $object)) 
-					{
-							
-						if($line->qty>=90) $level = 100 - $line->qty;
-						else $level = $line->qty;
-						
-						if(!isset($TLevelTitre[$level])) {
-							$TLevelTitre[$level] = 0;
-						}
-						
-						if($prevlevel > $level) {
-							$TLevelTitre[$prevlevel] = 0;
-						}
-						$prevlevel = $level;
-						$TLevelTitre[$level]++;
-						
-						if($line->label=='') {
-							$line->label = empty($line->description) ? $line->desc : $line->description;
-							$line->description=$line->desc='';
-						}
-						
-						$pre = '';
-						for($ii = 1; $ii<=$level; $ii++) $pre.=$TLevelTitre[$ii].'.';
-						$line->label = $pre.' '.$line->label;
-					}
-			
+				if ($line->id > 0 && $this->isModSubtotalLine($k, $object) && $line->qty <= 10)
+				{
+					$TLineTitle[] = &$line;
+				}
 			}
+			
+			if (!empty($TLineTitle)) $TTitleNumeroted = $this->formatNumerotation($TLineTitle);
 		}
 		
+	}
+
+	// TODO ne gère pas encore la numération des lignes "Totaux"
+	private function formatNumerotation(&$TLineTitle, $line_reference='', $level=1, $prefix_num=0)
+	{
+		$TTitle = array();
+		
+		$i=1;
+		$j=0;
+		foreach ($TLineTitle as $k => &$line)
+		{
+			if (!empty($line_reference) && $line->rang <= $line_reference->rang) continue;
+			if (!empty($line_reference) && $line->qty <= $line_reference->qty) break;
+			
+			if ($line->qty == $level)
+			{
+				$TTitle[$j]['numerotation'] = ($prefix_num == 0) ? $i : $prefix_num.'.'.$i;
+				//var_dump('Prefix == '.$prefix_num.' // '.$line->desc.' ==> numerotation == '.$TTitle[$j]['numerotation'].'   ###    '.$line->qty .'=='. $level);
+				if (empty($line->label))
+				{
+					$line->label = !empty($line->desc) ? $line->desc : $line->description;
+					$line->desc = $line->description = '';
+				}
+				
+				$line->label = $TTitle[$j]['numerotation'].' '.$line->label;
+				$TTitle[$j]['line'] = &$line;
+				
+				$deep_level = $line->qty;
+				do {
+					$deep_level++;
+					$TTitle[$j]['children'] = $this->formatNumerotation($TLineTitle, $line, $deep_level, $TTitle[$j]['numerotation']);
+				} while (empty($TTitle[$j]['children']) && $deep_level <= 10); // Exemple si un bloc Titre lvl 1 contient pas de sous lvl 2 mais directement un sous lvl 5
+				// Rappel on peux avoir jusqu'a 10 niveau de titre
+				
+				$i++;
+				$j++;
+			}
+		}
+
+		return $TTitle;
 	}
 	
 	function setDocTVA(&$pdf, &$object) {
