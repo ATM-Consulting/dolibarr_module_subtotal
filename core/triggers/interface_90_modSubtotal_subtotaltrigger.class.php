@@ -98,7 +98,55 @@ class Interfacesubtotaltrigger
             return $langs->trans("Unknown");
         }
     }
-
+	
+	public function addToBegin(&$parent, &$object, $rang)
+	{
+		foreach ($parent->lines as &$line)
+		{
+			// Si (ma ligne courrante n'est pas celle que je viens d'ajouter) et que (le rang courrant est supérieure au rang du titre)
+			if ($object->id != $line->id && $line->rang > $rang)
+			{
+				// Update du rang de toutes les lignes suivant mon titre
+				$parent->updateRangOfLine($line->id, $line->rang+1);
+			}
+		}
+		
+		// Update du rang de la ligne fraichement ajouté pour la déplacer sous mon titre
+		$parent->updateRangOfLine($object->id, $rang+1);
+		$object->rang = $rang+1;
+	}
+	
+	public function addToEnd(&$parent, &$object, $rang)
+	{
+		$title_level = -1;
+		$subtotal_line_found = false;
+		foreach ($parent->lines as $k => &$line)
+		{
+			if ($line->rang < $rang) continue;
+			elseif ($line->rang == $rang) // Je suis sur la ligne de titre où je souhaite ajouter ma nouvelle ligne en fin de bloc
+			{
+				$title_level = $line->qty;
+			}
+			elseif (!$subtotal_line_found && $title_level > -1 && ($line->qty == 100 - $title_level)) // Le level de mon titre a été trouvé avant, donc maintenant je vais m'arrêter jusqu'à trouver un sous-total
+			{
+				$subtotal_line_found = true;
+				$rang = $line->rang;
+			}
+			
+			
+			if ($subtotal_line_found)
+			{
+				$parent->updateRangOfLine($line->id, $line->rang+1);
+			}
+		}
+		
+		if ($subtotal_line_found)
+		{
+			$parent->updateRangOfLine($object->id, $rang);
+			$object->rang = $rang;
+		}
+	}
+	
     /**
      * Function called when a Dolibarrr business event is done.
      * All functions "run_trigger" are triggered if file
@@ -116,6 +164,87 @@ class Interfacesubtotaltrigger
         // Put here code you want to execute when a Dolibarr business events occurs.
         // Data and type of action are stored into $object and $action
         // Users
+        dol_include_once('/subtotal/class/subtotal.class.php');
+        $langs->load('subtotal@subtotal');
+        
+        if (!empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) && in_array($action, array('LINEPROPAL_INSERT', 'LINEORDER_INSERT', 'LINEBILL_INSERT')))
+		{
+			
+			$rang = GETPOST('under_title', 'int'); // Rang du titre
+			if ($rang > 0)
+			{
+				switch ($action) {
+					case 'LINEPROPAL_INSERT':
+						$parent = new Propal($this->db);
+						$parent->fetch($object->fk_propal);
+						break;
+					case 'LINEORDER_INSERT':
+						$parent = new Commande($this->db);
+						$parent->fetch($object->fk_commande);
+						break;
+					case 'LINEBILL_INSERT':
+						$parent = new Facture($this->db);
+						$parent->fetch($object->fk_facture);
+						break;
+					default:
+						$parent = $object;
+						break;
+				}
+				
+				if (!empty($conf->global->SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK)) $this->addToEnd($parent, $object, $rang);
+				else $this->addToBegin($parent, $object, $rang);
+				
+			}
+			
+		}
+        
+		
+        if ($action == 'LINEBILL_INSERT' && $object->special_code != TSubtotal::$module_number)
+		{
+			$subtotal_add_title_bloc_from_orderstoinvoice = GETPOST('subtotal_add_title_bloc_from_orderstoinvoice');
+			if (!empty($subtotal_add_title_bloc_from_orderstoinvoice))
+			{
+				global $subtotal_current_rang, $subtotal_bloc_previous_fk_commande, $subtotal_bloc_already_add_title;
+				
+				$current_fk_commande = TSubtotal::getOrderIdFromLineId($this->db, $object->origin_id);
+				$last_fk_commandedet = TSubtotal::getLastLineOrderId($this->db, $current_fk_commande);
+				
+				$facture = new Facture($this->db);
+				if ($facture->fetch($object->fk_facture) > 0)
+				{
+					$rang = !empty($subtotal_current_rang) ? $subtotal_current_rang : $object->rang;
+					// Si le fk_commande courrant est différent alors on change de commande => ajout d'un titre
+					if ($current_fk_commande != $subtotal_bloc_previous_fk_commande) 
+					{
+						$commande = new Commande($this->db);
+						$commande->fetch($current_fk_commande);
+						
+						$label = $conf->global->SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE;
+						if (empty($label)) $label = 'Commande [__REFORDER__] - Référence client : [__REFCUSTOMER__]';
+						$label = str_replace(array('__REFORDER__', '__REFCUSTOMER__'), array($commande->ref, $commande->ref_client), $label);
+						
+						TSubtotal::addTitle($facture, $label, 1, $rang);
+						$rang++;
+					}
+					
+					$object->rang = $rang;
+					$facture->updateRangOfLine($object->id, $rang);
+					$rang++;
+						
+					// Est-ce qu'il s'agit de la dernière ligne de la commande d'origine ? Si oui alors on ajout un sous-total
+					if ($last_fk_commandedet == $object->origin_id) 
+					{
+						TSubtotal::addTotal($facture, $langs->trans('SubTotal'), 1, $rang);
+						$rang++;
+					}
+				}
+				
+				$subtotal_bloc_previous_fk_commande = $current_fk_commande;
+				$subtotal_current_rang = $rang;
+			}
+		}
+        
+        
         if ($action == 'USER_LOGIN') {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id

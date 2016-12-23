@@ -70,7 +70,8 @@ class pdf_azur_subtotal extends ModelePDFPropales
 
 		$this->db = $db;
 		$this->name = "azur_subtotal";
-		$this->description = 'Modèle de proposition commerciale incluant des spécificités du module sous-total';
+		// J'ajoute l'annotation "déprécié" mais à garder... des fois qu'un client avec une vieille version utilise les modèles PDF custom
+		$this->description = 'Modèle de proposition commerciale incluant des spécificités du module sous-total. (déprécié)';
 
 		// Dimension page pour format A4
 		$this->type = 'pdf';
@@ -217,7 +218,9 @@ class pdf_azur_subtotal extends ModelePDFPropales
 		if ($conf->propal->dir_output)
 		{
 			$object->fetch_thirdparty();
-
+			if(!empty($object->client) ){
+				$object->thirdparty = $object->client;
+			}
 			// $deja_regle = 0;
 
 			// Definition of $dir and $file
@@ -618,6 +621,18 @@ class pdf_azur_subtotal extends ModelePDFPropales
 					if (($object->lines[$i]->info_bits & 0x01) == 0x01) $vatrate.='*';
 					if (! isset($this->tva[$vatrate]))				$this->tva[$vatrate]='';
 					$this->tva[$vatrate] += $tvaligne;
+
+					if (!empty($object->lines[$i]->TTotal_tva))
+					{
+						foreach ($object->lines[$i]->TTotal_tva as $vatrate => $tvaligne)
+						{
+							$this->tva[$vatrate] += $tvaligne;
+						}
+					}
+					else {
+						// standard
+						$this->tva[$vatrate] += $tvaligne;
+					}
 
 					if ($posYAfterImage > $posYAfterDescription) $nexY=$posYAfterImage;
 
@@ -1394,13 +1409,12 @@ class pdf_azur_subtotal extends ModelePDFPropales
 		$pdf->SetXY($posx,$posy);
 		$pdf->SetTextColor(0,0,60);
 		$pdf->MultiCell(100, 3, $outputlangs->transnoentities("DateEndPropal")." : " . dol_print_date($object->fin_validite,"day",false,$outputlangs,true), '', 'R');
-
-		if ($object->client->code_client)
+		if ($object->thirdparty->code_client)
 		{
 			$posy+=4;
 			$pdf->SetXY($posx,$posy);
 			$pdf->SetTextColor(0,0,60);
-			$pdf->MultiCell(100, 3, $outputlangs->transnoentities("CustomerCode")." : " . $outputlangs->transnoentities($object->client->code_client), '', 'R');
+			$pdf->MultiCell(100, 3, $outputlangs->transnoentities("CustomerCode")." : " . $outputlangs->transnoentities($object->thirdparty->code_client), '', 'R');
 		}
 
 		$posy+=2;
@@ -1420,7 +1434,7 @@ class pdf_azur_subtotal extends ModelePDFPropales
 		 		$carac_emetteur .= ($carac_emetteur ? "\n" : '' ).$outputlangs->transnoentities("Name").": ".$outputlangs->convToOutputCharset($object->user->getFullName($outputlangs))."\n";
 		 	}
 
-		 	$carac_emetteur .= pdf_build_address($outputlangs, $this->emetteur, $object->client);
+		 	$carac_emetteur .= pdf_build_address($outputlangs, $this->emetteur, $object->thirdparty);
 
 			// Show sender
 			$posy=42;
@@ -1464,15 +1478,15 @@ class pdf_azur_subtotal extends ModelePDFPropales
 			{
 				// On peut utiliser le nom de la societe du contact
 				if (! empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) $socname = $object->contact->socname;
-				else $socname = $object->client->name;
+				else $socname = $object->thirdparty->name;
 				$carac_client_name=$outputlangs->convToOutputCharset($socname);
 			}
 			else
 			{
-				$carac_client_name=$outputlangs->convToOutputCharset($object->client->name);
+				$carac_client_name=$outputlangs->convToOutputCharset($object->thirdparty->name);
 			}
 
-			$carac_client=pdf_build_address($outputlangs,$this->emetteur,$object->client,($usecontact?$object->contact:''),$usecontact,'target');
+			$carac_client=pdf_build_address($outputlangs,$this->emetteur,$object->thirdparty,($usecontact?$object->contact:''),$usecontact,'target');
 
 			// Show recipient
 			$widthrecbox=100;
@@ -1514,7 +1528,8 @@ class pdf_azur_subtotal extends ModelePDFPropales
 	function _pagefoot(&$pdf,$object,$outputlangs,$hidefreetext=0)
 	{
 		$showdetails=0;
-		return pdf_pagefoot($pdf,$outputlangs,'PROPALE_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche,$this->page_hauteur,$object,$showdetails,$hidefreetext);
+		$free_text = (float)DOL_VERSION > 3.8 ? 'PROPOSAL_FREE_TEXT' : 'PROPALE_FREE_TEXT';
+		return pdf_pagefoot($pdf,$outputlangs,$free_text,$this->emetteur,$this->marge_basse,$this->marge_gauche,$this->page_hauteur,$object,$showdetails,$hidefreetext);
 	}
 
 }

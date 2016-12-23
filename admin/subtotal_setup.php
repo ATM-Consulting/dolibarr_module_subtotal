@@ -49,7 +49,7 @@ if($action=='save') {
 	
 	foreach($_REQUEST['TDivers'] as $name=>$param) {
 		
-		dolibarr_set_const($db, $name, $param);
+		dolibarr_set_const($db, $name, $param,'chaine', 0, '', $conf->entity);
 		
 	}
 	
@@ -96,72 +96,134 @@ dol_fiche_head(
 showParameters();
 
 function showParameters() {
-	global $db,$conf,$langs;
+	global $db,$conf,$langs,$bc;
 	
 	$html=new Form($db);
 	
+	$var=false;
+	print '<table class="noborder" width="100%">';
+	print '<tr class="liste_titre">';
+	print '<td>'.$langs->trans("Parameters").'</td>'."\n";
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
 	
-	?><form action="<?php echo $_SERVER['PHP_SELF'] ?>" name="form1" method="POST" enctype="multipart/form-data">
-		<input type="hidden" name="action" value="save" />
-	<table width="100%" class="noborder" style="background-color: #fff;">
-		<tr class="liste_titre">
-			<td colspan="2">Paramètres</td>
-		</tr>
-		
-		<tr>
-			<td><?php echo $langs->trans('SUBTOTAL_MANAGE_SUBSUBTOTAL') ?></td><td><?php
-			
-				if($conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL==0) {
-					
-					 ?><a href="?action=save&TDivers[SUBTOTAL_MANAGE_SUBSUBTOTAL]=1"><?php echo img_picto($langs->trans("Disabled"),'switch_off'); ?></a><?php
-					
-				}
-				else {
-					 ?><a href="?action=save&TDivers[SUBTOTAL_MANAGE_SUBSUBTOTAL]=0"><?php echo img_picto($langs->trans("Activated"),'switch_on'); ?></a><?php
-					
-				}
-			
-			?></td>				
-		</tr>
-		
-		<tr class="pair">
-			<td><?php echo $langs->trans('SUBTOTAL_USE_NEW_FORMAT') ?></td><td><?php
-			
-				if(empty($conf->global->SUBTOTAL_USE_NEW_FORMAT)) {
-					
-					 ?><a href="?action=save&TDivers[SUBTOTAL_USE_NEW_FORMAT]=1"><?php echo img_picto($langs->trans("Disabled"),'switch_off'); ?></a><?php
-					
-				}
-				else {
-					 ?><a href="?action=save&TDivers[SUBTOTAL_USE_NEW_FORMAT]=0"><?php echo img_picto($langs->trans("Activated"),'switch_on'); ?></a><?php
-					
-				}
-			
-			?></td>				
-		</tr>
-<?php
-	if((float)DOL_VERSION>=3.8) {
-?>		<tr class="pair">
-			<td><?php echo $langs->trans('SUBTOTAL_USE_NUMEROTATION') ?></td><td><?php
-			
-				if(empty($conf->global->SUBTOTAL_USE_NUMEROTATION)) {
-					
-					 ?><a href="?action=save&TDivers[SUBTOTAL_USE_NUMEROTATION]=1"><?php echo img_picto($langs->trans("Disabled"),'switch_off'); ?></a><?php
-					
-				}
-				else {
-					 ?><a href="?action=save&TDivers[SUBTOTAL_USE_NUMEROTATION]=0"><?php echo img_picto($langs->trans("Activated"),'switch_on'); ?></a><?php
-					
-				}
-			
-			?></td>				
-		</tr>
-<?php
-}
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_MANAGE_SUBSUBTOTAL").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_MANAGE_SUBSUBTOTAL');
+	print '</td></tr>';
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_USE_NEW_FORMAT").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_USE_NEW_FORMAT');
+	print '</td></tr>';
+	
+	if((float)DOL_VERSION>=3.8)
+	{
+		$var=!$var;
+		print '<tr '.$bc[$var].'>';
+		print '<td>'.$langs->trans("SUBTOTAL_USE_NUMEROTATION").'</td>';
+		print '<td align="center" width="20">&nbsp;</td>';
+		print '<td align="center" width="300">';
+		print ajax_constantonoff('SUBTOTAL_USE_NUMEROTATION');
+		print '</td></tr>';	
+	}
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_ADD_BLOCK").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ALLOW_ADD_BLOCK');
+	print '</td></tr>';
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_EDIT_BLOCK").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ALLOW_EDIT_BLOCK');
+	print '</td></tr>';
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_REMOVE_BLOCK").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ALLOW_REMOVE_BLOCK');
+	print '</td></tr>';
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE');
+	print '</td></tr>';
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK');
+	print '</td></tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$html->textwithpicto($langs->trans("SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE"), $langs->trans("SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info")).'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="right" width="300">';
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<input type="hidden" name="action" value="set_SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE">';
+	print '<input type="text" name="SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE" value="'.$conf->global->SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE.'" />';
+	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+	print '</form>';
+	print '</td></tr>';
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_TITLE_STYLE").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="right" width="300">';
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<input type="hidden" name="action" value="set_SUBTOTAL_TITLE_STYLE">';
+	print '<input type="text" placeholder="BU" name="SUBTOTAL_TITLE_STYLE" value="'.$conf->global->SUBTOTAL_TITLE_STYLE.'" />';
+	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+	print '</form>';
+	print '</td></tr>';
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_SUBTOTAL_STYLE").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="right" width="300">';
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<input type="hidden" name="action" value="set_SUBTOTAL_SUBTOTAL_STYLE">';
+	print '<input type="text" placeholder="B" name="SUBTOTAL_SUBTOTAL_STYLE" value="'.$conf->global->SUBTOTAL_SUBTOTAL_STYLE.'" />';
+	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+	print '</form>';
+	print '</td></tr>';
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES", $langs->transnoentitiesnoconv('HideInnerLines')).'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES');
+	print '</td></tr>';
+	
+	
+	print '</table>';
 ?>
-	</table>
-	</form>
-	
 	<br />
 		
 	<table width="100%" class="noborder" style="background-color: #fff;">

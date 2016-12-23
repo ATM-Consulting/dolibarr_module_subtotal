@@ -62,7 +62,7 @@ class modSubtotal extends DolibarrModules
         // (where XXX is value of numeric property 'numero' of module)
         $this->description = "Module permettant l'ajout de sous-totaux et sous-totaux intermédiaires et le déplacement d'une ligne aisée de l'un dans l'autre";
         // Possible values for version are: 'development', 'experimental' or version
-        $this->version = '1.6.1';
+        $this->version = '1.7.2';
         // Key used in llx_const table to save module status enabled/disabled
         // (where MYMODULE is value of property name of module in uppercase)
         $this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
@@ -81,7 +81,7 @@ class modSubtotal extends DolibarrModules
         // for specific css file (eg: /titre/css/titre.css.php)
         $this->module_parts = array(
             // Set this to 1 if module has its own trigger directory
-            //'triggers' => 1,
+            'triggers' => 1,
             // Set this to 1 if module has its own login method directory
             //'login' => 0,
             // Set this to 1 if module has its own substitution function file
@@ -95,7 +95,7 @@ class modSubtotal extends DolibarrModules
             // Set this to relative path of css if module has its own css file
             //'css' => '/titre/css/mycss.css.php',
             // Set here all hooks context managed by module
-            'hooks' => array('invoicecard','propalcard','ordercard','odtgeneration')
+            'hooks' => array('invoicecard','propalcard','ordercard','odtgeneration','orderstoinvoice')
             // Set here all workflow context managed by module
             //'workflow' => array('order' => array('WORKFLOW_ORDER_AUTOCREATE_INVOICE'))
         );
@@ -132,6 +132,11 @@ class modSubtotal extends DolibarrModules
             		'Définit le style (B : gras, I : Italique, U : Souligné) des sous titres lorsque le détail des lignes et des ensembles est caché',
             		1
             	)
+				,1=>array('SUBTOTAL_ALLOW_ADD_BLOCK', 'chaine', '1', 'Permet l\'ajout de titres et sous-totaux')
+				,2=>array('SUBTOTAL_ALLOW_EDIT_BLOCK', 'chaine', '1', 'Permet de modifier titres et sous-totaux')
+				,3=>array('SUBTOTAL_ALLOW_REMOVE_BLOCK', 'chaine', '1', 'Permet de supprimer les titres et sous-totaux')
+				,4=>array('SUBTOTAL_TITLE_STYLE', 'chaine', 'BU')
+				,5=>array('SUBTOTAL_SUBTOTAL_STYLE', 'chaine', 'B')
             //	1=>array(
             //		'MYMODULE_MYNEWCONST2',
             //		'chaine',
@@ -140,6 +145,9 @@ class modSubtotal extends DolibarrModules
             //		0
             //	)
         );
+		
+
+
 
         // Array to add new pages in new tabs
         // Example:

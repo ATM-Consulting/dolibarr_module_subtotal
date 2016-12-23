@@ -1,1 +1,1 @@
-Si vous désirez activer la gestion des sous-sous-totaux, il faut mettre la variable SUBTOTAL_MANAGE_SUBSUBTOTAL dans configuration > divers à 1
+Un bug existe dans la version 3.8, il vous faudra donc remplacer certains fichiers de Dolibarr par le contenu de htdocs_38

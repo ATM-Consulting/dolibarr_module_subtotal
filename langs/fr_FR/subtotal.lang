@@ -19,3 +19,15 @@ SubtotalLabel=<b>Sous-total : </b>
 SUBTOTAL_MANAGE_SUBSUBTOTAL=Activer la gestion des sous-sous-totaux
 SUBTOTAL_USE_NEW_FORMAT=Activer l'utilisation avancée
 SUBTOTAL_USE_NUMEROTATION=Activer la numérotation automatique sur le PDF
+SUBTOTAL_ALLOW_ADD_BLOCK=Autoriser l'ajout d'un titre et sous-total
+SUBTOTAL_ALLOW_EDIT_BLOCK=Autoriser l'edition d'un titre ou sous-total
+SUBTOTAL_ALLOW_REMOVE_BLOCK=Autoriser la suppression d'un titre ou sous-total
+SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE=Permettre l'ajout d'une ligne libre et/ou produit directement sous un titre
+subtotal_title_to_add_under_title=Ajouter sous
+SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE=Texte des titres lors de la facturation via onglet client -> bouton "Facturer commandes"
+SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info=Clés de remplacement :<br /><b>__REFORDER__</b> = Référence de la commande<br /><b>__REFCUSTOMER__</b> = Référence client de la commande
+subtotal_add_title_bloc_from_orderstoinvoice=Ajouter un bloc titre et sous-total entre chaque commande
+SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK=L'ajout sous un titre se fera en fin de section 
+SUBTOTAL_TITLE_STYLE=Style des titres (B = gras, U = souligné, I = italique)
+SUBTOTAL_SUBTOTAL_STYLE=Style des sous-totaux (B = gras, U = souligné, I = italique)
+SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES=Avoir une seule ligne de titre + total si l'option "%s" est utilisée (expérimental)

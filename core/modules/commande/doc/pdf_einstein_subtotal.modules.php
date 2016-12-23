@@ -71,7 +71,8 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 
 		$this->db = $db;
 		$this->name = "einstein_subtotal";
-		$this->description = 'Modèle de commande incluant des spécificités du module sous-total.';
+		// J'ajoute l'annotation "déprécié" mais à garder... des fois qu'un client avec une vieille version utilise les modèles PDF custom
+		$this->description = 'Modèle de commande incluant des spécificités du module sous-total. (déprécié)';
 
 		// Dimension page pour format A4
 		$this->type = 'pdf';
@@ -159,7 +160,9 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 		if ($conf->commande->dir_output)
 		{
             $object->fetch_thirdparty();
-
+			if(!empty($object->client) ){
+				$object->thirdparty = $object->client;
+			}
             $deja_regle = "";
 
             // Definition of $dir and $file
@@ -510,7 +513,7 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 					if ($object->remise_percent) $localtax2ligne-=($localtax2ligne*$object->remise_percent)/100;
 
 					$vatrate=(string) $object->lines[$i]->tva_tx;
-
+					
 					// Retrieve type from database for backward compatibility with old records
 					if ((! isset($localtax1_type) || $localtax1_type=='' || ! isset($localtax2_type) || $localtax2_type=='') // if tax type not defined
 					&& (! empty($localtax1_rate) || ! empty($localtax2_rate))) // and there is local tax
@@ -528,7 +531,18 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 
 					if (($object->lines[$i]->info_bits & 0x01) == 0x01) $vatrate.='*';
 					if (! isset($this->tva[$vatrate])) 				$this->tva[$vatrate]='';
-					$this->tva[$vatrate] += $tvaligne;
+					
+					if (!empty($object->lines[$i]->TTotal_tva))
+					{
+						foreach ($object->lines[$i]->TTotal_tva as $vatrate => $tvaligne)
+						{
+							$this->tva[$vatrate] += $tvaligne;
+						}
+					}
+					else {
+						// standard
+						$this->tva[$vatrate] += $tvaligne;
+					}
 
 					// Add line
 					if (! empty($conf->global->MAIN_PDF_DASH_BETWEEN_LINES) && $i < ($nblignes - 1))
@@ -1287,7 +1301,7 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 		if ($showaddress)
 		{
 			// Sender properties
-			$carac_emetteur = pdf_build_address($outputlangs, $this->emetteur, $object->client);
+			$carac_emetteur = pdf_build_address($outputlangs, $this->emetteur, $object->thirdparty);
 
 			// Show sender
 			$posy=42;
@@ -1332,15 +1346,15 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 			{
 				// On peut utiliser le nom de la societe du contact
 				if (! empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) $socname = $object->contact->socname;
-				else $socname = $object->client->name;
+				else $socname = $object->thirdparty->name;
 				$carac_client_name=$outputlangs->convToOutputCharset($socname);
 			}
 			else
 			{
-				$carac_client_name=$outputlangs->convToOutputCharset($object->client->name);
+				$carac_client_name=$outputlangs->convToOutputCharset($object->thirdparty->name);
 			}
 
-			$carac_client=pdf_build_address($outputlangs,$this->emetteur,$object->client,($usecontact?$object->contact:''),$usecontact,'target');
+			$carac_client=pdf_build_address($outputlangs,$this->emetteur,$object->thirdparty,($usecontact?$object->contact:''),$usecontact,'target');
 
 			// Show recipient
 			$widthrecbox=100;
@@ -1382,7 +1396,8 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 	function _pagefoot(&$pdf,$object,$outputlangs,$hidefreetext=0)
 	{
 		$showdetails=0;
-		return pdf_pagefoot($pdf,$outputlangs,'COMMANDE_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche,$this->page_hauteur,$object,$showdetails,$hidefreetext);
+		$free_text = (float)DOL_VERSION > 3.8 ? 'ORDER_FREE_TEXT' : 'COMMANDE_FREE_TEXT';
+		return pdf_pagefoot($pdf,$outputlangs,$free_text,$this->emetteur,$this->marge_basse,$this->marge_gauche,$this->page_hauteur,$object,$showdetails,$hidefreetext);
 	}
 
 }
