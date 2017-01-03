@@ -425,7 +425,9 @@ class ActionsSubtotal
 	}
 	
 	function doActions($parameters, &$object, $action, $hookmanager) {
-		global $conf;
+		global $conf,$langs;
+		
+		dol_include_once('/subtotal/class/subtotal.class.php');
 		
 		if($action === 'builddoc') {
 			
@@ -497,7 +499,21 @@ class ActionsSubtotal
 			exit;
 			
 		}
-
+		else if ($action == 'duplicate')
+		{
+			$langs->load('subtotal@subtotal');
+			
+			$lineid = GETPOST('lineid', 'int');
+			$nbDuplicate = TSubtotal::duplicateLines($object, $lineid, true);
+			
+			if ($nbDuplicate > 0) setEventMessage($langs->trans('subtotal_duplicate_success', $nbDuplicate));
+			elseif ($nbDuplicate == 0) setEventMessage($langs->trans('subtotal_duplicate_lineid_not_found'), 'warnings');
+			else setEventMessage($langs->trans('subtotal_duplicate_error'), 'errors');
+			
+			header('Location: ?id='.$object->id);
+			exit;
+		}
+		
 		return 0;
 	}
 	
@@ -1174,28 +1190,36 @@ class ActionsSubtotal
 		}	
 		else if (in_array('invoicecard',$contexts) || in_array('propalcard',$contexts) || in_array('ordercard',$contexts)) 
         {
-        	
 			if($object->element=='facture')$idvar = 'facid';
 			else $idvar='id';
-					
-					if($action=='savelinetitle' && $_POST['lineid']===$line->id) {
+			
+					if($action=='savelinetitle' && GETPOST('lineid', 'int') == $line->id) {
 						
 						$description = ($line->qty>90) ? '' : GETPOST('linedescription');
 						$pagebreak = (int)GETPOST('pagebreak');
-
+						
+						$level = GETPOST('subtotal_level', 'int');
+						if (!empty($level))
+						{
+							if ($line->qty > 90) $level = 100 - $level;
+						}
+						else
+						{
+							$level = $line->qty;
+						}
+						
 						/**
 						 * @var $object Facture
 						 */
-						if($object->element=='facture') $object->updateline($line->id,$description, 0,$line->qty,0,'','',0,0,0,'HT',$pagebreak,9,0,0,null,0,$_POST['linetitle'], $this->module_number);
+						if($object->element=='facture') $object->updateline($line->id,$description, 0, $level,0,'','',0,0,0,'HT',$pagebreak,9,0,0,null,0,$_POST['linetitle'], $this->module_number);
 						/**
 						* @var $object Propal
 						*/
-						else if($object->element=='propal') $object->updateline($line->id, 0,$line->qty,0,0,0,0, $description ,'HT',$pagebreak,$this->module_number,0,0,0,0,$_POST['linetitle'],9);
+						else if($object->element=='propal') $res = $object->updateline($line->id, 0, $level,0,0,0,0, $description ,'HT',$pagebreak,$this->module_number,0,0,0,0,$_POST['linetitle'],9);
 						/**
 						 * @var $object Commande
 						 */
-						else if($object->element=='commande') $object->updateline($line->id,$description, 0,$line->qty,0,0,0,0,'HT',$pagebreak,'','',9,0,0,null,0,$_POST['linetitle'], $this->module_number);
-						
+						else if($object->element=='commande') $object->updateline($line->id,$description, 0, $level,0,0,0,0,'HT',$pagebreak,'','',9,0,0,null,0,$_POST['linetitle'], $this->module_number);
 					}
 					else if($action=='editlinetitle') {
 						?>
@@ -1286,21 +1310,25 @@ class ActionsSubtotal
 								}
 								
 								if($line->label=='') {
-									$line->label = $line->description;
+									$line->label = $line->description.' '.$this->getTitle($object, $line);
 									$line->description='';
 								}
 								
-								?>
-								<label>
-									<input type="text" name="line-title" id-line="<?php echo $line->id ?>"
-									       value="<?php echo $line->label ?>" size="80"/>
-								</label>
-
-								<input type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="8" <?php print ($line->info_bits > 0) ? 'checked="checked"' : '' ?> /> <label for="subtotal-pagebreak"><?php print $langs->trans('AddBreakPageBefore') ?></label>
-								<br />
-								<?php
+								
+								echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$line->label.'" size="80"/>&nbsp;';
+								
+								$select = '<select name="subtotal_level">';
+								for ($j=1; $j<10; $j++)
+								{
+									$select .= '<option '.($qty_displayed == $j ? 'selected="selected"' : '').' value="'.$j.'">'.$langs->trans('Level').' '.$j.'</option>';
+								}
+								$select .= '</select>&nbsp;';
+								
+								echo $select;
+								echo '<input type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="8" '.(($line->info_bits > 0) ? 'checked="checked"' : '') .' /> <label for="subtotal-pagebreak">'.$langs->trans('AddBreakPageBefore').'</label>';
 								
 								if($line->qty<10) {
+									echo '<br />';
 									// WYSIWYG editor
 									require_once DOL_DOCUMENT_ROOT . '/core/class/doleditor.class.php';
 									$nbrows = ROWS_2;
@@ -1376,7 +1404,7 @@ class ActionsSubtotal
 							 }	
 						?>
 					
-					<td align="center">
+					<td align="center" class="nowrap">
 						<?php
 							if($action=='editlinetitle' && $_REQUEST['lineid']==$line->id ) {
 								?>
@@ -1394,6 +1422,7 @@ class ActionsSubtotal
 													, linedescription: $('textarea[name=line-description]').val()
 												<?php } ?>
 													,pagebreak:($('input[name=line-pagebreak]').is(':checked') ? 8 : 0)
+													,subtotal_level: $('select[name=subtotal_level]').val()
 											}
 											,function() {
 												document.location.href="<?php echo '?'.$idvar.'='.$object->id ?>";	
@@ -1411,15 +1440,14 @@ class ActionsSubtotal
 								<?php
 							}
 							else{
+								if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK))
+								{
+									if(TSubtotal::isTitle($line)) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
+								}
 								
-								if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK)) {
-								
-								?>
-									<a href="<?php echo '?'.$idvar.'='.$object->id.'&action=editlinetitle&lineid='.$line->id ?>">
-										<?php echo img_edit() ?>		
-									</a>
-								<?php
-								
+								if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK)) 
+								{
+									echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=editlinetitle&lineid='.$line->id.'">'.img_edit().'</a>';
 								}								
 							}
 						?>
@@ -1436,9 +1464,7 @@ class ActionsSubtotal
 								if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK)) {
 								
 									?>
-										<a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id ?>">
-											<?php echo img_delete() ?>		
-										</a>
+										<a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id ?>"><?php echo img_delete() ?></a>
 									<?php								
 									
 									
