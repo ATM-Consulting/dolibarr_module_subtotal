@@ -425,7 +425,9 @@ class ActionsSubtotal
 	}
 	
 	function doActions($parameters, &$object, $action, $hookmanager) {
-		global $conf;
+		global $conf,$langs;
+		
+		dol_include_once('/subtotal/class/subtotal.class.php');
 		
 		if($action === 'builddoc') {
 			
@@ -497,7 +499,21 @@ class ActionsSubtotal
 			exit;
 			
 		}
-
+		else if ($action == 'duplicate')
+		{
+			$langs->load('subtotal@subtotal');
+			
+			$lineid = GETPOST('lineid', 'int');
+			$nbDuplicate = TSubtotal::duplicateLines($object, $lineid, true);
+			
+			if ($nbDuplicate > 0) setEventMessage($langs->trans('subtotal_duplicate_success', $nbDuplicate));
+			elseif ($nbDuplicate == 0) setEventMessage($langs->trans('subtotal_duplicate_lineid_not_found'), 'warnings');
+			else setEventMessage($langs->trans('subtotal_duplicate_error'), 'errors');
+			
+			header('Location: ?id='.$object->id);
+			exit;
+		}
+		
 		return 0;
 	}
 	
@@ -1388,7 +1404,7 @@ class ActionsSubtotal
 							 }	
 						?>
 					
-					<td align="center">
+					<td align="center" class="nowrap">
 						<?php
 							if($action=='editlinetitle' && $_REQUEST['lineid']==$line->id ) {
 								?>
@@ -1424,15 +1440,14 @@ class ActionsSubtotal
 								<?php
 							}
 							else{
+								if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK))
+								{
+									if(TSubtotal::isTitle($line)) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
+								}
 								
-								if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK)) {
-								
-								?>
-									<a href="<?php echo '?'.$idvar.'='.$object->id.'&action=editlinetitle&lineid='.$line->id ?>">
-										<?php echo img_edit() ?>		
-									</a>
-								<?php
-								
+								if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK)) 
+								{
+									echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=editlinetitle&lineid='.$line->id.'">'.img_edit().'</a>';
 								}								
 							}
 						?>
@@ -1449,9 +1464,7 @@ class ActionsSubtotal
 								if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK)) {
 								
 									?>
-										<a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id ?>">
-											<?php echo img_delete() ?>		
-										</a>
+										<a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id ?>"><?php echo img_delete() ?></a>
 									<?php								
 									
 									
