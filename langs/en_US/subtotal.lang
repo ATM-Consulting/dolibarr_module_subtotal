@@ -36,3 +36,5 @@ Duplicate=Duplicate
 subtotal_duplicate_success=%d lines copied
 subtotal_duplicate_lineid_not_found=Clone block fails the title's identifier not found
 subtotal_duplicate_error=Failure about clone
+subtotal_apply_default_tva=Apply a default TVA to the block
+subtotal_apply_default_tva_help=Allows to define a default TVA on each line's block

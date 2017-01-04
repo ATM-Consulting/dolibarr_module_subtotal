@@ -1177,7 +1177,7 @@ class ActionsSubtotal
 	 */
 	function printObjectLine ($parameters, &$object, &$action, $hookmanager){
 		
-		global $conf,$langs,$user;
+		global $conf,$langs,$user,$db;
 		
 		$num = &$parameters['num'];
 		$line = &$parameters['line'];
@@ -1220,6 +1220,17 @@ class ActionsSubtotal
 						 * @var $object Commande
 						 */
 						else if($object->element=='commande') $object->updateline($line->id,$description, 0, $level,0,0,0,0,'HT',$pagebreak,'','',9,0,0,null,0,$_POST['linetitle'], $this->module_number);
+						
+						
+						$subtotal_tva_tx = GETPOST('subtotal_tva_tx', 'int');
+						if ($subtotal_tva_tx != '')
+						{
+							$TLine = TSubtotal::getLinesFromTitleId($object, $line->id);
+							foreach ($TLine as &$line)
+							{
+								if (!TSubtotal::isTitle($line) && !TSubtotal::isSubtotal($line)) $line->setValueFrom('tva_tx', $subtotal_tva_tx, $line->table_element, $line->id);
+							}
+						}
 					}
 					else if($action=='editlinetitle') {
 						?>
@@ -1325,7 +1336,13 @@ class ActionsSubtotal
 								$select .= '</select>&nbsp;';
 								
 								echo $select;
-								echo '<input type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="8" '.(($line->info_bits > 0) ? 'checked="checked"' : '') .' /> <label for="subtotal-pagebreak">'.$langs->trans('AddBreakPageBefore').'</label>';
+								echo '<input type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="8" '.(($line->info_bits > 0) ? 'checked="checked"' : '') .' /> <label for="subtotal-pagebreak">'.$langs->trans('AddBreakPageBefore').'</label>&nbsp;';
+								
+								$form = new Form($db);
+								echo '<select id="subtotal_tva_tx" name="subtotal_tva_tx" class="flat"><option selected="selected" value="">-</option>';
+								echo str_replace('selected', '', $form->load_tva('subtotal_tva_tx', '', $parameters['seller'], $parameters['buyer'], 0, 0, '', true));
+								echo '</select>&nbsp;';
+								echo '<label for="subtotal_tva_tx">'.$form->textwithpicto($langs->trans('subtotal_apply_default_tva'), $langs->trans('subtotal_apply_default_tva_help')).'</label>';
 								
 								if($line->qty<10) {
 									echo '<br />';
@@ -1423,6 +1440,7 @@ class ActionsSubtotal
 												<?php } ?>
 													,pagebreak:($('input[name=line-pagebreak]').is(':checked') ? 8 : 0)
 													,subtotal_level: $('select[name=subtotal_level]').val()
+													,subtotal_tva_tx: $('select[name=subtotal_tva_tx]').val()
 											}
 											,function() {
 												document.location.href="<?php echo '?'.$idvar.'='.$object->id ?>";	
