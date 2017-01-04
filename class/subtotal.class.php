@@ -125,12 +125,12 @@ class TSubtotal {
 	
 	public static function isTitle(&$line)
 	{
-		return $line->qty >= 1 && $line->qty <= 9;
+		return $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty >= 1 && $line->qty <= 9;
 	}
 	
 	public static function isSubtotal(&$line)
 	{
-		return $line->qty <= 99 && $line->qty >= 90;
+		return $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty <= 99 && $line->qty >= 90;
 	}
 
 	public static function duplicateLines(&$object, $lineid_title, $withBlockLine=false)

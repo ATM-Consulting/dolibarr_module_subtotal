@@ -36,3 +36,5 @@ Duplicate=Dupliquer
 subtotal_duplicate_success=%d lignes dupliquées
 subtotal_duplicate_lineid_not_found=Impossible de dupliquer le bloc, l'identifiant du titre est introuvable
 subtotal_duplicate_error=Échec de la duplication
+subtotal_apply_default_tva=Appliquer une TVA au bloc
+subtotal_apply_default_tva_help=Permet de définir une TVA général à toutes les lignes du bloc
