@@ -133,13 +133,13 @@ class TSubtotal {
 		return $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty <= 99 && $line->qty >= 90;
 	}
 
-	public static function duplicateLines(&$object, $lineid_title, $withBlockLine=false)
+	public static function duplicateLines(&$object, $lineid, $withBlockLine=false)
 	{
-		global $db,$user;
-		
+		global $db,$user,$conf;
+
 		if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK))
 		{
-			$TLine = self::getLinesFromTitleId($object, $lineid_title, $withBlockLine);
+			$TLine = self::getLinesFromTitleId($object, $lineid, $withBlockLine);
 
 			if (!empty($TLine))
 			{
