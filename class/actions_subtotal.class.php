@@ -1,6 +1,15 @@
 <?php
 class ActionsSubtotal
 {
+	
+	function __construct($db)
+	{
+		global $langs;
+		
+		$this->db = $db;
+		$langs->load('subtotal@subtotal');
+	}
+	
 	/** Overloading the doActions function : replacing the parent's function with the one below
 	 * @param      $parameters  array           meta datas of the hook (context, etc...)
 	 * @param      $object      CommonObject    the object you want to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
@@ -501,8 +510,6 @@ class ActionsSubtotal
 		}
 		else if ($action == 'duplicate')
 		{
-			$langs->load('subtotal@subtotal');
-			
 			$lineid = GETPOST('lineid', 'int');
 			$nbDuplicate = TSubtotal::duplicateLines($object, $lineid, true);
 			
@@ -1223,13 +1230,27 @@ class ActionsSubtotal
 						
 						
 						$subtotal_tva_tx = GETPOST('subtotal_tva_tx', 'int');
-						if ($subtotal_tva_tx != '')
+						$subtotal_progress = GETPOST('subtotal_progress', 'int');
+						if ($subtotal_tva_tx != '' || $subtotal_progress != '')
 						{
+							$error_progress = $nb_progress_update = 0;
 							$TLine = TSubtotal::getLinesFromTitleId($object, $line->id);
 							foreach ($TLine as &$line)
 							{
-								if (!TSubtotal::isTitle($line) && !TSubtotal::isSubtotal($line)) $line->setValueFrom('tva_tx', $subtotal_tva_tx, $line->table_element, $line->id);
+								if (!TSubtotal::isTitle($line) && !TSubtotal::isSubtotal($line))
+								{
+									if ($subtotal_tva_tx == '') $subtotal_tva_tx = $line->tva_tx;
+									if ($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION && $subtotal_progress == '') $subtotal_progress = $line->situation_percent;
+									
+									$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $subtotal_tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $subtotal_progress, $line->fk_unit);
+									
+									if ($res > 0) $success_updated_line++;
+									else $error_updated_line++;
+								}
 							}
+							
+							if ($success_updated_line > 0) setEventMessage($langs->trans('subtotal_success_updated_line', $success_updated_line));
+							if ($error_updated_line > 0) setEventMessage($langs->trans('subtotal_error_updated_line', $error_updated_line), 'errors');
 						}
 					}
 					else if($action=='editlinetitle') {
@@ -1327,25 +1348,31 @@ class ActionsSubtotal
 								
 								
 								echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$line->label.'" size="80"/>&nbsp;';
-								
 								$select = '<select name="subtotal_level">';
 								for ($j=1; $j<10; $j++)
 								{
 									$select .= '<option '.($qty_displayed == $j ? 'selected="selected"' : '').' value="'.$j.'">'.$langs->trans('Level').' '.$j.'</option>';
 								}
 								$select .= '</select>&nbsp;';
-								
+
 								echo $select;
-								echo '<input type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="8" '.(($line->info_bits > 0) ? 'checked="checked"' : '') .' /> <label for="subtotal-pagebreak">'.$langs->trans('AddBreakPageBefore').'</label>&nbsp;';
-								
-								$form = new Form($db);
-								echo '<select id="subtotal_tva_tx" name="subtotal_tva_tx" class="flat"><option selected="selected" value="">-</option>';
-								echo str_replace('selected', '', $form->load_tva('subtotal_tva_tx', '', $parameters['seller'], $parameters['buyer'], 0, 0, '', true));
-								echo '</select>&nbsp;';
-								echo '<label for="subtotal_tva_tx">'.$form->textwithpicto($langs->trans('subtotal_apply_default_tva'), $langs->trans('subtotal_apply_default_tva_help')).'</label>';
+
+								echo '<div class="subtotal_underline" style="margin-left:24px;">';
+									echo '<label for="subtotal-pagebreak">'.$langs->trans('AddBreakPageBefore').'</label> <input style="vertical-align:sub;"  type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="8" '.(($line->info_bits > 0) ? 'checked="checked"' : '') .' />&nbsp;&nbsp;';
+
+									$form = new Form($db);
+									echo '<label for="subtotal_tva_tx">'.$form->textwithpicto($langs->trans('subtotal_apply_default_tva'), $langs->trans('subtotal_apply_default_tva_help')).'</label>';
+									echo '<select id="subtotal_tva_tx" name="subtotal_tva_tx" class="flat"><option selected="selected" value="">-</option>';
+									echo str_replace('selected', '', $form->load_tva('subtotal_tva_tx', '', $parameters['seller'], $parameters['buyer'], 0, 0, '', true));
+									echo '</select>&nbsp;&nbsp;';
+									
+									if (!empty($conf->global->INVOICE_USE_SITUATION) && $object->element == 'facture' && $object->type == Facture::TYPE_SITUATION)
+									{
+										echo '<label for="subtotal_progress">'.$langs->trans('subtotal_apply_progress').'</label> <input id="subtotal_progress" name="subtotal_progress" value="" size="1" />%';
+									}
+								echo '</div>';
 								
 								if($line->qty<10) {
-									echo '<br />';
 									// WYSIWYG editor
 									require_once DOL_DOCUMENT_ROOT . '/core/class/doleditor.class.php';
 									$nbrows = ROWS_2;
@@ -1441,6 +1468,9 @@ class ActionsSubtotal
 													,pagebreak:($('input[name=line-pagebreak]').is(':checked') ? 8 : 0)
 													,subtotal_level: $('select[name=subtotal_level]').val()
 													,subtotal_tva_tx: $('select[name=subtotal_tva_tx]').val()
+												<?php if (!empty($conf->global->INVOICE_USE_SITUATION) && $object->element == 'facture' && $object->type == Facture::TYPE_SITUATION) { ?>
+													,subtotal_progress: $('input[name=subtotal_progress]').val()
+												<?php } ?>
 											}
 											,function() {
 												document.location.href="<?php echo '?'.$idvar.'='.$object->id ?>";	

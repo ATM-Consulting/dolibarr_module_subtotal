@@ -148,7 +148,7 @@ class TSubtotal {
 
 				foreach ($TLine as $line)
 				{
-
+					// TODO refactore avec un doAddLine sur le même schéma que le doUpdateLine
 					switch ($object->element) {
 						case 'propal':
 							//$desc, $pu_ht, $qty, $txtva, $txlocaltax1=0.0, $txlocaltax2=0.0, $fk_product=0, $remise_percent=0.0, $price_base_type='HT', $pu_ttc=0.0, $info_bits=0, $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=0, $pa_ht=0, $label='',$date_start='', $date_end='',$array_options=0, $fk_unit=null, $origin='', $origin_id=0)
@@ -233,5 +233,31 @@ class TSubtotal {
 	public static function getLinesFromTitleId(&$object, $lineid, $withBlockLine=false)
 	{
 		return self::getLinesFromTitle($object, $lineid, '', '', $withBlockLine, true);
+	}
+	
+	public function doUpdateLine(&$object, $rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $type, $txlocaltax1=0, $txlocaltax2=0, $price_base_type='HT', $info_bits=0, $fk_parent_line=0, $skip_update_total=0, $fk_fournprice=null, $pa_ht=0, $label='', $special_code=0, $array_options=0, $situation_percent=0, $fk_unit = null)
+	{
+		$res = 0;
+		$object->db->begin();
+		
+		switch ($object->element) 
+		{
+			case 'propal':
+				$res = $object->updateline($rowid, $pu, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $desc, $price_base_type, $info_bits, $special_code, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $type, $date_start, $date_end, $array_options, $fk_unit);
+				break;
+			
+			case 'commande':
+				$res = $object->updateline($rowid, $desc, $pu, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $date_start, $date_end, $type, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $special_code, $array_options, $fk_unit);
+				break;
+			
+			case 'facture':
+				$res = $object->updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $type, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $special_code, $array_options, $situation_percent, $fk_unit);
+				break;
+		}
+		
+		if ($res <= 0) $object->db->rollback();
+		else $object->db->commit();
+		
+		return $res;
 	}
 }

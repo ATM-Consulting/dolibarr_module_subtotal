@@ -38,3 +38,6 @@ subtotal_duplicate_lineid_not_found=Impossible de dupliquer le bloc, l'identifia
 subtotal_duplicate_error=Échec de la duplication
 subtotal_apply_default_tva=Appliquer une TVA au bloc
 subtotal_apply_default_tva_help=Permet de définir une TVA général à toutes les lignes du bloc
+subtotal_apply_progress=Appliquer une progression au bloc
+subtotal_success_updated_line=Lignes mises à jour : %d
+subtotal_error_updated_line=Erreur : %d lignes non mises à jour
