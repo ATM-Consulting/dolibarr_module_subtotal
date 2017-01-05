@@ -1294,16 +1294,25 @@ class ActionsSubtotal
 						echo '<input id="product_id" type="hidden" value="'.$line->fk_product.'" name="type">';
 						echo '<input id="special_code" type="hidden" value="'.$line->special_code.'" name="type">';
 
-						if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+						if (TSubtotal::isTitle($line))
 						{
-							$qty_displayed = ($line->qty >=1 && $line->qty <= 9) ? $line->qty : 100 - $line->qty;
-							print img_picto('', 'subsubtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;color:#0075DE;">'.$qty_displayed.'</span>&nbsp;&nbsp;';
+							if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+							{
+								$qty_displayed = $line->qty;
+								print img_picto('', 'subsubtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;color:#0075DE;">'.$qty_displayed.'</span>&nbsp;&nbsp;';
+							}
+							else
+							{
+								if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
+								else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+							}
 						}
 						else
 						{
-							if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
-							else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+							$qty_displayed = 100 - $line->qty;
+							print img_picto('', 'subsubtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;color:#0075DE;">'.$qty_displayed.'</span>&nbsp;&nbsp;';
 						}
+						
 
 						if($line->label=='') {
 							$line->label = $line->description.' '.$this->getTitle($object, $line);
@@ -1311,27 +1320,35 @@ class ActionsSubtotal
 						}
 
 						echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$line->label.'" size="80"/>&nbsp;';
-						$select = '<select name="subtotal_level">';
-						for ($j=1; $j<10; $j++)
+						
+						if (TSubtotal::isTitle($line))
 						{
-							$select .= '<option '.($qty_displayed == $j ? 'selected="selected"' : '').' value="'.$j.'">'.$langs->trans('Level').' '.$j.'</option>';
-						}
-						$select .= '</select>&nbsp;';
+							$select = '<select name="subtotal_level">';
+							for ($j=1; $j<10; $j++)
+							{
+								$select .= '<option '.($qty_displayed == $j ? 'selected="selected"' : '').' value="'.$j.'">'.$langs->trans('Level').' '.$j.'</option>';
+							}
+							$select .= '</select>&nbsp;';
 
-						echo $select;
+							echo $select;
+						}
+						
 
 						echo '<div class="subtotal_underline" style="margin-left:24px;">';
 							echo '<label for="subtotal-pagebreak">'.$langs->trans('AddBreakPageBefore').'</label> <input style="vertical-align:sub;"  type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="8" '.(($line->info_bits > 0) ? 'checked="checked"' : '') .' />&nbsp;&nbsp;';
 
-							$form = new Form($db);
-							echo '<label for="subtotal_tva_tx">'.$form->textwithpicto($langs->trans('subtotal_apply_default_tva'), $langs->trans('subtotal_apply_default_tva_help')).'</label>';
-							echo '<select id="subtotal_tva_tx" name="subtotal_tva_tx" class="flat"><option selected="selected" value="">-</option>';
-							echo str_replace('selected', '', $form->load_tva('subtotal_tva_tx', '', $parameters['seller'], $parameters['buyer'], 0, 0, '', true));
-							echo '</select>&nbsp;&nbsp;';
-
-							if (!empty($conf->global->INVOICE_USE_SITUATION) && $object->element == 'facture' && $object->type == Facture::TYPE_SITUATION)
+							if (TSubtotal::isTitle($line))
 							{
-								echo '<label for="subtotal_progress">'.$langs->trans('subtotal_apply_progress').'</label> <input id="subtotal_progress" name="subtotal_progress" value="" size="1" />%';
+								$form = new Form($db);
+								echo '<label for="subtotal_tva_tx">'.$form->textwithpicto($langs->trans('subtotal_apply_default_tva'), $langs->trans('subtotal_apply_default_tva_help')).'</label>';
+								echo '<select id="subtotal_tva_tx" name="subtotal_tva_tx" class="flat"><option selected="selected" value="">-</option>';
+								echo str_replace('selected', '', $form->load_tva('subtotal_tva_tx', '', $parameters['seller'], $parameters['buyer'], 0, 0, '', true));
+								echo '</select>&nbsp;&nbsp;';
+								
+								if (!empty($conf->global->INVOICE_USE_SITUATION) && $object->element == 'facture' && $object->type == Facture::TYPE_SITUATION)
+								{
+									echo '<label for="subtotal_progress">'.$langs->trans('subtotal_apply_progress').'</label> <input id="subtotal_progress" name="subtotal_progress" value="" size="1" />%';
+								}
 							}
 						echo '</div>';
 
@@ -1357,11 +1374,12 @@ class ActionsSubtotal
 
 						 if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
 						 {
-							if($line->qty<=9) 
+							if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line)) 
 							{
-								for ($i=1;$i<$line->qty;$i++) print '&nbsp;&nbsp;&nbsp;';
-								print img_picto('', 'subtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;">'.$line->qty.'</span>&nbsp;&nbsp;';
-
+								echo str_repeat('&nbsp;&nbsp;&nbsp;', $line->qty-1);
+								
+								if (TSubtotal::isTitle($line)) print img_picto('', 'subtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;">'.$line->qty.'</span>&nbsp;&nbsp;';
+								else print img_picto('', 'subtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;">'.(100-$line->qty).'</span>&nbsp;&nbsp;';
 							}
 						 }
 						 else 
@@ -1384,10 +1402,10 @@ class ActionsSubtotal
 							}
 
 						 } 
+						if($line->qty>90) print ' : ';
+						if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
 
-						 if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
-
-						 if($line->qty>90) { print ' : '; }
+						 
 
 
 					}

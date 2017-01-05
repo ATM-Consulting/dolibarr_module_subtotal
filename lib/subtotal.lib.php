@@ -67,7 +67,7 @@ function _updateSubtotalLine(&$object, &$line)
 {
 	$label = GETPOST('line-title');
 	$description = ($line->qty>90) ? '' : GETPOST('line-description');
-	$pagebreak = (int) GETPOST('pagebreak');
+	$pagebreak = (int) GETPOST('line-pagebreak');
 
 	$level = GETPOST('subtotal_level', 'int');
 	if (!empty($level))
