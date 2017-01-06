@@ -41,3 +41,4 @@ subtotal_apply_default_tva_help=Permet de définir une TVA général à toutes l
 subtotal_apply_progress=Appliquer une progression au bloc
 subtotal_success_updated_line=Lignes mises à jour : %d
 subtotal_error_updated_line=Erreur : %d lignes non mises à jour
+subtotal_nb_progress_not_updated=Attention : progression non mise à jour pour %d lignes (progression précédente inférieur au nouveau taux)

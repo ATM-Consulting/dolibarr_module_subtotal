@@ -41,3 +41,4 @@ subtotal_apply_default_tva_help=Allows to define a default TVA on each line's bl
 subtotal_apply_progress=Apply a progress to the block
 subtotal_success_updated_line=Lines updated: %d
 subtotal_error_updated_line=Error: %d lines not updated
+subtotal_nb_progress_not_updated=Warning: progress not updated for %d lines (previous progress is inferior as new rate)

@@ -89,15 +89,27 @@ function _updateSubtotalBloc($object, $line)
 	$subtotal_progress = GETPOST('subtotal_progress', 'int');
 	if ($subtotal_tva_tx != '' || $subtotal_progress != '')
 	{
-		$error_progress = $nb_progress_update = 0;
+		$error_progress = $nb_progress_update = $nb_progress_not_updated = 0;
 		$TLine = TSubtotal::getLinesFromTitleId($object, $line->id);
 		foreach ($TLine as &$line)
 		{
 			if (!TSubtotal::isTitle($line) && !TSubtotal::isSubtotal($line))
 			{
 				if ($subtotal_tva_tx == '') $subtotal_tva_tx = $line->tva_tx;
-				if ($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION && $subtotal_progress == '') $subtotal_progress = $line->situation_percent;
-
+				if ($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION)
+				{
+					if ($subtotal_progress == '') $subtotal_progress = $line->situation_percent;
+					else
+					{
+						$prev_percent = $line->get_prev_progress($object->id);
+						if ($subtotal_progress < $prev_percent)
+						{
+							$nb_progress_not_updated++;
+							$subtotal_progress = $line->situation_percent;
+						}
+					}
+				}
+				
 				$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $subtotal_tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $subtotal_progress, $line->fk_unit);
 
 				if ($res > 0) $success_updated_line++;
@@ -105,6 +117,8 @@ function _updateSubtotalBloc($object, $line)
 			}
 		}
 
+		if ($nb_progress_not_updated > 0) setEventMessage($langs->trans('subtotal_nb_progress_not_updated', $nb_progress_not_updated), 'warnings');
+		
 		if ($success_updated_line > 0) setEventMessage($langs->trans('subtotal_success_updated_line', $success_updated_line));
 		if ($error_updated_line > 0)
 		{
