@@ -1,6 +1,15 @@
 <?php
 class ActionsSubtotal
 {
+	
+	function __construct($db)
+	{
+		global $langs;
+		
+		$this->db = $db;
+		$langs->load('subtotal@subtotal');
+	}
+	
 	/** Overloading the doActions function : replacing the parent's function with the one below
 	 * @param      $parameters  array           meta datas of the hook (context, etc...)
 	 * @param      $object      CommonObject    the object you want to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
@@ -424,12 +433,37 @@ class ActionsSubtotal
 		
 	}
 	
-	function doActions($parameters, &$object, $action, $hookmanager) {
+	function doActions($parameters, &$object, $action, $hookmanager)
+	{
 		global $conf,$langs;
 		
 		dol_include_once('/subtotal/class/subtotal.class.php');
+		dol_include_once('/subtotal/lib/subtotal.lib.php');
 		
-		if($action === 'builddoc') {
+		if($object->element=='facture') $idvar = 'facid';
+		else $idvar = 'id';
+			
+		if ($action == 'updateligne')
+		{
+			$found = false;
+			$lineid = GETPOST('lineid', 'int');
+			foreach ($object->lines as &$line)
+			{
+				if ($line->id == $lineid && (TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line)) )
+				{
+					$found = true;
+					_updateSubtotalLine($object, $line);
+					_updateSubtotalBloc($object, $line);
+				}
+			}
+			
+			if ($found)
+			{
+				header('Location: '.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id);
+				exit; // Surtout ne pas laisser Dolibarr faire du traitement sur le updateligne sinon ça plante les données de la ligne
+			}
+		}
+		else if($action === 'builddoc') {
 			
 			if (
 				in_array('invoicecard',explode(':',$parameters['context']))
@@ -501,8 +535,6 @@ class ActionsSubtotal
 		}
 		else if ($action == 'duplicate')
 		{
-			$langs->load('subtotal@subtotal');
-			
 			$lineid = GETPOST('lineid', 'int');
 			$nbDuplicate = TSubtotal::duplicateLines($object, $lineid, true);
 			
@@ -1193,325 +1225,269 @@ class ActionsSubtotal
 			if($object->element=='facture')$idvar = 'facid';
 			else $idvar='id';
 			
-					if($action=='savelinetitle' && GETPOST('lineid', 'int') == $line->id) {
-						
-						$description = ($line->qty>90) ? '' : GETPOST('linedescription');
-						$pagebreak = (int)GETPOST('pagebreak');
-						
-						$level = GETPOST('subtotal_level', 'int');
-						if (!empty($level))
+			if((float)DOL_VERSION <= 3.4)
+			{
+				?>
+				<script type="text/javascript">
+					$(document).ready(function() {
+						$('#tablelines tr[rel=subtotal]').mouseleave(function() {
+
+							id_line =$(this).attr('id');
+
+							$(this).find('td[rel=subtotal_total]').each(function() {
+								$.get(document.location.href, function(data) {
+									var total = $(data).find('#tablelines tr#'+id_line+' td[rel=subtotal_total]').html();
+
+									$('#tablelines tr#'+id_line+' td[rel=subtotal_total]').html(total);
+
+								});
+							});
+						});
+					});
+
+				</script>
+				<?php
+			}
+			
+			if(empty($line->description)) $line->description = $line->desc;
+			
+			$colspan = 5;
+			if(!empty($conf->multicurrency->enabled)) $colspan+=2;
+			if(!empty($conf->margin->enabled)) $colspan++;
+			if(!empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
+			if(!empty($conf->global->DISPLAY_MARK_RATES)) $colspan++;
+			if($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION) $colspan++;
+			if(!empty($conf->global->PRODUCT_USE_UNITS)) $colspan++;
+					
+			/* Titre */
+			//var_dump($line);
+			?>
+			<tr class="drag drop" rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
+					if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+					{
+						if($line->qty==99) print 'background-color:#adadcf';
+						else if($line->qty==98) print 'background-color:#ddddff;';
+						else if($line->qty<=97 && $line->qty>=91) print 'background-color:#eeeeff;';
+						else if($line->qty==1) print 'background-color:#adadcf;';
+						else if($line->qty==2) print 'background-color:#ddddff;';
+						else print 'background-color:#eeeeff;';
+
+						//A compléter si on veux plus de nuances de couleurs avec les niveau 4,5,6,7,8 et 9
+					}
+					else 
+					{
+						if($line->qty==99) print 'background-color:#ddffdd';
+						else if($line->qty==98) print 'background-color:#ddddff;';
+						else if($line->qty==2) print 'background-color:#eeeeff; ';
+						else print 'background-color:#eeffee;' ;	
+					}
+
+			?>;">
+			
+			<td colspan="<?php echo $colspan; ?>" style="font-weight:bold;  <?php echo ($line->qty>90)?'text-align:right':' font-style: italic;' ?> "><?php
+
+					if($action=='editline' && GETPOST('lineid') == $line->id && (TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line)) ) {
+
+						echo '<div id="line_'.$line->id.'"></div>'; // Imitation Dolibarr
+						echo '<input type="hidden" value="'.$line->id.'" name="lineid">';
+						echo '<input id="product_type" type="hidden" value="'.$line->product_type.'" name="type">';
+						echo '<input id="product_id" type="hidden" value="'.$line->fk_product.'" name="type">';
+						echo '<input id="special_code" type="hidden" value="'.$line->special_code.'" name="type">';
+
+						if (TSubtotal::isTitle($line))
 						{
-							if ($line->qty > 90) $level = 100 - $level;
+							if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+							{
+								$qty_displayed = $line->qty;
+								print img_picto('', 'subsubtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;color:#0075DE;">'.$qty_displayed.'</span>&nbsp;&nbsp;';
+							}
+							else
+							{
+								if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
+								else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+							}
 						}
 						else
 						{
-							$level = $line->qty;
+							$qty_displayed = 100 - $line->qty;
+							print img_picto('', 'subsubtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;color:#0075DE;">'.$qty_displayed.'</span>&nbsp;&nbsp;';
 						}
 						
-						/**
-						 * @var $object Facture
-						 */
-						if($object->element=='facture') $object->updateline($line->id,$description, 0, $level,0,'','',0,0,0,'HT',$pagebreak,9,0,0,null,0,$_POST['linetitle'], $this->module_number);
-						/**
-						* @var $object Propal
-						*/
-						else if($object->element=='propal') $res = $object->updateline($line->id, 0, $level,0,0,0,0, $description ,'HT',$pagebreak,$this->module_number,0,0,0,0,$_POST['linetitle'],9);
-						/**
-						 * @var $object Commande
-						 */
-						else if($object->element=='commande') $object->updateline($line->id,$description, 0, $level,0,0,0,0,'HT',$pagebreak,'','',9,0,0,null,0,$_POST['linetitle'], $this->module_number);
+
+						if($line->label=='') {
+							$line->label = $line->description.' '.$this->getTitle($object, $line);
+							$line->description='';
+						}
+
+						echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$line->label.'" size="80"/>&nbsp;';
 						
-						
-						$subtotal_tva_tx = GETPOST('subtotal_tva_tx', 'int');
-						if ($subtotal_tva_tx != '')
+						if (TSubtotal::isTitle($line))
 						{
-							$TLine = TSubtotal::getLinesFromTitleId($object, $line->id);
-							foreach ($TLine as &$line)
+							$select = '<select name="subtotal_level">';
+							for ($j=1; $j<10; $j++)
 							{
-								if (!TSubtotal::isTitle($line) && !TSubtotal::isSubtotal($line)) $line->setValueFrom('tva_tx', $subtotal_tva_tx, $line->table_element, $line->id);
+								$select .= '<option '.($qty_displayed == $j ? 'selected="selected"' : '').' value="'.$j.'">'.$langs->trans('Level').' '.$j.'</option>';
 							}
+							$select .= '</select>&nbsp;';
+
+							echo $select;
 						}
+						
+
+						echo '<div class="subtotal_underline" style="margin-left:24px;">';
+							echo '<label for="subtotal-pagebreak">'.$langs->trans('AddBreakPageBefore').'</label> <input style="vertical-align:sub;"  type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="8" '.(($line->info_bits > 0) ? 'checked="checked"' : '') .' />&nbsp;&nbsp;';
+
+							if (TSubtotal::isTitle($line))
+							{
+								$form = new Form($db);
+								echo '<label for="subtotal_tva_tx">'.$form->textwithpicto($langs->trans('subtotal_apply_default_tva'), $langs->trans('subtotal_apply_default_tva_help')).'</label>';
+								echo '<select id="subtotal_tva_tx" name="subtotal_tva_tx" class="flat"><option selected="selected" value="">-</option>';
+								echo str_replace('selected', '', $form->load_tva('subtotal_tva_tx', '', $parameters['seller'], $parameters['buyer'], 0, 0, '', true));
+								echo '</select>&nbsp;&nbsp;';
+								
+								if (!empty($conf->global->INVOICE_USE_SITUATION) && $object->element == 'facture' && $object->type == Facture::TYPE_SITUATION)
+								{
+									echo '<label for="subtotal_progress">'.$langs->trans('subtotal_apply_progress').'</label> <input id="subtotal_progress" name="subtotal_progress" value="" size="1" />%';
+								}
+							}
+						echo '</div>';
+
+						if($line->qty<10) {
+							// WYSIWYG editor
+							require_once DOL_DOCUMENT_ROOT . '/core/class/doleditor.class.php';
+							$nbrows = ROWS_2;
+							$cked_enabled = (!empty($conf->global->FCKEDITOR_ENABLE_DETAILS) ? $conf->global->FCKEDITOR_ENABLE_DETAILS : 0);
+							if (!empty($conf->global->MAIN_INPUT_DESC_HEIGHT)) {
+								$nbrows = $conf->global->MAIN_INPUT_DESC_HEIGHT;
+							}
+							$toolbarname = 'dolibarr_details';
+							if (!empty($conf->global->FCKEDITOR_ENABLE_DETAILS_FULL)) {
+								$toolbarname = 'dolibarr_notes';
+							}
+							$doleditor = new DolEditor('line-description', $line->description, '', 100, $toolbarname, '',
+								false, true, $cked_enabled, $nbrows, '98%');
+							$doleditor->Create();
+						}
+
 					}
-					else if($action=='editlinetitle') {
+					else {
+
+						 if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+						 {
+							if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line)) 
+							{
+								echo str_repeat('&nbsp;&nbsp;&nbsp;', $line->qty-1);
+								
+								if (TSubtotal::isTitle($line)) print img_picto('', 'subtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;">'.$line->qty.'</span>&nbsp;&nbsp;';
+								else print img_picto('', 'subtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;">'.(100-$line->qty).'</span>&nbsp;&nbsp;';
+							}
+						 }
+						 else 
+						 {
+							if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
+							else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; 
+						 }
+
+						 if (empty($line->label)) {
+							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) print  $line->description.' '.$this->getTitle($object, $line);
+							else print  $line->description;
+						 } 
+						 else {
+
+							if (! empty($conf->global->PRODUIT_DESC_IN_FORM) && !empty($line->description)) {
+								print $line->label.'<br><span style="font-weight:normal;">'.dol_htmlentitiesbr($line->description).'</span>';
+							}
+							else{
+								print '<span class="classfortooltip" title="'.$line->description.'">'.$line->label.'</span>';    
+							}
+
+						 } 
+						if($line->qty>90) print ' : ';
+						if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
+
+						 
+
+
+					}
+			?></td>
+					 
+			<?php
+				if($line->qty>90) {
+					/* Total */
+					$total_line = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
+					echo '<td class="nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
+				} else {
+					echo '<td>&nbsp;</td>';
+				}	
+			?>
+					
+			<td align="center" class="nowrap">
+				<?php
+					if($action=='editline' && GETPOST('lineid') == $line->id && (TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line)) ) {
 						?>
+						<input id="savelinebutton" class="button" type="submit" name="save" value="<?php echo $langs->trans('Save') ?>" />
+						<br />
+						<input class="button" type="button" name="cancelEditlinetitle" value="<?php echo $langs->trans('Cancel') ?>" />
 						<script type="text/javascript">
 							$(document).ready(function() {
-								$('#addproduct').submit(function () {
-									$('input[name=saveEditlinetitle]').click();
-									return false;
-								}) ;
+								$('input[name=cancelEditlinetitle]').click(function () {
+									document.location.href="<?php echo '?'.$idvar.'='.$object->id ?>";
+								});
 							});
-							
+
 						</script>
 						<?php
 					}
-					else {
-						if((float)DOL_VERSION <= 3.4) {
-							
-							?>
-							<script type="text/javascript">
-								$(document).ready(function() {
-									$('#tablelines tr[rel=subtotal]').mouseleave(function() {
-										
-										id_line =$(this).attr('id');
-										
-										$(this).find('td[rel=subtotal_total]').each(function() {
-											$.get(document.location.href, function(data) {
-												var total = $(data).find('#tablelines tr#'+id_line+' td[rel=subtotal_total]').html();
-												
-												$('#tablelines tr#'+id_line+' td[rel=subtotal_total]').html(total);
-												
-											});
-										});
-									});
-								});
-								
-							</script>
-							<?php
-							
+					else{
+						if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK))
+						{
+							if(TSubtotal::isTitle($line)) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
 						}
+
+						if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK)) 
+						{
+							echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=editline&lineid='.$line->id.'">'.img_edit().'</a>';
+						}								
 					}
-					
-					if(empty($line->description)) $line->description = $line->desc;
-					$colspan = 5;
-					if(!empty($conf->multicurrency->enabled)) $colspan+=2;
-					if(!empty($conf->margin->enabled)) $colspan++;
-					if(!empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
-					if(!empty($conf->global->DISPLAY_MARK_RATES)) $colspan++;
-					if($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION) $colspan++;
-					if(!empty($conf->global->PRODUCT_USE_UNITS)) $colspan++;
-					
-					/* Titre */
-					//var_dump($line);
-					?>
-					<tr class="drag drop" rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
-							if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
-							{
-								if($line->qty==99) print 'background-color:#adadcf';
-						   		else if($line->qty==98) print 'background-color:#ddddff;';
-						   		else if($line->qty<=97 && $line->qty>=91) print 'background-color:#eeeeff;';
-						   		else if($line->qty==1) print 'background-color:#adadcf;';
-						   		else if($line->qty==2) print 'background-color:#ddddff;';
-						   		else print 'background-color:#eeeeff;';
-								
-								//A compléter si on veux plus de nuances de couleurs avec les niveau 4,5,6,7,8 et 9
-							}
-							else 
-							{
-								if($line->qty==99) print 'background-color:#ddffdd';
-						   		else if($line->qty==98) print 'background-color:#ddddff;';
-						   		else if($line->qty==2) print 'background-color:#eeeeff; ';
-						   		else print 'background-color:#eeffee;' ;	
-							}
-						   
-					?>;">
-					<td colspan="<?php echo $colspan; ?>" style="font-weight:bold;  <?php echo ($line->qty>90)?'text-align:right':' font-style: italic;' ?> "><?php
-					
-							if($action=='editlinetitle' && $_REQUEST['lineid']===$line->id ) {
-								
-								if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
-								{
-									$qty_displayed = ($line->qty >=1 && $line->qty <= 9) ? $line->qty : 100 - $line->qty;
-									print img_picto('', 'subsubtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;color:#0075DE;">'.$qty_displayed.'</span>&nbsp;&nbsp;';
-								}
-								else
-								{
-									if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
-									else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-								}
-								
-								if($line->label=='') {
-									$line->label = $line->description.' '.$this->getTitle($object, $line);
-									$line->description='';
-								}
-								
-								
-								echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$line->label.'" size="80"/>&nbsp;';
-								
-								$select = '<select name="subtotal_level">';
-								for ($j=1; $j<10; $j++)
-								{
-									$select .= '<option '.($qty_displayed == $j ? 'selected="selected"' : '').' value="'.$j.'">'.$langs->trans('Level').' '.$j.'</option>';
-								}
-								$select .= '</select>&nbsp;';
-								
-								echo $select;
-								echo '<input type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="8" '.(($line->info_bits > 0) ? 'checked="checked"' : '') .' /> <label for="subtotal-pagebreak">'.$langs->trans('AddBreakPageBefore').'</label>&nbsp;';
-								
-								$form = new Form($db);
-								echo '<select id="subtotal_tva_tx" name="subtotal_tva_tx" class="flat"><option selected="selected" value="">-</option>';
-								echo str_replace('selected', '', $form->load_tva('subtotal_tva_tx', '', $parameters['seller'], $parameters['buyer'], 0, 0, '', true));
-								echo '</select>&nbsp;';
-								echo '<label for="subtotal_tva_tx">'.$form->textwithpicto($langs->trans('subtotal_apply_default_tva'), $langs->trans('subtotal_apply_default_tva_help')).'</label>';
-								
-								if($line->qty<10) {
-									echo '<br />';
-									// WYSIWYG editor
-									require_once DOL_DOCUMENT_ROOT . '/core/class/doleditor.class.php';
-									$nbrows = ROWS_2;
-									$cked_enabled = (!empty($conf->global->FCKEDITOR_ENABLE_DETAILS) ? $conf->global->FCKEDITOR_ENABLE_DETAILS : 0);
-									if (!empty($conf->global->MAIN_INPUT_DESC_HEIGHT)) {
-										$nbrows = $conf->global->MAIN_INPUT_DESC_HEIGHT;
-									}
-									$toolbarname = 'dolibarr_details';
-									if (!empty($conf->global->FCKEDITOR_ENABLE_DETAILS_FULL)) {
-										$toolbarname = 'dolibarr_notes';
-									}
-									$doleditor = new DolEditor('line-description', $line->description, '', 100, $toolbarname, '',
-										false, true, $cked_enabled, $nbrows, '98%');
-									$doleditor->Create();
-								}
-								
-							}
-							else {
-								
-								 if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
-								 {
-								 	if($line->qty<=9) 
-								 	{
-								 		for ($i=1;$i<$line->qty;$i++) print '&nbsp;&nbsp;&nbsp;';
-								 		print img_picto('', 'subtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;">'.$line->qty.'</span>&nbsp;&nbsp;';
-										
-									}
-								 }
-								 else 
-								 {
-									if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
-								 	else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; 
-								 }
-								
-								 if (empty($line->label)) {
-								 	if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) print  $line->description.' '.$this->getTitle($object, $line);
-									else print  $line->description;
-								 } 
-								 else {
-								     
-                                    if (! empty($conf->global->PRODUIT_DESC_IN_FORM) && !empty($line->description)) {
-                                        print $line->label.'<br><span style="font-weight:normal;">'.dol_htmlentitiesbr($line->description).'</span>';
-                                    }
-                                    else{
-                                        print '<span class="classfortooltip" title="'.$line->description.'">'.$line->label.'</span>';    
-                                    }
-								 	
-								 } 
-								
-								 if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
-								
-								 if($line->qty>90) { print ' : '; }
-								 
-								
-							}
-					 ?></td>
-					 
-					  <?php	
-						
-							 if($line->qty>90) {
-							/* Total */
-								$total_line = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
-								?>
-								<td class="nowrap" align="right" style="font-weight:bold;" rel="subtotal_total"><?php echo price($total_line) ?></td>
-								<?php
-								
-							}
-							 else {
-							 	
-								?>
-								<td>&nbsp;</td>
-								<?php
-							 }	
-						?>
-					
-					<td align="center" class="nowrap">
-						<?php
-							if($action=='editlinetitle' && $_REQUEST['lineid']==$line->id ) {
-								?>
-								<input class="button" type="button" name="saveEditlinetitle" value="<?php echo $langs->trans('Save') ?>" />
-								<script type="text/javascript">
-									$(document).ready(function() {
-										$('input[name=saveEditlinetitle]').click(function () {
-											$.post("<?php echo '?'.$idvar.'='.$object->id ?>",{
-													action:'savelinetitle'
-													,lineid:<?php echo $line->id ?>
-													,linetitle:$('input[name=line-title]').val()
-												<?php if ($cked_enabled) { ?>
-													,linedescription: CKEDITOR.instances['line-description'].getData()
-												<?php } else { ?>
-													, linedescription: $('textarea[name=line-description]').val()
-												<?php } ?>
-													,pagebreak:($('input[name=line-pagebreak]').is(':checked') ? 8 : 0)
-													,subtotal_level: $('select[name=subtotal_level]').val()
-													,subtotal_tva_tx: $('select[name=subtotal_tva_tx]').val()
-											}
-											,function() {
-												document.location.href="<?php echo '?'.$idvar.'='.$object->id ?>";	
-											});
-											
-										});
-										
-										$('input[name=cancelEditlinetitle]').click(function () {
-											document.location.href="<?php echo '?'.$idvar.'='.$object->id ?>";
-										});
-										
-									});
-									
-								</script>
-								<?php
-							}
-							else{
-								if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK))
-								{
-									if(TSubtotal::isTitle($line)) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
-								}
-								
-								if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK)) 
-								{
-									echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=editlinetitle&lineid='.$line->id.'">'.img_edit().'</a>';
-								}								
-							}
-						?>
-					</td>
+				?>
+			</td>
 
-					<td align="center" nowrap="nowrap">	
-						<?php
-							if($action=='editlinetitle' && $_REQUEST['lineid']===$line->id ) {
-								?>
-								<input class="button" type="button" name="cancelEditlinetitle" value="<?php echo $langs->trans('Cancel') ?>" />
-								<?php
-							}
-							else{
-								if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK)) {
-								
-									?>
-										<a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id ?>"><?php echo img_delete() ?></a>
-									<?php								
-									
-									
-									if($line->qty<10) {
-										
-									?><a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id ?>">
-											<?php if ((float) DOL_VERSION >= 3.8) echo img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal'); else echo img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal'); ?>		
-										</a><?php								
-									}
-									
-								}
-								
-																	
-							}
-						?>	
-						
-					</td>
+			<td align="center" nowrap="nowrap">	
+				<?php
 
-					<?php if ($num > 1 && empty($conf->browser->phone)) { ?>
-					<td align="center" class="tdlineupdown">
-					</td>
-				    <?php } else { ?>
-				    <td align="center"<?php echo ((empty($conf->browser->phone) && ($object->statut == 0  && $user->rights->{$object->element}->creer))?' class="tdlineupdown"':''); ?>></td>
-					<?php } ?>
+					if ($action != 'editline') {
+						if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK)) {
 
-					</tr>
-					<?php
-					
-					
+							?>
+								<a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id ?>"><?php echo img_delete() ?></a>
+							<?php								
+
+
+							if($line->qty<10) {
+
+							?><a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id ?>">
+									<?php if ((float) DOL_VERSION >= 3.8) echo img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal'); else echo img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal'); ?>		
+								</a><?php								
+							}
+
+						}
+
+
+					}
+				?>	
+
+			</td>
+
+			<?php if ($num > 1 && empty($conf->browser->phone)) { ?>
+			<td align="center" class="tdlineupdown">
+			</td>
+			<?php } else { ?>
+			<td align="center"<?php echo ((empty($conf->browser->phone) && ($object->statut == 0  && $user->rights->{$object->element}->creer))?' class="tdlineupdown"':''); ?>></td>
+			<?php } ?>
+
+			</tr>
+			<?php
+			
 			return 1;	
 			
 		}

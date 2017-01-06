@@ -62,3 +62,58 @@ function getHtmlSelectTitle(&$object)
 	$html .= '</select>';
 	return $html;
 }
+
+function _updateSubtotalLine(&$object, &$line)
+{
+	$label = GETPOST('line-title');
+	$description = ($line->qty>90) ? '' : GETPOST('line-description');
+	$pagebreak = (int) GETPOST('line-pagebreak');
+
+	$level = GETPOST('subtotal_level', 'int');
+	if (!empty($level))
+	{
+		if ($line->qty > 90) $line->qty = 100 - $level; // Si on edit une ligne sous-total
+		else $line->qty = $level;
+	}
+	
+	$res = TSubtotal::doUpdateLine($object, $line->id, $description, 0, $line->qty, 0, '', '', 0, 9, 0, 0, 'HT', $pagebreak, 0, 1, null, 0, $label, TSubtotal::$module_number);
+
+	return $res;
+}
+
+function _updateSubtotalBloc($object, $line)
+{
+	global $conf,$langs;
+	
+	$subtotal_tva_tx = GETPOST('subtotal_tva_tx', 'int');
+	$subtotal_progress = GETPOST('subtotal_progress', 'int');
+	if ($subtotal_tva_tx != '' || $subtotal_progress != '')
+	{
+		$error_progress = $nb_progress_update = 0;
+		$TLine = TSubtotal::getLinesFromTitleId($object, $line->id);
+		foreach ($TLine as &$line)
+		{
+			if (!TSubtotal::isTitle($line) && !TSubtotal::isSubtotal($line))
+			{
+				if ($subtotal_tva_tx == '') $subtotal_tva_tx = $line->tva_tx;
+				if ($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION && $subtotal_progress == '') $subtotal_progress = $line->situation_percent;
+
+				$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $subtotal_tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $subtotal_progress, $line->fk_unit);
+
+				if ($res > 0) $success_updated_line++;
+				else $error_updated_line++;
+			}
+		}
+
+		if ($success_updated_line > 0) setEventMessage($langs->trans('subtotal_success_updated_line', $success_updated_line));
+		if ($error_updated_line > 0)
+		{
+			setEventMessage($langs->trans('subtotal_error_updated_line', $error_updated_line), 'errors');
+			return -$error_updated_line;
+		}
+		
+		return $success_updated_line;
+	}
+	
+	return 0;
+}
