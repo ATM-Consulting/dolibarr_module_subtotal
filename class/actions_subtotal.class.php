@@ -1471,11 +1471,18 @@ class ActionsSubtotal
 							}
 						}
 					}
-				?>	
-
+				?>
 			</td>
-
-			<?php if ($num > 1 && empty($conf->browser->phone)) { ?>
+			
+			<?php 
+			if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::isTitle($line))
+			{
+				echo '<td class="subtotal_nc">';
+				echo '<input id="subtotal_nc-'.$line->id.'" class="subtotal_nc_chkbx" data-lineid="'.$line->id.'" type="checkbox" name="subtotal_nc" value="1" '.(!empty($line->array_options['options_subtotal_nc']) ? 'checked="checked"' : '').' />';
+				echo '</td>';
+			}
+			
+			if ($num > 1 && empty($conf->browser->phone)) { ?>
 			<td align="center" class="tdlineupdown">
 			</td>
 			<?php } else { ?>
@@ -1493,5 +1500,56 @@ class ActionsSubtotal
 
 	}
 
+	
+	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
+		global $conf;
+		
+		if ($object->statut == 0 && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS))
+		{
+			?>
+			<script type="text/javascript">
+				$(function() {
+					$("#tablelines tbody > tr").each(function(i, item) {
+						if ($(item).children('.subtotal_nc').length == 0)
+						{
+							var id = $(item).attr('id');
+							
+							if (typeof id != 'undefined' && id.indexOf('row-') >= 0)
+							{
+								$(item).children('td:last-child').before('<td class="subtotal_nc"></td>');
+							}
+							else 
+							{
+								$(item).append('<td class="subtotal_nc"></td>');
+							}
+						}
+					});
+					
+					$(".subtotal_nc_chkbx").change(function(event) {
+						var hash = $(this).attr('id');
+						var lineid = $(this).data('lineid');
+						var subtotal_nc = 0 | $(this).is(':checked'); // Renvoi 0 ou 1 
+						
+						$.ajax({
+							url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+							,type: "POST"
+							,data: {
+								json:1
+								,set: 'updateLineNC'
+								,element: "<?php echo $object->element; ?>"
+								,elementid: <?php echo (int) $object->id; ?>
+								,lineid: lineid
+								,subtotal_nc: subtotal_nc
+							}
+						}).done(function(response) {
+							window.location.href = window.location.pathname + window.location.search + '#' + hash;
+							window.location.reload();
+						});
+					});
+				});
+			</script>
+			<?php
+		}
+	}
 	
 }
