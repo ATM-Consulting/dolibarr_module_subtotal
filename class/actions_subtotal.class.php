@@ -1525,18 +1525,15 @@ class ActionsSubtotal
 						}
 					});
 					
-					$(".subtotal_nc_chkbx").change(function(event) {
-						var self = this;
-						var lineid = $(this).data('lineid');
-						var subtotal_nc = 0 | $(this).is(':checked'); // Renvoi 0 ou 1 
-						
+					function callAjaxUpdateLineNC(set, lineid, subtotal_nc)
+					{
 						$.ajax({
 							url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
-							,type: "POST"
+							,type: 'POST'
 							,data: {
 								json:1
-								,set: 'updateLineNC'
-								,element: "<?php echo $object->element; ?>"
+								,set: set
+								,element: '<?php echo $object->element; ?>'
 								,elementid: <?php echo (int) $object->id; ?>
 								,lineid: lineid
 								,subtotal_nc: subtotal_nc
@@ -1544,8 +1541,52 @@ class ActionsSubtotal
 						}).done(function(response) {
 							window.location.href = window.location.pathname + '?id=<?php echo $object->id; ?>&page_y=' + window.pageYOffset;
 						});
+					}
+					
+					$(".subtotal_nc_chkbx").change(function(event) {
+						var lineid = $(this).data('lineid');
+						var subtotal_nc = 0 | $(this).is(':checked'); // Renvoi 0 ou 1 
+						
+						callAjaxUpdateLineNC('updateLineNC', lineid, subtotal_nc);
+					});
+					
+					$(document).ajaxSuccess(function(event, xhr, options) {
+						if (xhr.status == 200 && xhr.statusText == 'OK' && typeof options.url != 'undefined' && options.url == '/core/ajax/row.php')
+						{
+							var roworder = GetURLParameter('roworder', options.data);
+							if (roworder.length > 0)
+							{
+								var lineid = GetURLParameter('element_id', options.data);
+								if (lineid > 0)
+								{
+									callAjaxUpdateLineNC('updateLine', lineid);
+								}
+							}
+						}
+						
 					});
 				});
+				
+				// source : http://www.jquerybyexample.net/2012/06/get-url-parameters-using-jquery.html
+				function GetURLParameter(sParam, sPageURL)
+				{
+					if (!sPageURL) {
+						sPageURL = window.location.search.substring(1);
+					}
+					
+					var sURLVariables = sPageURL.split('&');
+					for (var i = 0; i < sURLVariables.length; i++)
+					{
+						var sParameterName = sURLVariables[i].split('=');
+						if (sParameterName[0] == sParam)
+						{
+							return sParameterName[1];
+						}
+					}
+					
+					return '';
+				}
+
 			</script>
 			<?php
 		}
