@@ -1526,7 +1526,7 @@ class ActionsSubtotal
 					});
 					
 					$(".subtotal_nc_chkbx").change(function(event) {
-						var hash = $(this).attr('id');
+						var self = this;
 						var lineid = $(this).data('lineid');
 						var subtotal_nc = 0 | $(this).is(':checked'); // Renvoi 0 ou 1 
 						
@@ -1542,8 +1542,7 @@ class ActionsSubtotal
 								,subtotal_nc: subtotal_nc
 							}
 						}).done(function(response) {
-							window.location.href = window.location.pathname + window.location.search + '#' + hash;
-							window.location.reload();
+							window.location.href = window.location.pathname + '?id=<?php echo $object->id; ?>&page_y=' + window.pageYOffset;
 						});
 					});
 				});
