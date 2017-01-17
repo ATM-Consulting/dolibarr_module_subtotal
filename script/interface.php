@@ -47,36 +47,47 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc)
 		{
 			$line->array_options['options_subtotal_nc'] = $subtotal_nc;
 			$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $line->tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options);
+			$origin_line = $line;
 			if ($res <= 0) $error++;
-			break;
 		}
-	}
-	
-	if (!$error)
-	{
-		$TLine = TSubtotal::getLinesFromTitleId($object, $lineid, false);
-		if (!empty($TLine))
+		elseif (!TSubtotal::isTitle($line) && !TSubtotal::isSubtotal($line))
 		{
-			foreach ($TLine as &$line)
+			$type_update = 'doUpdateLine';
+			$TTitle = TSubtotal::getAllTitleFromLine($line);
+			foreach ($TTitle as $line_title)
 			{
-				if (!empty($subtotal_nc))
+				if (!empty($line_title->array_options['options_subtotal_nc']))
 				{
-					$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 = 
-					$line->multicurrency_total_ht = $line->multicurrency_total_tva = $line->multicurrency_total_ttc = 0;
-				
-					$res = $line->update();
+					$type_update = 'update';
+					break;
 				}
-				else
+			}
+			
+			if ($type_update == 'doUpdateLine')
+			{
+				if (empty($line->total_ht)) 
 				{
 					$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $line->tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $line->situation_percent, $line->fk_unit);
+					if ($res <= 0) $error++;
 				}
-				
-				if ($res <= 0) $error++;
 			}
+			else // update
+			{
+				if (!empty($line->total_ht))
+				{
+					$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 = 
+						$line->multicurrency_total_ht = $line->multicurrency_total_tva = $line->multicurrency_total_ttc = 0;
 
-			$res = $object->update_price(1);
-			if ($res <= 0) $error++;
-		}	
+					$res = $line->update();
+					if ($res <= 0) $error++;
+				}
+			}
+		}
+		
+		$res = $object->update_price(1);
+		if ($res <= 0) $error++;
+		
+		if ($error) break;
 	}
 	
 	if (!$error)
