@@ -42,3 +42,5 @@ subtotal_apply_progress=Apply a progress to the block
 subtotal_success_updated_line=Lines updated: %d
 subtotal_error_updated_line=Error: %d lines not updated
 subtotal_nb_progress_not_updated=Warning: progress not updated for %d lines (previous progress is inferior as new rate)
+subtotal_update_nc_success=Total updated
+subtotal_update_nc_error=Error: total not updated

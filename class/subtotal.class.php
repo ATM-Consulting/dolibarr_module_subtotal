@@ -222,7 +222,8 @@ class TSubtotal {
 				
 				if ($add_line)
 				{
-					$TLine[] = $line;
+					if (!$withBlockLine && (self::isTitle($line) || self::isSubtotal($line)) ) continue;
+					else $TLine[] = $line;
 				}
 			}
 		}
@@ -235,7 +236,7 @@ class TSubtotal {
 		return self::getLinesFromTitle($object, $lineid, '', '', $withBlockLine, true);
 	}
 	
-	public function doUpdateLine(&$object, $rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $type, $txlocaltax1=0, $txlocaltax2=0, $price_base_type='HT', $info_bits=0, $fk_parent_line=0, $skip_update_total=0, $fk_fournprice=null, $pa_ht=0, $label='', $special_code=0, $array_options=0, $situation_percent=0, $fk_unit = null)
+	public static function doUpdateLine(&$object, $rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $type, $txlocaltax1=0, $txlocaltax2=0, $price_base_type='HT', $info_bits=0, $fk_parent_line=0, $skip_update_total=0, $fk_fournprice=null, $pa_ht=0, $label='', $special_code=0, $array_options=0, $situation_percent=0, $fk_unit = null)
 	{
 		$res = 0;
 		$object->db->begin();

@@ -21,7 +21,7 @@ class ActionsSubtotal
     var $module_number = 104777;
     
     function formObjectOptions($parameters, &$object, &$action, $hookmanager) 
-    {  
+    {
       	global $langs,$db,$user, $conf;
 		
 		$langs->load('subtotal@subtotal');
@@ -1441,7 +1441,7 @@ class ActionsSubtotal
 					else{
 						if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK))
 						{
-							if(TSubtotal::isTitle($line)) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
+							if(TSubtotal::isTitle($line) && ($object->situation_counter == 1 || !$object->situation_cycle_ref) ) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
 						}
 
 						if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK)) 
@@ -1456,29 +1456,33 @@ class ActionsSubtotal
 				<?php
 
 					if ($action != 'editline') {
-						if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK)) {
+						if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
+						{
 
-							?>
-								<a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id ?>"><?php echo img_delete() ?></a>
-							<?php								
-
-
-							if($line->qty<10) {
-
-							?><a href="<?php echo '?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id ?>">
-									<?php if ((float) DOL_VERSION >= 3.8) echo img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal'); else echo img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal'); ?>		
-								</a><?php								
+							if ($object->situation_counter == 1 || !$object->situation_cycle_ref)
+							{
+								echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id.'">'.img_delete().'</a>';
 							}
 
+							if(TSubtotal::isTitle($line) && ($object->situation_counter == 1 || !$object->situation_cycle_ref) )
+							{
+								$img_delete = ((float) DOL_VERSION >= 3.8) ? img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal') : img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal');
+								echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id.'">'.$img_delete.'</a>';
+							}
 						}
-
-
 					}
-				?>	
-
+				?>
 			</td>
-
-			<?php if ($num > 1 && empty($conf->browser->phone)) { ?>
+			
+			<?php 
+			if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::isTitle($line))
+			{
+				echo '<td class="subtotal_nc">';
+				echo '<input id="subtotal_nc-'.$line->id.'" class="subtotal_nc_chkbx" data-lineid="'.$line->id.'" type="checkbox" name="subtotal_nc" value="1" '.(!empty($line->array_options['options_subtotal_nc']) ? 'checked="checked"' : '').' />';
+				echo '</td>';
+			}
+			
+			if ($num > 1 && empty($conf->browser->phone)) { ?>
 			<td align="center" class="tdlineupdown">
 			</td>
 			<?php } else { ?>
@@ -1496,5 +1500,55 @@ class ActionsSubtotal
 
 	}
 
+	
+	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
+		global $conf;
+		
+		if ($object->statut == 0 && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS))
+		{
+			?>
+			<script type="text/javascript">
+				$(function() {
+					$("#tablelines tbody > tr").each(function(i, item) {
+						if ($(item).children('.subtotal_nc').length == 0)
+						{
+							var id = $(item).attr('id');
+							
+							if (typeof id != 'undefined' && id.indexOf('row-') >= 0)
+							{
+								$(item).children('td:last-child').before('<td class="subtotal_nc"></td>');
+							}
+							else 
+							{
+								$(item).append('<td class="subtotal_nc"></td>');
+							}
+						}
+					});
+					
+					$(".subtotal_nc_chkbx").change(function(event) {
+						var self = this;
+						var lineid = $(this).data('lineid');
+						var subtotal_nc = 0 | $(this).is(':checked'); // Renvoi 0 ou 1 
+						
+						$.ajax({
+							url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+							,type: "POST"
+							,data: {
+								json:1
+								,set: 'updateLineNC'
+								,element: "<?php echo $object->element; ?>"
+								,elementid: <?php echo (int) $object->id; ?>
+								,lineid: lineid
+								,subtotal_nc: subtotal_nc
+							}
+						}).done(function(response) {
+							window.location.href = window.location.pathname + '?id=<?php echo $object->id; ?>&page_y=' + window.pageYOffset;
+						});
+					});
+				});
+			</script>
+			<?php
+		}
+	}
 	
 }
