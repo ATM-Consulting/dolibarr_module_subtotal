@@ -46,3 +46,4 @@ subtotal_update_nc_success=Total updated
 subtotal_update_nc_error=Error: total not updated
 subtotal_nc_title=NI
 subtotal_nc_title_help=Management of blocks No Included in the total
+SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS=Enable the management of "Not Included" blocks to exclude the amount
