@@ -132,6 +132,11 @@ class TSubtotal {
 	{
 		return $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty <= 99 && $line->qty >= 90;
 	}
+	
+	public static function isModSubtotalLine(&$line)
+	{
+		return self::isTitle($line) || self::isSubtotal($line);
+	}
 
 	public static function duplicateLines(&$object, $lineid, $withBlockLine=false)
 	{
