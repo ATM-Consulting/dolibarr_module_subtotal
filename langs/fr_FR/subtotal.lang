@@ -44,3 +44,5 @@ subtotal_error_updated_line=Erreur : %d lignes non mises à jour
 subtotal_nb_progress_not_updated=Attention : progression non mise à jour pour %d lignes (progression précédente inférieur au nouveau taux)
 subtotal_update_nc_success=Total mis à jour
 subtotal_update_nc_error=Erreur : total non mis à jour
+subtotal_nc_title=NC
+subtotal_nc_title_help=Gestion des blocs Non Compris dans le calcul du total

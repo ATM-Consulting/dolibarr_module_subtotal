@@ -683,9 +683,24 @@ class ActionsSubtotal
 		$pdf->MultiCell(200-$posx, $cell_height, '', 0, '', 1);
 		
 		if (!$hidePriceOnSubtotalLines) {
-			if($line->total == 0) {
-				list($total, $total_tva, $total_ttc) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
+			$total_to_print = price($line->total);
 			
+			if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS))
+			{
+				$TTitle = TSubtotal::getAllTitleFromLine($line);
+				foreach ($TTitle as &$line_title)
+				{
+					if (!empty($line_title->array_options['options_subtotal_nc']))
+					{
+						$total_to_print = ''; // TODO Gestion "Compris/Non compris", voir si on affiche une annotation du genre "NC"
+						break;
+					}
+				}
+			}
+			else if($total_to_print) {
+				list($total, $total_tva, $total_ttc) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
+
+				$total_to_print = price($total);
 				$line->total_ht = $total;
 				$line->total = $total;
 				$line->total_tva = $total_tva;
@@ -694,7 +709,7 @@ class ActionsSubtotal
 			
 			$pdf->SetXY($pdf->postotalht, $posy);
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
-			$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($line->total), 0, 'R', 0);
+			$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, $total_to_print, 0, 'R', 0);
 		}
 		else{
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
@@ -1519,10 +1534,11 @@ class ActionsSubtotal
 
 	
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
-		global $conf;
+		global $conf,$langs;
 		
 		if ($object->statut == 0 && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS))
 		{
+			$form = new Form($db);
 			?>
 			<script type="text/javascript">
 				$(function() {
@@ -1531,7 +1547,7 @@ class ActionsSubtotal
 						{
 							var id = $(item).attr('id');
 							
-							if (typeof id != 'undefined' && id.indexOf('row-') >= 0)
+							if ((typeof id != 'undefined' && id.indexOf('row-') >= 0) || $(item).hasClass('liste_titre'))
 							{
 								$(item).children('td:last-child').before('<td class="subtotal_nc"></td>');
 							}
@@ -1541,6 +1557,8 @@ class ActionsSubtotal
 							}
 						}
 					});
+					
+					$('#tablelines tbody tr.liste_titre:first .subtotal_nc').html(<?php echo json_encode($form->textwithtooltip($langs->trans('subtotal_nc_title'), $langs->trans('subtotal_nc_title_help'))); ?>);
 					
 					function callAjaxUpdateLineNC(set, lineid, subtotal_nc)
 					{

@@ -66,7 +66,7 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 			{
 				$type_update = 'doUpdateLine';
 				$TTitle = TSubtotal::getAllTitleFromLine($line);
-				foreach ($TTitle as $line_title)
+				foreach ($TTitle as &$line_title)
 				{
 					if (!empty($line_title->array_options['options_subtotal_nc']))
 					{
@@ -79,7 +79,6 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 				{
 					if (empty((double) $line->total_ht)) 
 					{
-						var_dump($line->id);
 						$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $line->tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $line->situation_percent, $line->fk_unit);
 						if ($res <= 0) $error++;
 					}

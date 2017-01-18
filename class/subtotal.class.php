@@ -317,6 +317,7 @@ class TSubtotal {
 					}
 					else
 					{
+						if (empty($object->lines[$y]->array_options)) $object->lines[$y]->fetch_optionals();
 						$TTitle[$object->lines[$y]->id] = $object->lines[$y];
 						
 						if ($object->lines[$y]->qty == 1) break;

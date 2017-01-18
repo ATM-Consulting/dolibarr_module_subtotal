@@ -249,7 +249,7 @@ class Interfacesubtotaltrigger
 		{
 			$doli_action = GETPOST('action');
 			
-			if (in_array($doli_action, array('updateligne', 'addline')) && !TSubtotal::isTitle($object) && !TSubtotal::isSubtotal($object) && in_array($object->element, array('propaldet', 'commandedet', 'facturedet')))
+			if (in_array($doli_action, array('updateligne', 'updateline', 'addline')) && !TSubtotal::isTitle($object) && !TSubtotal::isSubtotal($object) && in_array($object->element, array('propaldet', 'commandedet', 'facturedet')))
 			{
 				 dol_syslog(
 					"[SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS] Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". object=".$object->element." id=" . $object->id
