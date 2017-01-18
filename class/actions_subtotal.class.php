@@ -813,8 +813,9 @@ class ActionsSubtotal
 	}
 	
 	function pdf_getlinetotalexcltax($parameters=array(), &$object, &$action='') {
-		if($this->isModSubtotalLine($parameters,$object) ){
+		global $conf;
 			
+		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 			
 			if((float)DOL_VERSION<=3.4) {
@@ -825,6 +826,22 @@ class ActionsSubtotal
 			}
 			
 		}
+		elseif (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS))
+		{
+			if(is_array($parameters)) $i = & $parameters['i'];
+			else $i = (int)$parameters;
+			
+			$TTitle = TSubtotal::getAllTitleFromLine($object->lines[$i]);
+			foreach ($TTitle as &$line_title)
+			{
+				if (!empty($line_title->array_options['options_subtotal_nc']))
+				{
+					$this->resprints = ' ';
+					return 1;
+				}
+			}
+		}
+			
 		
 		return 0;
 	}
