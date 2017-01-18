@@ -74,10 +74,11 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 						break;
 					}
 				}
-
+				
+				$total_ht = (double) $line->total_ht;
 				if ($type_update == 'doUpdateLine')
 				{
-					if (empty((double) $line->total_ht)) 
+					if (empty($total_ht)) 
 					{
 						$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $line->tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $line->situation_percent, $line->fk_unit);
 						if ($res <= 0) $error++;
@@ -85,7 +86,7 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 				}
 				else // update
 				{
-					if (!empty((double) $line->total_ht))
+					if (!empty($total_ht))
 					{
 						$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 = 
 							$line->multicurrency_total_ht = $line->multicurrency_total_tva = $line->multicurrency_total_ttc = 0;
