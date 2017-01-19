@@ -254,9 +254,10 @@ class Interfacesubtotaltrigger
 				 dol_syslog(
 					"[SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS] Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". object=".$object->element." id=" . $object->id
 				);
+				 
 				$TTitle = TSubtotal::getAllTitleFromLine($object);
 				foreach ($TTitle as &$line)
-				{new Facture();
+				{
 					if (!empty($line->array_options['options_subtotal_nc']))
 					{
 						$object->total_ht = $object->total_tva = $object->total_ttc = $object->total_localtax1 = $object->total_localtax2 = 
