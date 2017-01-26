@@ -378,7 +378,7 @@ class ActionsSubtotal
 				if($line->qty>90) {
 					$substitutionarray['line_modsubtotal_total'] = true;
 					
-					list($total, $total_tva, $total_ttc) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
+					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
 					
 					$substitutionarray['line_price_ht'] = $total;
 					$substitutionarray['line_price_vat'] = $total_tva;
@@ -603,14 +603,15 @@ class ActionsSubtotal
 				//echo 'return!<br>';
 				if (!$return_all) return $total;
 				else return array($total, $total_tva, $total_ttc, $TTotal_tva);
-			} 
-			else if($l->special_code==$this->module_number && $l->qty == 100 - $qty_line) 
+			}
+			else if(TSubtotal::isTitle($l)) 
 		  	{
 				$total = 0;
 				$total_tva = 0;
 				$total_ttc = 0;
+				$TTotal_tva = array();
 			}
-			elseif($l->product_type!=9) {
+			elseif(!TSubtotal::isTitle($l) && !TSubtotal::isSubtotal($l)) {
 				$total += $l->total_ht;
 				$total_tva += $l->total_tva;
 				$TTotal_tva[$l->tva_tx] += $l->total_tva;
@@ -831,6 +832,7 @@ class ActionsSubtotal
 		global $conf;
 			
 		if($this->isModSubtotalLine($parameters,$object) ){
+			
 			$this->resprints = ' ';
 			
 			if((float)DOL_VERSION<=3.4) {
