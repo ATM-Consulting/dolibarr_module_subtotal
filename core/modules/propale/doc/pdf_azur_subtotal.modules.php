@@ -620,7 +620,6 @@ class pdf_azur_subtotal extends ModelePDFPropales
 
 					if (($object->lines[$i]->info_bits & 0x01) == 0x01) $vatrate.='*';
 					if (! isset($this->tva[$vatrate]))				$this->tva[$vatrate]='';
-					$this->tva[$vatrate] += $tvaligne;
 
 					if (!empty($object->lines[$i]->TTotal_tva))
 					{
