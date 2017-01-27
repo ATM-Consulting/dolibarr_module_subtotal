@@ -247,6 +247,32 @@ function showParameters() {
 		print '</td></tr>';
 	}
 	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans('SUBTOTAL_PROPAL_ADD_RECAP').'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_PROPAL_ADD_RECAP');
+	print '</td></tr>';
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans('SUBTOTAL_COMMANDE_ADD_RECAP').'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_COMMANDE_ADD_RECAP');
+	print '</td></tr>';
+	
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans('SUBTOTAL_INVOICE_ADD_RECAP').'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_INVOICE_ADD_RECAP');
+	print '</td></tr>';
+	
+	
 	print '</table>';
 ?>
 	<br />

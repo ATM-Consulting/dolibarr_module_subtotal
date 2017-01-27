@@ -587,6 +587,20 @@ class ActionsSubtotal
 		
 	}
 
+	/**
+	 *  TODO le calcul est faux dans certains cas,  exemple :
+	 *	T1
+	 *		|_ l1 => 50 €
+	 *		|_ l2 => 40 €
+	 *		|_ T2
+	 *			|_l3 => 100 €
+	 *		|_ ST2
+	 *		|_ l4 => 23 €
+	 *	|_ ST1
+	 * 
+	 * On obtiens ST2 = 100 ET ST1 = 123 €
+	 * Alors qu'on devrais avoir ST2 = 100 ET ST1 = 213 €
+	 */
 	function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=0) {
 		
 		$rang = $line->rang;
@@ -1509,7 +1523,7 @@ class ActionsSubtotal
 			</td>
 			
 			<?php 
-			if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::isTitle($line))
+			if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::isTitle($line) && $action != 'editline')
 			{
 				echo '<td class="subtotal_nc">';
 				echo '<input id="subtotal_nc-'.$line->id.'" class="subtotal_nc_chkbx" data-lineid="'.$line->id.'" type="checkbox" name="subtotal_nc" value="1" '.(!empty($line->array_options['options_subtotal_nc']) ? 'checked="checked"' : '').' />';
@@ -1538,7 +1552,7 @@ class ActionsSubtotal
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
 		global $conf,$langs;
 		
-		if ($object->statut == 0 && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS))
+		if ($object->statut == 0 && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && $action != 'editline')
 		{
 			$form = new Form($db);
 			?>
@@ -1626,6 +1640,18 @@ class ActionsSubtotal
 
 			</script>
 			<?php
+		}
+	}
+	
+	function afterPDFCreation($parameters, &$pdf, &$action, $hookmanager)
+	{
+		global $conf;
+		
+		$object = $parameters['object'];
+		
+		if ((!empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP) && $object->element == 'propal') || (!empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP) && $object->element == 'commande') || (!empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP) && $object->element == 'facture'))
+		{
+			TSubtotal::addRecapPage($parameters, $pdf);
 		}
 	}
 	
