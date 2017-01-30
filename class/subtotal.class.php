@@ -398,6 +398,13 @@ class TSubtotal {
 		
 		$outputlangs->load('subtotal@subtotal');
 		
+		$objmarge = new stdClass();
+		$objmarge->page_hauteur = 297;
+		$objmarge->page_largeur = 210;
+		$objmarge->marge_gauche = 10;
+		$objmarge->marge_haute = 10;
+		$objmarge->marge_droite = 10;
+		
 		$objectref = dol_sanitizeFileName($object->ref);
 		if ($object->element == 'propal') $dir = $conf->propal->dir_output . '/' . $objectref;
 		elseif ($object->element == 'commande') $dir = $conf->commande->dir_output . '/' . $objectref;
@@ -408,8 +415,9 @@ class TSubtotal {
 			return -1;
 		}
 		$file = $dir . '/' . $objectref . '_recap.pdf';
-		
-		$pdf=pdf_getInstance($origin_pdf->format);
+
+//		$pdf=pdf_getInstance($origin_pdf->format);
+		$pdf=pdf_getInstance(array(210, 297)); // Format A4 Portrait
 		$default_font_size = pdf_getPDFFontSize($outputlangs);	// Must be after pdf_getInstance
 		$pdf->SetAutoPageBreak(1,0);
 	             
@@ -437,7 +445,7 @@ class TSubtotal {
 		$pdf->SetKeyWords($outputlangs->convToOutputCharset($object->ref)." ".$outputlangs->transnoentities("subtotalRecap")." ".$outputlangs->convToOutputCharset($object->thirdparty->name));
 		if (! empty($conf->global->MAIN_DISABLE_PDF_COMPRESSION)) $pdf->SetCompression(false);
 
-		$pdf->SetMargins($origin_pdf->marge_gauche, $origin_pdf->marge_heute, $origin_pdf->marge_droite);   // Left, Top, Right
+		$pdf->SetMargins($objmarge->marge_gauche, $objmarge->marge_haute, $objmarge->marge_droite);   // Left, Top, Right
 
 		$pagenb=0;
 		$pdf->SetDrawColor(128,128,128);
@@ -449,20 +457,20 @@ class TSubtotal {
 		$pagenb++;
 		
 		
-		self::pagehead($origin_pdf, $pdf, $object, 1, $outputlangs);
+		self::pagehead($objmarge, $pdf, $object, 1, $outputlangs);
 		$pdf->SetFont('','', $default_font_size - 1);
 		$pdf->MultiCell(0, 3, '');		// Set interline to 3
 		$pdf->SetTextColor(0,0,0);
 		
 		$heightforinfotot = 25;	// Height reserved to output the info and total part
-		$heightforfooter = $origin_pdf->marge_basse + 8;	// Height reserved to output the footer (value include bottom margin)
+		$heightforfooter = $objmarge->marge_basse + 8;	// Height reserved to output the footer (value include bottom margin)
 		
 		$posx_designation = 25;
 		$posx_options = 150;
 		$posx_montant = 170;
 		
 		$tab_top = 72;
-		$tab_top_newpage = (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)?82:20); // TODO à vérifier
+		$tab_top_newpage = (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)?72:20); // TODO à vérifier
 		
 		$TLine = self::getAllTitleFromDocument($object, true);
 		if (!empty($TLine))
@@ -506,7 +514,7 @@ class TSubtotal {
 				
 				$pdf->SetTextColor(0,0,0);
 				
-				$pdf->setTopMargin($tab_top_newpage);
+				$pdf->setTopMargin($tab_top_newpage + 10);
 				$pdf->setPageOrientation('', 1, $heightforfooter+$heightforinfotot);	// The only function to edit the bottom margin of current page to set it.
 				$pageposbefore=$pdf->getPage();
 				
@@ -530,13 +538,13 @@ class TSubtotal {
 					$pageposafter=$pdf->getPage();
 					$posyafter=$pdf->GetY();
 					//var_dump($posyafter); var_dump(($this->page_hauteur - ($heightforfooter+$heightforfreetext+$heightforinfotot))); exit;
-					if ($posyafter > ($origin_pdf->page_hauteur - ($heightforfooter+$heightforinfotot)))	// There is no space left for total+free text
+					if ($posyafter > ($objmarge->page_hauteur - ($heightforfooter+$heightforinfotot)))	// There is no space left for total+free text
 					{
 						if ($i == ($nblignes-1))	// No more lines, and no space left to show total, so we create a new page
 						{
 							$pdf->AddPage('','',true);
 							if (! empty($tplidx)) $pdf->useTemplate($tplidx);
-							if (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)) self::pagehead($origin_pdf, $pdf, $object, 0, $outputlangs);
+							if (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)) self::pagehead($objmarge, $pdf, $object, 0, $outputlangs);
 							$pdf->setPage($pageposafter+1);
 						}
 					}
@@ -556,15 +564,15 @@ class TSubtotal {
 				$pageposafter=$pdf->getPage();
 
 				$pdf->setPage($pageposbefore);
-				$pdf->setTopMargin($origin_pdf->marge_haute);
+				$pdf->setTopMargin($objmarge->marge_haute);
 				$pdf->setPageOrientation('', 1, 0);	// The only function to edit the bottom margin of current page to set it.
 
 				// We suppose that a too long description or photo were moved completely on next page
 				if ($pageposafter > $pageposbefore && empty($showpricebeforepagebreak)) {
-					$pdf->setPage($pageposafter); $curY = $tab_top_newpage;
+					$pdf->setPage($pageposafter); $curY = $tab_top_newpage + 10;
 				}
 				
-				self::printLevel($origin_pdf, $pdf, $line, $curY, $posx_designation);
+				self::printLevel($objmarge, $pdf, $line, $curY, $posx_designation);
 				
 				// Print: Options
 				if (!empty($line->total_options))
@@ -575,7 +583,7 @@ class TSubtotal {
 				
 				// Print: Montant
 				$pdf->SetXY($posx_montant, $curY);
-				$pdf->MultiCell($origin_pdf->page_largeur-$origin_pdf->marge_droite-$posx_montant-0.8, 3, price($line->total_ht, 0, $outputlangs), 0, 'R', 0);
+				$pdf->MultiCell($objmarge->page_largeur-$objmarge->marge_droite-$posx_montant-0.8, 3, price($line->total_ht, 0, $outputlangs), 0, 'R', 0);
 				
 				$nexY+=2;    // Passe espace entre les lignes
 
@@ -585,17 +593,17 @@ class TSubtotal {
 					$pdf->setPage($pagenb);
 					if ($pagenb == 1)
 					{
-						self::tableau($origin_pdf, $pdf, $posx_designation, $posx_options, $posx_montant, $tab_top, $origin_pdf->page_hauteur - $tab_top - $heightforfooter, 0, $outputlangs, 0, 1, $object->multicurrency_code);
+						self::tableau($objmarge, $pdf, $posx_designation, $posx_options, $posx_montant, $tab_top, $objmarge->page_hauteur - $tab_top - $heightforfooter, 0, $outputlangs, 0, 1, $object->multicurrency_code);
 					}
 					else
 					{
-						self::tableau($origin_pdf, $pdf, $posx_designation, $posx_options, $posx_montant, $tab_top_newpage-10, $origin_pdf->page_hauteur - $tab_top_newpage - $heightforfooter, 0, $outputlangs, $hidetop, 1, $object->multicurrency_code);
+						self::tableau($objmarge, $pdf, $posx_designation, $posx_options, $posx_montant, $tab_top_newpage, $objmarge->page_hauteur - $tab_top_newpage - $heightforfooter, 0, $outputlangs, $hidetop, 1, $object->multicurrency_code);
 					}
 					
 					$pagenb++;
 					$pdf->setPage($pagenb);
 					$pdf->setPageOrientation('', 1, 0);	// The only function to edit the bottom margin of current page to set it.
-					if (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)) self::pagehead($origin_pdf, $pdf, $object, 0, $outputlangs);
+					if (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)) self::pagehead($objmarge, $pdf, $object, 0, $outputlangs);
 				}
 			}
 		}
@@ -603,17 +611,17 @@ class TSubtotal {
 		// Show square
 		if ($pagenb == 1)
 		{
-			self::tableau($origin_pdf, $pdf, $posx_designation, $posx_options, $posx_montant, $tab_top, $origin_pdf->page_hauteur - $tab_top - $heightforinfotot - $heightforfooter, 0, $outputlangs, 0, 0, $object->multicurrency_code);
-			$bottomlasttab=$origin_pdf->page_hauteur - $heightforinfotot - $heightforfooter + 1;
+			self::tableau($objmarge, $pdf, $posx_designation, $posx_options, $posx_montant, $tab_top, $objmarge->page_hauteur - $tab_top - $heightforinfotot - $heightforfooter, 0, $outputlangs, 0, 0, $object->multicurrency_code);
+			$bottomlasttab=$objmarge->page_hauteur - $heightforinfotot - $heightforfooter + 1;
 		}
 		else
 		{
-			self::tableau($origin_pdf, $pdf, $posx_designation, $posx_options, $posx_montant, $tab_top_newpage-10, $origin_pdf->page_hauteur - $tab_top_newpage - $heightforinfotot - $heightforfooter, 0, $outputlangs, $hidetop, 0, $object->multicurrency_code);
-			$bottomlasttab=$origin_pdf->page_hauteur - $heightforinfotot - $heightforfooter + 1;
+			self::tableau($objmarge, $pdf, $posx_designation, $posx_options, $posx_montant, $tab_top_newpage, $objmarge->page_hauteur - $tab_top_newpage - $heightforinfotot - $heightforfooter, 0, $outputlangs, $hidetop, 0, $object->multicurrency_code);
+			$bottomlasttab=$objmarge->page_hauteur - $heightforinfotot - $heightforfooter + 1;
 		}
 		
 		// Affiche zone totaux
-		$posy=self::tableau_tot($origin_pdf, $pdf, $object, $bottomlasttab, $outputlangs, $TTot);
+		$posy=self::tableau_tot($objmarge, $pdf, $object, $bottomlasttab, $outputlangs, $TTot);
 		
 		$pdf->Close();
 		$pdf->Output($file,'F');
@@ -623,12 +631,12 @@ class TSubtotal {
 		if (empty($conf->global->SUBTOTAL_KEEP_RECAP_FILE)) unlink($file);
 	}
 	
-	private static function printLevel($origin_pdf, $pdf, $line, $curY, $posx_designation)
+	private static function printLevel($objmarge, $pdf, $line, $curY, $posx_designation)
 	{
 		$level = $line->qty; // TODO à améliorer
 		
-		$pdf->SetXY($origin_pdf->marge_gauche, $curY);
-		$pdf->MultiCell($posx_designation-$origin_pdf->marge_gauche-0.8, 5, $level, 0, 'L', 0);
+		$pdf->SetXY($objmarge->marge_gauche, $curY);
+		$pdf->MultiCell($posx_designation-$objmarge->marge_gauche-0.8, 5, $level, 0, 'L', 0);
 	}
 	
 	/**
@@ -640,21 +648,21 @@ class TSubtotal {
 	 *  @param  Translate	$outputlangs	Object lang for output
 	 *  @return	void
 	 */
-	private static function pagehead(&$origin_pdf, &$pdf, &$object, $showdetail, $outputlangs)
+	private static function pagehead(&$objmarge, &$pdf, &$object, $showdetail, $outputlangs)
 	{
 		global $conf,$mysoc;
 
 		$default_font_size = pdf_getPDFFontSize($outputlangs);
 
-		pdf_pagehead($pdf,$outputlangs,$origin_pdf->page_hauteur);
+		pdf_pagehead($pdf,$outputlangs,$objmarge->page_hauteur);
 
 		$pdf->SetTextColor(0,0,60);
 		$pdf->SetFont('','B', $default_font_size + 3);
 
-		$posy=$origin_pdf->marge_haute;
-		$posx=$origin_pdf->page_largeur-$origin_pdf->marge_droite-100;
+		$posy=$objmarge->marge_haute;
+		$posx=$objmarge->page_largeur-$objmarge->marge_droite-100;
 		
-		$pdf->SetXY($origin_pdf->marge_gauche,$posy);
+		$pdf->SetXY($objmarge->marge_gauche,$posy);
 
 		$logo=$conf->mycompany->dir_output.'/logos/'.$mysoc->logo;
 		if ($mysoc->logo)
@@ -662,7 +670,7 @@ class TSubtotal {
 			if (is_readable($logo))
 			{
 			    $height=pdf_getHeightForLogo($logo);
-			    $pdf->Image($logo, $origin_pdf->marge_gauche, $posy, 0, $height);	// width=0 (auto)
+			    $pdf->Image($logo, $objmarge->marge_gauche, $posy, 0, $height);	// width=0 (auto)
 			}
 			else
 			{
@@ -685,7 +693,7 @@ class TSubtotal {
 		
 		$pdf->SetTextColor(0,0,0);
 		$pdf->SetFont('','B', $default_font_size + 2);
-		$pdf->SetXY($origin_pdf->marge_gauche,$posy);
+		$pdf->SetXY($objmarge->marge_gauche,$posy);
 		
 		$key = 'subtotalPropalTitle';
 		if ($object->element == 'commande') $key = 'subtotalCommandeTitle';
@@ -694,13 +702,13 @@ class TSubtotal {
 		$pdf->MultiCell(150, 4, $outputlangs->transnoentities($key, $object->ref, $object->thirdparty->name), '', 'L');
 		
 		$pdf->SetFont('','', $default_font_size);
-		$pdf->SetXY($origin_pdf->page_largeur-$origin_pdf->marge_droite-40,$posy);
+		$pdf->SetXY($objmarge->page_largeur-$objmarge->marge_droite-40,$posy);
 		$pdf->MultiCell(40, 4, dol_print_date($object->date, 'daytext'), '', 'R');
 		
 		$posy += 8;
 			
 		$pdf->SetFont('','B', $default_font_size + 2);
-		$pdf->SetXY($origin_pdf->marge_gauche,$posy);
+		$pdf->SetXY($objmarge->marge_gauche,$posy);
 		$pdf->MultiCell(70, 4, $outputlangs->transnoentities('subtotalRecapLot'), '', 'L');
 		
 	}
@@ -718,7 +726,7 @@ class TSubtotal {
 	 *   @param		string		$currency		Currency code
 	 *   @return	void
 	 */
-	private static function tableau(&$origin_pdf, &$pdf, $posx_designation, $posx_options, $posx_montant, $tab_top, $tab_height, $nexY, $outputlangs, $hidetop=0, $hidebottom=0, $currency='')
+	private static function tableau(&$objmarge, &$pdf, $posx_designation, $posx_options, $posx_montant, $tab_top, $tab_height, $nexY, $outputlangs, $hidetop=0, $hidebottom=0, $currency='')
 	{
 		global $conf;
 		
@@ -736,35 +744,35 @@ class TSubtotal {
 		if (empty($hidetop))
 		{
 			$titre = $outputlangs->transnoentities("AmountInCurrency",$outputlangs->transnoentitiesnoconv("Currency".$currency));
-			$pdf->SetXY($origin_pdf->page_largeur - $origin_pdf->marge_droite - ($pdf->GetStringWidth($titre) + 3), $tab_top-4.5);
+			$pdf->SetXY($objmarge->page_largeur - $objmarge->marge_droite - ($pdf->GetStringWidth($titre) + 3), $tab_top-4.5);
 			$pdf->MultiCell(($pdf->GetStringWidth($titre) + 3), 2, $titre);
 			
-			if (! empty($conf->global->MAIN_PDF_TITLE_BACKGROUND_COLOR)) $pdf->Rect($origin_pdf->marge_gauche, $tab_top, $origin_pdf->page_largeur-$origin_pdf->marge_droite-$origin_pdf->marge_gauche, 8, 'F', null, explode(',',$conf->global->MAIN_PDF_TITLE_BACKGROUND_COLOR));
+			if (! empty($conf->global->MAIN_PDF_TITLE_BACKGROUND_COLOR)) $pdf->Rect($objmarge->marge_gauche, $tab_top, $objmarge->page_largeur-$objmarge->marge_droite-$objmarge->marge_gauche, 8, 'F', null, explode(',',$conf->global->MAIN_PDF_TITLE_BACKGROUND_COLOR));
 			
 			
-			$pdf->line($origin_pdf->marge_gauche, $tab_top, $origin_pdf->page_largeur-$origin_pdf->marge_droite, $tab_top);	// line prend une position y en 2eme param et 4eme param
+			$pdf->line($objmarge->marge_gauche, $tab_top, $objmarge->page_largeur-$objmarge->marge_droite, $tab_top);	// line prend une position y en 2eme param et 4eme param
 
 			$pdf->SetXY($posx_designation, $tab_top+2);
 			$pdf->MultiCell($posx_options - $posx_designation,2, $outputlangs->transnoentities("Designation"),'','L');
 			$pdf->SetXY($posx_options, $tab_top+2);
 			$pdf->MultiCell($posx_montant - $posx_options,2, $outputlangs->transnoentities("Options"),'','R');
 			$pdf->SetXY($posx_montant, $tab_top+2);
-			$pdf->MultiCell($origin_pdf->page_largeur - $origin_pdf->marge_droite - $posx_montant,2, $outputlangs->transnoentities("Amount"),'','R');
+			$pdf->MultiCell($objmarge->page_largeur - $objmarge->marge_droite - $posx_montant,2, $outputlangs->transnoentities("Amount"),'','R');
 			
-			$pdf->line($origin_pdf->marge_gauche, $tab_top+8, $origin_pdf->page_largeur-$origin_pdf->marge_droite, $tab_top+8);	// line prend une position y en 2eme param et 4eme param
+			$pdf->line($objmarge->marge_gauche, $tab_top+8, $objmarge->page_largeur-$objmarge->marge_droite, $tab_top+8);	// line prend une position y en 2eme param et 4eme param
 		}
 		else
 		{
-			$pdf->line($origin_pdf->marge_gauche, $tab_top-2, $origin_pdf->page_largeur-$origin_pdf->marge_droite, $tab_top-2);	// line prend une position y en 2eme param et 4eme param
+			$pdf->line($objmarge->marge_gauche, $tab_top-2, $objmarge->page_largeur-$objmarge->marge_droite, $tab_top-2);	// line prend une position y en 2eme param et 4eme param
 		}
 		
 	}
 	
-	private static function tableau_tot(&$origin_pdf, &$pdf, $object, $posy, $outputlangs, $TTot)
+	private static function tableau_tot(&$objmarge, &$pdf, $object, $posy, $outputlangs, $TTot)
 	{
 		global $conf;
 		
-		$pdf->line($origin_pdf->marge_gauche, $posy, $origin_pdf->page_largeur-$origin_pdf->marge_droite, $posy);	// line prend une position y en 2eme param et 4eme param
+		$pdf->line($objmarge->marge_gauche, $posy, $objmarge->page_largeur-$objmarge->marge_droite, $posy);	// line prend une position y en 2eme param et 4eme param
 		
 		$default_font_size = pdf_getPDFFontSize($outputlangs);
 		
@@ -774,11 +782,11 @@ class TSubtotal {
 
 		// Tableau total
 		$col1x = 120; $col2x = 170;
-		if ($origin_pdf->page_largeur < 210) // To work with US executive format
+		if ($objmarge->page_largeur < 210) // To work with US executive format
 		{
 			$col2x-=20;
 		}
-		$largcol2 = ($origin_pdf->page_largeur - $origin_pdf->marge_droite - $col2x);
+		$largcol2 = ($objmarge->page_largeur - $objmarge->marge_droite - $col2x);
 
 		$useborder=0;
 		$index = 0;
