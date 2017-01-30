@@ -72,7 +72,9 @@ class TSubtotal {
 						$line->multicurrency_total_ht = $TTot['multicurrency_total_ht'];
 						$line->multicurrency_total_tva = $TTot['multicurrency_total_tva'];
 						$line->multicurrency_total_ttc = $TTot['multicurrency_total_ttc'];
+						$line->TTotal_tva_multicurrency = $TTot['TTotal_tva_multicurrency'];
 					}
+					
 					$TRes[] = $line;
 				}
 			}
@@ -83,7 +85,7 @@ class TSubtotal {
 	
 	public static function getTotalBlockFromTitle(&$object, &$line)
 	{
-		$TTot = array('total_options' => 0, 'total_ht' => 0, 'total_tva' => 0, 'total_ttc' => 0, 'TTotal_tva' => array(), 'multicurrency_total_ht' => 0, 'multicurrency_total_tva' => 0, 'multicurrency_total_ttc' => 0);
+		$TTot = array('total_options' => 0, 'total_ht' => 0, 'total_tva' => 0, 'total_ttc' => 0, 'TTotal_tva' => array(), 'multicurrency_total_ht' => 0, 'multicurrency_total_tva' => 0, 'multicurrency_total_ttc' => 0, 'TTotal_tva_multicurrency' => array());
 		
 		foreach ($object->lines as &$l)
 		{
@@ -101,6 +103,7 @@ class TSubtotal {
 				$TTot['multicurrency_total_ht'] += $l->multicurrency_total_ht;
 				$TTot['multicurrency_total_tva'] += $l->multicurrency_total_tva;
 				$TTot['multicurrency_total_ttc'] += $l->multicurrency_total_ttc;
+				$TTot['TTotal_tva_multicurrency'][$l->tva_tx] += $l->multicurrency_total_tva;
 			}
 		}
 		
@@ -381,9 +384,13 @@ class TSubtotal {
 		else return 0;
 	}
 	
+	/**
+	 * Ajoute une page de récap à la génération du PDF
+	 * Le tableau total en bas du document se base sur les totaux des titres niveau 1 pour le moment
+	 */
 	public static function addRecapPage(&$parameters, &$origin_pdf)
 	{
-		global $user,$conf;
+		global $user,$conf,$langs;
 		
 		$origin_file = $parameters['file'];
 		$outputlangs = $parameters['outputlangs'];
@@ -392,7 +399,14 @@ class TSubtotal {
 		$outputlangs->load('subtotal@subtotal');
 		
 		$objectref = dol_sanitizeFileName($object->ref);
-		$dir = $conf->propal->dir_output . '/' . $objectref;
+		if ($object->element == 'propal') $dir = $conf->propal->dir_output . '/' . $objectref;
+		elseif ($object->element == 'commande') $dir = $conf->commande->dir_output . '/' . $objectref;
+		elseif ($object->element == 'facture') $dir = $conf->facture->dir_output . '/' . $objectref;
+		else
+		{
+			setEventMessage($langs->trans('warning_subtotal_recap_object_element_unknown', $object->element), 'warnings');
+			return -1;
+		}
 		$file = $dir . '/' . $objectref . '_recap.pdf';
 		
 		$pdf=pdf_getInstance($origin_pdf->format);
@@ -423,12 +437,8 @@ class TSubtotal {
 		$pdf->SetKeyWords($outputlangs->convToOutputCharset($object->ref)." ".$outputlangs->transnoentities("subtotalRecap")." ".$outputlangs->convToOutputCharset($object->thirdparty->name));
 		if (! empty($conf->global->MAIN_DISABLE_PDF_COMPRESSION)) $pdf->SetCompression(false);
 
-//		$pdf->SetMargins($origin_pdf->marge_gauche, $origin_pdf->marge_haute, $origin_pdf->marge_droite);   // Left, Top, Right
 		$pdf->SetMargins($origin_pdf->marge_gauche, $origin_pdf->marge_heute, $origin_pdf->marge_droite);   // Left, Top, Right
-		//
-//		var_dump($origin_pdf->marge_gauche, $origin_pdf->marge_haute, $origin_pdf->marge_droite);
-		
-		
+
 		$pagenb=0;
 		$pdf->SetDrawColor(128,128,128);
 
@@ -444,7 +454,7 @@ class TSubtotal {
 		$pdf->MultiCell(0, 3, '');		// Set interline to 3
 		$pdf->SetTextColor(0,0,0);
 		
-		$heightforinfotot = 40;	// Height reserved to output the info and total part
+		$heightforinfotot = 25;	// Height reserved to output the info and total part
 		$heightforfooter = $origin_pdf->marge_basse + 8;	// Height reserved to output the footer (value include bottom margin)
 		
 		$posx_designation = 25;
@@ -453,13 +463,8 @@ class TSubtotal {
 		
 		$tab_top = 72;
 		$tab_top_newpage = (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)?82:20); // TODO à vérifier
-		$tab_height = 130;
-		$tab_height_newpage = 130;
-				
-		$TLine = self::getAllTitleFromDocument($object, true);
-		//TODO remove
-		//$TLine = array_merge($TLine, $TLine, $TLine, $TLine,$TLine,$TLine,$TLine,$TLine,$TLine);
 		
+		$TLine = self::getAllTitleFromDocument($object, true);
 		if (!empty($TLine))
 		{
 			$hidetop = 0;
@@ -468,6 +473,8 @@ class TSubtotal {
 			$curY = $tab_top + 10;
 			$nexY = $tab_top + 10;
 		
+			$TTot = array('total_ht' => 0, 'total_ttc' => 0, 'TTotal_tva' => array());
+			
 			$nblignes = count($TLine);
 			foreach($TLine as $i => &$line)
 			{
@@ -477,6 +484,23 @@ class TSubtotal {
 				{
 					$pdf->SetFont('','B', $default_font_size - 1);   // Into loop to work with multipage
 					$curY+=2;
+					
+					$TTot['total_ht'] += $line->total_ht;
+					$TTot['total_tva'] += $line->total_tva;
+					$TTot['total_ttc'] += $line->total_ttc;
+					$TTot['multicurrency_total_ht'] += $line->multicurrency_total_ht;
+					$TTot['multicurrency_total_tva'] += $line->multicurrency_total_tva;
+					$TTot['multicurrency_total_ttc'] += $line->multicurrency_total_ttc;
+					
+					foreach ($line->TTotal_tva as $tx => $amount)
+					{
+						$TTot['TTotal_tva'][$tx] += $amount;
+					}
+					
+					foreach ($line->TTotal_tva_multicurrency as $tx => $amount)
+					{
+						$TTot['TTotal_tva_multicurrency'][$tx] += $amount;
+					}	
 				}
 				else $pdf->SetFont('','', $default_font_size - 1);   // Into loop to work with multipage
 				
@@ -486,7 +510,7 @@ class TSubtotal {
 				$pdf->setPageOrientation('', 1, $heightforfooter+$heightforinfotot);	// The only function to edit the bottom margin of current page to set it.
 				$pageposbefore=$pdf->getPage();
 				
-				$showpricebeforepagebreak=0;
+				$showpricebeforepagebreak=1;
 				
 				$decalage = (self::getNiveau($line) - 1) * 2;
 				
@@ -567,7 +591,7 @@ class TSubtotal {
 					{
 						self::tableau($origin_pdf, $pdf, $posx_designation, $posx_options, $posx_montant, $tab_top_newpage-10, $origin_pdf->page_hauteur - $tab_top_newpage - $heightforfooter, 0, $outputlangs, $hidetop, 1, $object->multicurrency_code);
 					}
-//					$this->_pagefoot($pdf,$object,$outputlangs,1);
+					
 					$pagenb++;
 					$pdf->setPage($pagenb);
 					$pdf->setPageOrientation('', 1, 0);	// The only function to edit the bottom margin of current page to set it.
@@ -587,20 +611,16 @@ class TSubtotal {
 			self::tableau($origin_pdf, $pdf, $posx_designation, $posx_options, $posx_montant, $tab_top_newpage-10, $origin_pdf->page_hauteur - $tab_top_newpage - $heightforinfotot - $heightforfooter, 0, $outputlangs, $hidetop, 0, $object->multicurrency_code);
 			$bottomlasttab=$origin_pdf->page_hauteur - $heightforinfotot - $heightforfooter + 1;
 		}
-				
-				// Affiche zone infos
-//				$posy=$this->_tableau_info($pdf, $object, $bottomlasttab, $outputlangs);
-//
-//				// Affiche zone totaux
-//				$posy=$this->_tableau_tot2($pdf, $object, $bottomlasttab, $outputlangs, $TTot);
-//
-				// Pied de page
-//				$this->_pagefoot($pdf,$object,$outputlangs, 1);
-//				if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 		
-		//var_dump($file);exit;
+		// Affiche zone totaux
+		$posy=self::tableau_tot($origin_pdf, $pdf, $object, $bottomlasttab, $outputlangs, $TTot);
+		
 		$pdf->Close();
 		$pdf->Output($file,'F');
+		
+		$pagecount = self::concat($outputlangs, array($origin_file, $file), $origin_file);
+		
+		if (empty($conf->global->SUBTOTAL_KEEP_RECAP_FILE)) unlink($file);
 	}
 	
 	private static function printLevel($origin_pdf, $pdf, $line, $curY, $posx_designation)
@@ -738,5 +758,141 @@ class TSubtotal {
 			$pdf->line($origin_pdf->marge_gauche, $tab_top-2, $origin_pdf->page_largeur-$origin_pdf->marge_droite, $tab_top-2);	// line prend une position y en 2eme param et 4eme param
 		}
 		
+	}
+	
+	private static function tableau_tot(&$origin_pdf, &$pdf, $object, $posy, $outputlangs, $TTot)
+	{
+		global $conf;
+		
+		$pdf->line($origin_pdf->marge_gauche, $posy, $origin_pdf->page_largeur-$origin_pdf->marge_droite, $posy);	// line prend une position y en 2eme param et 4eme param
+		
+		$default_font_size = pdf_getPDFFontSize($outputlangs);
+		
+		$tab2_top = $posy+2;
+		$tab2_hl = 4;
+		$pdf->SetFont('','', $default_font_size - 1);
+
+		// Tableau total
+		$col1x = 120; $col2x = 170;
+		if ($origin_pdf->page_largeur < 210) // To work with US executive format
+		{
+			$col2x-=20;
+		}
+		$largcol2 = ($origin_pdf->page_largeur - $origin_pdf->marge_droite - $col2x);
+
+		$useborder=0;
+		$index = 0;
+
+		// Total HT
+		$pdf->SetFillColor(255,255,255);
+		$pdf->SetXY($col1x, $tab2_top + 0);
+		$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalHT"), 0, 'L', 1);
+
+		// $total_ht = ($conf->multicurrency->enabled && $object->mylticurrency_tx != 1) ? $TTot['multicurrency_total_ht'] : $TTot['total_ht'];
+		$total_ht = $TTot['total_ht'];
+		$pdf->SetXY($col2x, $tab2_top + 0);
+		$pdf->MultiCell($largcol2, $tab2_hl, price($total_ht, 0, $outputlangs), 0, 'R', 1);
+
+		// Show VAT by rates and total
+		$pdf->SetFillColor(248,248,248);
+		
+		$atleastoneratenotnull=0;
+		foreach($TTot['TTotal_tva'] as $tvakey => $tvaval)
+		{
+			if ($tvakey != 0)    // On affiche pas taux 0
+			{
+				$atleastoneratenotnull++;
+
+				$index++;
+				$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
+
+				$tvacompl='';
+				if (preg_match('/\*/',$tvakey))
+				{
+					$tvakey=str_replace('*','',$tvakey);
+					$tvacompl = " (".$outputlangs->transnoentities("NonPercuRecuperable").")";
+				}
+				$totalvat =$outputlangs->transnoentities("TotalVAT").' ';
+				$totalvat.=vatrate($tvakey,1).$tvacompl;
+				$pdf->MultiCell($col2x-$col1x, $tab2_hl, $totalvat, 0, 'L', 1);
+
+				$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
+				$pdf->MultiCell($largcol2, $tab2_hl, price($tvaval, 0, $outputlangs), 0, 'R', 1);
+			}
+		}
+		
+		// Total TTC
+		$index++;
+		$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
+		$pdf->SetTextColor(0,0,60);
+		$pdf->SetFillColor(224,224,224);
+		$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalTTC"), $useborder, 'L', 1);
+
+		// $total_ttc = ($conf->multicurrency->enabled && $object->multiccurency_tx != 1) ? $TTot['multicurrency_total_ttc'] : $TTot['total_ttc'];
+		$total_ttc = $TTot['total_ttc'];
+		$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
+		$pdf->MultiCell($largcol2, $tab2_hl, price($total_ttc, 0, $outputlangs), $useborder, 'R', 1);
+
+		$pdf->SetTextColor(0,0,0);
+				
+		$index++;
+		return ($tab2_top + ($tab2_hl * $index));
+		
+	}
+	
+	/**
+	 * Rect pdf
+	 *
+	 * @param	PDF		$pdf			Object PDF
+	 * @param	float	$x				Abscissa of first point
+	 * @param	float	$y		        Ordinate of first point
+	 * @param	float	$l				??
+	 * @param	float	$h				??
+	 * @param	int		$hidetop		1=Hide top bar of array and title, 0=Hide nothing, -1=Hide only title
+	 * @param	int		$hidebottom		Hide bottom
+	 * @return	void
+	 */
+    private static function printRect($pdf, $x, $y, $l, $h, $hidetop=0, $hidebottom=0)
+    {
+	    if (empty($hidetop) || $hidetop==-1) $pdf->line($x, $y, $x+$l, $y);
+	    $pdf->line($x+$l, $y, $x+$l, $y+$h);
+	    if (empty($hidebottom)) $pdf->line($x+$l, $y+$h, $x, $y+$h);
+	    $pdf->line($x, $y+$h, $x, $y);
+    }
+	
+	
+	public static function concat(&$outputlangs, $files, $fileoutput='')
+	{
+		global $conf;
+		
+		if (empty($fileoutput)) $fileoutput = $file[0];
+		
+		$pdf=pdf_getInstance();
+        if (class_exists('TCPDF'))
+        {
+            $pdf->setPrintHeader(false);
+            $pdf->setPrintFooter(false);
+        }
+        $pdf->SetFont(pdf_getPDFFont($outputlangs));
+
+        if (! empty($conf->global->MAIN_DISABLE_PDF_COMPRESSION)) $pdf->SetCompression(false);
+
+		
+		foreach($files as $file)
+		{
+			$pagecount = $pdf->setSourceFile($file);
+			for ($i = 1; $i <= $pagecount; $i++)
+			{
+				$tplidx = $pdf->ImportPage($i);
+				$s = $pdf->getTemplatesize($tplidx);
+				$pdf->AddPage($s['h'] > $s['w'] ? 'P' : 'L');
+				$pdf->useTemplate($tplidx);
+			}
+		}
+		
+		$pdf->Output($fileoutput,'F');
+		if (! empty($conf->global->MAIN_UMASK)) @chmod($file, octdec($conf->global->MAIN_UMASK));
+
+		return $pagecount;
 	}
 }

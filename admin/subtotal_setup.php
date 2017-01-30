@@ -108,6 +108,7 @@ function showParameters() {
 	print '<td>'.$langs->trans("Parameters").'</td>'."\n";
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
+	print '</tr>';
 	
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
@@ -247,6 +248,27 @@ function showParameters() {
 		print '</td></tr>';
 	}
 	
+	
+	print '</table><br />';
+	
+	
+	
+	$var=false;
+	print '<table class="noborder" width="100%">';
+	print '<tr class="liste_titre">';
+	print '<td>'.$langs->trans("RecapGeneration").'</td>'."\n";
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
+	print '</tr>';
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans('SUBTOTAL_KEEP_RECAP_FILE').'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_KEEP_RECAP_FILE');
+	print '</td></tr>';
+	
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
 	print '<td>'.$langs->trans('SUBTOTAL_PROPAL_ADD_RECAP').'</td>';
@@ -272,8 +294,8 @@ function showParameters() {
 	print ajax_constantonoff('SUBTOTAL_INVOICE_ADD_RECAP');
 	print '</td></tr>';
 	
-	
 	print '</table>';
+	
 ?>
 	<br />
 		
