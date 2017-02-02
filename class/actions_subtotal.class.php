@@ -443,7 +443,7 @@ class ActionsSubtotal
 		if($object->element=='facture') $idvar = 'facid';
 		else $idvar = 'id';
 			
-		if ($action == 'updateligne')
+		if ($action == 'updateligne' || $action == 'updateline')
 		{
 			$found = false;
 			$lineid = GETPOST('lineid', 'int');
