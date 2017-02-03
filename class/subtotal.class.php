@@ -344,7 +344,7 @@ class TSubtotal {
 		$i--; // Skip la ligne d'origine
 		
 		// Si elle n'est pas en 1ère position, alors on cherche des titres au dessus
-		if ($i > 0)
+		if ($i >= 0)
 		{
 			$next_title_lvl_to_skip = 0;
 			for ($y = $i; $y >= 0; $y--)
