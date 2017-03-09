@@ -303,38 +303,51 @@ class ActionsSubtotal
 	function formBuilddocOptions($parameters) {
 	/* Réponse besoin client */		
 			
-		global $conf, $langs, $bc, $var;
+		global $conf, $langs, $bc;
 			
 		$action = GETPOST('action');	
-		
+		$TContext = explode(':',$parameters['context']);
 		if (
-				in_array('invoicecard',explode(':',$parameters['context']))
-				|| in_array('propalcard',explode(':',$parameters['context']))
-				|| in_array('ordercard',explode(':',$parameters['context']))
+				in_array('invoicecard',$TContext)
+				|| in_array('propalcard',$TContext)
+				|| in_array('ordercard',$TContext)
 			)
 	        {	
 				$hideInnerLines	= isset( $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] : 0;
 				$hidedetails	= isset( $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] : 0;	
 					
-					
+				$var=false;
 		     	$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
 		     				<label for="hideInnerLines">'.$langs->trans('HideInnerLines').'</label>
 		     				<input type="checkbox" onclick="if($(this).is(\':checked\')) { $(\'#hidedetails\').prop(\'checked\', \'checked\')  }" id="hideInnerLines" name="hideInnerLines" value="1" '.(( $hideInnerLines ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
-				$var = -$var;
-				 
-				 
 				
+				$var=!$var;
 				$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
 		     				<label for="hidedetails">'.$langs->trans('SubTotalhidedetails').'</label>
 		     				<input type="checkbox" id="hidedetails" name="hidedetails" value="1" '.(( $hidedetails ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
-				$var = -$var;
+				
 				 
+				if ( 
+					(in_array('propalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
+					|| (in_array('ordercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
+					|| (in_array('invoicecard',$TContext) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
+				)
+				{
+					$var=!$var;
+					$out.= '
+						<tr '.$bc[$var].'>
+							<td colspan="4" align="right">
+								<label for="subtotal_add_recap">'.$langs->trans('subtotal_add_recap').'</label>
+								<input type="checkbox" id="subtotal_add_recap" name="subtotal_add_recap" value="1" '.( GETPOST('subtotal_add_recap') ? 'checked="checked"' : '' ).' />
+							</td>
+						</tr>';
+				}
 				
 				
 				$this->resprints = $out;	
@@ -587,6 +600,20 @@ class ActionsSubtotal
 		
 	}
 
+	/**
+	 *  TODO le calcul est faux dans certains cas,  exemple :
+	 *	T1
+	 *		|_ l1 => 50 €
+	 *		|_ l2 => 40 €
+	 *		|_ T2
+	 *			|_l3 => 100 €
+	 *		|_ ST2
+	 *		|_ l4 => 23 €
+	 *	|_ ST1
+	 * 
+	 * On obtiens ST2 = 100 ET ST1 = 123 €
+	 * Alors qu'on devrais avoir ST2 = 100 ET ST1 = 213 €
+	 */
 	function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=0) {
 		
 		$rang = $line->rang;
@@ -684,9 +711,24 @@ class ActionsSubtotal
 		$pdf->MultiCell(200-$posx, $cell_height, '', 0, '', 1);
 		
 		if (!$hidePriceOnSubtotalLines) {
-			if($line->total == 0) {
-				list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
+			$total_to_print = price($line->total);
 			
+			if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS))
+			{
+				$TTitle = TSubtotal::getAllTitleFromLine($line);
+				foreach ($TTitle as &$line_title)
+				{
+					if (!empty($line_title->array_options['options_subtotal_nc']))
+					{
+						$total_to_print = ''; // TODO Gestion "Compris/Non compris", voir si on affiche une annotation du genre "NC"
+						break;
+					}
+				}
+			}
+			else if($total_to_print) {
+				list($total, $total_tva, $total_ttc) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
+
+				$total_to_print = price($total);
 				$line->total_ht = $total;
 				$line->total = $total;
 				$line->total_tva = $total_tva;
@@ -695,7 +737,7 @@ class ActionsSubtotal
 			
 			$pdf->SetXY($pdf->postotalht, $posy);
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
-			$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, price($line->total), 0, 'R', 0);
+			$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, $total_to_print, 0, 'R', 0);
 		}
 		else{
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
@@ -814,6 +856,8 @@ class ActionsSubtotal
 	}
 	
 	function pdf_getlinetotalexcltax($parameters=array(), &$object, &$action='') {
+		global $conf;
+			
 		if($this->isModSubtotalLine($parameters,$object) ){
 			
 			$this->resprints = ' ';
@@ -826,6 +870,22 @@ class ActionsSubtotal
 			}
 			
 		}
+		elseif (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS))
+		{
+			if(is_array($parameters)) $i = & $parameters['i'];
+			else $i = (int)$parameters;
+			
+			$TTitle = TSubtotal::getAllTitleFromLine($object->lines[$i]);
+			foreach ($TTitle as &$line_title)
+			{
+				if (!empty($line_title->array_options['options_subtotal_nc']))
+				{
+					$this->resprints = ' ';
+					return 1;
+				}
+			}
+		}
+			
 		
 		return 0;
 	}
@@ -1476,7 +1536,7 @@ class ActionsSubtotal
 			</td>
 			
 			<?php 
-			if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::isTitle($line))
+			if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::isTitle($line) && $action != 'editline')
 			{
 				echo '<td class="subtotal_nc">';
 				echo '<input id="subtotal_nc-'.$line->id.'" class="subtotal_nc_chkbx" data-lineid="'.$line->id.'" type="checkbox" name="subtotal_nc" value="1" '.(!empty($line->array_options['options_subtotal_nc']) ? 'checked="checked"' : '').' />';
@@ -1503,10 +1563,11 @@ class ActionsSubtotal
 
 	
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
-		global $conf;
+		global $conf,$langs;
 		
-		if ($object->statut == 0 && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS))
+		if ($object->statut == 0 && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && $action != 'editline')
 		{
+			$form = new Form($db);
 			?>
 			<script type="text/javascript">
 				$(function() {
@@ -1515,7 +1576,7 @@ class ActionsSubtotal
 						{
 							var id = $(item).attr('id');
 							
-							if (typeof id != 'undefined' && id.indexOf('row-') >= 0)
+							if ((typeof id != 'undefined' && id.indexOf('row-') >= 0) || $(item).hasClass('liste_titre'))
 							{
 								$(item).children('td:last-child').before('<td class="subtotal_nc"></td>');
 							}
@@ -1526,18 +1587,17 @@ class ActionsSubtotal
 						}
 					});
 					
-					$(".subtotal_nc_chkbx").change(function(event) {
-						var self = this;
-						var lineid = $(this).data('lineid');
-						var subtotal_nc = 0 | $(this).is(':checked'); // Renvoi 0 ou 1 
-						
+					$('#tablelines tbody tr.liste_titre:first .subtotal_nc').html(<?php echo json_encode($form->textwithtooltip($langs->trans('subtotal_nc_title'), $langs->trans('subtotal_nc_title_help'))); ?>);
+					
+					function callAjaxUpdateLineNC(set, lineid, subtotal_nc)
+					{
 						$.ajax({
 							url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
-							,type: "POST"
+							,type: 'POST'
 							,data: {
 								json:1
-								,set: 'updateLineNC'
-								,element: "<?php echo $object->element; ?>"
+								,set: set
+								,element: '<?php echo $object->element; ?>'
 								,elementid: <?php echo (int) $object->id; ?>
 								,lineid: lineid
 								,subtotal_nc: subtotal_nc
@@ -1545,10 +1605,66 @@ class ActionsSubtotal
 						}).done(function(response) {
 							window.location.href = window.location.pathname + '?id=<?php echo $object->id; ?>&page_y=' + window.pageYOffset;
 						});
+					}
+					
+					$(".subtotal_nc_chkbx").change(function(event) {
+						var lineid = $(this).data('lineid');
+						var subtotal_nc = 0 | $(this).is(':checked'); // Renvoi 0 ou 1 
+						
+						callAjaxUpdateLineNC('updateLineNC', lineid, subtotal_nc);
+					});
+					
+					$(document).ajaxSuccess(function(event, xhr, options) {
+						if (xhr.status == 200 && xhr.statusText == 'OK' && typeof options.url != 'undefined' && options.url == '/core/ajax/row.php')
+						{
+							var roworder = GetURLParameter('roworder', options.data);
+							if (roworder.length > 0)
+							{
+								var lineid = GetURLParameter('element_id', options.data);
+								if (lineid > 0)
+								{
+									callAjaxUpdateLineNC('updateLine', lineid);
+								}
+							}
+						}
+						
 					});
 				});
+				
+				// source : http://www.jquerybyexample.net/2012/06/get-url-parameters-using-jquery.html
+				function GetURLParameter(sParam, sPageURL)
+				{
+					if (!sPageURL) {
+						sPageURL = window.location.search.substring(1);
+					}
+					
+					var sURLVariables = sPageURL.split('&');
+					for (var i = 0; i < sURLVariables.length; i++)
+					{
+						var sParameterName = sURLVariables[i].split('=');
+						if (sParameterName[0] == sParam)
+						{
+							return sParameterName[1];
+						}
+					}
+					
+					return '';
+				}
+
 			</script>
 			<?php
+		}
+	}
+	
+	function afterPDFCreation($parameters, &$pdf, &$action, $hookmanager)
+	{
+		global $conf;
+		
+		$object = $parameters['object'];
+		
+		if ((!empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP) && $object->element == 'propal') || (!empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP) && $object->element == 'commande') || (!empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP) && $object->element == 'facture'))
+		{
+			if (GETPOST('subtotal_add_recap')) TSubtotal::addRecapPage($parameters, $pdf);
 		}
 	}
 	

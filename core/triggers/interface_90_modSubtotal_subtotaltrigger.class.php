@@ -243,7 +243,36 @@ class Interfacesubtotaltrigger
 				$subtotal_current_rang = $rang;
 			}
 		}
-        
+		
+		
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($action, array('LINEPROPAL_INSERT', 'LINEPROPAL_UPDATE', 'LINEORDER_INSERT', 'LINEORDER_UPDATE', 'LINEBILL_INSERT', 'LINEBILL_UPDATE')))
+		{
+			$doli_action = GETPOST('action');
+			$set = GETPOST('set');
+			if ( (in_array($doli_action, array('updateligne', 'updateline', 'addline', 'add')) || $set == 'defaultTVA') && !TSubtotal::isTitle($object) && !TSubtotal::isSubtotal($object) && in_array($object->element, array('propaldet', 'commandedet', 'facturedet')))
+			{
+				 dol_syslog(
+					"[SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS] Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". object=".$object->element." id=" . $object->id
+				);
+				 
+				$TTitle = TSubtotal::getAllTitleFromLine($object);
+				foreach ($TTitle as &$line)
+				{
+					if (!empty($line->array_options['options_subtotal_nc']))
+					{
+						$object->total_ht = $object->total_tva = $object->total_ttc = $object->total_localtax1 = $object->total_localtax2 = 
+							$object->multicurrency_total_ht = $object->multicurrency_total_tva = $object->multicurrency_total_ttc = 0;
+
+						if ($object->element == 'propal') $res = $object->update(1);
+						else $res = $object->update($user, 1);
+						
+						if ($res > 0) setEventMessage($langs->trans('subtotal_update_nc_success'));
+						break;
+					}
+				}
+			}
+		}
+		
         
         if ($action == 'USER_LOGIN') {
             dol_syslog(

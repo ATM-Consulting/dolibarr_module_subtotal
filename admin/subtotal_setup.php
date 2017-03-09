@@ -108,6 +108,7 @@ function showParameters() {
 	print '<td>'.$langs->trans("Parameters").'</td>'."\n";
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
+	print '</tr>';
 	
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
@@ -231,21 +232,70 @@ function showParameters() {
 	print ajax_constantonoff('SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES');
 	print '</td></tr>';
 	
+	if ((double) DOL_VERSION >= 4.0)
+	{
+		$var=!$var;
+		print '<tr '.$bc[$var].'>';
+		print '<td>'.$langs->trans("SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS").'</td>';
+		print '<td align="center" width="20">&nbsp;</td>';
+		print '<td align="right" width="300">';
+		print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+		print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+		print '<input type="hidden" name="action" value="set_SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS">';
+		print $html->selectyesno("SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS",$conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS,1);
+		print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+		print '</form>';
+		print '</td></tr>';
+	}
+	
+	
+	print '</table><br />';
+	
+	
+	
+	$var=false;
+	print '<table class="noborder" width="100%">';
+	print '<tr class="liste_titre">';
+	print '<td>'.$langs->trans("RecapGeneration").'</td>'."\n";
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
+	print '</tr>';
 	
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS").'</td>';
+	print '<td>'.$langs->trans('SUBTOTAL_KEEP_RECAP_FILE').'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="right" width="300">';
-	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
-	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-	print '<input type="hidden" name="action" value="set_SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS">';
-	print $html->selectyesno("SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS",$conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS,1);
-	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
-	print '</form>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_KEEP_RECAP_FILE');
+	print '</td></tr>';
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans('SUBTOTAL_PROPAL_ADD_RECAP').'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_PROPAL_ADD_RECAP');
+	print '</td></tr>';
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans('SUBTOTAL_COMMANDE_ADD_RECAP').'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_COMMANDE_ADD_RECAP');
+	print '</td></tr>';
+	
+	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans('SUBTOTAL_INVOICE_ADD_RECAP').'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_INVOICE_ADD_RECAP');
 	print '</td></tr>';
 	
 	print '</table>';
+	
 ?>
 	<br />
 		
