@@ -1314,7 +1314,7 @@ class ActionsSubtotal
 			
 			$colspan = 5;
 			if(!empty($conf->multicurrency->enabled)) $colspan+=2;
-			if(!empty($conf->shippableorder->enabled)) $colspan++;
+			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
 			if(!empty($conf->margin->enabled)) $colspan++;
 			if(!empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
 			if(!empty($conf->global->DISPLAY_MARK_RATES)) $colspan++;
