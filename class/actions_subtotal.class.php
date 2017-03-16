@@ -1314,6 +1314,7 @@ class ActionsSubtotal
 			
 			$colspan = 5;
 			if(!empty($conf->multicurrency->enabled)) $colspan+=2;
+			if(!empty($conf->shippableorder->enabled)) $colspan++;
 			if(!empty($conf->clisms->enabled)) $colspan+=3;
 			if(!empty($conf->margin->enabled)) $colspan++;
 			if(!empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
