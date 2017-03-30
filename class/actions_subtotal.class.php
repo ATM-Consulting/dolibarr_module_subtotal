@@ -44,7 +44,7 @@ class ActionsSubtotal
 					if($action=='add_title_line') {
 						$title = GETPOST('title');
 						if(empty($title)) $title = $langs->trans('title');
-						$qty = $level ? $level : 1;
+						$qty = $level<1 ? 1 : $level ;
 					}
 					else if($action=='add_subtitle_line') {
 						$title = GETPOST('title');
@@ -79,16 +79,19 @@ class ActionsSubtotal
 					$this->showSelectTitleToAdd($object);
 				}
 
-				// New format is for 3.8
-				if ($conf->global->SUBTOTAL_USE_NEW_FORMAT) 
-				{
-					$this->printNewFormat($object, $conf, $langs, $idvar);
-				}
-				else 
-				{
-					$this->printOldFormat($object, $conf, $langs, $idvar);
-				}
 				
+				if($action!='editline') {
+					
+					// New format is for 3.8
+					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT)) 
+					{
+						$this->printNewFormat($object, $conf, $langs, $idvar);
+					}
+					else 
+					{
+						$this->printOldFormat($object, $conf, $langs, $idvar);
+					}
+				}
 			}
 		}
 		elseif ((!empty($parameters['currentcontext']) && $parameters['currentcontext'] == 'orderstoinvoice') || in_array('orderstoinvoice',$contexts))
@@ -1325,7 +1328,7 @@ class ActionsSubtotal
 			//var_dump($line);
 			?>
 			<tr class="drag drop" rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
-					if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
 						if($line->qty==99) print 'background-color:#adadcf';
 						else if($line->qty==98) print 'background-color:#ddddff;';
@@ -1347,7 +1350,6 @@ class ActionsSubtotal
 			?>;">
 			
 			<td colspan="<?php echo $colspan; ?>" style="font-weight:bold;  <?php echo ($line->qty>90)?'text-align:right':' font-style: italic;' ?> "><?php
-
 					if($action=='editline' && GETPOST('lineid') == $line->id && (TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line)) ) {
 
 						echo '<div id="line_'.$line->id.'"></div>'; // Imitation Dolibarr
@@ -1358,7 +1360,7 @@ class ActionsSubtotal
 
 						if (TSubtotal::isTitle($line))
 						{
-							if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+							if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 							{
 								$qty_displayed = $line->qty;
 								print img_picto('', 'subsubtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;color:#0075DE;">'.$qty_displayed.'</span>&nbsp;&nbsp;';
@@ -1383,7 +1385,7 @@ class ActionsSubtotal
 
 						echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$line->label.'" size="80"/>&nbsp;';
 						
-						if (TSubtotal::isTitle($line))
+						if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT) && TSubtotal::isTitle($line))
 						{
 							$select = '<select name="subtotal_level">';
 							for ($j=1; $j<10; $j++)
