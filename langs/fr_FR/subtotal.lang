@@ -59,3 +59,4 @@ SUBTOTAL_COMMANDE_ADD_RECAP=Activer la génération du récapitulatif sur les co
 SUBTOTAL_INVOICE_ADD_RECAP=Activer la génération du récapitulatif sur les factures
 warning_subtotal_recap_object_element_unknown=Génération du récapitulatif impossible, element inconnu : %s
 subtotal_add_recap=Ajouter le récapitulatif
+AddFreeText = Ajouter une ligne de texte
