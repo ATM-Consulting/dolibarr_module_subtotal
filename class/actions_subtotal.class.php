@@ -1117,9 +1117,9 @@ class ActionsSubtotal
 					}
 				
 					$posy = $pdf->GetY();
-					
+					return 1;
 				}	
-				else{
+				else if ($line->qty < 10) {
 					$pageBefore = $pdf->getPage();
 
 					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h); 
@@ -1138,10 +1138,11 @@ class ActionsSubtotal
 					}
 				*/
 					$posy = $pdf->GetY();
+					return 1;
 				}
 //	if($line->rowid==47) exit;
 			
-			return 1;
+			return 0;
 		}
 		elseif (empty($object->lines[$parameters['i']]))
 		{
