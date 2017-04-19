@@ -36,15 +36,19 @@ class ActionsSubtotal
 				if($object->element=='facture')$idvar = 'facid';
 				else $idvar='id';
 				
-				
-				if($action=='add_title_line' || $action=='add_total_line' || $action=='add_subtitle_line' || $action=='add_subtotal_line') {
-					
+				if(in_array($action, array('add_title_line', 'add_total_line', 'add_subtitle_line', 'add_subtotal_line', 'add_free_text')) )
+				{
 					$level = GETPOST('level', 'int'); //New avec SUBTOTAL_USE_NEW_FORMAT
 					
 					if($action=='add_title_line') {
 						$title = GETPOST('title');
 						if(empty($title)) $title = $langs->trans('title');
 						$qty = $level<1 ? 1 : $level ;
+					}
+					else if($action=='add_free_text') {
+						$title = GETPOST('title');
+						if(empty($title)) $title = $langs->trans('subtotalAddLineDescription');
+						$qty = 50;
 					}
 					else if($action=='add_subtitle_line') {
 						$title = GETPOST('title');
@@ -123,22 +127,38 @@ class ActionsSubtotal
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction">'+label+select+'</div>');
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" rel="add_title_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddTitle' )?></a></div>');
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" rel="add_total_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubTotal')?></a></div>');
-					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_free_text" rel="add_free_text" href="?<?php echo $idvar.'='.$object->id.'&action=add_free_text'; ?>" class="butAction"><?php echo  $langs->trans('AddFreeText')?></a></div>');
+					$('div.fiche div.tabsAction').append('|<div class="inline-block divButAction"><a id="add_free_text" rel="add_free_text" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddFreeText')?></a></div>');
 					
-					function promptSubTotal(titleDialog, label, url_to, url_ajax) {
+					function promptSubTotal(titleDialog, label, url_to, url_ajax, use_textarea, show_under_title) {
 					     $( "#dialog-prompt-subtotal" ).remove();
-					     $('body').append('<div id="dialog-prompt-subtotal"><input id="sub-total-title" size=30 value="'+label+'" /></div>');
+						 
+						 var dialog_html = '<div id="dialog-prompt-subtotal">';
+						 
+						 if (typeof show_under_title != 'undefined' && show_under_title)
+						 {
+							 var selectUnderTitle = <?php echo json_encode(getHtmlSelectTitle($object)); ?>;
+							 dialog_html += selectUnderTitle + '<br />';
+						 }
+						 
+						 if (typeof use_textarea != 'undefined' && use_textarea) dialog_html += '<textarea id="sub-total-title" rows="<?php echo ROWS_8; ?>" cols="80">'+label+'</textarea>';
+						 else dialog_html += '<input id="sub-total-title" size=30 value="'+label+'" />';
+						 
+						 
+						 dialog_html += '</div>';
 					    
+						$('body').append(dialog_html);
+						
 					     $( "#dialog-prompt-subtotal" ).dialog({
 	                        resizable: false,
-	                        height:140,
+							height: 'auto',
+							width: 'auto',
 	                        modal: true,
 	                        title: titleDialog,
 	                        buttons: {
 	                            "Ok": function() {
-	                                $.get(url_ajax+'&title='+encodeURIComponent( $(this).find('#sub-total-title').val() ), function() {
-	                                    document.location.href=url_to;
-	                                })
+	                                $.get(url_ajax+'&title='+encodeURIComponent( $(this).find('#sub-total-title').val() )+'&under_title='+$(this).find('select[name=under_title]').val(), function() {
+	                                   document.location.href=url_to;
+	                                });
 	
                                     $( this ).dialog( "close" );
 	                            },
@@ -164,6 +184,17 @@ class ActionsSubtotal
 							document.location.href='?<?php echo $idvar ?>=<?php echo $object->id; ?>';
 						});
 						
+					});
+					
+					$('a[rel=add_free_text]').click(function() 
+					{
+						promptSubTotal("<?php echo $langs->transnoentitiesnoconv('YourTextLabel') ?>"
+							, "<?php echo $langs->trans('subtotalAddLineDescription'); ?>"
+							, '?<?php echo $idvar ?>=<?php echo $object->id; ?>'
+							, '?<?php echo $idvar ?>=<?php echo $object->id; ?>&action=add_free_text'
+							, true
+							, <?php echo !empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) ? 'true' : 'false'; ?>
+						);
 					});
 				});
 		 	</script>
@@ -358,7 +389,8 @@ class ActionsSubtotal
 			$lineid = GETPOST('lineid', 'int');
 			foreach ($object->lines as &$line)
 			{
-				if ($line->id == $lineid && (TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line)) )
+				
+				if ($line->id == $lineid && TSubtotal::isModSubtotalLine($line))
 				{
 					$found = true;
 					_updateSubtotalLine($object, $line);
@@ -1166,11 +1198,13 @@ class ActionsSubtotal
 	 */
 	function printObjectLine ($parameters, &$object, &$action, $hookmanager){
 		
-		global $conf,$langs,$user,$db;
+		global $conf,$langs,$user,$db,$bc;
 		
 		$num = &$parameters['num'];
 		$line = &$parameters['line'];
 		$i = &$parameters['i'];
+		
+		$var = &$parameters['var'];
 
 		$contexts = explode(':',$parameters['context']);
 
@@ -1219,8 +1253,9 @@ class ActionsSubtotal
 					
 			/* Titre */
 			//var_dump($line);
+			
 			?>
-			<tr class="drag drop" rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
+			<tr <?php echo $bc[$var]; $var=!$var; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
 						if($line->qty==99) print 'background-color:#adadcf';
@@ -1228,6 +1263,7 @@ class ActionsSubtotal
 						else if($line->qty<=97 && $line->qty>=91) print 'background-color:#eeeeff;';
 						else if($line->qty==1) print 'background-color:#adadcf;';
 						else if($line->qty==2) print 'background-color:#ddddff;';
+						else if($line->qty==50) print '';
 						else print 'background-color:#eeeeff;';
 
 						//A compléter si on veux plus de nuances de couleurs avec les niveau 4,5,6,7,8 et 9
@@ -1237,13 +1273,14 @@ class ActionsSubtotal
 						if($line->qty==99) print 'background-color:#ddffdd';
 						else if($line->qty==98) print 'background-color:#ddddff;';
 						else if($line->qty==2) print 'background-color:#eeeeff; ';
+						else if($line->qty==50) print '';
 						else print 'background-color:#eeffee;' ;	
 					}
 
 			?>;">
 			
 			<td colspan="<?php echo $colspan; ?>" style="font-weight:bold;  <?php echo ($line->qty>90)?'text-align:right':' font-style: italic;' ?> "><?php
-					if($action=='editline' && GETPOST('lineid') == $line->id && (TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line)) ) {
+					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 
 						echo '<div id="line_'.$line->id.'"></div>'; // Imitation Dolibarr
 						echo '<input type="hidden" value="'.$line->id.'" name="lineid">';
@@ -1251,6 +1288,7 @@ class ActionsSubtotal
 						echo '<input id="product_id" type="hidden" value="'.$line->fk_product.'" name="type">';
 						echo '<input id="special_code" type="hidden" value="'.$line->special_code.'" name="type">';
 
+						$isFreeText=false;
 						if (TSubtotal::isTitle($line))
 						{
 							if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
@@ -1264,19 +1302,22 @@ class ActionsSubtotal
 								else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 							}
 						}
-						else
+						else if (TSubtotal::isSubtotal($line))
 						{
 							$qty_displayed = 100 - $line->qty;
 							print img_picto('', 'subsubtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;color:#0075DE;">'.$qty_displayed.'</span>&nbsp;&nbsp;';
 						}
+						else
+						{
+							$isFreeText = true;
+						}
 						
-
 						if($line->label=='') {
 							$line->label = $line->description.' '.$this->getTitle($object, $line);
 							$line->description='';
 						}
 
-						echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$line->label.'" size="80"/>&nbsp;';
+						if (!$isFreeText) echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$line->label.'" size="80"/>&nbsp;';
 						
 						if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT) && TSubtotal::isTitle($line))
 						{
@@ -1307,6 +1348,7 @@ class ActionsSubtotal
 									echo '<label for="subtotal_progress">'.$langs->trans('subtotal_apply_progress').'</label> <input id="subtotal_progress" name="subtotal_progress" value="" size="1" />%';
 								}
 							}
+							else if ($isFreeText) echo TSubtotal::getFreeTextHtml($line);
 						echo '</div>';
 
 						if($line->qty<10) {
@@ -1380,7 +1422,7 @@ class ActionsSubtotal
 					
 			<td align="center" class="nowrap">
 				<?php
-					if($action=='editline' && GETPOST('lineid') == $line->id && (TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line)) ) {
+					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 						?>
 						<input id="savelinebutton" class="button" type="submit" name="save" value="<?php echo $langs->trans('Save') ?>" />
 						<br />
