@@ -174,11 +174,32 @@ class TSubtotal {
 		return $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty >= 90;
 	}
 	
+	public static function isFreeText(&$line)
+	{
+		return $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty == 50;
+	}
+	
 	public static function isModSubtotalLine(&$line)
 	{
-		return self::isTitle($line) || self::isSubtotal($line);
+		return self::isTitle($line) || self::isSubtotal($line) || self::isFreeText($line);
 	}
 
+	public static function getFreeTextHtml(&$line)
+	{
+		global $conf;
+		
+		// Copie du fichier "objectline_edit.tpl.php"
+		// editeur wysiwyg
+		require_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
+		$nbrows=ROWS_2;
+		if (! empty($conf->global->MAIN_INPUT_DESC_HEIGHT)) $nbrows=$conf->global->MAIN_INPUT_DESC_HEIGHT;
+		$enable=(isset($conf->global->FCKEDITOR_ENABLE_DETAILS)?$conf->global->FCKEDITOR_ENABLE_DETAILS:0);
+		$toolbarname='dolibarr_details';
+		if (! empty($conf->global->FCKEDITOR_ENABLE_DETAILS_FULL)) $toolbarname='dolibarr_notes';
+		$doleditor=new DolEditor('line-description',$line->label,'',164,$toolbarname,'',false,true,$enable,$nbrows,'98%');
+		return $doleditor->Create(1);
+	}
+	
 	public static function duplicateLines(&$object, $lineid, $withBlockLine=false)
 	{
 		global $db,$user,$conf;
