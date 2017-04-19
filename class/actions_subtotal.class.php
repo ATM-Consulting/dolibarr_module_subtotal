@@ -559,7 +559,7 @@ class ActionsSubtotal
 				if (!$return_all) return $total;
 				else return array($total, $total_tva, $total_ttc, $TTotal_tva);
 			}
-			else if(TSubtotal::isTitle($l)) 
+			else if(TSubtotal::isTitle($l, 100 - $qty_line)) 
 		  	{
 				$total = 0;
 				$total_tva = 0;

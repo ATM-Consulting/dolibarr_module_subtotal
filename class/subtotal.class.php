@@ -164,9 +164,13 @@ class TSubtotal {
 		return false;
 	}
 	
-	public static function isTitle(&$line)
+	public static function isTitle(&$line, $level=-1)
 	{
-		return $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty <= 9;
+		$res = $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty <= 9;
+		if($res && $level > -1) {
+			return $line->qty == $level;
+		} else return $res;
+		
 	}
 	
 	public static function isSubtotal(&$line)
