@@ -123,7 +123,7 @@ class ActionsSubtotal
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction">'+label+select+'</div>');
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" rel="add_title_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddTitle' )?></a></div>');
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" rel="add_total_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubTotal')?></a></div>');
-					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_free_text" rel="add_free_text" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddFreeText')?></a></div>');
+					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_free_text" rel="add_free_text" href="?<?php echo $idvar.'='.$object->id.'&action=add_free_text'; ?>" class="butAction"><?php echo  $langs->trans('AddFreeText')?></a></div>');
 					
 					function promptSubTotal(titleDialog, label, url_to, url_ajax) {
 					     $( "#dialog-prompt-subtotal" ).remove();
