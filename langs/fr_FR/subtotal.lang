@@ -62,3 +62,4 @@ SUBTOTAL_INVOICE_ADD_RECAP=Activer la génération du récapitulatif sur les fac
 warning_subtotal_recap_object_element_unknown=Génération du récapitulatif impossible, element inconnu : %s
 subtotal_add_recap=Ajouter le récapitulatif
 AddFreeText = Ajouter une ligne de texte
+SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE=Ajouter un titre, ajoutera au-dessus les sous-totaux manquants

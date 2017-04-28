@@ -64,6 +64,9 @@ class ActionsSubtotal
 						$qty = $level ? 100-$level : 99;
 					}
 					dol_include_once('/subtotal/class/subtotal.class.php');
+					
+					if (!empty($conf->global->SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE) && $qty < 10) TSubtotal::addSubtotalMissing($object, $qty);
+					
 	    			TSubtotal::addSubTotalLine($object, $title, $qty);
 				}
 				else if($action==='ask_deleteallline') {
@@ -559,7 +562,7 @@ class ActionsSubtotal
 				if (!$return_all) return $total;
 				else return array($total, $total_tva, $total_ttc, $TTotal_tva);
 			}
-			else if(TSubtotal::isTitle($l)) 
+			else if(TSubtotal::isTitle($l, 100 - $qty_line)) 
 		  	{
 				$total = 0;
 				$total_tva = 0;

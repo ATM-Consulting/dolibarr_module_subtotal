@@ -40,7 +40,68 @@ class TSubtotal {
 		}
 	
 	}
-
+	
+	/**
+	 * Permet de mettre à jour les rangs afin de décaler des lignes pour une insertion en milieu de document
+	 * 
+	 * @param type $object
+	 * @param type $rang_start
+	 * @param type $move_to
+	 */
+	public static function updateRang(&$object, $rang_start, $move_to=1)
+	{
+		if (!class_exists('GenericObject')) require_once DOL_DOCUMENT_ROOT.'/core/class/genericobject.class.php';
+		
+		$row=new GenericObject($object->db);
+		$row->table_element_line = $object->table_element_line;
+		$row->fk_element = $object->fk_element;
+		$row->id = $object->id;
+		
+		foreach ($object->lines as &$line)
+		{
+			if ($line->rang < $rang_start) continue;
+			
+			$row->updateRangOfLine($line->id, $line->rang+$move_to);
+		}
+	}
+	
+	/**
+	 * Méthode qui se charge de faire les ajouts de sous-totaux manquant afin de fermer les titres ouvert lors de l'ajout d'un nouveau titre
+	 * 
+	 * @global type $langs
+	 * @param type $object
+	 * @param type $level_new_title
+	 */
+	public static function addSubtotalMissing(&$object, $level_new_title)
+	{
+		global $langs;
+		$TTitle = self::getAllTitleWithoutTotalFromDocument($object);
+		// Reverse - Pour partir de la fin et remonter dans les titres pour me permettre de m'arrêter quand je trouve un titre avec un niveau inférieur à celui qui a était ajouté
+		$TTitle_reverse = array_reverse($TTitle);
+		
+		foreach ($TTitle_reverse as $k => $title_line)
+		{
+			$title_niveau = self::getNiveau($title_line);
+			if ($title_niveau < $level_new_title) break;
+			
+			$rang_to_add = self::titleHasTotalLine($object, $title_line, true, true);
+			
+			if (is_numeric($rang_to_add)) 
+			{
+				if ($rang_to_add != -1) self::updateRang($object, $rang_to_add);
+				
+				self::addSubTotalLine($object, $langs->trans('SubTotal'), 100-$title_niveau, $rang_to_add);
+				
+				$object->lines[] = $object->line; // ajout de la ligne dans le tableau de ligne (Dolibarr ne le fait pas)
+				if ($rang_to_add != -1) 
+				{
+					if (method_exists($object, 'fetch_lines')) $object->fetch_lines();
+					else $object->fetch($object->id);
+				}
+			}
+		}
+	}
+	
 	public static function addTitle(&$object, $label, $level, $rang=-1)
 	{
 		self::addSubTotalLine($object, $label, $level, $rang);
@@ -51,6 +112,61 @@ class TSubtotal {
 		self::addSubTotalLine($object, $label, (100-$level), $rang);
 	}
 
+	/**
+	 * Récupère la liste des lignes de titre qui n'ont pas de sous-total
+	 * 
+	 * @param Propal|Commande|Facture				$object
+	 * @param boolean								$get_block_total
+	 * 
+	 * @return array
+	 */
+	public static function getAllTitleWithoutTotalFromDocument(&$object, $get_block_total=false)
+	{
+		$TTitle = self::getAllTitleFromDocument($object, $get_block_total);
+		
+		foreach ($TTitle as $k => $title_line)
+		{
+			if (self::titleHasTotalLine($object, $title_line)) unset($TTitle[$k]);
+		}
+		
+		return $TTitle;
+	}
+	
+	/**
+	 * Est-ce que mon titre ($title_line) a un sous-total ?
+	 * 
+	 * @param Propal|Commande|Facture				$object
+	 * @param PropaleLigne|OrderLine|FactureLigne	$title_line
+	 * @param boolean								$strict_mode			si true alors un titre doit avoir un sous-total de même niveau; si false un titre possède un sous-total à partir du moment où l'on trouve un titre de niveau égale ou inférieur
+	 * @param boolean								$return_rang_on_false	si true alors renvoi le rang où devrait ce trouver le sous-total
+	 * @return boolean
+	 */
+	public static function titleHasTotalLine(&$object, &$title_line, $strict_mode=false, $return_rang_on_false=false)
+	{
+		if (empty($object->lines) || !is_array($object->lines)) return false;
+		
+		$title_niveau = self::getNiveau($title_line);
+		foreach ($object->lines as &$line)
+		{
+			if ($line->rang <= $title_line->rang) continue;
+			if (self::isTitle($line) && self::getNiveau($line) <= $title_niveau) return false; // Oups on croise un titre d'un niveau inférieur ou égale (exemple : je croise un titre niveau 2 alors que je suis sur un titre de niveau 3) pas lieu de continuer car un nouveau bloc commence
+			if (!self::isSubtotal($line)) continue;
+			
+			$subtotal_niveau = self::getNiveau($line);
+			
+			// Comparaison du niveau de la ligne de sous-total avec celui du titre
+			if ($subtotal_niveau == $title_niveau) return true; // niveau égale => Ok mon titre a un sous-total
+			elseif ($subtotal_niveau < $title_niveau) // niveau inférieur trouvé (exemple : sous-total de niveau 1 contre mon titre de niveau 3)
+			{
+				if ($strict_mode) return ($return_rang_on_false) ? $line->rang : false; // mode strict niveau pas égale donc faux
+				else return true; // mode libre => OK je considère que mon titre à un sous-total
+			}
+		}
+		
+		// Sniff, j'ai parcouru toutes les lignes et pas de sous-total pour ce titre
+		return ($return_rang_on_false) ? -1 : false;
+	}
+	
 	public static function getAllTitleFromDocument(&$object, $get_block_total=false)
 	{
 		$TRes = array();
@@ -164,9 +280,13 @@ class TSubtotal {
 		return false;
 	}
 	
-	public static function isTitle(&$line)
+	public static function isTitle(&$line, $level=-1)
 	{
-		return $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty <= 9;
+		$res = $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty <= 9;
+		if($res && $level > -1) {
+			return $line->qty == $level;
+		} else return $res;
+		
 	}
 	
 	public static function isSubtotal(&$line)
