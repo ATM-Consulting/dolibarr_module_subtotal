@@ -41,6 +41,13 @@ class TSubtotal {
 	
 	}
 	
+	/**
+	 * Permet de mettre à jour les rangs afin de décaler des lignes pour une insertion en milieu de document
+	 * 
+	 * @param type $object
+	 * @param type $rang_start
+	 * @param type $move_to
+	 */
 	public static function updateRang(&$object, $rang_start, $move_to=1)
 	{
 		if (!class_exists('GenericObject')) require_once DOL_DOCUMENT_ROOT.'/core/class/genericobject.class.php';
@@ -58,6 +65,13 @@ class TSubtotal {
 		}
 	}
 	
+	/**
+	 * Méthode qui se charge de faire les ajouts de sous-totaux manquant afin de fermer les titres ouvert lors de l'ajout d'un nouveau titre
+	 * 
+	 * @global type $langs
+	 * @param type $object
+	 * @param type $level_new_title
+	 */
 	public static function addSubtotalMissing(&$object, $level_new_title)
 	{
 		global $langs;
@@ -86,14 +100,6 @@ class TSubtotal {
 				}
 			}
 		}
-	}
-
-	private static function orderByRang($a,$b)
-	{
-		if ($a->rang < $b->rang) return -1;
-		elseif ($a->rang > $b->rang) return 1;
-		
-		return 0;
 	}
 	
 	public static function addTitle(&$object, $label, $level, $rang=-1)
@@ -127,6 +133,7 @@ class TSubtotal {
 	}
 	
 	/**
+	 * Est-ce que mon titre ($title_line) a un sous-total ?
 	 * 
 	 * @param Propal|Commande|Facture				$object
 	 * @param PropaleLigne|OrderLine|FactureLigne	$title_line
