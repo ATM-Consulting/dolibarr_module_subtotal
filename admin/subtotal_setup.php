@@ -307,7 +307,7 @@ function showParameters() {
 	<br />
 		
 	<table width="100%" class="noborder" style="background-color: #fff;">
-		<!--<tr class="liste_titre">-->
+		<tr class="liste_titre">
 			<td colspan="2">Paramètrage de l'option "Cacher le prix des lignes des ensembles"</td>
 		</tr>
 		
