@@ -61,3 +61,4 @@ SUBTOTAL_COMMANDE_ADD_RECAP=Enable the generation of summary on orders
 SUBTOTAL_INVOICE_ADD_RECAP=Enable the generation of summary on invoices
 warning_subtotal_recap_object_element_unknown=Can't generate the summary by title, unknown element: %s
 subtotal_add_recap=Add the summary by title
+SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE=Add a new title will add above the missing subtotals

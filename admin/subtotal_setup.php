@@ -248,6 +248,13 @@ function showParameters() {
 		print '</td></tr>';
 	}
 	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans('SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE').'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE');
+	print '</td></tr>';
 	
 	print '</table><br />';
 	
@@ -300,7 +307,7 @@ function showParameters() {
 	<br />
 		
 	<table width="100%" class="noborder" style="background-color: #fff;">
-		<tr class="liste_titre">
+		<!--<tr class="liste_titre">-->
 			<td colspan="2">Paramètrage de l'option "Cacher le prix des lignes des ensembles"</td>
 		</tr>
 		
