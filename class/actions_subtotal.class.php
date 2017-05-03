@@ -1398,7 +1398,7 @@ class ActionsSubtotal
 
 						if (!$isFreeText) echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$line->label.'" size="80"/>&nbsp;';
 						
-						if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT) && TSubtotal::isTitle($line))
+						if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT) && TSubtotal::isModSubtotalLine($line))
 						{
 							$select = '<select name="subtotal_level">';
 							for ($j=1; $j<10; $j++)
