@@ -783,6 +783,15 @@ class ActionsSubtotal
 			}
 		}
 		
+		if(is_array($parameters)) $i = & $parameters['i'];
+		else $i = (int)$parameters;
+			
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		{
+			$this->resprints = ' ';
+			return 1;
+		}
+		
 		return 0;
 	}
 	
@@ -816,12 +825,14 @@ class ActionsSubtotal
 				}
 			}
 		}
-			
+		
 		
 		return 0;
 	}
 	
 	function pdf_getlinetotalwithtax($parameters=array(), &$object, &$action='') {
+		global $conf;
+		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			
 			$this->resprints = ' ';
@@ -832,12 +843,23 @@ class ActionsSubtotal
 			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
+		}
+		
+		if(is_array($parameters)) $i = & $parameters['i'];
+		else $i = (int)$parameters;
+			
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		{
+			$this->resprints = ' ';
+			return 1;
 		}
 		
 		return 0;
 	}
 	
 	function pdf_getlineunit($parameters=array(), &$object, &$action='') {
+		global $conf;
+		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 		
@@ -847,12 +869,23 @@ class ActionsSubtotal
 			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
+		}
+		
+		if(is_array($parameters)) $i = & $parameters['i'];
+		else $i = (int)$parameters;
+			
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		{
+			$this->resprints = ' ';
+			return 1;
 		}
 		
 		return 0;
 	}
 	
 	function pdf_getlineupexcltax($parameters=array(), &$object, &$action='') {
+		global $conf;
+		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 		
@@ -862,12 +895,23 @@ class ActionsSubtotal
 			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
+		}
+		
+		if(is_array($parameters)) $i = & $parameters['i'];
+		else $i = (int)$parameters;
+			
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		{
+			$this->resprints = ' ';
+			return 1;
 		}
 		
 		return 0;
 	}
 	
 	function pdf_getlineupwithtax($parameters=array(), &$object, &$action='') {
+		global $conf;
+		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 			if((float)DOL_VERSION<=3.4) {
@@ -878,10 +922,21 @@ class ActionsSubtotal
 			}
 		}
 		
+		if(is_array($parameters)) $i = & $parameters['i'];
+		else $i = (int)$parameters;
+			
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		{
+			$this->resprints = ' ';
+			return 1;
+		}
+		
 		return 0;
 	}
 	
 	function pdf_getlinevatrate($parameters=array(), &$object, &$action='') {
+		global $conf;
+		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 			
@@ -893,10 +948,21 @@ class ActionsSubtotal
 			}
 		}
 		
+		if(is_array($parameters)) $i = & $parameters['i'];
+		else $i = (int)$parameters;
+			
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		{
+			$this->resprints = ' ';
+			return 1;
+		}
+		
 		return 0;
 	}
 		
 	function pdf_getlineprogress($parameters=array(), &$object, &$action) {
+		global $conf;
+		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 			if((float)DOL_VERSION<=3.4) {
@@ -905,6 +971,15 @@ class ActionsSubtotal
 			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
+		}
+		
+		if(is_array($parameters)) $i = & $parameters['i'];
+		else $i = (int)$parameters;
+			
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		{
+			$this->resprints = ' ';
+			return 1;
 		}
 		
 		return 0;

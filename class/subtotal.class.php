@@ -1044,4 +1044,24 @@ class TSubtotal {
 
 		return $pagecount;
 	}
+	
+	/**
+	 * Méthode pour savoir si une ligne fait partie d'un bloc Compris/Non Compris
+	 * 
+	 * @param PropaleLigne|OrderLine|FactureLigne	$line
+	 * @return	true or false
+	 */
+	public static function hasNcTitle(&$line)
+	{
+		$TTitle = self::getAllTitleFromLine($line);
+		foreach ($TTitle as &$line_title)
+		{
+			if (!empty($line_title->array_options['options_subtotal_nc']))
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }
