@@ -657,13 +657,26 @@ class ActionsSubtotal
 				}
 			}
 			else if($total_to_print) {
-				list($total, $total_tva, $total_ttc) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
+				
+				if (GETPOST('hideInnerLines'))
+				{
+					// Dans le cas des lignes cachés, le calcul est déjà fait dans la méthode beforePDFCreation et les lignes de sous-totaux sont déjà renseignés
+//					$line->TTotal_tva
+//					$line->total_ht
+//					$line->total_tva
+//					$line->total
+//					$line->total_ttc
+				}
+				else
+				{
+					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
 
-				$total_to_print = price($total);
-				$line->total_ht = $total;
-				$line->total = $total;
-				$line->total_tva = $total_tva;
-				$line->total_ttc = $total_ttc;
+					$total_to_print = price($total);
+					$line->total_ht = $total;
+					$line->total = $total;
+					$line->total_tva = $total_tva;
+					$line->total_ttc = $total_ttc;
+				}
 			}
 			
 			$pdf->SetXY($pdf->postotalht, $posy);
@@ -1103,6 +1116,7 @@ class ActionsSubtotal
 						$line->total_ht = $total;
 						$line->total_tva = $total_tva;
 						$line->total = $line->total_ht;
+						$line->total_ttc = $total_ttc;
 					} 
 						
 				} 
