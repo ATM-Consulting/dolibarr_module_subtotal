@@ -1337,23 +1337,23 @@ class ActionsSubtotal
 			<tr <?php echo $bc[$var]; $var=!$var; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
-						if($line->qty==99) print 'background-color:#adadcf';
-						else if($line->qty==98) print 'background-color:#ddddff;';
-						else if($line->qty<=97 && $line->qty>=91) print 'background-color:#eeeeff;';
-						else if($line->qty==1) print 'background-color:#adadcf;';
-						else if($line->qty==2) print 'background-color:#ddddff;';
+						if($line->qty==99) print 'background:#adadcf';
+						else if($line->qty==98) print 'background:#ddddff;';
+						else if($line->qty<=97 && $line->qty>=91) print 'background:#eeeeff;';
+						else if($line->qty==1) print 'background:#adadcf;';
+						else if($line->qty==2) print 'background:#ddddff;';
 						else if($line->qty==50) print '';
-						else print 'background-color:#eeeeff;';
+						else print 'background:#eeeeff;';
 
 						//A compléter si on veux plus de nuances de couleurs avec les niveau 4,5,6,7,8 et 9
 					}
 					else 
 					{
-						if($line->qty==99) print 'background-color:#ddffdd';
-						else if($line->qty==98) print 'background-color:#ddddff;';
-						else if($line->qty==2) print 'background-color:#eeeeff; ';
+						if($line->qty==99) print 'background:#ddffdd';
+						else if($line->qty==98) print 'background:#ddddff;';
+						else if($line->qty==2) print 'background:#eeeeff; ';
 						else if($line->qty==50) print '';
-						else print 'background-color:#eeffee;' ;	
+						else print 'background:#eeffee;' ;
 					}
 
 			?>;">
