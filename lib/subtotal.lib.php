@@ -56,7 +56,7 @@ function getHtmlSelectTitle(&$object)
 	foreach ($TTitle as &$line)
 	{
 		$str = str_repeat($nbsp, ($line->qty - 1) * 3);
-		$html .= '<option value="'.$line->rang.'">'.$str.(!empty($line->desc) ? $line->desc : $line->label).'</option>';
+		$html .= '<option value="'.$line->rang.'">'.$str.(!empty($line->label) ? $line->label : $line->desc).'</option>';
 	}
 	
 	$html .= '</select>';
