@@ -1361,6 +1361,9 @@ class ActionsSubtotal
 			<td colspan="<?php echo $colspan; ?>" style="font-weight:bold;  <?php echo ($line->qty>90)?'text-align:right':' font-style: italic;' ?> "><?php
 					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 
+						$params=array('line'=>$line);
+						$reshook=$hookmanager->executeHooks('formEditProductOptions',$params,$object,$action);
+						
 						echo '<div id="line_'.$line->id.'"></div>'; // Imitation Dolibarr
 						echo '<input type="hidden" value="'.$line->id.'" name="lineid">';
 						echo '<input id="product_type" type="hidden" value="'.$line->product_type.'" name="type">';
