@@ -15,7 +15,12 @@
 	}
 	
 	switch ($set) {
-		case 'updateLineNC':
+		case 'updateLineNCFromLine': // Gestion du Compris/Non Compris via les lignes directement
+			
+			echo json_encode( _updateLineNCFromLine(GETPOST('element'), GETPOST('elementid'), GETPOST('lineid'), GETPOST('subtotal_nc')) );
+			
+			break;
+		case 'updateLineNC': // Gestion du Compris/Non Compris via les titres
 			
 			echo json_encode( _updateLineNC(GETPOST('element'), GETPOST('elementid'), GETPOST('lineid'), GETPOST('subtotal_nc')) );
 			
@@ -76,21 +81,24 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 				}
 				
 				$total_ht = (double) $line->total_ht;
-				if ($type_update == 'doUpdateLine')
+				if ($type_update == 'doUpdateLine') // doUpdateLine pour ré-appliquer le total
 				{
 					if (empty($total_ht)) 
 					{
+						$line->array_options['options_subtotal_nc'] = 0;
 						$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $line->tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $line->situation_percent, $line->fk_unit);
 						if ($res <= 0) $error++;
 					}
 				}
-				else // update
+				else // update (il faut mettre le total ht à 0 car NC
 				{
 					if (!empty($total_ht))
 					{
 						$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 = 
 							$line->multicurrency_total_ht = $line->multicurrency_total_tva = $line->multicurrency_total_ttc = 0;
-
+						
+						$line->array_options['options_subtotal_nc'] = 1;
+						
 						$res = $line->update();
 						if ($res <= 0) $error++;
 					}
@@ -101,6 +109,66 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 			if ($res <= 0) $error++;
 
 			if ($error) break;
+		}
+	}
+	
+	if (!$error)
+	{
+		setEventMessage($langs->trans('subtotal_update_nc_success'));
+		$db->commit();
+	}
+	else
+	{
+		setEventMessage($langs->trans('subtotal_update_nc_error'), 'errors');
+		$db->rollback();
+	}
+}
+
+function _updateLineNCFromLine($element, $elementid, $lineid, $subtotal_nc=null)
+{
+	global $db,$langs;
+	
+	$db->begin();
+		
+	$error = 0;
+	if (empty($element)) $error++;
+	
+	if (!$error)
+	{
+		$classname = ucfirst($element);
+		$object = new $classname($db); // Propal | Commande | Facture
+		$res = $object->fetch($elementid);
+		if ($res < 0) $error++;
+	}
+	
+	if (!$error)
+	{
+		foreach ($object->lines as &$line)
+		{
+			if ($line->id == $lineid)
+			{
+				if (!empty($subtotal_nc)) // update il faut mettre le total ht à 0 car NC
+				{
+					$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 = 
+						$line->multicurrency_total_ht = $line->multicurrency_total_tva = $line->multicurrency_total_ttc = 0;
+
+					$line->array_options['options_subtotal_nc'] = 1;
+
+					$res = $line->update();
+					if ($res <= 0) $error++;
+				}
+				else
+				{
+					$line->array_options['options_subtotal_nc'] = 0;
+					$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $line->tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $line->situation_percent, $line->fk_unit);
+					if ($res <= 0) $error++;
+				}
+				
+				$res = $object->update_price(1);
+				if ($res <= 0) $error++;
+			
+				break;
+			}
 		}
 	}
 	

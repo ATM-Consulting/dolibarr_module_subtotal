@@ -1601,10 +1601,17 @@ class ActionsSubtotal
 		
 		if ($object->statut == 0 && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && $action != 'editline')
 		{
+			$TSubNc = array();
+			foreach ($object->lines as &$l)
+			{
+				$TSubNc[$l->id] = (int) $l->array_options['options_subtotal_nc'];
+			}
+			
 			$form = new Form($db);
 			?>
 			<script type="text/javascript">
 				$(function() {
+					var subtotal_TSubNc = <?php echo json_encode($TSubNc); ?>;
 					$("#tablelines tbody > tr").each(function(i, item) {
 						if ($(item).children('.subtotal_nc').length == 0)
 						{
@@ -1613,6 +1620,12 @@ class ActionsSubtotal
 							if ((typeof id != 'undefined' && id.indexOf('row-') >= 0) || $(item).hasClass('liste_titre'))
 							{
 								$(item).children('td:last-child').before('<td class="subtotal_nc"></td>');
+								
+								if ($(item).attr('rel') != 'subtotal' && typeof $(item).attr('id') != 'undefined')
+								{
+									var idSplit = $(item).attr('id').split('-');
+									$(item).children('td.subtotal_nc').append($('<input type="checkbox" id="subtotal_nc-'+idSplit[1]+'" class="subtotal_nc_chkbx" data-lineid="'+idSplit[1]+'" value="1" '+(typeof subtotal_TSubNc[idSplit[1]] != 'undefined' && subtotal_TSubNc[idSplit[1]] == 1 ? 'checked="checked"' : '')+' />'));
+								}
 							}
 							else 
 							{
@@ -1645,7 +1658,8 @@ class ActionsSubtotal
 						var lineid = $(this).data('lineid');
 						var subtotal_nc = 0 | $(this).is(':checked'); // Renvoi 0 ou 1 
 						
-						callAjaxUpdateLineNC('updateLineNC', lineid, subtotal_nc);
+						if (typeof $(this).closest('tr').attr('rel') && $(this).closest('tr').attr('rel') == 'subtotal') callAjaxUpdateLineNC('updateLineNC', lineid, subtotal_nc);
+						else callAjaxUpdateLineNC('updateLineNCFromLine', lineid, subtotal_nc);
 					});
 					
 					$(document).ajaxSuccess(function(event, xhr, options) {
