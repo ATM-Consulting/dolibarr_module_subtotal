@@ -96,7 +96,7 @@ class modSubtotal extends DolibarrModules
             // Set this to relative path of css if module has its own css file
             //'css' => '/titre/css/mycss.css.php',
             // Set here all hooks context managed by module
-            'hooks' => array('invoicecard','propalcard','ordercard','odtgeneration','orderstoinvoice')
+            'hooks' => array('invoicecard','propalcard','ordercard','odtgeneration','orderstoinvoice','admin')
             // Set here all workflow context managed by module
             //'workflow' => array('order' => array('WORKFLOW_ORDER_AUTOCREATE_INVOICE'))
         );
@@ -182,7 +182,18 @@ class modSubtotal extends DolibarrModules
             $conf->subtotal=new stdClass();
             $conf->subtotal->enabled = 0;
         }
-        $this->dictionnaries = array();
+        $this->dictionaries = array(
+			'langs'=>'subtotal@subtotal',
+            'tabname'=>array(MAIN_DB_PREFIX.'c_subtotal_free_text'),		// List of tables we want to see into dictonnary editor
+            'tablib'=>array($langs->trans('subtotalFreeLineDictionary')),													// Label of tables
+            'tabsql'=>array('SELECT f.rowid as rowid, f.label, f.content, f.entity, f.active FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text as f'),	// Request to select fields
+            'tabsqlsort'=>array('label ASC'),																					// Sort order
+            'tabfield'=>array('label,content'),							// List of fields (result of select to show dictionary)
+            'tabfieldvalue'=>array('label,content'),						// List of fields (list of fields to edit a record)
+            'tabfieldinsert'=>array('label,content'),					// List of fields (list of fields for insert)
+            'tabrowid'=>array('rowid'),											// Name of columns with primary key (try to always name it 'rowid')
+            'tabcond'=>array($conf->subtotal->enabled)	
+		);
         /* Example:
           // This is to avoid warnings
           if (! isset($conf->titre->enabled)) $conf->titre->enabled=0;

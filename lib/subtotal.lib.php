@@ -41,22 +41,63 @@ function subtotalAdminPrepareHead()
     $head[$h][2] = 'about';
     $h++;
 
-    complete_head_from_modules($conf, $langs, $object, $head, $h, 'subtotal');
+    complete_head_from_modules($conf, $langs, $object, $head, $h, 'subtotal', $showLabel=false);
 
     return $head;
 }
 
-function getHtmlSelectTitle(&$object)
+function getHtmlSelectTitle(&$object, $showLabel=false)
 {
+	global $langs;
+	
 	dol_include_once('/subtotal/class/subtotal.class.php');
 	$TTitle = TSubtotal::getAllTitleFromDocument($object);
-	$html = '<select onChange="$(\'select[name=under_title]\').val(this.value);" name="under_title" class="under_title maxwidth200"><option value="-1"></option>';
+	$html = '';
+	if ($showLabel) $html.= '<label for="under_title">'.$langs->trans('subtotalLabelForUnderTitle').'</label>';
+	$html.= '<select onChange="$(\'select[name=under_title]\').val(this.value);" name="under_title" class="under_title minwidth200"><option value="-1"></option>';
 	
 	$nbsp = '&nbsp;';
 	foreach ($TTitle as &$line)
 	{
 		$str = str_repeat($nbsp, ($line->qty - 1) * 3);
 		$html .= '<option value="'.$line->rang.'">'.$str.(!empty($line->label) ? $line->label : $line->desc).'</option>';
+	}
+	
+	$html .= '</select>';
+	return $html;
+}
+
+function getTFreeText()
+{
+	global $db,$conf;
+	
+	$TFreeText = array();
+	
+	$sql = 'SELECT rowid, label, content, active, entity FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text WHERE active = 1 AND entity = '.$conf->entity.' ORDER BY label';
+	$resql = $db->query($sql);
+	
+	if ($resql)
+	{
+		while ($row = $db->fetch_object($resql))
+		{
+			$TFreeText[$row->rowid] = $row;
+		}
+	}
+	
+	return $TFreeText;
+}
+
+function getHtmlSelectFreeText($withEmpty=true)
+{
+	global $langs;
+	
+	$TFreeText = getTFreeText();
+	$html = '<label for="free_text">'.$langs->trans('subtotalLabelForFreeText').'</label> <select name="free_text" class="minwidth200">';
+	if ($withEmpty) $html.= '<option value=""></option>';
+	
+	foreach ($TFreeText as $id => $tab)
+	{
+		$html.= '<option value="'.$id.'">'.$tab->label.'</option>';
 	}
 	
 	$html .= '</select>';
