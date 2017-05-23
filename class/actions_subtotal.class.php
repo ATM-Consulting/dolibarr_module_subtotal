@@ -169,7 +169,7 @@ class ActionsSubtotal
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" rel="add_total_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubTotal')?></a></div>');
 					$('div.fiche div.tabsAction').append('|<div class="inline-block divButAction"><a id="add_free_text" rel="add_free_text" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddFreeText')?></a></div>');
 					
-					function promptSubTotal(titleDialog, label, url_to, url_ajax, use_textarea, show_free_text, show_under_title) {
+					function promptSubTotal(titleDialog, label, url_to, url_ajax, params, use_textarea, show_free_text, show_under_title) {
 					     $( "#dialog-prompt-subtotal" ).remove();
 						 
 						 var dialog_html = '<div id="dialog-prompt-subtotal">';
@@ -203,10 +203,18 @@ class ActionsSubtotal
 	                        title: titleDialog,
 	                        buttons: {
 	                            "Ok": function() {
-	                                $.get(url_ajax+'&title='+encodeURIComponent( $(this).find('#sub-total-title').val() )+'&under_title='+$(this).find('select[name=under_title]').val()+'&free_text='+$(this).find('select[name=free_text]').val(), function() {
-	                                   document.location.href=url_to;
-	                                });
-	
+									params.title = $(this).find('#sub-total-title').val();
+									params.under_title = $(this).find('select[name=under_title]').val();
+									params.free_text = $(this).find('select[name=free_text]').val();
+
+									$.ajax({
+										url: url_ajax
+										,type: 'POST'
+										,data: params
+									}).done(function() {
+										document.location.href=url_to;
+									});
+									
                                     $( this ).dialog( "close" );
 	                            },
 	                            "<?php echo $langs->trans('Cancel') ?>": function() {
@@ -220,9 +228,9 @@ class ActionsSubtotal
 					{
 						promptSubTotal("<?php echo $langs->trans('YourTitleLabel') ?>"
 						     , "<?php echo $langs->trans('title'); ?>"
-						     , '?<?php echo $idvar ?>=<?php echo $object->id; ?>'
-						     , '?<?php echo $idvar ?>=<?php echo $object->id; ?>&action=add_title_line&level='+$('select[name=subtotal_line_level]').val()
-						     
+							 , '?<?php echo $idvar ?>=<?php echo $object->id; ?>'
+						     , '<?php echo $_SERVER['PHP_SELF']; ?>'
+							 , {<?php echo $idvar; ?>: <?php echo $object->id; ?>, action:'add_title_line', level:$('select[name=subtotal_line_level]').val()}
 						);
 					});
 					
@@ -238,7 +246,8 @@ class ActionsSubtotal
 						promptSubTotal("<?php echo $langs->transnoentitiesnoconv('YourTextLabel') ?>"
 							, "<?php echo $langs->trans('subtotalAddLineDescription'); ?>"
 							, '?<?php echo $idvar ?>=<?php echo $object->id; ?>'
-							, '?<?php echo $idvar ?>=<?php echo $object->id; ?>&action=add_free_text'
+							, '<?php echo $_SERVER['PHP_SELF']; ?>'
+							, {<?php echo $idvar; ?>: <?php echo $object->id; ?>, action:'add_free_text'}
 							, true
 							, true
 							, <?php echo !empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) ? 'true' : 'false'; ?>
