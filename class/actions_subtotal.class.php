@@ -450,7 +450,10 @@ class ActionsSubtotal
 				if ($line->id == $lineid && TSubtotal::isModSubtotalLine($line))
 				{
 					$found = true;
-					_updateSubtotalLine($object, $line);
+					if(TSubtotal::isTitle($line)) {
+						$array_options = array('options_a2a_propaldet_ressource'=>GETPOST('options_a2a_propaldet_ressource'));
+					}
+					_updateSubtotalLine($object, $line, $array_options);
 					_updateSubtotalBloc($object, $line);
 				}
 			}
@@ -1654,14 +1657,14 @@ class ActionsSubtotal
 				// Extrafields
 				$extrafieldsline = new ExtraFields($db);
 				$extralabelsline = $extrafieldsline->fetch_name_optionals_label($object->table_element_line);
-				// Seul l'extrafield ressource nous intéresse sur les titres
-				foreach ($extrafieldsline->attribute_label as $k=>$v) {
+				
+				foreach ($extrafieldsline->attribute_label as $k=>$v) { // Seul l'extrafield ressource nous intéresse sur les titres
 					if($k !== 'a2a_propaldet_ressource') unset($extrafieldsline->attribute_label[$k]);
 				}
-				$array_options = $extrafieldsline->getOptionalsFromPost($extralabelsline, $predef);
-				$colspan+=3;
-				$mode = 'view';
+				
+				$colspan+=3; $mode = 'view';
 				if($action === 'editline') $mode = 'edit';
+				
 				print $line->showOptionals($extrafieldsline, $mode, array('style'=>' style="background:#eeffee;" ','colspan'=>$colspan));
 				
 			}
