@@ -104,7 +104,7 @@ function getHtmlSelectFreeText($withEmpty=true)
 	return $html;
 }
 
-function _updateSubtotalLine(&$object, &$line, $array_options=array())
+function _updateSubtotalLine(&$object, &$line)
 {
 	$label = GETPOST('line-title');
 	$description = ($line->qty>90) ? '' : GETPOST('line-description');
@@ -117,7 +117,7 @@ function _updateSubtotalLine(&$object, &$line, $array_options=array())
 		else $line->qty = $level;
 	}
 	
-	$res = TSubtotal::doUpdateLine($object, $line->id, $description, 0, $line->qty, 0, '', '', 0, 9, 0, 0, 'HT', $pagebreak, 0, 1, null, 0, $label, TSubtotal::$module_number, $array_options);
+	$res = TSubtotal::doUpdateLine($object, $line->id, $description, 0, $line->qty, 0, '', '', 0, 9, 0, 0, 'HT', $pagebreak, 0, 1, null, 0, $label, TSubtotal::$module_number, $line->array_options);
 
 	return $res;
 }
