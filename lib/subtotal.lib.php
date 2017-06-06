@@ -128,11 +128,7 @@ function _updateSubtotalBloc($object, $line)
 	
 	$subtotal_tva_tx = GETPOST('subtotal_tva_tx', 'int');
 	$subtotal_progress = GETPOST('subtotal_progress', 'int');
-	
-	$array_options=array();
-	foreach($_REQUEST as $k=>$v) {
-		if(strpos($k, 'options_') !== false) $array_options[$k] = $v;
-	}
+	$array_options = $line->array_options;
 	
 	if ($subtotal_tva_tx != '' || $subtotal_progress != '' || !empty($array_options))
 	{
