@@ -63,6 +63,7 @@ warning_subtotal_recap_object_element_unknown=Génération du récapitulatif imp
 subtotal_add_recap=Ajouter le récapitulatif
 AddFreeText = Ajouter une ligne de texte
 SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE=Ajouter un titre, ajoutera au-dessus les sous-totaux manquants
+SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE=Autoriser l'affichage des extrafields sur les titres (les données enregistrées seront alors peuplées sur les lignes du bloc)
 subtotalFreeLineDictionary=Ligne de texte prédéfini
 subtotalLabelForUnderTitle=Ajouter dans le bloc :
 subtotalLabelForFreeText=Texte prédéfini :
