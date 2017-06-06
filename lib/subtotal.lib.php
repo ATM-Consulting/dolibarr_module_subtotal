@@ -130,7 +130,7 @@ function _updateSubtotalBloc($object, $line)
 	$subtotal_progress = GETPOST('subtotal_progress', 'int');
 	$array_options = $line->array_options;
 	
-	if ($subtotal_tva_tx != '' || $subtotal_progress != '' || !empty($array_options))
+	if ($subtotal_tva_tx != '' || $subtotal_progress != '' || (!empty($conf->global->SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE) && !empty($array_options)))
 	{
 		$error_progress = $nb_progress_update = $nb_progress_not_updated = 0;
 		$TLine = TSubtotal::getLinesFromTitleId($object, $line->id);
