@@ -128,7 +128,13 @@ function _updateSubtotalBloc($object, $line)
 	
 	$subtotal_tva_tx = GETPOST('subtotal_tva_tx', 'int');
 	$subtotal_progress = GETPOST('subtotal_progress', 'int');
-	if ($subtotal_tva_tx != '' || $subtotal_progress != '')
+	
+	$array_options=array();
+	foreach($_REQUEST as $k=>$v) {
+		if(strpos($k, 'options_') !== false) $array_options[$k] = $v;
+	}
+	
+	if ($subtotal_tva_tx != '' || $subtotal_progress != '' || !empty($array_options))
 	{
 		$error_progress = $nb_progress_update = $nb_progress_not_updated = 0;
 		$TLine = TSubtotal::getLinesFromTitleId($object, $line->id);
@@ -136,6 +142,7 @@ function _updateSubtotalBloc($object, $line)
 		{
 			if (!TSubtotal::isTitle($line) && !TSubtotal::isSubtotal($line))
 			{
+				if (!empty($conf->global->SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE)) $line->array_options = $array_options;
 				if ($subtotal_tva_tx == '') $subtotal_tva_tx = $line->tva_tx;
 				if ($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION)
 				{
