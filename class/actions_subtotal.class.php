@@ -1666,6 +1666,7 @@ class ActionsSubtotal
 				$colspan+=3; $mode = 'view';
 				if($action === 'editline' && $line->rowid == GETPOST('lineid')) $mode = 'edit';
 				
+				$ex_element = $line->element;
 				$line->element = 'tr_extrafield_title '.$line->element; // Pour pouvoir manipuler ces tr
 				print $line->showOptionals($extrafieldsline, $mode, array('style'=>' style="background:#eeffee;" ','colspan'=>$colspan));
 				
@@ -1697,6 +1698,7 @@ class ActionsSubtotal
 					</script>
 					<?php
 				}
+				$line->element = $ex_element;
 				
 			}
 			
