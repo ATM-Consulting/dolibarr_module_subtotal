@@ -432,10 +432,11 @@ class ActionsSubtotal
 	
 	function doActions($parameters, &$object, $action, $hookmanager)
 	{
-		global $conf,$langs;
+		global $db, $conf, $langs;
 		
 		dol_include_once('/subtotal/class/subtotal.class.php');
 		dol_include_once('/subtotal/lib/subtotal.lib.php');
+		require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 		
 		if($object->element=='facture') $idvar = 'facid';
 		else $idvar = 'id';
@@ -450,8 +451,11 @@ class ActionsSubtotal
 				if ($line->id == $lineid && TSubtotal::isModSubtotalLine($line))
 				{
 					$found = true;
-					if(TSubtotal::isTitle($line)) {
-						$array_options = array('options_a2a_propaldet_ressource'=>GETPOST('options_a2a_propaldet_ressource'));
+					if(TSubtotal::isTitle($line) && !empty($conf->global->SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE)) {
+						$extrafieldsline = new ExtraFields($db);
+						$extralabelsline = $extrafieldsline->fetch_name_optionals_label($object->table_element_line);
+						$extrafieldsline->setOptionalsFromPost($extralabelsline, $line);
+						$array_options = $line->array_options;
 					}
 					_updateSubtotalLine($object, $line, $array_options);
 					_updateSubtotalBloc($object, $line);
@@ -1649,21 +1653,17 @@ class ActionsSubtotal
 			<?php
 			
 			
-			// Affichage des extrafields à la Dolibarr (car sinon non affiché sur les titres
-			if(TSubtotal::isTitle($line)
-				&& ((empty($action) || $action == 'view')
-					|| ($action === 'editline' && $line->rowid == GETPOST('lineid')))) {
+			// Affichage des extrafields à la Dolibarr (car sinon non affiché sur les titres)
+			if(TSubtotal::isTitle($line) && !empty($conf->global->SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE)) {
+				
+				require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 				
 				// Extrafields
 				$extrafieldsline = new ExtraFields($db);
 				$extralabelsline = $extrafieldsline->fetch_name_optionals_label($object->table_element_line);
 				
-				foreach ($extrafieldsline->attribute_label as $k=>$v) { // Seul l'extrafield ressource nous intéresse sur les titres
-					if($k !== 'a2a_propaldet_ressource') unset($extrafieldsline->attribute_label[$k]);
-				}
-				
 				$colspan+=3; $mode = 'view';
-				if($action === 'editline') $mode = 'edit';
+				if($action === 'editline' && $line->rowid == GETPOST('lineid')) $mode = 'edit';
 				
 				print $line->showOptionals($extrafieldsline, $mode, array('style'=>' style="background:#eeffee;" ','colspan'=>$colspan));
 				
