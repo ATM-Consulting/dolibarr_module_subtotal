@@ -438,6 +438,8 @@ class ActionsSubtotal
 		dol_include_once('/subtotal/lib/subtotal.lib.php');
 		require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 		
+		$showBlockExtrafields = GETPOST('showBlockExtrafields');
+		
 		if($object->element=='facture') $idvar = 'facid';
 		else $idvar = 'id';
 			
@@ -451,7 +453,7 @@ class ActionsSubtotal
 				if ($line->id == $lineid && TSubtotal::isModSubtotalLine($line))
 				{
 					$found = true;
-					if(TSubtotal::isTitle($line) && !empty($conf->global->SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE)) {
+					if(TSubtotal::isTitle($line) && !empty($showBlockExtrafields)) {
 						$extrafieldsline = new ExtraFields($db);
 						$extralabelsline = $extrafieldsline->fetch_name_optionals_label($object->table_element_line);
 						$extrafieldsline->setOptionalsFromPost($extralabelsline, $line);
@@ -1664,7 +1666,37 @@ class ActionsSubtotal
 				$colspan+=3; $mode = 'view';
 				if($action === 'editline' && $line->rowid == GETPOST('lineid')) $mode = 'edit';
 				
+				$line->element = 'tr_extrafield_title '.$line->element; // Pour pouvoir manipuler ces tr
 				print $line->showOptionals($extrafieldsline, $mode, array('style'=>' style="background:#eeffee;" ','colspan'=>$colspan));
+				
+				if($mode === 'edit') {
+					?>
+					<script>
+						$(document).ready(function(){
+
+							var all_tr_extrafields = $("tr.tr_extrafield_title");
+							all_tr_extrafields.hide();
+							
+							$("div .subtotal_underline").append('<a id="printBlocExtrafields" onclick="return false;" href="#"><?php print $langs->trans('showExtrafields'); ?></a>'
+																+ '<input type="hidden" name="showBlockExtrafields" id="showBlockExtrafields" value="0" />');
+
+							$(document).on('click', "#printBlocExtrafields", function() {
+								var btnShowBlock = $("#showBlockExtrafields");
+								var val = btnShowBlock.val();
+								if(val == '0') {
+									btnShowBlock.val('1');
+									$("#printBlocExtrafields").html("<?php print $langs->trans('hideExtrafields'); ?>");
+									$(all_tr_extrafields).show();
+								} else {
+									btnShowBlock.val('0');
+									$("#printBlocExtrafields").html("<?php print $langs->trans('showExtrafields'); ?>");
+									$(all_tr_extrafields).hide();
+								}
+							});
+						});
+					</script>
+					<?php
+				}
 				
 			}
 			

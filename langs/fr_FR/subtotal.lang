@@ -68,3 +68,5 @@ subtotalFreeLineDictionary=Ligne de texte prédéfini
 subtotalLabelForUnderTitle=Ajouter dans le bloc :
 subtotalLabelForFreeText=Texte prédéfini :
 subtotalFreeTextOrDesc=ou saisir une description...
+showExtrafields=Editer extrafields
+hideExtrafields=Masquer extrafields
