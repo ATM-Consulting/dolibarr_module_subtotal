@@ -451,6 +451,7 @@ class ActionsSubtotal
 				if ($line->id == $lineid && TSubtotal::isModSubtotalLine($line))
 				{
 					$found = true;
+					$array_options=array();
 					if(TSubtotal::isTitle($line) && !empty($conf->global->SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE)) {
 						$extrafieldsline = new ExtraFields($db);
 						$extralabelsline = $extrafieldsline->fetch_name_optionals_label($object->table_element_line);
