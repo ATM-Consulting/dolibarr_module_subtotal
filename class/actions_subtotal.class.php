@@ -97,7 +97,7 @@ class ActionsSubtotal
 						$qty = 98;
 					}
 					else {
-						$title = $langs->trans('SubTotal');
+						$title = GETPOST('title') ? GETPOST('title') : $langs->trans('SubTotal');
 						$qty = $level ? 100-$level : 99;
 					}
 					dol_include_once('/subtotal/class/subtotal.class.php');
@@ -180,11 +180,13 @@ class ActionsSubtotal
 							}
 						 
 							if (typeof use_textarea != 'undefined' && use_textarea) dialog_html += '<textarea id="sub-total-title" rows="<?php echo ROWS_8; ?>" cols="80" placeholder="'+label+'"></textarea>';
-							else dialog_html += '<input id="sub-total-title" size=30 value="" placeholder="'+label+'" />';
+							else dialog_html += '<input id="sub-total-title" size="30" value="" placeholder="'+label+'" />';
 						}
 						 
 						if (action == 'addTitle' || action == 'addSubtotal')
 						{
+							if (action == 'addSubtotal') dialog_html += '<input id="sub-total-title" size="30" value="" placeholder="'+label+'" />';
+							
 							dialog_html += "&nbsp;<select name='subtotal_line_level'>";
 							for (var i=1;i<10;i++)
 							{
@@ -242,7 +244,7 @@ class ActionsSubtotal
 					{
 						promptSubTotal('addSubtotal'
 							, '<?php echo $langs->trans('YourSubtotalLabel') ?>'
-							, ''
+							, '<?php echo $langs->trans('subtotal'); ?>'
 							, '?<?php echo $idvar ?>=<?php echo $object->id; ?>'
 							, '<?php echo $_SERVER['PHP_SELF']; ?>'
 							, {<?php echo $idvar; ?>: <?php echo $object->id; ?>, action:'add_total_line'}
