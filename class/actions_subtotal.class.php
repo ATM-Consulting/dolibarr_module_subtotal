@@ -1681,6 +1681,13 @@ class ActionsSubtotal
 				$ex_element = $line->element;
 				$line->element = 'tr_extrafield_title '.$line->element; // Pour pouvoir manipuler ces tr
 				print $line->showOptionals($extrafieldsline, $mode, array('style'=>' style="background:#eeffee;" ','colspan'=>$colspan));
+				$isExtraSelected = false;
+				foreach($line->array_options as $option) {
+					if(!empty($option) && $option != "-1") {
+						$isExtraSelected = true;
+						break;
+					}
+				}
 				
 				if($mode === 'edit') {
 					?>
@@ -1688,10 +1695,21 @@ class ActionsSubtotal
 						$(document).ready(function(){
 
 							var all_tr_extrafields = $("tr.tr_extrafield_title");
-							all_tr_extrafields.hide();
+							<?php 
+							// Si un extrafield est rempli alors on affiche directement les extrafields
+							if(!$isExtraSelected) {
+								echo 'all_tr_extrafields.hide();';
+								echo 'var trad = "'.$langs->trans('showExtrafields').'";';
+								echo 'var extra = 0;';
+							} else {
+								echo 'var trad = "'.$langs->trans('hideExtrafields').'";';
+								echo 'var extra = 1;';
+							}
+							?>
 							
-							$("div .subtotal_underline").append('<a id="printBlocExtrafields" onclick="return false;" href="#"><?php print $langs->trans('showExtrafields'); ?></a>'
-																+ '<input type="hidden" name="showBlockExtrafields" id="showBlockExtrafields" value="0" />');
+							$("div .subtotal_underline").append(
+									'<a id="printBlocExtrafields" onclick="return false;" href="#">' + trad + '</a>'
+									+ '<input type="hidden" name="showBlockExtrafields" id="showBlockExtrafields" value="'+ extra +'" />');
 
 							$(document).on('click', "#printBlocExtrafields", function() {
 								var btnShowBlock = $("#showBlockExtrafields");
