@@ -1702,6 +1702,7 @@ class ActionsSubtotal
 								echo 'var trad = "'.$langs->trans('showExtrafields').'";';
 								echo 'var extra = 0;';
 							} else {
+								echo 'all_tr_extrafields.show();';
 								echo 'var trad = "'.$langs->trans('hideExtrafields').'";';
 								echo 'var extra = 1;';
 							}
