@@ -1461,16 +1461,9 @@ class ActionsSubtotal
 						$isFreeText=false;
 						if (TSubtotal::isTitle($line))
 						{
-							if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
-							{
-								$qty_displayed = $line->qty;
-								print img_picto('', 'subsubtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;color:#0075DE;">'.$qty_displayed.'</span>&nbsp;&nbsp;';
-							}
-							else
-							{
-								if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
-								else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-							}
+							$qty_displayed = $line->qty;
+							print img_picto('', 'subsubtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;color:#0075DE;">'.$qty_displayed.'</span>&nbsp;&nbsp;';
+							
 						}
 						else if (TSubtotal::isSubtotal($line))
 						{
@@ -1483,7 +1476,12 @@ class ActionsSubtotal
 						}
 						
 						if($line->label=='' && !$isFreeText) {
-							$line->label = $line->description.' '.$this->getTitle($object, $line);
+							if(TSubtotal::isSubtotal($line)) {
+								$newlabel = $line->description.' '.$this->getTitle($object, $line);
+							} else {
+								$newlabel= $line->description;
+							}
+							$line->label = $newlabel;
 							$line->description='';
 						}
 
