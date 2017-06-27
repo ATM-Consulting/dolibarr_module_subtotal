@@ -310,8 +310,9 @@ class ActionsSubtotal
 			)
 	        {	
 				$hideInnerLines	= isset( $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] : 0;
-				$hidedetails	= isset( $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] : 0;	
-					
+				$hidedetails	= isset( $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] : 0;
+				$hideprices= isset( $_SESSION['subtotal_hideprices_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hideprices_'.$parameters['modulepart']] : 0;
+				
 				$var=false;
 		     	$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
@@ -320,14 +321,23 @@ class ActionsSubtotal
 		     			</td>
 		     			</tr>';
 				
-				$var=!$var;
-				$out.= '<tr '.$bc[$var].'>
+		     	$var=!$var;
+		     	$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
 		     				<label for="hidedetails">'.$langs->trans('SubTotalhidedetails').'</label>
 		     				<input type="checkbox" id="hidedetails" name="hidedetails" value="1" '.(( $hidedetails ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
-				
+		     	
+		     	$var=!$var;
+		     	$out.= '<tr '.$bc[$var].'>
+		     			<td colspan="4" align="right">
+		     				<label for="hidedetails">'.$langs->trans('SubTotalhidePrice').'</label>
+		     				<input type="checkbox" id="hideprices" name="hideprices" value="1" '.(( $hideprices ) ? 'checked="checked"' : '' ).' />
+		     			</td>
+		     			</tr>';
+		     	
+		     	
 				 
 				if ( 
 					(in_array('propalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
@@ -492,27 +502,36 @@ class ActionsSubtotal
 				if(in_array('invoicecard',explode(':',$parameters['context']))) {
 					$sessname = 'subtotal_hideInnerLines_facture';	
 					$sessname2 = 'subtotal_hidedetails_facture';
+					$sessname3 = 'subtotal_hideprices_facture';
 				}
 				elseif(in_array('propalcard',explode(':',$parameters['context']))) {
 					$sessname = 'subtotal_hideInnerLines_propal';
 					$sessname2 = 'subtotal_hidedetails_propal';	
+					$sessname3 = 'subtotal_hideprices_propal';
 				}
 				elseif(in_array('ordercard',explode(':',$parameters['context']))) {
 					$sessname = 'subtotal_hideInnerLines_commande';
 					$sessname2 = 'subtotal_hidedetails_commande';	
+					$sessname3 = 'subtotal_hideprices_commande';
 				}
 				else {
 					$sessname = 'subtotal_hideInnerLines_unknown';
 					$sessname2 = 'subtotal_hidedetails_unknown';
+					$sessname3 = 'subtotal_hideprices_unknown';
 				}
-								
+					
+				global $hideprices;
+				
 				$hideInnerLines = (int)GETPOST('hideInnerLines');
 				$_SESSION[$sessname] = $hideInnerLines;		
 				
-				$hidedetails= (int)GETPOST('hidedetails');	
+				$hidedetails= (int)GETPOST('hidedetails');
 				$_SESSION[$sessname2] = $hidedetails;
 				
-	           	foreach($object->lines as &$line) {
+				$hideprices= (int)GETPOST('hideprices');
+				$_SESSION[$sessname3] = $hideprices;
+				
+				foreach($object->lines as &$line) {
 					if ($line->product_type == 9 && $line->special_code == $this->module_number) {
 					    
                         if($line->qty>=90) {
@@ -846,7 +865,7 @@ class ActionsSubtotal
 	}
 
 	function pdf_getlineqty($parameters=array(), &$object, &$action='') {
-		global $conf;
+		global $conf,$hideprices;
 		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			
@@ -859,6 +878,10 @@ class ActionsSubtotal
 				return 1;
 			}
 			
+		}
+		elseif(!empty($hideprices)) {
+			$this->resprints = $object->lines[$parameters['i']]->qty;
+			return 1;
 		}
 		elseif (!empty($conf->global->SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY))
 		{
@@ -971,7 +994,7 @@ class ActionsSubtotal
 	}
 	
 	function pdf_getlineupexcltax($parameters=array(), &$object, &$action='') {
-		global $conf;
+		global $conf,$hideprices;
 		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
@@ -983,11 +1006,12 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
-		
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
-			
-		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		
+		if (!empty($hideprices) 
+				|| (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		)
 		{
 			$this->resprints = ' ';
 			return 1;
@@ -997,7 +1021,7 @@ class ActionsSubtotal
 	}
 	
 	function pdf_getlineupwithtax($parameters=array(), &$object, &$action='') {
-		global $conf;
+		global $conf,$hideprices;
 		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
@@ -1012,7 +1036,9 @@ class ActionsSubtotal
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
 			
-		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		if (!empty($hideprices)
+				|| (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		)
 		{
 			$this->resprints = ' ';
 			return 1;
@@ -1247,6 +1273,14 @@ class ActionsSubtotal
 		$hidedetails = (int)GETPOST('hidedetails');
 		
 		if($this->isModSubtotalLine($parameters,$object) ){			
+		
+				global $hideprices;
+				
+				if(!empty($hideprices)) {
+					foreach($object->lines as &$line) {
+						if($line->fk_product_type!=9) $line->fk_parent_line = -1;	
+					}
+				}
 			
 				$line = &$object->lines[$i];
 				
