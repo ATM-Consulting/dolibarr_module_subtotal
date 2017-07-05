@@ -39,6 +39,41 @@ class TSubtotal {
 			else if($object->element=='commande') $res =  $object->addline($label, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,$rang, TSubtotal::$module_number);
 		}
 	
+		self::generateDoc($object);
+	}
+
+	public static function generateDoc(&$object)
+	{
+		global $conf,$langs,$db;
+		
+		if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE))
+		{
+			$hidedetails = (GETPOST('hidedetails', 'int') ? GETPOST('hidedetails', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS) ? 1 : 0));
+			$hidedesc = (GETPOST('hidedesc', 'int') ? GETPOST('hidedesc', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC) ? 1 : 0));
+			$hideref = (GETPOST('hideref', 'int') ? GETPOST('hideref', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF) ? 1 : 0));
+			
+			// Define output language
+			$outputlangs = $langs;
+			$newlang = GETPOST('lang_id', 'alpha');
+			if (! empty($conf->global->MAIN_MULTILANGS) && empty($newlang))
+				$newlang = !empty($object->client) ? $object->client->default_lang : $object->thirdparty->default_lang;
+			if (! empty($newlang)) {
+				$outputlangs = new Translate("", $conf);
+				$outputlangs->setDefaultLang($newlang);
+			}
+
+			$ret = $object->fetch($object->id); // Reload to get new records
+			if ((float) DOL_VERSION <= 3.6)
+			{
+				if ($object->element == 'propal') propale_pdf_create($db, $object, $object->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
+				elseif ($object->element == 'commande') commande_pdf_create($db, $object, $object->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
+				elseif ($object->element == 'facture') facture_pdf_create($db, $object, $object->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
+			}
+			else
+			{
+				$object->generateDocument($object->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
+			}
+		}
 	}
 	
 	/**
