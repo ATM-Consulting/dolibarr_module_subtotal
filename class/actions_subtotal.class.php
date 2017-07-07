@@ -201,7 +201,7 @@ class ActionsSubtotal
 						
 						if (action == 'addTitle' || action == 'addFreeTxt')
 						{
-							if (typeof use_textarea != 'undefined' && use_textarea) CKEDITOR.replace( 'sub-total-title', {toolbar: 'dolibarr_notes', toolbarStartupExpanded: false} );
+							if (typeof use_textarea != 'undefined' && use_textarea && typeof(CKEDITOR) !== "undefined" ) CKEDITOR.replace( 'sub-total-title', {toolbar: 'dolibarr_notes', toolbarStartupExpanded: false} );
 						}
 						
 					     $( "#dialog-prompt-subtotal" ).dialog({
