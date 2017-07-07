@@ -198,11 +198,13 @@ class ActionsSubtotal
 						 dialog_html += '</div>';
 					    
 						$('body').append(dialog_html);
-						
+
+						<?php if(!empty($conf->global->FCKEDITOR_ENABLE_DETAILS) and $conf->global->FCKEDITOR_ENABLE_DETAILS){ php?>
 						if (action == 'addTitle' || action == 'addFreeTxt')
 						{
-							if (typeof use_textarea != 'undefined' && use_textarea && typeof(CKEDITOR) !== "undefined" ) CKEDITOR.replace( 'sub-total-title', {toolbar: 'dolibarr_notes', toolbarStartupExpanded: false} );
+							if (typeof use_textarea != 'undefined' && use_textarea && typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" ) CKEDITOR.replace( 'sub-total-title', {toolbar: 'dolibarr_details', toolbarStartupExpanded: false} );
 						}
+						<?php } php?>
 						
 					     $( "#dialog-prompt-subtotal" ).dialog({
 	                        resizable: false,
