@@ -199,6 +199,11 @@ class ActionsSubtotal
 					    
 						$('body').append(dialog_html);
 						
+						if (action == 'addTitle' || action == 'addFreeTxt')
+						{
+							if (typeof use_textarea != 'undefined' && use_textarea) CKEDITOR.replace( 'sub-total-title', {toolbar: 'dolibarr_notes', toolbarStartupExpanded: false} );
+						}
+						
 					     $( "#dialog-prompt-subtotal" ).dialog({
 	                        resizable: false,
 							height: 'auto',
