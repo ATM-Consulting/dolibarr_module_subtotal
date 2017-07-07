@@ -199,7 +199,11 @@ class ActionsSubtotal
 					    
 						$('body').append(dialog_html);
 
-						<?php if(!empty($conf->global->FCKEDITOR_ENABLE_DETAILS) and $conf->global->FCKEDITOR_ENABLE_DETAILS){ php?>
+						<?php 
+						$editorTool = empty($conf->global->FCKEDITOR_EDITORNAME)?'ckeditor':$conf->global->FCKEDITOR_EDITORNAME;
+						$editorConf = empty($conf->global->FCKEDITOR_ENABLE_DETAILS)?false:$conf->global->FCKEDITOR_ENABLE_DETAILS;
+						if($editorTool && $editorConf){ 
+						php?>
 						if (action == 'addTitle' || action == 'addFreeTxt')
 						{
 							if (typeof use_textarea != 'undefined' && use_textarea && typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" ) CKEDITOR.replace( 'sub-total-title', {toolbar: 'dolibarr_details', toolbarStartupExpanded: false} );
