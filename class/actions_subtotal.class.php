@@ -202,7 +202,7 @@ class ActionsSubtotal
 						<?php 
 						$editorTool = empty($conf->global->FCKEDITOR_EDITORNAME)?'ckeditor':$conf->global->FCKEDITOR_EDITORNAME;
 						$editorConf = empty($conf->global->FCKEDITOR_ENABLE_DETAILS)?false:$conf->global->FCKEDITOR_ENABLE_DETAILS;
-						if($editorTool && $editorConf){ 
+						if($editorConf && in_array($editorTool,array('textarea','ckeditor'))){ 
 						php?>
 						if (action == 'addTitle' || action == 'addFreeTxt')
 						{
