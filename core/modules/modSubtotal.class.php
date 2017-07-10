@@ -186,11 +186,11 @@ class modSubtotal extends DolibarrModules
 			'langs'=>'subtotal@subtotal',
             'tabname'=>array(MAIN_DB_PREFIX.'c_subtotal_free_text'),		// List of tables we want to see into dictonnary editor
             'tablib'=>array($langs->trans('subtotalFreeLineDictionary')),													// Label of tables
-            'tabsql'=>array('SELECT f.rowid as rowid, f.label, f.content, f.entity, f.active FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text as f'),	// Request to select fields
+            'tabsql'=>array('SELECT f.rowid as rowid, f.label, f.content, f.entity, f.active FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text as f WHERE f.entity='.$conf->entity),	// Request to select fields
             'tabsqlsort'=>array('label ASC'),																					// Sort order
             'tabfield'=>array('label,content'),							// List of fields (result of select to show dictionary)
             'tabfieldvalue'=>array('label,content'),						// List of fields (list of fields to edit a record)
-            'tabfieldinsert'=>array('label,content'),					// List of fields (list of fields for insert)
+            'tabfieldinsert'=>array('label,content,entity'),					// List of fields (list of fields for insert)
             'tabrowid'=>array('rowid'),											// Name of columns with primary key (try to always name it 'rowid')
             'tabcond'=>array($conf->subtotal->enabled)	
 		);
