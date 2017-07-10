@@ -159,6 +159,13 @@ class ActionsSubtotal
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" rel="add_title_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddTitle' )?></a></div>');
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" rel="add_total_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubTotal')?></a></div>');
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_free_text" rel="add_free_text" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddFreeText')?></a></div>');
+
+
+					function updateAllMessageForms(){
+				         for (instance in CKEDITOR.instances) {
+				             CKEDITOR.instances[instance].updateElement();
+				         }
+				    }
 					
 					function promptSubTotal(action, titleDialog, label, url_to, url_ajax, params, use_textarea, show_free_text, show_under_title) {
 					     $( "#dialog-prompt-subtotal" ).remove();
@@ -206,7 +213,10 @@ class ActionsSubtotal
 						?>
 						if (action == 'addTitle' || action == 'addFreeTxt')
 						{
-							if (typeof use_textarea != 'undefined' && use_textarea && typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" ) CKEDITOR.replace( 'sub-total-title', {toolbar: 'dolibarr_details', toolbarStartupExpanded: false} );
+							if (typeof use_textarea != 'undefined' && use_textarea && typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" )
+							{
+								 CKEDITOR.replace( 'sub-total-title', {toolbar: 'dolibarr_details', toolbarStartupExpanded: false} );
+							}
 						}
 						<?php } ?>
 						
@@ -218,6 +228,7 @@ class ActionsSubtotal
 	                        title: titleDialog,
 	                        buttons: {
 	                            "Ok": function() {
+	                            	if (typeof use_textarea != 'undefined' && use_textarea && typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" ){ updateAllMessageForms(); }
 									params.title = $(this).find('#sub-total-title').val();
 									params.under_title = $(this).find('select[name=under_title]').val();
 									params.free_text = $(this).find('select[name=free_text]').val();
