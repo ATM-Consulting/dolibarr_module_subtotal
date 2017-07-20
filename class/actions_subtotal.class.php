@@ -504,6 +504,9 @@ class ActionsSubtotal
 					}
 					_updateSubtotalLine($object, $line);
 					_updateSubtotalBloc($object, $line);
+					
+					TSubtotal::generateDoc($object);
+					break;
 				}
 			}
 			
