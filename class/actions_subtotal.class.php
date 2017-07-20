@@ -893,7 +893,7 @@ class ActionsSubtotal
 			
 			$this->resprints = ' ';
 			
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -934,7 +934,7 @@ class ActionsSubtotal
 			
 			$this->resprints = ' ';
 			
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -969,7 +969,7 @@ class ActionsSubtotal
 			
 			$this->resprints = ' ';
 		
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -995,7 +995,7 @@ class ActionsSubtotal
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 		
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -1021,7 +1021,7 @@ class ActionsSubtotal
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 		
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -1047,7 +1047,7 @@ class ActionsSubtotal
 		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -1075,7 +1075,7 @@ class ActionsSubtotal
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 			
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -1100,7 +1100,7 @@ class ActionsSubtotal
 		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -1311,13 +1311,11 @@ class ActionsSubtotal
 					$posy = $pdf->GetY();
 				}
 				
-				if($line->label=='') {
-					$label = $outputlangs->convToOutputCharset($line->desc);
+				$label = $line->label;
+				$description= !empty($line->desc) ? $outputlangs->convToOutputCharset($line->desc) : $outputlangs->convToOutputCharset($line->description);
+				if(empty($label)) {
+					$label = $description;
 					$description='';
-				}
-				else {
-					$label = $outputlangs->convToOutputCharset($line->label);
-					$description=$outputlangs->convToOutputCharset(dol_htmlentitiesbr($line->desc));
 				}
 				
 				if($line->qty>90) {
