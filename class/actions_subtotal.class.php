@@ -774,7 +774,8 @@ class ActionsSubtotal
 					}
 				}
 			}
-			else if($total_to_print) {
+			
+			if($total_to_print) {
 				
 				if (GETPOST('hideInnerLines'))
 				{
@@ -796,7 +797,7 @@ class ActionsSubtotal
 					$line->total_ttc = $total_ttc;
 				}
 			}
-			
+//			var_dump($total_to_print);exit;
 			$pdf->SetXY($pdf->postotalht, $posy);
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
 			$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, $total_to_print, 0, 'R', 0);
@@ -921,7 +922,7 @@ class ActionsSubtotal
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
 			
-		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
 			$this->resprints = ' ';
 			return 1;
@@ -949,6 +950,12 @@ class ActionsSubtotal
 		{
 			if(is_array($parameters)) $i = & $parameters['i'];
 			else $i = (int)$parameters;
+			
+			if (!empty($object->lines[$i]->array_options['options_subtotal_nc'])) 
+			{
+				$this->resprints = ' ';
+				return 1;
+			}
 			
 			$TTitle = TSubtotal::getAllTitleFromLine($object->lines[$i]);
 			foreach ($TTitle as &$line_title)
@@ -982,8 +989,8 @@ class ActionsSubtotal
 		
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
-			
-		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) ) 
 		{
 			$this->resprints = ' ';
 			return 1;
@@ -1009,7 +1016,7 @@ class ActionsSubtotal
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
 			
-		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
 			$this->resprints = ' ';
 			return 1;
@@ -1035,7 +1042,7 @@ class ActionsSubtotal
 		else $i = (int)$parameters;
 		
 		if (!empty($hideprices) 
-				|| (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+				|| (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		)
 		{
 			$this->resprints = ' ';
@@ -1062,7 +1069,7 @@ class ActionsSubtotal
 		else $i = (int)$parameters;
 			
 		if (!empty($hideprices)
-				|| (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+				|| (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		)
 		{
 			$this->resprints = ' ';
@@ -1089,7 +1096,7 @@ class ActionsSubtotal
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
 			
-		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
 			$this->resprints = ' ';
 			return 1;
@@ -1114,7 +1121,7 @@ class ActionsSubtotal
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
 			
-		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::hasNcTitle($object->lines[$i]))
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
 			$this->resprints = ' ';
 			return 1;
