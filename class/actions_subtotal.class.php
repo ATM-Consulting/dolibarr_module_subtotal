@@ -698,6 +698,32 @@ class ActionsSubtotal
 		if (!$return_all) return $total;
 		else return array($total, $total_tva, $total_ttc, $TTotal_tva);
 	}
+        /*
+         * Get the sum of situation invoice for last column
+         */
+        
+        function getTotalToPrintSituation(&$object, &$line) {
+		
+		$rang = $line->rang;
+		$total = 0;
+		foreach($object->lines as $l) {
+			if($l->rang>=$rang) {
+				return price($total);
+			}
+                        if (TSubtotal::isSubtotal($l)){
+                            $total = 0;
+                        } else  if ($l->situation_percent > 0 ){
+                           
+        	
+		 	$prev_progress = $l->get_prev_progress($object->id);
+		 	$progress = ($l->situation_percent - $prev_progress) /100;
+                        $total += ($l->total_ht/($l->situation_percent/100)) * $progress;
+                        
+                    }
+                }
+                
+		return price($total);
+	}
 
 	/**
 	 * @param $pdf          TCPDF               PDF object
@@ -788,8 +814,12 @@ class ActionsSubtotal
 				else
 				{
 					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
-
-					$total_to_print = price($total);
+                                        if($object->type==Facture::TYPE_SITUATION && get_class($object) == 'Facture'){//Facture de situation
+                                                $total_to_print = $this->getTotalToPrintSituation($object, $line);
+                                        } else {
+                                            	$total_to_print = price($total);
+                                        }
+                                            
 					$line->total_ht = $total;
 					$line->total = $total;
 					$line->total_tva = $total_tva;
