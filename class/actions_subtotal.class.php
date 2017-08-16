@@ -797,7 +797,7 @@ class ActionsSubtotal
 					$line->total_ttc = $total_ttc;
 				}
 			}
-//			var_dump($total_to_print);exit;
+
 			$pdf->SetXY($pdf->postotalht, $posy);
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
 			$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, $total_to_print, 0, 'R', 0);
