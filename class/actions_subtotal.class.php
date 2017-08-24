@@ -997,7 +997,9 @@ class ActionsSubtotal
 				}
 			}
 		}
-		
+		if(is_array($parameters)) $i = & $parameters['i'];
+		else $i = (int)$parameters;
+		$this->resprints = price($object->lines[$i]->total_ht);
 		
 		return 0;
 	}
@@ -1144,7 +1146,6 @@ class ActionsSubtotal
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
-			    $this->resprints = ' ';
 				return 1;
 			}
 		}
@@ -1238,8 +1239,9 @@ class ActionsSubtotal
 		/**
 		 * @var $pdf    TCPDF
 		 */
-		global $pdf,$conf;
+		global $pdf,$conf, $langs;
 
+		//var_dump($object->lines);
 		dol_include_once('/subtotal/class/subtotal.class.php');
 
 		foreach($parameters as $key=>$value) {
@@ -1259,9 +1261,11 @@ class ActionsSubtotal
 			$TLines =array();
 		
 			$original_count=count($object->lines);
-		
+		    $last_tva = array(); // enregistre les tva déjà prises en compte dans les calculs
+		    
 			foreach($object->lines as $k=>&$line) 
 			{
+			    
 				if($line->product_type==9 && $line->rowid>0) 
 				{
 					$fk_parent_line = $line->rowid;
@@ -1279,25 +1283,44 @@ class ActionsSubtotal
 						$line->total_ht = $total;
 						$line->total_tva = $total_tva;
 						$line->total = $line->total_ht;
-						$line->situation_percent = NULL;
 						$line->total_ttc = $total_ttc;
-					}
-					elseif($line->qty<10 && $line->total==0)
-					{
-					    $line->situation_percent = NULL;
 					} 
 						
 				} 
 			
 				if ($hideInnerLines)
 				{
-					if($line->product_type==9 && $line->rowid>0) 
+					if($line->product_type==9 && $line->rowid>0)
 					{
-						$TLines[] = $line; //Cas où je doit cacher les produits et afficher uniquement les sous-totaux avec les titres
+					    //Cas où je doit cacher les produits et afficher uniquement les sous-totaux avec les titres
+					    
+					    if(count($line->TTotal_tva) > 1){
+					       // plusieurs tx 
+					       foreach ($line->TTotal_tva as $k=>$v){
+					           if($line->TTotal_tva[$k] - $last_tva[$k] > 0){
+					               $v -= $last_tva[$k];
+    					           $l = clone $line;
+    					           
+    					           $l->product_type = 1;
+    					           $l->desc = $langs->trans('VAT').' '. price($k) .' %';
+    					           $l->tva_tx = $k;
+    					           $l->total_ht = $v *100/$k;
+    					           $l->total_tva = $v;
+    					           $l->total = $line->total_ht;
+    					           $l->total_ttc = $l->total_ht + $v;
+    					           
+    					           $last_tva[$k]+=$v;
+    					           $TLines[] = $l;
+					           }
+					       }
+					    } else {
+					        
+					    }
+						$TLines[] = $line; 
 					}
-					elseif (!TSubtotal::getParentTitleOfLine($object, $k)) {
+					/*elseif (!TSubtotal::getParentTitleOfLine($object, $k)) {
 						$TLines[] = $line;
-					}
+					}*/
 				}
 				elseif ($hidedetails)
 				{
@@ -1313,11 +1336,11 @@ class ActionsSubtotal
 					$line->total = 0;
 					$line->subprice= 0;
 				}*/
+				
 			}
 			
 			$object->lines = $TLines;
-			
-			//var_dump($object);exit;
+			//var_dump($TLines);exit;
 			//var_dump($original_count,$i,count($object->lines));
 			if($i>count($object->lines)) {
 				$this->resprints = '';
