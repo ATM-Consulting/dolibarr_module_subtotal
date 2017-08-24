@@ -1298,6 +1298,8 @@ class ActionsSubtotal
 					       // plusieurs tx 
 					       foreach ($line->TTotal_tva as $k=>$v){
 					           if($line->TTotal_tva[$k] - $last_tva[$k] > 0){
+					               // a chaque ligne de tva qui n'est pas déjà prises en compte, je crée une ligne de texte vide
+					               // permet de réafficher les totaux de TVA qui se base sur des données issu des lignes de facture
 					               $v -= $last_tva[$k];
     					           $l = clone $line;
     					           
@@ -1313,14 +1315,10 @@ class ActionsSubtotal
     					           $TLines[] = $l;
 					           }
 					       }
-					    } else {
-					        
 					    }
 						$TLines[] = $line; 
 					}
-					/*elseif (!TSubtotal::getParentTitleOfLine($object, $k)) {
-						$TLines[] = $line;
-					}*/
+					
 				}
 				elseif ($hidedetails)
 				{
