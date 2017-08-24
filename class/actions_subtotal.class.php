@@ -1144,6 +1144,7 @@ class ActionsSubtotal
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
+			    $this->resprints = ' ';
 				return 1;
 			}
 		}
@@ -1278,7 +1279,12 @@ class ActionsSubtotal
 						$line->total_ht = $total;
 						$line->total_tva = $total_tva;
 						$line->total = $line->total_ht;
+						$line->situation_percent = NULL;
 						$line->total_ttc = $total_ttc;
+					}
+					elseif($line->qty<10 && $line->total==0)
+					{
+					    $line->situation_percent = NULL;
 					} 
 						
 				} 
@@ -1310,6 +1316,8 @@ class ActionsSubtotal
 			}
 			
 			$object->lines = $TLines;
+			
+			//var_dump($object);exit;
 			//var_dump($original_count,$i,count($object->lines));
 			if($i>count($object->lines)) {
 				$this->resprints = '';
