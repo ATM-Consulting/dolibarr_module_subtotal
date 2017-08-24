@@ -1000,7 +1000,7 @@ class ActionsSubtotal
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
 		$this->resprints = price($object->lines[$i]->total_ht);
-		
+
 		return 0;
 	}
 	
@@ -1294,29 +1294,30 @@ class ActionsSubtotal
 					{
 					    //Cas où je doit cacher les produits et afficher uniquement les sous-totaux avec les titres
 					    
-					    if(count($line->TTotal_tva) > 1){
-					       // plusieurs tx 
+					   if(count($line->TTotal_tva) > 0){
 					       foreach ($line->TTotal_tva as $k=>$v){
+					    
 					           if($line->TTotal_tva[$k] - $last_tva[$k] > 0){
 					               // a chaque ligne de tva qui n'est pas déjà prises en compte, je crée une ligne de texte vide
 					               // permet de réafficher les totaux de TVA qui se base sur des données issu des lignes de facture
-					               $v -= $last_tva[$k];
     					           $l = clone $line;
     					           
     					           $l->product_type = 1;
-    					           $l->desc = $langs->trans('VAT').' '. price($k) .' %';
+    					           $l->desc = 'Montant HT soumis à '.$langs->trans('VAT').' '. price($k) .' %';
     					           $l->tva_tx = $k;
+    					           $l->special_code = '';
+    					           $l->qty = 1;
     					           $l->total_ht = $v *100/$k;
     					           $l->total_tva = $v;
     					           $l->total = $line->total_ht;
     					           $l->total_ttc = $l->total_ht + $v;
     					           
-    					           $last_tva[$k]+=$v;
     					           $TLines[] = $l;
 					           }
 					       }
-					    }
-						$TLines[] = $line; 
+					   }
+					   
+					   $TLines[] = $line; 
 					}
 					
 				}
