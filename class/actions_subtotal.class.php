@@ -1244,7 +1244,7 @@ class ActionsSubtotal
 		 */
 		global $pdf,$conf, $langs;
 
-		//var_dump($object->lines);
+		// var_dump($object->lines);
 		dol_include_once('/subtotal/class/subtotal.class.php');
 
 		foreach($parameters as $key=>$value) {
@@ -1264,7 +1264,7 @@ class ActionsSubtotal
 			$TLines =array();
 		
 			$original_count=count($object->lines);
-		    $last_tva = array(); // enregistre les tva déjà prises en compte dans les calculs
+		    $T_tva = array(); // tableau de tva
 		    
 			foreach($object->lines as $k=>&$line) 
 			{
@@ -1293,33 +1293,34 @@ class ActionsSubtotal
 			
 				if ($hideInnerLines)
 				{
+				    if($line->tva_tx != '0.000' && $line->product_type!=9){
+				        // on remplit le tableau de tva pour substituer les lignes cachées
+				        $T_tva[$line->tva_tx]['total_tva'] += $line->total_tva;
+				        $T_tva[$line->tva_tx]['total_ht'] += $line->total_ht;
+				        $T_tva[$line->tva_tx]['total_ttc'] += $line->total_ttc; 
+				    }
 					if($line->product_type==9 && $line->rowid>0)
 					{
 					    //Cas où je doit cacher les produits et afficher uniquement les sous-totaux avec les titres
-					    
-					   if(count($line->TTotal_tva) > 0){
-					       foreach ($line->TTotal_tva as $k=>$v){
-					    
-					           if($line->TTotal_tva[$k] - $last_tva[$k] > 0){
-					               // a chaque ligne de tva qui n'est pas déjà prises en compte, je crée une ligne de texte vide
-					               // permet de réafficher les totaux de TVA qui se base sur des données issu des lignes de facture
-    					           $l = clone $line;
-    					           
-    					           $l->product_type = 1;
-    					           $l->desc = 'Montant HT soumis à '.$langs->trans('VAT').' '. price($k) .' %';
-    					           $l->tva_tx = $k;
-    					           $l->special_code = '';
-    					           $l->qty = 1;
-    					           $l->total_ht = $v *100/$k;
-    					           $l->total_tva = $v;
-    					           $l->total = $line->total_ht;
-    					           $l->total_ttc = $l->total_ht + $v;
-    					           
-    					           $TLines[] = $l;
-					           }
+					    // génère des lignes d'affichage des montants HT soumis à tva
+					    if(!empty(count($T_tva))){
+					        foreach ($T_tva as $tx =>$val){
+					            $l = clone $line;
+					            $l->product_type = 1;
+					            $l->special_code = '';
+					            $l->qty = 1;
+					            $l->desc = 'Montant HT soumis à '.$langs->trans('VAT').' '. price($tx) .' %';
+					            $l->tva_tx = $tx;
+					            $l->total_ht = $val['total_ht'];
+					            $l->total_tva = $val['total_tva'];
+					            $l->total = $line->total_ht;
+					            $l->total_ttc = $val['total_ttc'];
+					            $TLines[] = $l;
+					            array_shift($T_tva);
 					       }
-					   }
-					   
+					    }
+					    
+					    // ajoute la ligne de sous-total
 					   $TLines[] = $line; 
 					}
 					
@@ -1341,8 +1342,28 @@ class ActionsSubtotal
 				
 			}
 			
+			// cas incongru où il y aurait des produits en dessous du dernier sous-total
+			if(!empty(count($T_tva)) && $hideInnerLines){
+			    foreach ($T_tva as $tx =>$val){
+			        $l = clone $line;
+			        $l->product_type = 1;
+			        $l->special_code = '';
+			        $l->qty = 1;
+			        $l->desc = 'Montant HT soumis à '.$langs->trans('VAT').' '. price($tx) .' %';
+			        $l->tva_tx = $tx;
+			        $l->total_ht = $val['total_ht'];
+			        $l->total_tva = $val['total_tva'];
+			        $l->total = $line->total_ht;
+			        $l->total_ttc = $val['total_ttc'];
+			        $TLines[] = $l;
+			        array_shift($T_tva);
+			    }
+			}
+			
 			$object->lines = $TLines;
-			//var_dump($TLines);exit;
+			
+			//var_dump($TLines);
+			
 			//var_dump($original_count,$i,count($object->lines));
 			if($i>count($object->lines)) {
 				$this->resprints = '';
