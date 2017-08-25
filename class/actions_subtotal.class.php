@@ -815,7 +815,7 @@ class ActionsSubtotal
 				else
 				{
 					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
-                                        if($object->type==Facture::TYPE_SITUATION && get_class($object) == 'Facture'){//Facture de situation
+                                        if(get_class($object) == 'Facture' && $object->type==Facture::TYPE_SITUATION){//Facture de situation
                                                 $total_to_print = $this->getTotalToPrintSituation($object, $line);
                                         } else {
                                             	$total_to_print = price($total);
