@@ -997,10 +997,13 @@ class ActionsSubtotal
 				}
 			}
 		}
-		if(is_array($parameters)) $i = & $parameters['i'];
-		else $i = (int)$parameters;
-		$this->resprints = price($object->lines[$i]->total_ht);
-
+		if ((int)GETPOST('hideInnerLines')){
+		    if(is_array($parameters)) $i = & $parameters['i'];
+		    else $i = (int)$parameters;
+		    $this->resprints = price($object->lines[$i]->total_ht);
+		}
+		
+        
 		return 0;
 	}
 	
