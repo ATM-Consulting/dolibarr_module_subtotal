@@ -815,7 +815,7 @@ class ActionsSubtotal
 				else
 				{
 					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
-                                        if($object->type==Facture::TYPE_SITUATION && get_class($object) == 'Facture'){//Facture de situation
+                                        if(get_class($object) == 'Facture' && $object->type==Facture::TYPE_SITUATION){//Facture de situation
                                                 $total_to_print = $this->getTotalToPrintSituation($object, $line);
                                         } else {
                                             	$total_to_print = price($total);
@@ -997,13 +997,8 @@ class ActionsSubtotal
 				}
 			}
 		}
-		if ((int)GETPOST('hideInnerLines') && !empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES)){
-		    if(is_array($parameters)) $i = & $parameters['i'];
-		    else $i = (int)$parameters;
-		    $this->resprints = price($object->lines[$i]->total_ht);
-		}
 		
-        
+		
 		return 0;
 	}
 	
@@ -1242,9 +1237,8 @@ class ActionsSubtotal
 		/**
 		 * @var $pdf    TCPDF
 		 */
-		global $pdf,$conf, $langs;
+		global $pdf,$conf;
 
-		// var_dump($object->lines);
 		dol_include_once('/subtotal/class/subtotal.class.php');
 
 		foreach($parameters as $key=>$value) {
@@ -1264,11 +1258,9 @@ class ActionsSubtotal
 			$TLines =array();
 		
 			$original_count=count($object->lines);
-		    $T_tva = array(); // tableau de tva
-		    
+		
 			foreach($object->lines as $k=>&$line) 
 			{
-			    
 				if($line->product_type==9 && $line->rowid>0) 
 				{
 					$fk_parent_line = $line->rowid;
@@ -1293,49 +1285,13 @@ class ActionsSubtotal
 			
 				if ($hideInnerLines)
 				{
-				    if(!empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES))
-				    {
-				        if($line->tva_tx != '0.000' && $line->product_type!=9){
-				            
-    				        // on remplit le tableau de tva pour substituer les lignes cachées
-    				        $T_tva[$line->tva_tx]['total_tva'] += $line->total_tva;
-    				        $T_tva[$line->tva_tx]['total_ht'] += $line->total_ht;
-    				        $T_tva[$line->tva_tx]['total_ttc'] += $line->total_ttc; 
-    				    }
-    					if($line->product_type==9 && $line->rowid>0)
-    					{
-    					    //Cas où je doit cacher les produits et afficher uniquement les sous-totaux avec les titres
-    					    // génère des lignes d'affichage des montants HT soumis à tva
-    					    if(!empty(count($T_tva))){
-    					        foreach ($T_tva as $tx =>$val){
-    					            $l = clone $line;
-    					            $l->product_type = 1;
-    					            $l->special_code = '';
-    					            $l->qty = 1;
-    					            $l->desc = 'Montant HT soumis à '.$langs->trans('VAT').' '. price($tx) .' %';
-    					            $l->tva_tx = $tx;
-    					            $l->total_ht = $val['total_ht'];
-    					            $l->total_tva = $val['total_tva'];
-    					            $l->total = $line->total_ht;
-    					            $l->total_ttc = $val['total_ttc'];
-    					            $TLines[] = $l;
-    					            array_shift($T_tva);
-    					       }
-    					    }
-    					    
-    					    // ajoute la ligne de sous-total
-    					    $TLines[] = $line; 
-    					}
-				    } else {
-				        
-				        if($line->product_type==9 && $line->rowid>0)
-				        {
-				            // ajoute la ligne de sous-total
-				            $TLines[] = $line; 
-				        }
-				    }
-				    
-					
+					if($line->product_type==9 && $line->rowid>0) 
+					{
+						$TLines[] = $line; //Cas où je doit cacher les produits et afficher uniquement les sous-totaux avec les titres
+					}
+					elseif (!TSubtotal::getParentTitleOfLine($object, $k)) {
+						$TLines[] = $line;
+					}
 				}
 				elseif ($hidedetails)
 				{
@@ -1351,32 +1307,9 @@ class ActionsSubtotal
 					$line->total = 0;
 					$line->subprice= 0;
 				}*/
-				
-			}
-			
-			// cas incongru où il y aurait des produits en dessous du dernier sous-total
-			if(!empty(count($T_tva)) && $hideInnerLines && !empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES))
-			{
-			    foreach ($T_tva as $tx =>$val){
-			        $l = clone $line;
-			        $l->product_type = 1;
-			        $l->special_code = '';
-			        $l->qty = 1;
-			        $l->desc = 'Montant HT soumis à '.$langs->trans('VAT').' '. price($tx) .' %';
-			        $l->tva_tx = $tx;
-			        $l->total_ht = $val['total_ht'];
-			        $l->total_tva = $val['total_tva'];
-			        $l->total = $line->total_ht;
-			        $l->total_ttc = $val['total_ttc'];
-			        $TLines[] = $l;
-			        array_shift($T_tva);
-			    }
 			}
 			
 			$object->lines = $TLines;
-			
-			var_dump(empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES));
-			
 			//var_dump($original_count,$i,count($object->lines));
 			if($i>count($object->lines)) {
 				$this->resprints = '';
