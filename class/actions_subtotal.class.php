@@ -1264,7 +1264,7 @@ class ActionsSubtotal
 			$TLines =array();
 		
 			$original_count=count($object->lines);
-		    $T_tva = array(); // tableau de tva
+		    $TTvas = array(); // tableau de tva
 		    
 			foreach($object->lines as $k=>&$line) 
 			{
@@ -1298,16 +1298,17 @@ class ActionsSubtotal
 				        if($line->tva_tx != '0.000' && $line->product_type!=9){
 				            
     				        // on remplit le tableau de tva pour substituer les lignes cachées
-    				        $T_tva[$line->tva_tx]['total_tva'] += $line->total_tva;
-    				        $T_tva[$line->tva_tx]['total_ht'] += $line->total_ht;
-    				        $T_tva[$line->tva_tx]['total_ttc'] += $line->total_ttc; 
+    				        $TTvas[$line->tva_tx]['total_tva'] += $line->total_tva;
+    				        $TTvas[$line->tva_tx]['total_ht'] += $line->total_ht;
+    				        $TTvas[$line->tva_tx]['total_ttc'] += $line->total_ttc; 
     				    }
     					if($line->product_type==9 && $line->rowid>0)
     					{
     					    //Cas où je doit cacher les produits et afficher uniquement les sous-totaux avec les titres
     					    // génère des lignes d'affichage des montants HT soumis à tva
-    					    if(!empty(count($T_tva))){
-    					        foreach ($T_tva as $tx =>$val){
+    					    $nbtva = count($TTvas);
+    					    if(!empty($nbtva)){
+    					        foreach ($TTvas as $tx =>$val){
     					            $l = clone $line;
     					            $l->product_type = 1;
     					            $l->special_code = '';
@@ -1319,7 +1320,7 @@ class ActionsSubtotal
     					            $l->total = $line->total_ht;
     					            $l->total_ttc = $val['total_ttc'];
     					            $TLines[] = $l;
-    					            array_shift($T_tva);
+    					            array_shift($TTvas);
     					       }
     					    }
     					    
@@ -1355,9 +1356,10 @@ class ActionsSubtotal
 			}
 			
 			// cas incongru où il y aurait des produits en dessous du dernier sous-total
-			if(!empty(count($T_tva)) && $hideInnerLines && !empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES))
+			$nbtva = count($TTvas);
+			if(!empty($nbtva) && $hideInnerLines && !empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES))
 			{
-			    foreach ($T_tva as $tx =>$val){
+			    foreach ($TTvas as $tx =>$val){
 			        $l = clone $line;
 			        $l->product_type = 1;
 			        $l->special_code = '';
@@ -1369,15 +1371,12 @@ class ActionsSubtotal
 			        $l->total = $line->total_ht;
 			        $l->total_ttc = $val['total_ttc'];
 			        $TLines[] = $l;
-			        array_shift($T_tva);
+			        array_shift($TTvas);
 			    }
 			}
 			
 			$object->lines = $TLines;
 			
-			var_dump(empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES));
-			
-			//var_dump($original_count,$i,count($object->lines));
 			if($i>count($object->lines)) {
 				$this->resprints = '';
 				return 0;
