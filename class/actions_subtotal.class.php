@@ -954,8 +954,11 @@ class ActionsSubtotal
 			
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
-			$this->resprints = ' ';
-			return 1;
+			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
+			{
+				$this->resprints = ' ';
+				return 1;
+			}
 		}
 		
 		return 0;
@@ -981,19 +984,22 @@ class ActionsSubtotal
 			if(is_array($parameters)) $i = & $parameters['i'];
 			else $i = (int)$parameters;
 			
-			if (!empty($object->lines[$i]->array_options['options_subtotal_nc'])) 
+			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
 			{
-				$this->resprints = ' ';
-				return 1;
-			}
-			
-			$TTitle = TSubtotal::getAllTitleFromLine($object->lines[$i]);
-			foreach ($TTitle as &$line_title)
-			{
-				if (!empty($line_title->array_options['options_subtotal_nc']))
+				if (!empty($object->lines[$i]->array_options['options_subtotal_nc'])) 
 				{
 					$this->resprints = ' ';
 					return 1;
+				}
+
+				$TTitle = TSubtotal::getAllTitleFromLine($object->lines[$i]);
+				foreach ($TTitle as &$line_title)
+				{
+					if (!empty($line_title->array_options['options_subtotal_nc']))
+					{
+						$this->resprints = ' ';
+						return 1;
+					}
 				}
 			}
 		}
@@ -1027,8 +1033,11 @@ class ActionsSubtotal
 		
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) ) 
 		{
-			$this->resprints = ' ';
-			return 1;
+			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
+			{
+				$this->resprints = ' ';
+				return 1;
+			}
 		}
 		
 		return 0;
@@ -1053,8 +1062,11 @@ class ActionsSubtotal
 			
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
-			$this->resprints = ' ';
-			return 1;
+			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
+			{
+				$this->resprints = ' ';
+				return 1;
+			}
 		}
 		
 		return 0;
@@ -1080,8 +1092,11 @@ class ActionsSubtotal
 				|| (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		)
 		{
-			$this->resprints = ' ';
-			return 1;
+			if (!empty($hideprices) || !in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
+			{
+				$this->resprints = ' ';
+				return 1;
+			}
 		}
 		
 		return 0;
@@ -1107,8 +1122,11 @@ class ActionsSubtotal
 				|| (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		)
 		{
-			$this->resprints = ' ';
-			return 1;
+			if (!empty($hideprices) || !in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
+			{
+				$this->resprints = ' ';
+				return 1;
+			}
 		}
 		
 		return 0;
@@ -1133,8 +1151,11 @@ class ActionsSubtotal
 			
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
-			$this->resprints = ' ';
-			return 1;
+			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
+			{
+				$this->resprints = ' ';
+				return 1;
+			}
 		}
 		
 		return 0;
@@ -1158,8 +1179,11 @@ class ActionsSubtotal
 			
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
-			$this->resprints = ' ';
-			return 1;
+			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
+			{
+				$this->resprints = ' ';
+				return 1;
+			}
 		}
 		
 		return 0;
