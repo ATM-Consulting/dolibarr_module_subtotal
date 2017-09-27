@@ -699,7 +699,12 @@ class TSubtotal {
 				$decalage = (self::getNiveau($line) - 1) * 2;
 				
 				// Print: Designation
-				$label = !empty($line->label) ? $line->label : $line->desc;
+				$label = $line->label;
+				if( (float)DOL_VERSION < 6 ) {
+					$label = !empty($line->label) ? $line->label : $line->desc;
+				}
+				
+				
 				$pdf->startTransaction();
 				$pdf->writeHTMLCell($posx_options-$posx_designation-$decalage, 3, $posx_designation+$decalage, $curY, $outputlangs->convToOutputCharset($label), 0, 1, false, true, 'J',true);
 				$pageposafter=$pdf->getPage();
