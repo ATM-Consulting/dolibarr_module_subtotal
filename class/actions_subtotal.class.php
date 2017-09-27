@@ -1226,7 +1226,7 @@ class ActionsSubtotal
 			{
 				$TTitle[$j]['numerotation'] = ($prefix_num == 0) ? $i : $prefix_num.'.'.$i;
 				//var_dump('Prefix == '.$prefix_num.' // '.$line->desc.' ==> numerotation == '.$TTitle[$j]['numerotation'].'   ###    '.$line->qty .'=='. $level);
-				if (empty($line->label))
+				if (empty($line->label) && (float)DOL_VERSION < 6)
 				{
 					$line->label = !empty($line->desc) ? $line->desc : $line->description;
 					$line->desc = $line->description = '';
@@ -1443,7 +1443,8 @@ class ActionsSubtotal
 				
 				$label = $line->label;
 				$description= !empty($line->desc) ? $outputlangs->convToOutputCharset($line->desc) : $outputlangs->convToOutputCharset($line->description);
-				if(empty($label)) {
+				
+				if(empty($label) && (float)DOL_VERSION < 6.0) {
 					$label = $description;
 					$description='';
 				}
@@ -1662,11 +1663,11 @@ class ActionsSubtotal
 						if($line->label=='' && !$isFreeText) {
 							if(TSubtotal::isSubtotal($line)) {
 								$newlabel = $line->description.' '.$this->getTitle($object, $line);
-							} else {
+								$line->description='';
+							} elseif( (float)DOL_VERSION < 6 ) {
 								$newlabel= $line->description;
+								$line->description='';
 							}
-							$line->label = $newlabel;
-							$line->description='';
 						}
 
 						if (!$isFreeText) echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$line->label.'" size="80"/>&nbsp;';
