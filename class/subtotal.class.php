@@ -1104,4 +1104,17 @@ class TSubtotal {
 		
 		return false;
 	}
+	
+	/**
+	 * Méthode pour récupérer le titre de la ligne
+	 * 
+	 * @param PropaleLigne|OrderLine|FactureLigne	$line
+	 * @return	string
+	 */
+	public static function getTitleLabel($line)
+	{
+		$title = $line->label;
+		if (empty($title)) $title = !empty($line->description) ? $line->description : $line->desc;
+		return $title;
+	}
 }
