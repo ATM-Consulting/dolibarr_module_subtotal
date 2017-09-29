@@ -882,7 +882,8 @@ class ActionsSubtotal
 			
 		}
 		
-		$pdf->MultiCell($w, $h, $label, 0, 'L');
+		if ($label === strip_tags($label)) $pdf->MultiCell($w, $h, $label, 0, 'L'); // Pas de HTML dans la chaine
+		else $pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'J',true); // et maintenant avec du HTML
 		
 		if($description && !$hidedesc) {
 			$posy = $pdf->GetY();
@@ -1444,7 +1445,7 @@ class ActionsSubtotal
 				$label = $line->label;
 				$description= !empty($line->desc) ? $outputlangs->convToOutputCharset($line->desc) : $outputlangs->convToOutputCharset($line->description);
 				
-				if(empty($label) && (float)DOL_VERSION < 6.0) {
+				if(empty($label)) {
 					$label = $description;
 					$description='';
 				}
