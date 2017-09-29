@@ -1444,7 +1444,7 @@ class ActionsSubtotal
 				$label = $line->label;
 				$description= !empty($line->desc) ? $outputlangs->convToOutputCharset($line->desc) : $outputlangs->convToOutputCharset($line->description);
 				
-				if(empty($label) ) {
+				if(empty($label) && $description== strip_tags($description)) {
 					$label = $description;
 					$description='';
 				}
