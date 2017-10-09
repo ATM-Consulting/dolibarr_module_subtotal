@@ -92,15 +92,35 @@ function getHtmlSelectFreeText($withEmpty=true)
 	global $langs;
 	
 	$TFreeText = getTFreeText();
-	$html = '<label for="free_text">'.$langs->trans('subtotalLabelForFreeText').'</label> <select name="free_text" class="minwidth200">';
+	$html = '<label for="free_text">'.$langs->trans('subtotalLabelForFreeText').'</label>';
+	$html.= '<select onChange="getTFreeText($(this));" name="free_text" class="minwidth200">';
 	if ($withEmpty) $html.= '<option value=""></option>';
-	
+
+	$TFreeTextContents = array();
 	foreach ($TFreeText as $id => $tab)
 	{
 		$html.= '<option value="'.$id.'">'.$tab->label.'</option>';
+		$TFreeTextContents[$id] = $tab->content;
 	}
-	
+
 	$html .= '</select>';
+
+	$html .= '<script type="text/javascript">';
+	$html .= 'function getTFreeText(select) {';
+	$html .= ' var TFreeText = '.json_encode($TFreeTextContents).';';
+	$html .= ' var id = select.val();';
+	$html .= ' if (id in TFreeText) {';
+	$html .= '  var content = TFreeText[id];';
+	$html .= '  if (typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" && "sub-total-title" in CKEDITOR.instances) {';
+	$html .= '   var editor = CKEDITOR.instances["sub-total-title"];';
+	$html .= '   editor.setData(content);';
+	$html .= '  } else {';
+	$html .= '   $("#sub-total-title").val(content);';
+	$html .= '  }';
+	$html .= ' }';
+	$html .= '}';
+	$html .= '</script>';
+
 	return $html;
 }
 
