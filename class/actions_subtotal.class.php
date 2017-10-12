@@ -258,7 +258,7 @@ class ActionsSubtotal
 							 , "<?php echo $langs->trans('title'); ?>"
 							 , '?<?php echo $idvar ?>=<?php echo $object->id; ?>'
 							 , '<?php echo $_SERVER['PHP_SELF']; ?>'
-							 , {<?php echo $idvar; ?>: <?php echo $object->id; ?>, action:'add_title_line'}
+							 , {<?php echo $idvar; ?>: <?php echo (int) $object->id; ?>, action:'add_title_line'}
 						);
 					});
 					
@@ -269,7 +269,7 @@ class ActionsSubtotal
 							, '<?php echo $langs->trans('subtotal'); ?>'
 							, '?<?php echo $idvar ?>=<?php echo $object->id; ?>'
 							, '<?php echo $_SERVER['PHP_SELF']; ?>'
-							, {<?php echo $idvar; ?>: <?php echo $object->id; ?>, action:'add_total_line'}
+							, {<?php echo $idvar; ?>: <?php echo (int) $object->id; ?>, action:'add_total_line'}
 							/*,false,false, <?php echo !empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) ? 'true' : 'false'; ?>*/
 						);
 					});
@@ -281,7 +281,7 @@ class ActionsSubtotal
 							, "<?php echo $langs->trans('subtotalAddLineDescription'); ?>"
 							, '?<?php echo $idvar ?>=<?php echo $object->id; ?>'
 							, '<?php echo $_SERVER['PHP_SELF']; ?>'
-							, {<?php echo $idvar; ?>: <?php echo $object->id; ?>, action:'add_free_text'}
+							, {<?php echo $idvar; ?>: <?php echo (int) $object->id; ?>, action:'add_free_text'}
 							, true
 							, true
 							, <?php echo !empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) ? 'true' : 'false'; ?>
