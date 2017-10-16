@@ -73,17 +73,17 @@ class ActionsSubtotal
 						$qty = $level<1 ? 1 : $level ;
 					}
 					else if($action=='add_free_text') {
-						$free_text = GETPOST('free_text', 'int');
-						if (!empty($free_text))
-						{
-							$TFreeText = getTFreeText();
-							if (!empty($TFreeText[$free_text]))
-							{
-								$title = $TFreeText[$free_text]->content;
+						$title = GETPOST('title');
+
+						if (empty($title)) {
+							$free_text = GETPOST('free_text', 'int');
+							if (!empty($free_text)) {
+								$TFreeText = getTFreeText();
+								if (!empty($TFreeText[$free_text])) {
+									$title = $TFreeText[$free_text]->content;
+								}
 							}
 						}
-
-						if (empty($title)) $title = GETPOST('title');
 						if(empty($title)) $title = $langs->trans('subtotalAddLineDescription');
 						$qty = 50;
 					}
