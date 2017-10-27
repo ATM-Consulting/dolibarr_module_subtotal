@@ -966,7 +966,7 @@ class ActionsSubtotal
 	}
 	
 	function pdf_getlinetotalexcltax($parameters=array(), &$object, &$action='') {
-		global $conf $hideprices;
+		global $conf, $hideprices;
 			
 		if($this->isModSubtotalLine($parameters,$object) ){
 			
