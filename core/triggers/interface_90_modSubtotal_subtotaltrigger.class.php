@@ -272,6 +272,20 @@ class Interfacesubtotaltrigger
 				}
 			}
 		}
+
+		// Les lignes libres (y compris les sous-totaux) créées à partir d'une facture modèle n'ont pas la TVA de la ligne du modèle mais la TVA par défaut
+		if ($action == 'BILL_CREATE' && $object->fac_rec > 0) {
+			dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
+
+			$object->fetch_lines(); // Lignes pas rajoutées à $object->lines par les appels à addline();
+
+			foreach($object->lines as &$line) {
+				if(TSubtotal::isSubtotal($line) && ! empty($line->tva_tx)) {
+					$line->tva_tx = 0;
+					$line->update();
+				}
+			}
+		}
 		
         
         if ($action == 'USER_LOGIN') {
@@ -514,12 +528,7 @@ class Interfacesubtotaltrigger
             );
         }
 
-        // Bills
-        elseif ($action == 'BILL_CREATE') {
-            dol_syslog(
-                "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
-            );
-        } elseif ($action == 'BILL_CLONE') {
+		elseif ($action == 'BILL_CLONE') {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
