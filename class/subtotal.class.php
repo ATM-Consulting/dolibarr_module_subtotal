@@ -339,7 +339,7 @@ class TSubtotal {
 		return self::isTitle($line) || self::isSubtotal($line) || self::isFreeText($line);
 	}
 
-	public static function getFreeTextHtml(&$line)
+	public static function getFreeTextHtml(&$line, $readonly=0)
 	{
 		global $conf;
 		
@@ -351,7 +351,7 @@ class TSubtotal {
 		$enable=(isset($conf->global->FCKEDITOR_ENABLE_DETAILS)?$conf->global->FCKEDITOR_ENABLE_DETAILS:0);
 		$toolbarname='dolibarr_details';
 		if (! empty($conf->global->FCKEDITOR_ENABLE_DETAILS_FULL)) $toolbarname='dolibarr_notes';
-		$doleditor=new DolEditor('line-description',$line->description,'',164,$toolbarname,'',false,true,$enable,$nbrows,'98%');
+		$doleditor=new DolEditor('line-description',$line->description,'',164,$toolbarname,'',false,true,$enable,$nbrows,'98%', $readonly);
 		return $doleditor->Create(1);
 	}
 	
