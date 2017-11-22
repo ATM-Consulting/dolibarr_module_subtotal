@@ -1680,7 +1680,7 @@ class ActionsSubtotal
 							}
 						}
 
-						if (!$isFreeText) echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$line->label.'" size="80"/>&nbsp;';
+						if (!$isFreeText) echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$newlabel.'" size="80"/>&nbsp;';
 						
 						if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT) && (TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line)) )
 						{
