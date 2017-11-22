@@ -1670,6 +1670,7 @@ class ActionsSubtotal
 							$isFreeText = true;
 						}
 						
+						$newlabel = $line->label;
 						if($line->label=='' && !$isFreeText) {
 							if(TSubtotal::isSubtotal($line)) {
 								$newlabel = $line->description.' '.$this->getTitle($object, $line);
