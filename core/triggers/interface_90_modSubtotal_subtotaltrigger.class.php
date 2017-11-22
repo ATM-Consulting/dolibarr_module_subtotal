@@ -244,6 +244,14 @@ class Interfacesubtotaltrigger
 			}
 		}
 		
+		if ($action == 'LINEBILL_UPDATE')
+		{
+			if (GETPOST('all_progress') && TSubtotal::isModSubtotalLine($object))
+			{
+				$object->situation_percent = 0;
+				$object->update($user, true); // notrigger pour éviter la boucle infinie
+			}
+		}
 		
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($action, array('LINEPROPAL_INSERT', 'LINEPROPAL_UPDATE', 'LINEORDER_INSERT', 'LINEORDER_UPDATE', 'LINEBILL_INSERT', 'LINEBILL_UPDATE')))
 		{
