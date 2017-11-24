@@ -236,6 +236,7 @@ class TSubtotal {
 	
 	public static function getTotalBlockFromTitle(&$object, &$line)
 	{
+		dol_include_once('/core/lib/price.lib.php');
 		$TTot = array('total_options' => 0, 'total_ht' => 0, 'total_tva' => 0, 'total_ttc' => 0, 'TTotal_tva' => array(), 'multicurrency_total_ht' => 0, 'multicurrency_total_tva' => 0, 'multicurrency_total_ttc' => 0, 'TTotal_tva_multicurrency' => array());
 		
 		foreach ($object->lines as &$l)
@@ -244,7 +245,11 @@ class TSubtotal {
 			elseif (self::isSubtotal($l) && self::getNiveau($l) == $line->qty) break;
 			elseif (self::isModSubtotalLine($l)) continue;
 			
-			if ($l->qty == 0) $TTot['total_options'] += $l->subprice;
+			if (!empty($l->array_options['options_subtotal_nc']))
+			{
+				$tabprice = calcul_price_total($l->qty, $l->subprice, $l->remise_percent, $l->tva_tx, $l->localtax1_tx, $l->localtax2_tx, 0, 'HT', $l->info_bits, $l->product_type);
+				$TTot['total_options'] += $tabprice[2]; // total ttc
+			}
 			else
 			{
 				$TTot['total_ht'] += $l->total_ht;
