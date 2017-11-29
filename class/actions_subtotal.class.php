@@ -194,12 +194,20 @@ class ActionsSubtotal
 						{
 							if (action == 'addSubtotal') dialog_html += '<input id="sub-total-title" size="30" value="" placeholder="'+label+'" />';
 							
-							dialog_html += "&nbsp;<select name='subtotal_line_level'>";
-							for (var i=1;i<10;i++)
-							{
-								dialog_html += "<option value="+i+"><?php echo $langs->trans('Level'); ?> "+i+"</option>";
-							}
-							dialog_html += "</select>";
+							<?php
+								if(!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
+								{
+									print 'dialog_html += "&nbsp;<select name=\'subtotal_line_level\'>";';
+
+									print 'for (var i=1;i<10;i++) {';
+									print 'dialog_html += "<option value="+i+">';
+									print $langs->trans('Level');
+									print '"+i+"</option>";';
+									print '}';
+
+									print 'dialog_html += "</select>";';
+								}
+							?>
 						}
 						 
 						 dialog_html += '</div>';
