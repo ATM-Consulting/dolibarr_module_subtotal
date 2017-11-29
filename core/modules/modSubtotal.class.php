@@ -463,7 +463,6 @@ class modSubtotal extends DolibarrModules
 
         $result = $this->loadTables();
 
-		dolibarr_set_const($this->db, 'SUBTOTAL_MANAGE_SUBSUBTOTAL', isset($conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL) ? $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL : 0 ,'integer',1,'Gère ou pas les sous-sous-totaux',0);
 		
         return $this->_init($sql, $options);
     }
