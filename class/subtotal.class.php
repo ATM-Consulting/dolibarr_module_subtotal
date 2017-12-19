@@ -236,6 +236,7 @@ class TSubtotal {
 	
 	public static function getTotalBlockFromTitle(&$object, &$line)
 	{
+		dol_include_once('/core/lib/price.lib.php');
 		$TTot = array('total_options' => 0, 'total_ht' => 0, 'total_tva' => 0, 'total_ttc' => 0, 'TTotal_tva' => array(), 'multicurrency_total_ht' => 0, 'multicurrency_total_tva' => 0, 'multicurrency_total_ttc' => 0, 'TTotal_tva_multicurrency' => array());
 		
 		foreach ($object->lines as &$l)
@@ -244,7 +245,11 @@ class TSubtotal {
 			elseif (self::isSubtotal($l) && self::getNiveau($l) == $line->qty) break;
 			elseif (self::isModSubtotalLine($l)) continue;
 			
-			if ($l->qty == 0) $TTot['total_options'] += $l->subprice;
+			if (!empty($l->array_options['options_subtotal_nc']))
+			{
+				$tabprice = calcul_price_total($l->qty, $l->subprice, $l->remise_percent, $l->tva_tx, $l->localtax1_tx, $l->localtax2_tx, 0, 'HT', $l->info_bits, $l->product_type);
+				$TTot['total_options'] += $tabprice[2]; // total ttc
+			}
 			else
 			{
 				$TTot['total_ht'] += $l->total_ht;
@@ -339,7 +344,7 @@ class TSubtotal {
 		return self::isTitle($line) || self::isSubtotal($line) || self::isFreeText($line);
 	}
 
-	public static function getFreeTextHtml(&$line)
+	public static function getFreeTextHtml(&$line, $readonly=0)
 	{
 		global $conf;
 		
@@ -351,7 +356,7 @@ class TSubtotal {
 		$enable=(isset($conf->global->FCKEDITOR_ENABLE_DETAILS)?$conf->global->FCKEDITOR_ENABLE_DETAILS:0);
 		$toolbarname='dolibarr_details';
 		if (! empty($conf->global->FCKEDITOR_ENABLE_DETAILS_FULL)) $toolbarname='dolibarr_notes';
-		$doleditor=new DolEditor('line-description',$line->description,'',164,$toolbarname,'',false,true,$enable,$nbrows,'98%');
+		$doleditor=new DolEditor('line-description',$line->description,'',164,$toolbarname,'',false,true,$enable,$nbrows,'98%', $readonly);
 		return $doleditor->Create(1);
 	}
 	
