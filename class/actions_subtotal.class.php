@@ -419,7 +419,7 @@ class ActionsSubtotal
 				if($line->qty>90) {
 					$substitutionarray['line_modsubtotal_total'] = true;
 					
-					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
+					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
 					
 					$substitutionarray['line_price_ht'] = $total;
 					$substitutionarray['line_price_vat'] = $total_tva;
@@ -566,7 +566,7 @@ class ActionsSubtotal
                             $line->modsubtotal_title = 1;
                         }
                         
-						$line->total_ht = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
+						$line->total_ht = $this->getTotalLineFromObject($object, $line, '');
 					}
 	        	}
 	        }
@@ -662,6 +662,8 @@ class ActionsSubtotal
 	 * 
 	 * On obtiens ST2 = 100 ET ST1 = 123 €
 	 * Alors qu'on devrais avoir ST2 = 100 ET ST1 = 213 €
+	 * 
+	 * @param	$use_level		isn't used anymore
 	 */
 	function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=0) {
 		
@@ -814,7 +816,7 @@ class ActionsSubtotal
 				}
 				else
 				{
-					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
+					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
                                         if(get_class($object) == 'Facture' && $object->type==Facture::TYPE_SITUATION){//Facture de situation
                                                 $total_to_print = $this->getTotalToPrintSituation($object, $line);
                                         } else {
@@ -1309,12 +1311,12 @@ class ActionsSubtotal
 					
 					if($line->qty>90 && $line->total==0) 
 					{
-						/*$total = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
+						/*$total = $this->getTotalLineFromObject($object, $line, '');
 						
 						$line->total_ht = $total;
 						$line->total = $total;
 						*/
-						list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
+						list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
 						
 						$line->TTotal_tva = $TTotal_tva;
 						$line->total_ht = $total;
@@ -1788,7 +1790,7 @@ class ActionsSubtotal
 			<?php
 				if($line->qty>90) {
 					/* Total */
-					$total_line = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
+					$total_line = $this->getTotalLineFromObject($object, $line, '');
 					echo '<td class="nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
 				} else {
 					echo '<td>&nbsp;</td>';

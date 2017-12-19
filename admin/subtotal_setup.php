@@ -115,14 +115,6 @@ function showParameters() {
 	
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("SUBTOTAL_MANAGE_SUBSUBTOTAL").'</td>';
-	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="center" width="300">';
-	print ajax_constantonoff('SUBTOTAL_MANAGE_SUBSUBTOTAL');
-	print '</td></tr>';
-	
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
 	print '<td>'.$langs->trans("SUBTOTAL_USE_NEW_FORMAT").'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
