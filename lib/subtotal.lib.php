@@ -157,8 +157,7 @@ function _updateSubtotalBloc($object, $line)
 		$TLine = TSubtotal::getLinesFromTitleId($object, $line->id);
 		foreach ($TLine as &$line)
 		{
-
-			if (!TSubtotal::isTitle($line) && !TSubtotal::isSubtotal($line))
+			if (!TSubtotal::isModSubtotalLine($line))
 			{
 				if (!empty($showBlockExtrafields)) $line->array_options = $array_options;
 				if ($subtotal_tva_tx == '') $subtotal_tva_tx = $line->tva_tx;
