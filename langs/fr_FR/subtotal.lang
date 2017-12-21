@@ -53,6 +53,7 @@ subtotal_update_nc_error=Erreur : total non mis à jour
 subtotal_nc_title=NC
 subtotal_nc_title_help=Gestion des blocs Non Compris dans le calcul du total
 SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS=Activer la gestion des blocs "Non Compris" pour exclusion du total
+SUBTOTAL_TFIELD_TO_KEEP_WITH_NC=Colonnes à afficher sur lignes marquées "Non Compris"
 subtotalRecap=Récapitulatif
 subtotalPropalTitle=Devis %s %s
 subtotalCommandeTitle=Commande %s %s
