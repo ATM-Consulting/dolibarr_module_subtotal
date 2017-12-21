@@ -154,7 +154,7 @@ function _updateLineNCFromLine($element, $elementid, $lineid, $subtotal_nc=null)
 
 					$line->array_options['options_subtotal_nc'] = 1;
 
-					$res = $line->update();
+					$res = $line->update(1);
 					if ($res <= 0) $error++;
 				}
 				else
