@@ -90,7 +90,7 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 						if ($res <= 0) $error++;
 					}
 				}
-				else // update (il faut mettre le total ht à 0 car NC
+				else // update (il faut mettre le total ht à 0 car NC)
 				{
 					if (!empty($total_ht))
 					{

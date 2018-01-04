@@ -700,11 +700,11 @@ class ActionsSubtotal
 		if (!$return_all) return $total;
 		else return array($total, $total_tva, $total_ttc, $TTotal_tva);
 	}
-        /*
-         * Get the sum of situation invoice for last column
-         */
-        
-        function getTotalToPrintSituation(&$object, &$line) {
+
+	/*
+	 * Get the sum of situation invoice for last column
+	 */
+	function getTotalToPrintSituation(&$object, &$line) {
 		
 		$rang = $line->rang;
 		$total = 0;
@@ -954,7 +954,8 @@ class ActionsSubtotal
 		
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
-			
+
+		$object->lines[$i]->fetch_optionals();
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
 			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
@@ -969,7 +970,7 @@ class ActionsSubtotal
 	
 	function pdf_getlinetotalexcltax($parameters=array(), &$object, &$action='') {
 		global $conf, $hideprices;
-			
+		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			
 			$this->resprints = ' ';
@@ -1086,7 +1087,7 @@ class ActionsSubtotal
 	
 	function pdf_getlineupexcltax($parameters=array(), &$object, &$action='') {
 		global $conf,$hideprices;
-		
+
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 		
@@ -1160,7 +1161,8 @@ class ActionsSubtotal
 		
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
-			
+
+		$object->lines[$i]->fetch_optionals();
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
 			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
