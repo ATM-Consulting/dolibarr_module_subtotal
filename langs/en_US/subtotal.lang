@@ -18,7 +18,6 @@ ConfirmDeleteAllThisLines=Delete %s lines ?
 AddBreakPageBefore=Add pagebreak before this item.
 Level=Level
 SubtotalLabel=<b>Subtotal: </b>
-SUBTOTAL_MANAGE_SUBSUBTOTAL=Enable the sub-subtotal function
 SUBTOTAL_USE_NEW_FORMAT=Enable the advenced functionnality
 SUBTOTAL_USE_NUMEROTATION=Enable the auto numbering on PDF
 SUBTOTAL_ALLOW_ADD_BLOCK=Allow add title and subtotal

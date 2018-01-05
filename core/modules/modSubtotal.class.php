@@ -63,7 +63,7 @@ class modSubtotal extends DolibarrModules
         // (where XXX is value of numeric property 'numero' of module)
         $this->description = "Module permettant l'ajout de sous-totaux et sous-totaux intermédiaires et le déplacement d'une ligne aisée de l'un dans l'autre";
         // Possible values for version are: 'development', 'experimental' or version
-        $this->version = '2.5.2';
+        $this->version = '2.5.3';
         // Key used in llx_const table to save module status enabled/disabled
         // (where MYMODULE is value of property name of module in uppercase)
         $this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
@@ -463,7 +463,6 @@ class modSubtotal extends DolibarrModules
 
         $result = $this->loadTables();
 
-		dolibarr_set_const($this->db, 'SUBTOTAL_MANAGE_SUBSUBTOTAL', isset($conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL) ? $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL : 0 ,'integer',1,'Gère ou pas les sous-sous-totaux',0);
 		
         return $this->_init($sql, $options);
     }

@@ -150,7 +150,7 @@ class ActionsSubtotal
 	function printNewFormat(&$object, &$conf, &$langs, $idvar)
 	{
 		if (empty($conf->global->SUBTOTAL_ALLOW_ADD_BLOCK)) return false;
-		
+		if (!empty($object->situation_cycle_ref) && $object->situation_counter > 1) return false; // Si facture de situation
 		?>
 		 	<script type="text/javascript">
 				$(document).ready(function() {
@@ -419,7 +419,7 @@ class ActionsSubtotal
 				if($line->qty>90) {
 					$substitutionarray['line_modsubtotal_total'] = true;
 					
-					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
+					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
 					
 					$substitutionarray['line_price_ht'] = $total;
 					$substitutionarray['line_price_vat'] = $total_tva;
@@ -566,7 +566,7 @@ class ActionsSubtotal
                             $line->modsubtotal_title = 1;
                         }
                         
-						$line->total_ht = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
+						$line->total_ht = $this->getTotalLineFromObject($object, $line, '');
 					}
 	        	}
 	        }
@@ -662,6 +662,8 @@ class ActionsSubtotal
 	 * 
 	 * On obtiens ST2 = 100 ET ST1 = 123 €
 	 * Alors qu'on devrais avoir ST2 = 100 ET ST1 = 213 €
+	 * 
+	 * @param	$use_level		isn't used anymore
 	 */
 	function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=0) {
 		
@@ -698,11 +700,11 @@ class ActionsSubtotal
 		if (!$return_all) return $total;
 		else return array($total, $total_tva, $total_ttc, $TTotal_tva);
 	}
-        /*
-         * Get the sum of situation invoice for last column
-         */
-        
-        function getTotalToPrintSituation(&$object, &$line) {
+
+	/*
+	 * Get the sum of situation invoice for last column
+	 */
+	function getTotalToPrintSituation(&$object, &$line) {
 		
 		$rang = $line->rang;
 		$total = 0;
@@ -814,7 +816,7 @@ class ActionsSubtotal
 				}
 				else
 				{
-					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
+					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
                                         if(get_class($object) == 'Facture' && $object->type==Facture::TYPE_SITUATION){//Facture de situation
                                                 $total_to_print = $this->getTotalToPrintSituation($object, $line);
                                         } else {
@@ -952,7 +954,8 @@ class ActionsSubtotal
 		
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
-			
+
+		$object->lines[$i]->fetch_optionals();
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
 			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
@@ -967,7 +970,7 @@ class ActionsSubtotal
 	
 	function pdf_getlinetotalexcltax($parameters=array(), &$object, &$action='') {
 		global $conf, $hideprices;
-			
+		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			
 			$this->resprints = ' ';
@@ -1084,7 +1087,7 @@ class ActionsSubtotal
 	
 	function pdf_getlineupexcltax($parameters=array(), &$object, &$action='') {
 		global $conf,$hideprices;
-		
+
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 		
@@ -1158,7 +1161,8 @@ class ActionsSubtotal
 		
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
-			
+
+		$object->lines[$i]->fetch_optionals();
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
 			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
@@ -1309,12 +1313,12 @@ class ActionsSubtotal
 					
 					if($line->qty>90 && $line->total==0) 
 					{
-						/*$total = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
+						/*$total = $this->getTotalLineFromObject($object, $line, '');
 						
 						$line->total_ht = $total;
 						$line->total = $total;
 						*/
-						list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL, 1);
+						list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
 						
 						$line->TTotal_tva = $TTotal_tva;
 						$line->total_ht = $total;
@@ -1670,6 +1674,7 @@ class ActionsSubtotal
 							$isFreeText = true;
 						}
 						
+						$newlabel = $line->label;
 						if($line->label=='' && !$isFreeText) {
 							if(TSubtotal::isSubtotal($line)) {
 								$newlabel = $line->description.' '.$this->getTitle($object, $line);
@@ -1680,14 +1685,19 @@ class ActionsSubtotal
 							}
 						}
 
-						if (!$isFreeText) echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$newlabel.'" size="80"/>&nbsp;';
+						$readonlyForSituation = '';
+						if (!empty($object->situation_cycle_ref) && $object->situation_counter > 1) $readonlyForSituation = 'readonly';
+						
+						if (!$isFreeText) echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$newlabel.'" size="80" '.$readonlyForSituation.'/>&nbsp;';
 						
 						if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT) && (TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line)) )
 						{
 							$select = '<select name="subtotal_level">';
 							for ($j=1; $j<10; $j++)
 							{
-								$select .= '<option '.($qty_displayed == $j ? 'selected="selected"' : '').' value="'.$j.'">'.$langs->trans('Level').' '.$j.'</option>';
+								if (!empty($readonlyForSituation)) {
+									if ($qty_displayed == $j) $select .= '<option selected="selected" value="'.$j.'">'.$langs->trans('Level').' '.$j.'</option>';
+								} else $select .= '<option '.($qty_displayed == $j ? 'selected="selected"' : '').' value="'.$j.'">'.$langs->trans('Level').' '.$j.'</option>';
 							}
 							$select .= '</select>&nbsp;';
 
@@ -1703,7 +1713,7 @@ class ActionsSubtotal
 								$form = new Form($db);
 								echo '<label for="subtotal_tva_tx">'.$form->textwithpicto($langs->trans('subtotal_apply_default_tva'), $langs->trans('subtotal_apply_default_tva_help')).'</label>';
 								echo '<select id="subtotal_tva_tx" name="subtotal_tva_tx" class="flat"><option selected="selected" value="">-</option>';
-								echo str_replace('selected', '', $form->load_tva('subtotal_tva_tx', '', $parameters['seller'], $parameters['buyer'], 0, 0, '', true));
+								if (empty($readonlyForSituation)) echo str_replace('selected', '', $form->load_tva('subtotal_tva_tx', '', $parameters['seller'], $parameters['buyer'], 0, 0, '', true));
 								echo '</select>&nbsp;&nbsp;';
 								
 								if (!empty($conf->global->INVOICE_USE_SITUATION) && $object->element == 'facture' && $object->type == Facture::TYPE_SITUATION)
@@ -1711,7 +1721,7 @@ class ActionsSubtotal
 									echo '<label for="subtotal_progress">'.$langs->trans('subtotal_apply_progress').'</label> <input id="subtotal_progress" name="subtotal_progress" value="" size="1" />%';
 								}
 							}
-							else if ($isFreeText) echo TSubtotal::getFreeTextHtml($line);
+							else if ($isFreeText) echo TSubtotal::getFreeTextHtml($line, (bool) $readonlyForSituation);
 						echo '</div>';
 
 						if($line->qty<10) {
@@ -1727,7 +1737,7 @@ class ActionsSubtotal
 								$toolbarname = 'dolibarr_notes';
 							}
 							$doleditor = new DolEditor('line-description', $line->description, '', 100, $toolbarname, '',
-								false, true, $cked_enabled, $nbrows, '98%');
+								false, true, $cked_enabled, $nbrows, '98%', (bool) $readonlyForSituation);
 							$doleditor->Create();
 						}
 						
@@ -1782,7 +1792,7 @@ class ActionsSubtotal
 			<?php
 				if($line->qty>90) {
 					/* Total */
-					$total_line = $this->getTotalLineFromObject($object, $line, $conf->global->SUBTOTAL_MANAGE_SUBSUBTOTAL);
+					$total_line = $this->getTotalLineFromObject($object, $line, '');
 					echo '<td class="nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
 				} else {
 					echo '<td>&nbsp;</td>';

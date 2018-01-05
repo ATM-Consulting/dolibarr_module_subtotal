@@ -244,6 +244,14 @@ class Interfacesubtotaltrigger
 			}
 		}
 		
+		if ($action == 'LINEBILL_UPDATE')
+		{
+			if (GETPOST('all_progress') && TSubtotal::isModSubtotalLine($object))
+			{
+				$object->situation_percent = 0;
+				$object->update($user, true); // notrigger pour éviter la boucle infinie
+			}
+		}
 		
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($action, array('LINEPROPAL_INSERT', 'LINEPROPAL_UPDATE', 'LINEORDER_INSERT', 'LINEORDER_UPDATE', 'LINEBILL_INSERT', 'LINEBILL_UPDATE')))
 		{
@@ -269,6 +277,17 @@ class Interfacesubtotaltrigger
 						if ($res > 0) setEventMessage($langs->trans('subtotal_update_nc_success'));
 						break;
 					}
+				}
+
+				// $object correspond à la ligne ajoutée
+				if(! empty($object->array_options['options_subtotal_nc'])) {
+					$object->total_ht = $object->total_tva = $object->total_ttc = $object->total_localtax1 = $object->total_localtax2 = 
+							$object->multicurrency_total_ht = $object->multicurrency_total_tva = $object->multicurrency_total_ttc = 0;
+
+					if ($object->element == 'propaldet') $res = $object->update(1);
+					else $res = $object->update($user, 1);
+
+					if ($res > 0) setEventMessage($langs->trans('subtotal_update_nc_success'));
 				}
 			}
 		}

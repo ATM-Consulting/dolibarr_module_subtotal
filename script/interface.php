@@ -59,56 +59,44 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 	
 	if (!$error)
 	{
-		foreach ($object->lines as &$line)
+		foreach ($object->lines as &$l)
 		{
-			if ($line->id == $lineid && !is_null($subtotal_nc))
-			{
-				$line->array_options['options_subtotal_nc'] = $subtotal_nc;
-				$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $line->tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options);
+			if($l->id == $lineid) {
+				$line = $l;
+				break;
+			}
+		}
+		
+		if(TSubtotal::isModSubtotalLine($line))
+		{
+			if(TSubtotal::isTitle($line)) {
+				// Update le contenu du titre
+				$hideMessage = true;
+				$TTitleBlock = TSubtotal::getLinesFromTitleId($object, $lineid, true);
+				foreach($TTitleBlock as &$line_block) {
+					if(! TSubtotal::isSubtotal($line_block) && ! TSubtotal::isFreeText($line_block)) {
+						_updateLineNCFromLine($element, $elementid, $line_block->id, $subtotal_nc, $hideMessage);
+					}
+				}
+			}
+		}
+		else
+		{
+			// Update extrafield et total
+			if(! empty($subtotal_nc)) {
+				$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 = 
+					$line->multicurrency_total_ht = $line->multicurrency_total_tva = $line->multicurrency_total_ttc = 0;
+
+				$line->array_options['options_subtotal_nc'] = 1;
+
+				$res = $line->update();
 				if ($res <= 0) $error++;
 			}
-			elseif (!TSubtotal::isTitle($line) && !TSubtotal::isSubtotal($line))
-			{
-				$type_update = 'doUpdateLine';
-				$TTitle = TSubtotal::getAllTitleFromLine($line);
-				foreach ($TTitle as &$line_title)
-				{
-					if (!empty($line_title->array_options['options_subtotal_nc']))
-					{
-						$type_update = 'update';
-						break;
-					}
-				}
-				
-				$total_ht = (double) $line->total_ht;
-				if ($type_update == 'doUpdateLine') // doUpdateLine pour ré-appliquer le total
-				{
-					if (empty($total_ht)) 
-					{
-						$line->array_options['options_subtotal_nc'] = 0;
-						$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $line->tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $line->situation_percent, $line->fk_unit);
-						if ($res <= 0) $error++;
-					}
-				}
-				else // update (il faut mettre le total ht à 0 car NC
-				{
-					if (!empty($total_ht))
-					{
-						$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 = 
-							$line->multicurrency_total_ht = $line->multicurrency_total_tva = $line->multicurrency_total_ttc = 0;
-						
-						$line->array_options['options_subtotal_nc'] = 1;
-						
-						$res = $line->update();
-						if ($res <= 0) $error++;
-					}
-				}
+			else {
+				$line->array_options['options_subtotal_nc'] = 0;
+				$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $line->tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $line->situation_percent, $line->fk_unit);
+				if ($res <= 0) $error++;
 			}
-
-			$res = $object->update_price(1);
-			if ($res <= 0) $error++;
-
-			if ($error) break;
 		}
 	}
 	
@@ -124,7 +112,7 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 	}
 }
 
-function _updateLineNCFromLine($element, $elementid, $lineid, $subtotal_nc=null)
+function _updateLineNCFromLine($element, $elementid, $lineid, $subtotal_nc=null, $hideMessage = false)
 {
 	global $db,$langs;
 	
@@ -174,12 +162,16 @@ function _updateLineNCFromLine($element, $elementid, $lineid, $subtotal_nc=null)
 	
 	if (!$error)
 	{
-		setEventMessage($langs->trans('subtotal_update_nc_success'));
+		if(! $hideMessage) {
+			setEventMessage($langs->trans('subtotal_update_nc_success'));
+		}
 		$db->commit();
 	}
 	else
 	{
-		setEventMessage($langs->trans('subtotal_update_nc_error'), 'errors');
+		if(! $hideMessage) {
+			setEventMessage($langs->trans('subtotal_update_nc_error'), 'errors');
+		}
 		$db->rollback();
 	}
 }
