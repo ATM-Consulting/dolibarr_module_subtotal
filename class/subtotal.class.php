@@ -248,7 +248,7 @@ class TSubtotal {
 			if (!empty($l->array_options['options_subtotal_nc']))
 			{
 				$tabprice = calcul_price_total($l->qty, $l->subprice, $l->remise_percent, $l->tva_tx, $l->localtax1_tx, $l->localtax2_tx, 0, 'HT', $l->info_bits, $l->product_type);
-				$TTot['total_options'] += $tabprice[2]; // total ttc
+				$TTot['total_options'] += $tabprice[0]; // total ht
 			}
 			else
 			{
@@ -653,6 +653,8 @@ class TSubtotal {
 		$tab_top = 72;
 		$tab_top_newpage = (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)?72:20); // TODO à vérifier
 		
+		$TTot = array('total_ht' => 0, 'total_ttc' => 0, 'TTotal_tva' => array());
+		
 		$TLine = self::getAllTitleFromDocument($object, true);
 		if (!empty($TLine))
 		{
@@ -661,8 +663,6 @@ class TSubtotal {
 			$iniY = $tab_top + 10;
 			$curY = $tab_top + 10;
 			$nexY = $tab_top + 10;
-		
-			$TTot = array('total_ht' => 0, 'total_ttc' => 0, 'TTotal_tva' => array());
 			
 			$nblignes = count($TLine);
 			foreach($TLine as $i => &$line)
