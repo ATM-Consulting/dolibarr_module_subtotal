@@ -653,6 +653,8 @@ class TSubtotal {
 		$tab_top = 72;
 		$tab_top_newpage = (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)?72:20); // TODO à vérifier
 		
+		$TTot = array('total_ht' => 0, 'total_ttc' => 0, 'TTotal_tva' => array());
+		
 		$TLine = self::getAllTitleFromDocument($object, true);
 		if (!empty($TLine))
 		{
@@ -661,8 +663,6 @@ class TSubtotal {
 			$iniY = $tab_top + 10;
 			$curY = $tab_top + 10;
 			$nexY = $tab_top + 10;
-		
-			$TTot = array('total_ht' => 0, 'total_ttc' => 0, 'TTotal_tva' => array());
 			
 			$nblignes = count($TLine);
 			foreach($TLine as $i => &$line)
