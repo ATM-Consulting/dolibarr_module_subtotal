@@ -258,7 +258,7 @@ function showParameters() {
 		print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 		print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 		print '<input type="hidden" name="action" value="set_SUBTOTAL_TFIELD_TO_KEEP_WITH_NC">';
-		$TField = array('pdf_getlineqty' => $langs->trans('Qty'), 'pdf_getlinevatrate' => $langs->trans('VAT'), 'pdf_getlineupexcltax' => $langs->trans('PriceUHT'), 'pdf_getlinetotalexcltax' => $langs->trans('TotalHT'));
+		$TField = array('pdf_getlineqty' => $langs->trans('Qty'), 'pdf_getlinevatrate' => $langs->trans('VAT'), 'pdf_getlineupexcltax' => $langs->trans('PriceUHT'), 'pdf_getlinetotalexcltax' => $langs->trans('TotalHT'), 'pdf_getlineunit' => $langs->trans('Unit'));
 		print $html->multiselectarray('SUBTOTAL_TFIELD_TO_KEEP_WITH_NC', $TField, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC), 0, 0, '', 0, 0, 'style="min-width:100px"');
 		print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 		print '</form>';
