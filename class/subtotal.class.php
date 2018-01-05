@@ -248,7 +248,7 @@ class TSubtotal {
 			if (!empty($l->array_options['options_subtotal_nc']))
 			{
 				$tabprice = calcul_price_total($l->qty, $l->subprice, $l->remise_percent, $l->tva_tx, $l->localtax1_tx, $l->localtax2_tx, 0, 'HT', $l->info_bits, $l->product_type);
-				$TTot['total_options'] += $tabprice[2]; // total ttc
+				$TTot['total_options'] += $tabprice[0]; // total ht
 			}
 			else
 			{
