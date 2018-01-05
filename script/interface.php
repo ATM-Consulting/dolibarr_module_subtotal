@@ -59,24 +59,27 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 	
 	if (!$error)
 	{
-		foreach ($object->lines as &$line)
+		foreach ($object->lines as &$l)
 		{
-			if($line->id == $lineid) {
-				$l = $line;
+			if($l->id == $lineid) {
+				$line = $l;
 				break;
 			}
 		}
 		
-		if(TSubtotal::isTitle($l)) {			
-			// Update le contenu du titre
-			$hideMessage = true;
-			$TTitleBlock = TSubtotal::getLinesFromTitleId($object, $lineid, true);
-			foreach($TTitleBlock as &$line) {
-				_updateLineNCFromLine($element, $elementid, $line->id, $subtotal_nc, $hideMessage);
+		if(TSubtotal::isModSubtotalLine($line))
+		{
+			if(TSubtotal::isTitle($line)) {
+				// Update le contenu du titre
+				$hideMessage = true;
+				$TTitleBlock = TSubtotal::getLinesFromTitleId($object, $lineid, true);
+				foreach($TTitleBlock as &$line_block) {
+					_updateLineNCFromLine($element, $elementid, $line_block->id, $subtotal_nc, $hideMessage);
+				}
 			}
 		}
-		elseif(TSubtotal::isSubtotal($line)) {}
-		else {
+		else
+		{
 			// Update extrafield et total
 			if(! empty($subtotal_nc)) {
 				$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 = 
