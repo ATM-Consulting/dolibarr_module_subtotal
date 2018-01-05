@@ -74,7 +74,9 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 				$hideMessage = true;
 				$TTitleBlock = TSubtotal::getLinesFromTitleId($object, $lineid, true);
 				foreach($TTitleBlock as &$line_block) {
-					_updateLineNCFromLine($element, $elementid, $line_block->id, $subtotal_nc, $hideMessage);
+					if(! TSubtotal::isSubtotal($line_block) && ! TSubtotal::isFreeText($line_block)) {
+						_updateLineNCFromLine($element, $elementid, $line_block->id, $subtotal_nc, $hideMessage);
+					}
 				}
 			}
 		}
