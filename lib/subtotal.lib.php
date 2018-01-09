@@ -50,6 +50,7 @@ function getHtmlSelectTitle(&$object, $showLabel=false)
 {
 	global $langs;
 	
+	require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
 	dol_include_once('/subtotal/class/subtotal.class.php');
 	$TTitle = TSubtotal::getAllTitleFromDocument($object);
 	$html = '';
@@ -60,7 +61,7 @@ function getHtmlSelectTitle(&$object, $showLabel=false)
 	foreach ($TTitle as &$line)
 	{
 		$str = str_repeat($nbsp, ($line->qty - 1) * 3);
-		$html .= '<option value="'.$line->rang.'">'.$str.(!empty($line->label) ? $line->label : $line->desc).'</option>';
+		$html .= '<option value="'.$line->rang.'">'.$str.(!empty($line->label) ? $line->label : dol_trunc($line->desc, 30)).'</option>';
 	}
 	
 	$html .= '</select>';
