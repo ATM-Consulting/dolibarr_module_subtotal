@@ -215,6 +215,7 @@ class TSubtotal {
 					{
 						$TTot = self::getTotalBlockFromTitle($object, $line);
 						
+						$line->total_pa_ht = $TTot['total_pa_ht'];
 						$line->total_options = $TTot['total_options'];
 						$line->total_ht = $TTot['total_ht'];
 						$line->total_tva = $TTot['total_tva'];
@@ -237,7 +238,7 @@ class TSubtotal {
 	public static function getTotalBlockFromTitle(&$object, &$line)
 	{
 		dol_include_once('/core/lib/price.lib.php');
-		$TTot = array('total_options' => 0, 'total_ht' => 0, 'total_tva' => 0, 'total_ttc' => 0, 'TTotal_tva' => array(), 'multicurrency_total_ht' => 0, 'multicurrency_total_tva' => 0, 'multicurrency_total_ttc' => 0, 'TTotal_tva_multicurrency' => array());
+		$TTot = array('total_pa_ht' => 0, 'total_options' => 0, 'total_ht' => 0, 'total_tva' => 0, 'total_ttc' => 0, 'TTotal_tva' => array(), 'multicurrency_total_ht' => 0, 'multicurrency_total_tva' => 0, 'multicurrency_total_ttc' => 0, 'TTotal_tva_multicurrency' => array());
 		
 		foreach ($object->lines as &$l)
 		{
@@ -252,6 +253,7 @@ class TSubtotal {
 			}
 			else
 			{
+				$TTot['total_pa_ht'] += $l->pa_ht * $l->qty;
 				$TTot['total_ht'] += $l->total_ht;
 				$TTot['total_tva'] += $l->total_tva;
 				$TTot['total_ttc'] += $l->total_ttc;
