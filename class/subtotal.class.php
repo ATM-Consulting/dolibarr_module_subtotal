@@ -11,7 +11,6 @@ class TSubtotal {
 			/**
 			 * @var $object Facture
 			 */
-
 			if($object->element=='facture') $res =  $object->addline($object->id, $label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, TSubtotal::$module_number);
 			/**
 			 * @var $object Propal
@@ -27,7 +26,6 @@ class TSubtotal {
 			/**
 			 * @var $object Facture
 			 */
-
 			if($object->element=='facture') $res =  $object->addline($label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,$rang, TSubtotal::$module_number);
 			/**
 			 * @var $object Propal
@@ -37,6 +35,10 @@ class TSubtotal {
 			 * @var $object Commande
 			 */
 			else if($object->element=='commande') $res =  $object->addline($label, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,$rang, TSubtotal::$module_number);
+			/**
+			 * @var $object Facturerec
+			 */
+			else if($object->element=='facturerec') $res =  $object->addline($label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,$rang, TSubtotal::$module_number);
 		}
 	
 		self::generateDoc($object);
@@ -391,6 +393,10 @@ class TSubtotal {
 							//$desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits=0, $fk_remise_except='', $price_base_type='HT', $pu_ttc=0, $type=self::TYPE_STANDARD, $rang=-1, $special_code=0, $origin='', $origin_id=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='', $array_options=0, $situation_percent=100, $fk_prev_id='', $fk_unit = null
 							$res = $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, $line->remise_percent, $line->date_start, $line->date_end, 0, $line->info_bits, $line->fk_remise_except, 'HT', 0, $line->product_type, -1, $line->special_code, $line->origin, $line->origin_id, $line->fk_parent_line, $line->fk_fournprice, $line->pa_ht, $line->label, $line->array_options, $line->situation_percent, $line->fk_prev_id, $line->fk_unit);
 							break;
+						case 'facturerec':
+							//$desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits=0, $fk_remise_except='', $price_base_type='HT', $pu_ttc=0, $type=self::TYPE_STANDARD, $rang=-1, $special_code=0, $origin='', $origin_id=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='', $array_options=0, $situation_percent=100, $fk_prev_id='', $fk_unit = null
+							$res = $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, $line->remise_percent, $line->date_start, $line->date_end, 0, $line->info_bits, $line->fk_remise_except, 'HT', 0, $line->product_type, -1, $line->special_code, $line->origin, $line->origin_id, $line->fk_parent_line, $line->fk_fournprice, $line->pa_ht, $line->label, $line->array_options, $line->situation_percent, $line->fk_prev_id, $line->fk_unit);
+							break;
 					}
 
 					// Error from addline
@@ -479,8 +485,12 @@ class TSubtotal {
 			case 'commande':
 				$res = $object->updateline($rowid, $desc, $pu, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $date_start, $date_end, $type, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $special_code, $array_options, $fk_unit);
 				break;
-			
+				
 			case 'facture':
+				$res = $object->updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $type, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $special_code, $array_options, $situation_percent, $fk_unit);
+				break;
+				
+			case 'facturerec':
 				$res = $object->updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $type, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $special_code, $array_options, $situation_percent, $fk_unit);
 				break;
 		}
@@ -592,6 +602,7 @@ class TSubtotal {
 		if ($object->element == 'propal') $dir = $conf->propal->dir_output . '/' . $objectref;
 		elseif ($object->element == 'commande') $dir = $conf->commande->dir_output . '/' . $objectref;
 		elseif ($object->element == 'facture') $dir = $conf->facture->dir_output . '/' . $objectref;
+		elseif ($object->element == 'facturerec') return; // no PDF for facturerec
 		else
 		{
 			setEventMessage($langs->trans('warning_subtotal_recap_object_element_unknown', $object->element), 'warnings');
@@ -886,6 +897,7 @@ class TSubtotal {
 		$key = 'subtotalPropalTitle';
 		if ($object->element == 'commande') $key = 'subtotalCommandeTitle';
 		elseif ($object->element == 'facture') $key = 'subtotalInvoiceTitle';
+		elseif ($object->element == 'facturerec') $key = 'subtotalInvoiceTitle';
 		
 		$pdf->MultiCell(150, 4, $outputlangs->transnoentities($key, $object->ref, $object->thirdparty->name), '', 'L');
 		

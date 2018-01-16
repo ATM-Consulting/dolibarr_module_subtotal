@@ -55,7 +55,7 @@ class ActionsSubtotal
 		
 		$contexts = explode(':',$parameters['context']);
 		
-		if(in_array('ordercard',$contexts) || in_array('propalcard',$contexts) || in_array('invoicecard',$contexts)) {
+		if(in_array('ordercard',$contexts) || in_array('propalcard',$contexts) || in_array('invoicecard',$contexts) || in_array('invoicereccard',$contexts)) {
         		
         	if ($object->statut == 0  && $user->rights->{$object->element}->creer) {
 			
@@ -1577,7 +1577,7 @@ class ActionsSubtotal
 		if($line->special_code!=$this->module_number || $line->product_type!=9) {
 			null;
 		}	
-		else if (in_array('invoicecard',$contexts) || in_array('propalcard',$contexts) || in_array('ordercard',$contexts)) 
+		else if (in_array('invoicecard',$contexts) || in_array('propalcard',$contexts) || in_array('ordercard',$contexts) || in_array('invoicereccard',$contexts)) 
         {
 			if($object->element=='facture')$idvar = 'facid';
 			else $idvar='id';
@@ -1953,7 +1953,7 @@ class ActionsSubtotal
 	
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
 		global $conf,$langs;
-		
+		 
 		if ($object->statut == 0 && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && $action != 'editline')
 		{
 			$TSubNc = array();
