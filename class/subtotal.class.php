@@ -395,6 +395,16 @@ class TSubtotal {
 
 					// Error from addline
 					if ($res <= 0) break;
+					else
+					{
+						// Call trigger
+						$result=$object->call_trigger('LINE_DUPLICATE',$user); // $object->line
+						if ($result < 0)
+						{
+							$object->db->rollback();
+							return -2;
+						}
+					}
 				}
 
 				if ($res > 0)
