@@ -397,6 +397,7 @@ class TSubtotal {
 					if ($res <= 0) break;
 					else
 					{
+						$object->line_from = $line;
 						// Call trigger
 						$result=$object->call_trigger('LINE_DUPLICATE',$user); // $object->line
 						if ($result < 0)
