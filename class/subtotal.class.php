@@ -368,6 +368,8 @@ class TSubtotal {
 
 		if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK))
 		{
+			dol_include_once('/subtotal/lib/subtotal.lib.php');
+			
 			$TLine = self::getLinesFromTitleId($object, $lineid, $withBlockLine);
 
 			if (!empty($TLine))
@@ -375,6 +377,7 @@ class TSubtotal {
 				$object->db->begin();
 				$res = 1;
 
+				$TLineAdded = array();
 				foreach ($TLine as $line)
 				{
 					// TODO refactore avec un doAddLine sur le même schéma que le doUpdateLine
@@ -393,8 +396,15 @@ class TSubtotal {
 							break;
 					}
 
+					$TLineAdded[] = $object->line;
 					// Error from addline
 					if ($res <= 0) break;
+				}
+				
+				foreach ($TLineAdded as &$line)
+				{
+					// ça peut paraitre non optimisé de déclancher la fonction sur toutes les lignes mais ceci est nécessaire pour réappliquer l'état exact de chaque ligne
+					_updateLineNC($object->element, $object->id, $line->id, $line->array_options['options_subtotal_nc']);
 				}
 
 				if ($res > 0)
