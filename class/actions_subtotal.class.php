@@ -1848,7 +1848,7 @@ class ActionsSubtotal
 
 							if(TSubtotal::isTitle($line) && ($object->situation_counter == 1 || !$object->situation_cycle_ref) )
 							{
-								$img_delete = ((float) DOL_VERSION >= 3.8) ? img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal') : img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal');
+								$img_delete = ((float) DOL_VERSION >= 3.8) ? img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal',' class="pictodelete" ') : img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal');
 								echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id.'">'.$img_delete.'</a>';
 							}
 						}
