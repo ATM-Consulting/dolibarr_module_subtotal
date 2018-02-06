@@ -147,8 +147,8 @@ function _updateSubtotalBloc($object, $line)
 {
 	global $conf,$langs;
 	
-	$subtotal_tva_tx = GETPOST('subtotal_tva_tx', 'int');
-	$subtotal_progress = GETPOST('subtotal_progress', 'int');
+	$subtotal_tva_tx = $subtotal_tva_tx_init = GETPOST('subtotal_tva_tx', 'int');
+	$subtotal_progress = $subtotal_progress_init = GETPOST('subtotal_progress', 'int');
 	$array_options = $line->array_options;
 	$showBlockExtrafields = GETPOST('showBlockExtrafields');
 	
@@ -160,10 +160,13 @@ function _updateSubtotalBloc($object, $line)
 		{
 			if (!TSubtotal::isModSubtotalLine($line))
 			{
+				$subtotal_tva_tx = $subtotal_tva_tx_init; // ré-init car la variable peut évoluer
+					
 				if (!empty($showBlockExtrafields)) $line->array_options = $array_options;
 				if ($subtotal_tva_tx == '') $subtotal_tva_tx = $line->tva_tx;
 				if ($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION)
 				{
+					$subtotal_progress = $subtotal_progress_init;
 					if ($subtotal_progress == '') $subtotal_progress = $line->situation_percent;
 					else
 					{
@@ -177,8 +180,6 @@ function _updateSubtotalBloc($object, $line)
 				}
 				
 				$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $subtotal_tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $subtotal_progress, $line->fk_unit);
-
-				$subtotal_tva_tx = '';	// La valeur présente dans la variable écrasait le taux de tva des autres lignes
 
 				if ($res > 0) $success_updated_line++;
 				else $error_updated_line++;
