@@ -476,7 +476,7 @@ class ActionsSubtotal
 	
 	function doActions($parameters, &$object, $action, $hookmanager)
 	{
-		global $db, $conf, $langs;
+		global $db, $conf, $langs,$user;
 		
 		dol_include_once('/subtotal/class/subtotal.class.php');
 		dol_include_once('/subtotal/lib/subtotal.lib.php');
@@ -588,7 +588,11 @@ class ActionsSubtotal
 				/**
 				 * @var $object Commande
 				 */
-				else if($object->element=='commande') $object->deleteline($idLine);
+				else if($object->element=='commande') 
+				{
+					if ((float) DOL_VERSION >= 5.0) $object->deleteline($user, $idLine);
+					else $object->deleteline($idLine);
+				}
 			}
 			
 			header('location:?id='.$object->id);
