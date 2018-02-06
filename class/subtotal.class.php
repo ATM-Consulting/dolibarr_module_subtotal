@@ -24,19 +24,24 @@ class TSubtotal {
 
 		}
 		else {
+			$desc = '';
+			if ((float) DOL_VERSION < 6) {
+				$desc = $label;
+				$label = '';
+			}
+			
 			/**
 			 * @var $object Facture
 			 */
-
-			if($object->element=='facture') $res =  $object->addline($label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,$rang, TSubtotal::$module_number);
+			if($object->element=='facture') $res =  $object->addline($desc, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,$rang, TSubtotal::$module_number, '', 0, 0, null, 0, $label);
 			/**
 			 * @var $object Propal
 			 */
-			else if($object->element=='propal') $res = $object->addline($label, 0,$qty,0,0,0,0,0,'HT',0,0,9,$rang, TSubtotal::$module_number);
+			else if($object->element=='propal') $res = $object->addline($desc, 0,$qty,0,0,0,0,0,'HT',0,0,9,$rang, TSubtotal::$module_number, 0, 0, 0, $label);
 			/**
 			 * @var $object Commande
 			 */
-			else if($object->element=='commande') $res =  $object->addline($label, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,$rang, TSubtotal::$module_number);
+			else if($object->element=='commande') $res =  $object->addline($desc, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,$rang, TSubtotal::$module_number, 0, null, 0, $label);
 		}
 	
 		self::generateDoc($object);
