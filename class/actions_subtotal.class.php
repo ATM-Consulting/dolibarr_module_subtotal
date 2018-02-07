@@ -56,10 +56,17 @@ class ActionsSubtotal
 		$contexts = explode(':',$parameters['context']);
 		
 		if(in_array('ordercard',$contexts) || in_array('propalcard',$contexts) || in_array('invoicecard',$contexts) || in_array('invoicereccard',$contexts)) {
-        		
-        	if ($object->statut == 0  && $user->rights->{$object->element}->creer) {
 			
+			$createRight = $user->rights->{$object->element}->creer;
+			if($object->element == 'facturerec' )
+			{
+				$object->statut = 0; // hack for facture rec
+				$createRight = $user->rights->facture->creer;
+			}
 			
+			if ($object->statut == 0  && $createRight) {
+			
+
 				if($object->element=='facture')$idvar = 'facid';
 				else $idvar='id';
 				
@@ -125,7 +132,6 @@ class ActionsSubtotal
 
 				
 				if($action!='editline') {
-					
 					// New format is for 3.8
 					$this->printNewFormat($object, $conf, $langs, $idvar);
 				}
@@ -329,6 +335,7 @@ class ActionsSubtotal
 				in_array('invoicecard',$TContext)
 				|| in_array('propalcard',$TContext)
 				|| in_array('ordercard',$TContext)
+				|| in_array('invoicereccard',$TContext)
 			)
 	        {	
 				$hideInnerLines	= isset( $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] : 0;
@@ -365,6 +372,7 @@ class ActionsSubtotal
 					(in_array('propalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
 					|| (in_array('ordercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
 					|| (in_array('invoicecard',$TContext) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
+					|| (in_array('invoicereccard',$TContext)  && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP ))
 				)
 				{
 					$var=!$var;
@@ -445,6 +453,7 @@ class ActionsSubtotal
 				in_array('invoicecard',explode(':',$parameters['context']))
 				|| in_array('propalcard',explode(':',$parameters['context']))
 				|| in_array('ordercard',explode(':',$parameters['context']))
+				|| in_array('invoicereccard',explode(':',$parameters['context']))
 		) {
 			
 			global $db;
@@ -589,6 +598,10 @@ class ActionsSubtotal
 				 * @var $object Commande
 				 */
 				else if($object->element=='commande') $object->deleteline($idLine);
+				/**
+				 * @var $object Facturerec
+				 */
+				else if($object->element=='facturerec') $object->deleteline($idLine);
 			}
 			
 			header('location:?id='.$object->id);
@@ -1574,6 +1587,13 @@ class ActionsSubtotal
 
 		$contexts = explode(':',$parameters['context']);
 
+		$createRight = $user->rights->{$object->element}->creer;
+		if($object->element == 'facturerec' )
+		{
+			$object->statut = 0; // hack for facture rec
+			$createRight = $user->rights->facture->creer;
+		}
+		
 		if($line->special_code!=$this->module_number || $line->product_type!=9) {
 			null;
 		}	
@@ -1609,6 +1629,9 @@ class ActionsSubtotal
 			if(empty($line->description)) $line->description = $line->desc;
 			
 			$colspan = 5;
+			if($object->element == 'facturerec' ) $colspan = 3;
+
+			
 			if(!empty($conf->multicurrency->enabled)) $colspan+=2;
 			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
 			if(!empty($conf->margin->enabled)) $colspan++;
@@ -1818,12 +1841,12 @@ class ActionsSubtotal
 						
 					}
 					else{
-						if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK))
+						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK))
 						{
 							if(TSubtotal::isTitle($line) && ($object->situation_counter == 1 || !$object->situation_cycle_ref) ) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
 						}
 
-						if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK)) 
+						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK)) 
 						{
 							echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=editline&lineid='.$line->id.'">'.img_edit().'</a>';
 						}								
@@ -1838,7 +1861,7 @@ class ActionsSubtotal
 				<?php
 
 					if ($action != 'editline') {
-						if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
+						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
 						{
 
 							if ($object->situation_counter == 1 || !$object->situation_cycle_ref)
@@ -1857,7 +1880,7 @@ class ActionsSubtotal
 			</td>
 			
 			<?php 
-			if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::isTitle($line) && $action != 'editline')
+			if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::isTitle($line) && $action != 'editline')
 			{
 				echo '<td class="subtotal_nc">';
 				echo '<input id="subtotal_nc-'.$line->id.'" class="subtotal_nc_chkbx" data-lineid="'.$line->id.'" type="checkbox" name="subtotal_nc" value="1" '.(!empty($line->array_options['options_subtotal_nc']) ? 'checked="checked"' : '').' />';
@@ -1868,7 +1891,7 @@ class ActionsSubtotal
 			<td align="center" class="tdlineupdown">
 			</td>
 			<?php } else { ?>
-			<td align="center"<?php echo ((empty($conf->browser->phone) && ($object->statut == 0  && $user->rights->{$object->element}->creer))?' class="tdlineupdown"':''); ?>></td>
+			<td align="center"<?php echo ((empty($conf->browser->phone) && ($object->statut == 0  && $createRight ))?' class="tdlineupdown"':''); ?>></td>
 			<?php } ?>
 
 			</tr>

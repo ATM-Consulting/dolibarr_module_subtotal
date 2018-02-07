@@ -38,7 +38,8 @@ class TSubtotal {
 			/**
 			 * @var $object Facturerec
 			 */
-			else if($object->element=='facturerec') $res =  $object->addline($label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,$rang, TSubtotal::$module_number);
+			else if($object->element=='facturerec') $res =  $object->addline($label, 0,$qty, 0, 0, 0, 0, 0, 'HT', 0, '', 0, 9, $rang, TSubtotal::$module_number);
+			
 		}
 	
 		self::generateDoc($object);
@@ -73,7 +74,7 @@ class TSubtotal {
 			}
 			else
 			{
-				$object->generateDocument($object->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
+				if ($object->element!= 'facturerec') $object->generateDocument($object->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
 			}
 		}
 	}
@@ -491,7 +492,14 @@ class TSubtotal {
 				break;
 				
 			case 'facturerec':
-				$res = $object->updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $type, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $special_code, $array_options, $situation_percent, $fk_unit);
+				$fk_product=0; $fk_remise_except=''; $pu_ttc=0;	$rang=-1;
+				$res = $object->updateline($rowid, $desc, $pu, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $price_base_type, $info_bits, $fk_remise_except, $pu_ttc, $type, $rang, $special_code, $label, $fk_unit);
+				
+				$factureRecLine = new FactureLigneRec($object->db);
+				$factureRecLine->fetch($rowid);
+				$factureRecLine->array_options = $array_options;
+				$factureRecLine->insertExtraFields();
+				
 				break;
 		}
 		
