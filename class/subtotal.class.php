@@ -23,18 +23,24 @@ class TSubtotal {
 
 		}
 		else {
+			$desc = '';
+			if ((float) DOL_VERSION < 6) {
+				$desc = $label;
+				$label = '';
+			}
+			
 			/**
 			 * @var $object Facture
 			 */
-			if($object->element=='facture') $res =  $object->addline($label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,$rang, TSubtotal::$module_number);
+			if($object->element=='facture') $res =  $object->addline($desc, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,$rang, TSubtotal::$module_number, '', 0, 0, null, 0, $label);
 			/**
 			 * @var $object Propal
 			 */
-			else if($object->element=='propal') $res = $object->addline($label, 0,$qty,0,0,0,0,0,'HT',0,0,9,$rang, TSubtotal::$module_number);
+			else if($object->element=='propal') $res = $object->addline($desc, 0,$qty,0,0,0,0,0,'HT',0,0,9,$rang, TSubtotal::$module_number, 0, 0, 0, $label);
 			/**
 			 * @var $object Commande
 			 */
-			else if($object->element=='commande') $res =  $object->addline($label, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,$rang, TSubtotal::$module_number);
+			else if($object->element=='commande') $res =  $object->addline($desc, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,$rang, TSubtotal::$module_number, 0, null, 0, $label);
 			/**
 			 * @var $object Facturerec
 			 */
@@ -371,6 +377,8 @@ class TSubtotal {
 
 		if ($object->statut == 0  && $user->rights->{$object->element}->creer && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK))
 		{
+			dol_include_once('/subtotal/lib/subtotal.lib.php');
+			
 			$TLine = self::getLinesFromTitleId($object, $lineid, $withBlockLine);
 
 			if (!empty($TLine))
@@ -378,6 +386,7 @@ class TSubtotal {
 				$object->db->begin();
 				$res = 1;
 
+				$TLineAdded = array();
 				foreach ($TLine as $line)
 				{
 					// TODO refactore avec un doAddLine sur le même schéma que le doUpdateLine
@@ -400,8 +409,26 @@ class TSubtotal {
 							break;
 					}
 
+					$TLineAdded[] = $object->line;
 					// Error from addline
 					if ($res <= 0) break;
+					else
+					{
+						$object->line_from = $line;
+						// Call trigger
+						$result=$object->call_trigger('LINE_DUPLICATE',$user); // $object->line
+						if ($result < 0)
+						{
+							$object->db->rollback();
+							return -2;
+						}
+					}
+				}
+				
+				foreach ($TLineAdded as &$line)
+				{
+					// ça peut paraitre non optimisé de déclancher la fonction sur toutes les lignes mais ceci est nécessaire pour réappliquer l'état exact de chaque ligne
+					_updateLineNC($object->element, $object->id, $line->id, $line->array_options['options_subtotal_nc']);
 				}
 
 				if ($res > 0)
@@ -486,7 +513,7 @@ class TSubtotal {
 			case 'commande':
 				$res = $object->updateline($rowid, $desc, $pu, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $date_start, $date_end, $type, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $special_code, $array_options, $fk_unit);
 				break;
-				
+			
 			case 'facture':
 				$res = $object->updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $type, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $special_code, $array_options, $situation_percent, $fk_unit);
 				break;

@@ -485,7 +485,7 @@ class ActionsSubtotal
 	
 	function doActions($parameters, &$object, $action, $hookmanager)
 	{
-		global $db, $conf, $langs;
+		global $db, $conf, $langs,$user;
 		
 		dol_include_once('/subtotal/class/subtotal.class.php');
 		dol_include_once('/subtotal/lib/subtotal.lib.php');
@@ -597,7 +597,11 @@ class ActionsSubtotal
 				/**
 				 * @var $object Commande
 				 */
-				else if($object->element=='commande') $object->deleteline($idLine);
+				else if($object->element=='commande') 
+				{
+					if ((float) DOL_VERSION >= 5.0) $object->deleteline($user, $idLine);
+					else $object->deleteline($idLine);
+				}
 				/**
 				 * @var $object Facturerec
 				 */
@@ -897,7 +901,7 @@ class ActionsSubtotal
 			
 		}
 		
-		if ($label === strip_tags($label)) $pdf->MultiCell($w, $h, $label, 0, 'L'); // Pas de HTML dans la chaine
+		if ($label === strip_tags($label) && $label === dol_html_entity_decode($label, ENT_QUOTES)) $pdf->MultiCell($w, $h, $label, 0, 'L'); // Pas de HTML dans la chaine
 		else $pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'J',true); // et maintenant avec du HTML
 		
 		if($description && !$hidedesc) {
@@ -1631,7 +1635,6 @@ class ActionsSubtotal
 			$colspan = 5;
 			if($object->element == 'facturerec' ) $colspan = 3;
 
-			
 			if(!empty($conf->multicurrency->enabled)) $colspan+=2;
 			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
 			if(!empty($conf->margin->enabled)) $colspan++;
