@@ -44,7 +44,7 @@ class TSubtotal {
 			/**
 			 * @var $object Facturerec
 			 */
-			else if($object->element=='facturerec') $res =  $object->addline($label, 0,$qty, 0, 0, 0, 0, 0, 'HT', 0, '', 0, 9, $rang, TSubtotal::$module_number);
+			else if($object->element=='facturerec') $res =  $object->addline($desc, 0,$qty, 0, 0, 0, 0, 0, 'HT', 0, '', 0, 9, $rang, TSubtotal::$module_number,$label); 
 			
 		}
 	
