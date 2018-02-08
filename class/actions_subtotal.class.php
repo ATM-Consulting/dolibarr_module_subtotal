@@ -959,6 +959,8 @@ class ActionsSubtotal
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
 
+		if (empty($object->lines[$i])) return 0; // hideInnerLines => override $object->lines et Dolibarr ne nous permet pas de mettre à jour la variable qui conditionne la boucle sur les lignes (PR faite pour 6.0)
+		
 		$object->lines[$i]->fetch_optionals();
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
@@ -1165,6 +1167,8 @@ class ActionsSubtotal
 		
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
+		
+		if (empty($object->lines[$i])) return 0; // hideInnerLines => override $object->lines et Dolibarr ne nous permet pas de mettre à jour la variable qui conditionne la boucle sur les lignes (PR faite pour 6.0)
 
 		$object->lines[$i]->fetch_optionals();
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
@@ -1417,6 +1421,9 @@ class ActionsSubtotal
 			    }
 			}
 			
+			global $nblignes;
+			$nblignes=count($TLines);
+
 			$object->lines = $TLines;
 			
 			if($i>count($object->lines)) {
