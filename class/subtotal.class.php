@@ -7,6 +7,8 @@ class TSubtotal {
 	
 	static function addSubTotalLine(&$object, $label, $qty, $rang=-1) {
 		
+		$res = 0;
+		
 		if( (float)DOL_VERSION <= 3.4 ) {
 			/**
 			 * @var $object Facture
@@ -49,6 +51,8 @@ class TSubtotal {
 		}
 	
 		self::generateDoc($object);
+		
+		return $res;
 	}
 
 	public static function generateDoc(&$object)
@@ -519,14 +523,15 @@ class TSubtotal {
 				break;
 				
 			case 'facturerec':
-				$fk_product=0; $fk_remise_except=''; $pu_ttc=0;	$rang=-1;
-				$res = $object->updateline($rowid, $desc, $pu, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $price_base_type, $info_bits, $fk_remise_except, $pu_ttc, $type, $rang, $special_code, $label, $fk_unit);
-				
+				// Add extrafields and get rang
 				$factureRecLine = new FactureLigneRec($object->db);
 				$factureRecLine->fetch($rowid);
 				$factureRecLine->array_options = $array_options;
 				$factureRecLine->insertExtraFields();
+				$rang=$factureRecLine->rang;
 				
+				$fk_product=0; $fk_remise_except=''; $pu_ttc=0;	
+				$res = $object->updateline($rowid, $desc, $pu, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $price_base_type, $info_bits, $fk_remise_except, $pu_ttc, $type, $rang, $special_code, $label, $fk_unit);
 				break;
 		}
 		
