@@ -679,6 +679,7 @@ class ActionsSubtotal
 		$total_ttc = 0;
 		$TTotal_tva = array();
 		
+		dol_include_once('/subtotal/class/subtotal.class.php');
 		foreach($object->lines as $l) {
 			//print $l->rang.'>='.$rang.' '.$total.'<br/>';
 			if($l->rang>=$rang) {
