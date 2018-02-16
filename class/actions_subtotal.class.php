@@ -2094,9 +2094,11 @@ class ActionsSubtotal
 	private function _getHtmlData($parameters, &$object, &$action, $hookmanager)
 	{
 	    $line = &$parameters['line'];
-	    $ThtmlData['id'] = $line->id;
+	    
+	    $ThtmlData['id']           = $line->id;
 	    $ThtmlData['product_type'] = $line->product_type;
-	    $ThtmlData['qty'] = $line->qty;
+	    $ThtmlData['qty']          = 0; //$line->qty;
+	    $ThtmlData['level']        = TSubtotal::getNiveau($line);
 	    
 	    if(TSubtotal::isTitle($line)){
 	        $ThtmlData['issubtotal'] = 'title';
@@ -2107,6 +2109,11 @@ class ActionsSubtotal
 	        $ThtmlData['issubtotal'] = 'freetext';
 	    }
 	    
+	    $ThtmlData['childrens'] = array();
+	    $TChildLines = TSubtotal::getLinesFromTitleId($object, $line->id);
+	    foreach ($TChildLines as &$child){
+	        $ThtmlData['childrens'][] = $child->id;
+	    }
 	    
 	    // Change or add data  from hooks
 	    $parameters = array_replace($parameters , array(  'ThtmlData' => $ThtmlData )  );
@@ -2119,16 +2126,27 @@ class ActionsSubtotal
 	        $ThtmlData = $hookmanager->resArray;
 	    }
 	    
-	    
-	    
-	    $data = '';
-	    foreach($ThtmlData as $k => $h )
-	    {
-	        $data .= ' data-' . $k . '="'.dol_htmlentities($h).'" ';
-	    }
+	    $data = $this->implodeHtmlData($ThtmlData);
 	    
 	    return $data;
 	
+	}
+	
+	
+	function implodeHtmlData($ThtmlData = array())
+	{
+	    $data = '';
+	    foreach($ThtmlData as $k => $h )
+	    {
+	        if(is_array($h))
+	        {
+	            $h = json_encode($h);
+	        }
+	        
+	        $data .= ' data-' . $k . '="'.dol_htmlentities($h, ENT_QUOTES).'" ';
+	    }
+	    
+	    return $data;
 	}
 	
 }
