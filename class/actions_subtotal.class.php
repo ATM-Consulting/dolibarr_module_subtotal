@@ -8,6 +8,8 @@ class ActionsSubtotal
 		
 		$this->db = $db;
 		$langs->load('subtotal@subtotal');
+		
+		$this->allow_move_block_lines = true;
 	}
 	
 	
@@ -1632,9 +1634,13 @@ class ActionsSubtotal
 					
 			/* Titre */
 			//var_dump($line);
+            
+			// HTML 5 data for js
+            $data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
+            
 			
 			?>
-			<tr <?php echo $bc[$var]; $var=!$var; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
+			<tr <?php echo $bc[$var]; $var=!$var; echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
 						if($line->qty==99) print 'background:#adadcf';
@@ -2082,6 +2088,47 @@ class ActionsSubtotal
 		{
 			if (GETPOST('subtotal_add_recap')) TSubtotal::addRecapPage($parameters, $pdf);
 		}
+	}
+	
+	// HTML 5 data for js
+	private function _getHtmlData($parameters, &$object, &$action, $hookmanager)
+	{
+	    $line = &$parameters['line'];
+	    $ThtmlData['id'] = $line->id;
+	    $ThtmlData['product_type'] = $line->product_type;
+	    $ThtmlData['qty'] = $line->qty;
+	    
+	    if(TSubtotal::isTitle($line)){
+	        $ThtmlData['issubtotal'] = 'title';
+	    }elseif(TSubtotal::isSubtotal($line)){
+	        $ThtmlData['issubtotal'] = 'subtotal';
+	    }
+	    else{
+	        $ThtmlData['issubtotal'] = 'freetext';
+	    }
+	    
+	    
+	    // Change or add data  from hooks
+	    $parameters = array_replace($parameters , array(  'ThtmlData' => $ThtmlData )  );
+	    
+	    // hook 
+	    $reshook = $hookmanager->executeHooks('subtotalLineHtmlData',$parameters,$object,$action); // Note that $action and $object may have been modified by hook
+	    if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+	    if ($reshook>0)
+	    {
+	        $ThtmlData = $hookmanager->resArray;
+	    }
+	    
+	    
+	    
+	    $data = '';
+	    foreach($ThtmlData as $k => $h )
+	    {
+	        $data .= ' data-' . $k . '="'.dol_htmlentities($h).'" ';
+	    }
+	    
+	    return $data;
+	
 	}
 	
 }
