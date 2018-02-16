@@ -692,6 +692,7 @@ class ActionsSubtotal
 		$total_ttc = 0;
 		$TTotal_tva = array();
 		
+		dol_include_once('/subtotal/class/subtotal.class.php');
 		foreach($object->lines as $l) {
 			//print $l->rang.'>='.$rang.' '.$total.'<br/>';
 			if($l->rang>=$rang) {
@@ -972,6 +973,8 @@ class ActionsSubtotal
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
 
+		if (empty($object->lines[$i])) return 0; // hideInnerLines => override $object->lines et Dolibarr ne nous permet pas de mettre à jour la variable qui conditionne la boucle sur les lignes (PR faite pour 6.0)
+		
 		$object->lines[$i]->fetch_optionals();
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
@@ -1178,6 +1181,8 @@ class ActionsSubtotal
 		
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
+		
+		if (empty($object->lines[$i])) return 0; // hideInnerLines => override $object->lines et Dolibarr ne nous permet pas de mettre à jour la variable qui conditionne la boucle sur les lignes (PR faite pour 6.0)
 
 		$object->lines[$i]->fetch_optionals();
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
@@ -1328,7 +1333,8 @@ class ActionsSubtotal
 				{
 					$fk_parent_line = $line->rowid;
 					
-					if($line->qty>90 && $line->total==0) 
+					// Fix tk7201 - si on cache le détail, la TVA est renseigné au niveau du sous-total, l'erreur c'est s'il y a plusieurs sous-totaux pour les même lignes, ça va faire la somme
+					if(TSubtotal::isSubtotal($line) && TSubtotal::getNiveau($line) == 1) 
 					{
 						/*$total = $this->getTotalLineFromObject($object, $line, '');
 						
@@ -1430,6 +1436,9 @@ class ActionsSubtotal
 			    }
 			}
 			
+			global $nblignes;
+			$nblignes=count($TLines);
+
 			$object->lines = $TLines;
 			
 			if($i>count($object->lines)) {
