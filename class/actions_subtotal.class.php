@@ -2153,6 +2153,11 @@ class ActionsSubtotal
 	{
 	    global $conf,$tagidfortablednd,$filepath;
 	    
+	    /*
+	     * this part of js is base on dolibarr htdocs/core/tpl/ajaxrow.tpl.php 
+	     * for compatibility reasons we don't use tableDnD but jquery sortable
+	     */
+	    
 	    $id=$object->id;
 	    $nboflines=(isset($object->lines)?count($object->lines):0);
 	    $forcereloadpage=empty($conf->global->MAIN_FORCE_RELOAD_PAGE)?0:1;
@@ -2174,11 +2179,15 @@ class ActionsSubtotal
 			<script type="text/javascript">
 			$(document).ready(function(){
 
+				// target some elements
 				var titleRow = $('tr[data-issubtotal="title"]');
 				var lastTitleCol = titleRow.find('td:last-child');
 				var moveBlockCol= titleRow.find('td.liencolht');
 
-				moveBlockCol.disableSelection();
+				
+				moveBlockCol.disableSelection(); // prevent selection
+
+				// apply some graphical stuff
 				moveBlockCol.css("background-image",'url(<?php echo DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/grip.png'; ?>)');
 				moveBlockCol.css("background-repeat","no-repeat");
 				moveBlockCol.css("background-position","center center");
@@ -2186,18 +2195,19 @@ class ActionsSubtotal
 				
 			
 
- 				$( "#tablelines" ).sortable({
+ 				$( "#<?php echo $tagidfortablednd; ?>" ).sortable({
 			    	  cursor: "move",
 			    	  handle: ".movetitleblock",
 			    	  items: 'tr:not(.nodrag,.nodrop,.noblockdrop)',
 			    	  delay: 150, //Needed to prevent accidental drag when trying to select
 			    	  opacity: 0.8,
-			    	  axis: "y",
+			    	  axis: "y", // limit y axis
 			    	  start: function( event, ui ) {
 			    	      //console.log('X:' + e.screenX, 'Y:' + e.screenY);
 			    		  //console.log(ui.item);
 			    		  
-			    		  var currentChild = JSON.parse(ui.item.attr('data-childrens'));
+			    		  // TODO: replace this part of code by a dynamic childs detection
+			    		  var TcurrentChilds = JSON.parse(ui.item.attr('data-childrens'));
 			    		  var nextSubtotal = ui.item.nextAll('[data-issubtotal="subtotal"]:first');
 			    		  var nextTitle = ui.item.nextAll('[data-issubtotal="title"]:first');
 			    		  
@@ -2205,14 +2215,15 @@ class ActionsSubtotal
 						  if( (nextSubtotal.length > 0 && nextTitle.length > 0  && nextSubtotal.index() < nextTitle.index())
 								  ||  (nextSubtotal.length > 0 && nextTitle.length == 0) )
 						  {
-							  currentChild.push(nextSubtotal.attr('id').slice(4));
-							  ui.item.attr('data-childrens',JSON.stringify(currentChild));
+							  TcurrentChilds.push(nextSubtotal.attr('id').slice(4));
+							  ui.item.attr('data-childrens',JSON.stringify(TcurrentChilds));
 						  }
 			    		  
-			    		  for (var key in currentChild) {
-			    			  $('#row-'+ currentChild[key]).addClass('noblockdrop');
-			    			  $('#row-'+ currentChild[key]).fadeOut();
+			    		  for (var key in TcurrentChilds) {
+			    			  $('#row-'+ TcurrentChilds[key]).addClass('noblockdrop');
+			    			  $('#row-'+ TcurrentChilds[key]).fadeOut();
 			    		  }
+
 			    		  
 			    		  $(this).sortable("refresh");	// "refresh" of source sortable is required to make "disable" work!
 			    	      
@@ -2221,13 +2232,14 @@ class ActionsSubtotal
 							// call we element is droped
 				    	  	$('.noblockdrop').removeClass('noblockdrop');
 
-				    	  	var currentChild = ui.item.data('childrens');
+				    	  	var TcurrentChilds = ui.item.data('childrens'); // reload child list from data and not attr to prevent load error
 
-							for (var i =currentChild.length ; i >= 0; i--) {
-				    			  $('#row-'+ currentChild[i]).insertAfter(ui.item);
-				    			  $('#row-'+ currentChild[i]).fadeIn();
+							for (var i =TcurrentChilds.length ; i >= 0; i--) {
+				    			  $('#row-'+ TcurrentChilds[i]).insertAfter(ui.item);
+				    			  $('#row-'+ TcurrentChilds[i]).fadeIn();
 							}
-							console.log(cleanSerialize($(this).sortable('serialize')));
+							
+							//console.log(cleanSerialize($(this).sortable('serialize')));
 			    	        // POST to server using $.post or $.ajax
 			    	        $.ajax({
 			    	            data: {
