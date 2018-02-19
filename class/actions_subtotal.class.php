@@ -2206,19 +2206,8 @@ class ActionsSubtotal
 			    	      //console.log('X:' + e.screenX, 'Y:' + e.screenY);
 			    		  //console.log(ui.item);
 			    		  
-			    		  // TODO: replace this part of code by a dynamic childs detection
-			    		  var TcurrentChilds = JSON.parse(ui.item.attr('data-childrens'));
-			    		  var nextSubtotal = ui.item.nextAll('[data-issubtotal="subtotal"]:first');
-			    		  var nextTitle = ui.item.nextAll('[data-issubtotal="title"]:first');
-			    		  
-			    		  
-						  if( (nextSubtotal.length > 0 && nextTitle.length > 0  && nextSubtotal.index() < nextTitle.index())
-								  ||  (nextSubtotal.length > 0 && nextTitle.length == 0) )
-						  {
-							  TcurrentChilds.push(nextSubtotal.attr('id').slice(4));
-							  ui.item.attr('data-childrens',JSON.stringify(TcurrentChilds));
-						  }
-			    		  
+			    		  var TcurrentChilds = getSubtotalTitleChilds(ui.item);
+
 			    		  for (var key in TcurrentChilds) {
 			    			  $('#row-'+ TcurrentChilds[key]).addClass('noblockdrop');
 			    			  $('#row-'+ TcurrentChilds[key]).fadeOut();
@@ -2259,7 +2248,24 @@ class ActionsSubtotal
 			    	    }
 			    });
 				
-				
+
+				function getSubtotalTitleChilds(item)
+				{
+		    		  var TcurrentChilds = JSON.parse(item.attr('data-childrens'));
+		    		  var level 		= item.data('level');
+		    		  var nextSubtotal 	= item.nextAll('[data-issubtotal="subtotal"]:first'); //[data-level="'+level+'"]
+		    		  var nextTitle 	= item.nextAll('[data-issubtotal="title"]:first');
+		    		  
+		    		  
+					  if( (nextSubtotal.length > 0 && nextTitle.length > 0  && nextSubtotal.index() < nextTitle.index())
+							  ||  (nextSubtotal.length > 0 && nextTitle.length == 0) )
+					  {
+						  TcurrentChilds.push(nextSubtotal.attr('id').slice(4));
+						  item.attr('data-childrens',JSON.stringify(TcurrentChilds));
+					  }
+
+					  return TcurrentChilds;
+				}
 				
 			});
 			</script>
