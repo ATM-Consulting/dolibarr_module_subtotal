@@ -2151,12 +2151,19 @@ class ActionsSubtotal
 	
 	function _ajax_block_order_js($object)
 	{
-	    global $conf;
+	    global $conf,$tagidfortablednd,$filepath;
 	    
 	    $id=$object->id;
 	    $nboflines=(isset($object->lines)?count($object->lines):0);
 	    $forcereloadpage=empty($conf->global->MAIN_FORCE_RELOAD_PAGE)?0:1;
-	    $tagidfortablednd='contrat-lines-container';
+	    
+	    $id=$object->id;
+	    $fk_element=$object->fk_element;
+	    $table_element_line=$object->table_element_line;
+	    $nboflines=(isset($object->lines)?count($object->lines):(empty($nboflines)?0:$nboflines));
+	    $tagidfortablednd=(empty($tagidfortablednd)?'tablelines':$tagidfortablednd);
+	    $filepath=(empty($filepath)?'':$filepath);
+	    
 	    
 	    if (GETPOST('action','aZ09') != 'editline' && $nboflines > 1)
 	    {
@@ -2210,16 +2217,6 @@ class ActionsSubtotal
 			    		  $(this).sortable("refresh");	// "refresh" of source sortable is required to make "disable" work!
 			    	      
 			    	    },
-			    	    
-			    	  /*helper: function (e, item) {
-			    	        var helper = $('<div/>');
-			    	        if (!item.hasClass('selected')) {
-			    	            item.addClass('selected').siblings().removeClass('selected');
-			    	        }
-			    	        var elements = item.parent().children('.selected').clone();
-			    	        item.data('multidrag', elements).siblings('.selected').remove();
-			    	        return helper.append(elements);
-			    	    },*/
 			    	  update: function (event, ui) {
 							// call we element is droped
 				    	  	$('.noblockdrop').removeClass('noblockdrop');
@@ -2230,23 +2227,23 @@ class ActionsSubtotal
 				    			  $('#row-'+ currentChild[i]).insertAfter(ui.item);
 				    			  $('#row-'+ currentChild[i]).fadeIn();
 							}
-					    	  	
-				    		  
-			    	        //var TRowOrder = $(this).sortable('toArray', { attribute: 'data-contratlineid' });
-			    	        
+							console.log(cleanSerialize($(this).sortable('serialize')));
 			    	        // POST to server using $.post or $.ajax
-			    	       /* $.ajax({
+			    	        $.ajax({
 			    	            data: {
-				    	            post: 'contractrang',
 									objet_id: <?php print $object->id; ?>,
-									TRowOrder: TRowOrder
+							    	roworder: cleanSerialize($(this).sortable('serialize')),
+									table_element_line: "<?php echo $table_element_line; ?>",
+									fk_element: "<?php echo $fk_element; ?>",
+									element_id: "<?php echo $id; ?>",
+									filepath: "<?php echo urlencode($filepath); ?>"
 								},
 			    	            type: 'POST',
-			    	            url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1) ; ?>',
+			    	            url: '<?php echo DOL_URL_ROOT; ?>/core/ajax/row.php',
 			    	            success: function(data) {
 			    	                console.log(data);
 			    	            },
-			    	        });*/
+			    	        });
 			    	    }
 			    });
 				
