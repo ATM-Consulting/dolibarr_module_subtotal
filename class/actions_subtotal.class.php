@@ -1812,13 +1812,13 @@ class ActionsSubtotal
 				if($line->qty>90) {
 					/* Total */
 					$total_line = $this->getTotalLineFromObject($object, $line, '');
-					echo '<td class="nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
+					echo '<td class="nowrap liencolht" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
 				} else {
-					echo '<td>&nbsp;</td>';
+					echo '<td class="liencolht movetitleblock" >&nbsp;</td>';
 				}	
 			?>
 					
-			<td align="center" class="nowrap">
+			<td align="center" class="nowrap linecoledit">
 				<?php
 					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 						?>
@@ -1853,7 +1853,7 @@ class ActionsSubtotal
 				?>
 			</td>
 
-			<td align="center" nowrap="nowrap">	
+			<td align="center" nowrap="nowrap" class="linecoldelete">	
 				<?php
 
 					if ($action != 'editline') {
@@ -2076,6 +2076,8 @@ class ActionsSubtotal
 			</script>
 			<?php
 		}
+		
+		$this->_ajax_block_order_js($object);
 	}
 	
 	function afterPDFCreation($parameters, &$pdf, &$action, $hookmanager)
@@ -2125,10 +2127,8 @@ class ActionsSubtotal
 	    {
 	        $ThtmlData = $hookmanager->resArray;
 	    }
-	    
-	    $data = $this->implodeHtmlData($ThtmlData);
-	    
-	    return $data;
+
+	    return $this->implodeHtmlData($ThtmlData);
 	
 	}
 	
@@ -2147,6 +2147,120 @@ class ActionsSubtotal
 	    }
 	    
 	    return $data;
+	}
+	
+	function _ajax_block_order_js($object)
+	{
+	    global $conf;
+	    
+	    $id=$object->id;
+	    $nboflines=(isset($object->lines)?count($object->lines):0);
+	    $forcereloadpage=empty($conf->global->MAIN_FORCE_RELOAD_PAGE)?0:1;
+	    $tagidfortablednd='contrat-lines-container';
+	    
+	    if (GETPOST('action','aZ09') != 'editline' && $nboflines > 1)
+	    {
+	        
+	        ?>
+		
+		
+			<script type="text/javascript">
+			$(document).ready(function(){
+
+				var titleRow = $('tr[data-issubtotal="title"]');
+				var lastTitleCol = titleRow.find('td:last-child');
+				var moveBlockCol= titleRow.find('td.liencolht');
+
+				moveBlockCol.disableSelection();
+				moveBlockCol.css("background-image",'url(<?php echo DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/grip.png'; ?>)');
+				moveBlockCol.css("background-repeat","no-repeat");
+				moveBlockCol.css("background-position","center center");
+				moveBlockCol.css("cursor","move");
+				
+			
+
+ 				$( "#tablelines" ).sortable({
+			    	  cursor: "move",
+			    	  handle: ".movetitleblock",
+			    	  items: 'tr:not(.nodrag,.nodrop,.noblockdrop)',
+			    	  delay: 150, //Needed to prevent accidental drag when trying to select
+			    	  opacity: 0.8,
+			    	  axis: "y",
+			    	  start: function( event, ui ) {
+			    	      //console.log('X:' + e.screenX, 'Y:' + e.screenY);
+			    		  //console.log(ui.item);
+			    		  
+			    		  var currentChild = JSON.parse(ui.item.attr('data-childrens'));
+			    		  var nextSubtotal = ui.item.nextAll('[data-issubtotal="subtotal"]:first');
+			    		  var nextTitle = ui.item.nextAll('[data-issubtotal="title"]:first');
+			    		  
+			    		  
+						  if( (nextSubtotal.length > 0 && nextTitle.length > 0  && nextSubtotal.index() < nextTitle.index())
+								  ||  (nextSubtotal.length > 0 && nextTitle.length == 0) )
+						  {
+							  currentChild.push(nextSubtotal.attr('id').slice(4));
+							  ui.item.attr('data-childrens',JSON.stringify(currentChild));
+						  }
+			    		  
+			    		  for (var key in currentChild) {
+			    			  $('#row-'+ currentChild[key]).addClass('noblockdrop');
+			    			  $('#row-'+ currentChild[key]).fadeOut();
+			    		  }
+			    		  
+			    		  $(this).sortable("refresh");	// "refresh" of source sortable is required to make "disable" work!
+			    	      
+			    	    },
+			    	    
+			    	  /*helper: function (e, item) {
+			    	        var helper = $('<div/>');
+			    	        if (!item.hasClass('selected')) {
+			    	            item.addClass('selected').siblings().removeClass('selected');
+			    	        }
+			    	        var elements = item.parent().children('.selected').clone();
+			    	        item.data('multidrag', elements).siblings('.selected').remove();
+			    	        return helper.append(elements);
+			    	    },*/
+			    	  update: function (event, ui) {
+							// call we element is droped
+				    	  	$('.noblockdrop').removeClass('noblockdrop');
+
+				    	  	var currentChild = ui.item.data('childrens');
+
+							for (var i =currentChild.length ; i >= 0; i--) {
+				    			  $('#row-'+ currentChild[i]).insertAfter(ui.item);
+				    			  $('#row-'+ currentChild[i]).fadeIn();
+							}
+					    	  	
+				    		  
+			    	        //var TRowOrder = $(this).sortable('toArray', { attribute: 'data-contratlineid' });
+			    	        
+			    	        // POST to server using $.post or $.ajax
+			    	       /* $.ajax({
+			    	            data: {
+				    	            post: 'contractrang',
+									objet_id: <?php print $object->id; ?>,
+									TRowOrder: TRowOrder
+								},
+			    	            type: 'POST',
+			    	            url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1) ; ?>',
+			    	            success: function(data) {
+			    	                console.log(data);
+			    	            },
+			    	        });*/
+			    	    }
+			    });
+				
+				
+				
+			});
+			</script>
+			
+		<?php
+		
+		} 
+	
+		
+		
 	}
 	
 }
