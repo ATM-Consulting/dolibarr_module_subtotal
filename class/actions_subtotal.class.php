@@ -2168,7 +2168,7 @@ class ActionsSubtotal
 	
 	function _ajax_block_order_js($object)
 	{
-	    global $conf,$tagidfortablednd,$filepath;
+	    global $conf,$tagidfortablednd,$filepath,$langs;
 	    
 	    /*
 	     * this part of js is base on dolibarr htdocs/core/tpl/ajaxrow.tpl.php 
@@ -2205,11 +2205,11 @@ class ActionsSubtotal
 				moveBlockCol.disableSelection(); // prevent selection
 
 				// apply some graphical stuff
-				moveBlockCol.css("background-image",'url(<?php echo DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/grip.png'; ?>)');
+				moveBlockCol.css("background-image",'url(<?php echo dol_buildpath('subtotal/img/grip_all.png',2);  ?>)');
 				moveBlockCol.css("background-repeat","no-repeat");
 				moveBlockCol.css("background-position","center center");
 				moveBlockCol.css("cursor","move");
-				
+				titleRow.attr('title', '<?php echo html_entity_decode($langs->trans('MoveTitleBlock')); ?>');
 			
 
  				$( "#<?php echo $tagidfortablednd; ?>" ).sortable({
