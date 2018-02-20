@@ -2111,11 +2111,6 @@ class ActionsSubtotal
 	        $ThtmlData['issubtotal'] = 'freetext';
 	    }
 	    
-	    $ThtmlData['childrens'] = array();
-	    $TChildLines = TSubtotal::getLinesFromTitleId($object, $line->id);
-	    foreach ($TChildLines as &$child){
-	        $ThtmlData['childrens'][] = $child->id;
-	    }
 	    
 	    // Change or add data  from hooks
 	    $parameters = array_replace($parameters , array(  'ThtmlData' => $ThtmlData )  );
@@ -2207,13 +2202,13 @@ class ActionsSubtotal
 			    		  //console.log(ui.item);
 			    		  
 			    		  var TcurrentChilds = getSubtotalTitleChilds(ui.item);
-
+			    		  ui.item.data('childrens',TcurrentChilds); // store data
+				    		
 			    		  for (var key in TcurrentChilds) {
-			    			  $('#row-'+ TcurrentChilds[key]).addClass('noblockdrop');
-			    			  $('#row-'+ TcurrentChilds[key]).fadeOut();
+			    			  $('#'+ TcurrentChilds[key]).addClass('noblockdrop');//'#row-'+ 
+			    			  $('#'+ TcurrentChilds[key]).fadeOut();//'#row-'+ 
 			    		  }
 
-			    		  
 			    		  $(this).sortable("refresh");	// "refresh" of source sortable is required to make "disable" work!
 			    	      
 			    	    },
@@ -2224,8 +2219,8 @@ class ActionsSubtotal
 				    	  	var TcurrentChilds = ui.item.data('childrens'); // reload child list from data and not attr to prevent load error
 
 							for (var i =TcurrentChilds.length ; i >= 0; i--) {
-				    			  $('#row-'+ TcurrentChilds[i]).insertAfter(ui.item);
-				    			  $('#row-'+ TcurrentChilds[i]).fadeIn();
+				    			  $('#'+ TcurrentChilds[i]).insertAfter(ui.item); //'#row-'+ 
+				    			  $('#'+ TcurrentChilds[i]).fadeIn(); //'#row-'+ 
 							}
 							
 							//console.log(cleanSerialize($(this).sortable('serialize')));
@@ -2251,20 +2246,42 @@ class ActionsSubtotal
 
 				function getSubtotalTitleChilds(item)
 				{
-		    		  var TcurrentChilds = JSON.parse(item.attr('data-childrens'));
-		    		  var level 		= item.data('level');
-		    		  var nextSubtotal 	= item.nextAll('[data-issubtotal="subtotal"]:first'); //[data-level="'+level+'"]
-		    		  var nextTitle 	= item.nextAll('[data-issubtotal="title"]:first');
-		    		  
-		    		  
-					  if( (nextSubtotal.length > 0 && nextTitle.length > 0  && nextSubtotal.index() < nextTitle.index())
-							  ||  (nextSubtotal.length > 0 && nextTitle.length == 0) )
-					  {
-						  TcurrentChilds.push(nextSubtotal.attr('id').slice(4));
-						  item.attr('data-childrens',JSON.stringify(TcurrentChilds));
-					  }
+		    		var TcurrentChilds = []; // = JSON.parse(item.attr('data-childrens'));
+		    		var level = item.data('level');
 
-					  return TcurrentChilds;
+		    		var indexOfFirstSubtotal = -1;
+		    		var indexOfFirstTitle = -1;
+		    		
+		    		item.nextAll('[id^="row-"]').each(function(index){
+
+						var dataLevel = $(this).attr('data-level');
+						var dataIsSubtotal = $(this).attr('data-issubtotal');
+						
+						if(dataIsSubtotal != 'undefined' && dataLevel != 'undefined' )
+						{
+
+							if(dataLevel >=  level && indexOfFirstSubtotal < 0 && dataIsSubtotal == 'subtotal' )
+							{
+								indexOfFirstSubtotal = index;
+								if(indexOfFirstTitle < 0)
+								{
+									TcurrentChilds.push($(this).attr('id'));
+								}
+							}
+							
+							if(dataLevel >=  level && indexOfFirstSubtotal < 0 && indexOfFirstTitle < 0 && dataIsSubtotal == 'title' )
+							{
+								indexOfFirstTitle = index;
+							}
+						}
+
+						if(indexOfFirstTitle < 0 && indexOfFirstSubtotal < 0)
+						{
+							TcurrentChilds.push($(this).attr('id'));
+						}
+
+		    		});
+		    		return TcurrentChilds;
 				}
 				
 			});
