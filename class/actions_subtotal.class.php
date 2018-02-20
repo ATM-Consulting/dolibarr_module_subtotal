@@ -2119,18 +2119,18 @@ class ActionsSubtotal
 	{
 	    $line = &$parameters['line'];
 	    
-	    $ThtmlData['id']           = $line->id;
-	    $ThtmlData['product_type'] = $line->product_type;
-	    $ThtmlData['qty']          = 0; //$line->qty;
-	    $ThtmlData['level']        = TSubtotal::getNiveau($line);
+	    $ThtmlData['data-id']           = $line->id;
+	    $ThtmlData['data-product_type'] = $line->product_type;
+	    $ThtmlData['data-qty']          = 0; //$line->qty;
+	    $ThtmlData['data-level']        = TSubtotal::getNiveau($line);
 	    
 	    if(TSubtotal::isTitle($line)){
-	        $ThtmlData['issubtotal'] = 'title';
+	        $ThtmlData['data-issubtotal'] = 'title';
 	    }elseif(TSubtotal::isSubtotal($line)){
-	        $ThtmlData['issubtotal'] = 'subtotal';
+	        $ThtmlData['data-issubtotal'] = 'subtotal';
 	    }
 	    else{
-	        $ThtmlData['issubtotal'] = 'freetext';
+	        $ThtmlData['data-issubtotal'] = 'freetext';
 	    }
 	    
 	    
@@ -2160,7 +2160,7 @@ class ActionsSubtotal
 	            $h = json_encode($h);
 	        }
 	        
-	        $data .= ' data-' . $k . '="'.dol_htmlentities($h, ENT_QUOTES).'" ';
+	        $data .= $k . '="'.dol_htmlentities($h, ENT_QUOTES).'" ';
 	    }
 	    
 	    return $data;
