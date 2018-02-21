@@ -8,6 +8,8 @@ class ActionsSubtotal
 		
 		$this->db = $db;
 		$langs->load('subtotal@subtotal');
+		
+		$this->allow_move_block_lines = true;
 	}
 	
 	
@@ -1654,9 +1656,13 @@ class ActionsSubtotal
 					
 			/* Titre */
 			//var_dump($line);
+            
+			// HTML 5 data for js
+            $data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
+            
 			
 			?>
-			<tr <?php echo $bc[$var]; $var=!$var; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
+			<tr <?php echo $bc[$var]; $var=!$var; echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
 						if($line->qty==99) print 'background:#adadcf';
@@ -1828,13 +1834,13 @@ class ActionsSubtotal
 				if($line->qty>90) {
 					/* Total */
 					$total_line = $this->getTotalLineFromObject($object, $line, '');
-					echo '<td class="nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
+					echo '<td class="nowrap liencolht" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
 				} else {
-					echo '<td>&nbsp;</td>';
+					echo '<td class="liencolht movetitleblock" >&nbsp;</td>';
 				}	
 			?>
 					
-			<td align="center" class="nowrap">
+			<td align="center" class="nowrap linecoledit">
 				<?php
 					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 						?>
@@ -1869,7 +1875,7 @@ class ActionsSubtotal
 				?>
 			</td>
 
-			<td align="center" nowrap="nowrap">	
+			<td align="center" nowrap="nowrap" class="linecoldelete">	
 				<?php
 
 					if ($action != 'editline') {
@@ -2092,6 +2098,8 @@ class ActionsSubtotal
 			</script>
 			<?php
 		}
+		
+		$this->_ajax_block_order_js($object);
 	}
 	
 	function afterPDFCreation($parameters, &$pdf, &$action, $hookmanager)
@@ -2104,6 +2112,219 @@ class ActionsSubtotal
 		{
 			if (GETPOST('subtotal_add_recap')) TSubtotal::addRecapPage($parameters, $pdf);
 		}
+	}
+	
+	// HTML 5 data for js
+	private function _getHtmlData($parameters, &$object, &$action, $hookmanager)
+	{
+	    $line = &$parameters['line'];
+	    
+	    $ThtmlData['data-id']           = $line->id;
+	    $ThtmlData['data-product_type'] = $line->product_type;
+	    $ThtmlData['data-qty']          = 0; //$line->qty;
+	    $ThtmlData['data-level']        = TSubtotal::getNiveau($line);
+	    
+	    if(TSubtotal::isTitle($line)){
+	        $ThtmlData['data-issubtotal'] = 'title';
+	    }elseif(TSubtotal::isSubtotal($line)){
+	        $ThtmlData['data-issubtotal'] = 'subtotal';
+	    }
+	    else{
+	        $ThtmlData['data-issubtotal'] = 'freetext';
+	    }
+	    
+	    
+	    // Change or add data  from hooks
+	    $parameters = array_replace($parameters , array(  'ThtmlData' => $ThtmlData )  );
+	    
+	    // hook 
+	    $reshook = $hookmanager->executeHooks('subtotalLineHtmlData',$parameters,$object,$action); // Note that $action and $object may have been modified by hook
+	    if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+	    if ($reshook>0)
+	    {
+	        $ThtmlData = $hookmanager->resArray;
+	    }
+
+	    return $this->implodeHtmlData($ThtmlData);
+	
+	}
+	
+	
+	function implodeHtmlData($ThtmlData = array())
+	{
+	    $data = '';
+	    foreach($ThtmlData as $k => $h )
+	    {
+	        if(is_array($h))
+	        {
+	            $h = json_encode($h);
+	        }
+	        
+	        $data .= $k . '="'.dol_htmlentities($h, ENT_QUOTES).'" ';
+	    }
+	    
+	    return $data;
+	}
+	
+	function _ajax_block_order_js($object)
+	{
+	    global $conf,$tagidfortablednd,$filepath,$langs;
+	    
+	    /*
+	     * this part of js is base on dolibarr htdocs/core/tpl/ajaxrow.tpl.php 
+	     * for compatibility reasons we don't use tableDnD but jquery sortable
+	     */
+	    
+	    $id=$object->id;
+	    $nboflines=(isset($object->lines)?count($object->lines):0);
+	    $forcereloadpage=empty($conf->global->MAIN_FORCE_RELOAD_PAGE)?0:1;
+	    
+	    $id=$object->id;
+	    $fk_element=$object->fk_element;
+	    $table_element_line=$object->table_element_line;
+	    $nboflines=(isset($object->lines)?count($object->lines):(empty($nboflines)?0:$nboflines));
+	    $tagidfortablednd=(empty($tagidfortablednd)?'tablelines':$tagidfortablednd);
+	    $filepath=(empty($filepath)?'':$filepath);
+	    
+	    
+	    if (GETPOST('action','aZ09') != 'editline' && $nboflines > 1)
+	    {
+	        
+	        ?>
+		
+		
+			<script type="text/javascript">
+			$(document).ready(function(){
+
+				// target some elements
+				var titleRow = $('tr[data-issubtotal="title"]');
+				var lastTitleCol = titleRow.find('td:last-child');
+				var moveBlockCol= titleRow.find('td.liencolht');
+
+				
+				moveBlockCol.disableSelection(); // prevent selection
+
+				// apply some graphical stuff
+				moveBlockCol.css("background-image",'url(<?php echo dol_buildpath('subtotal/img/grip_all.png',2);  ?>)');
+				moveBlockCol.css("background-repeat","no-repeat");
+				moveBlockCol.css("background-position","center center");
+				moveBlockCol.css("cursor","move");
+				titleRow.attr('title', '<?php echo html_entity_decode($langs->trans('MoveTitleBlock')); ?>');
+			
+
+ 				$( "#<?php echo $tagidfortablednd; ?>" ).sortable({
+			    	  cursor: "move",
+			    	  handle: ".movetitleblock",
+			    	  items: 'tr:not(.nodrag,.nodrop,.noblockdrop)',
+			    	  delay: 150, //Needed to prevent accidental drag when trying to select
+			    	  opacity: 0.8,
+			    	  axis: "y", // limit y axis
+			    	  placeholder: "ui-state-highlight",
+			    	  start: function( event, ui ) {
+			    	      //console.log('X:' + e.screenX, 'Y:' + e.screenY);
+			    		  //console.log(ui.item);
+			    		  var colCount = ui.item.children().length;
+   						  ui.placeholder.html('<td colspan="'+colCount+'">&nbsp;</td>');
+   		
+			    		  var TcurrentChilds = getSubtotalTitleChilds(ui.item);
+			    		  ui.item.data('childrens',TcurrentChilds); // store data
+				    		
+			    		  for (var key in TcurrentChilds) {
+			    			  $('#'+ TcurrentChilds[key]).addClass('noblockdrop');//'#row-'+ 
+			    			  $('#'+ TcurrentChilds[key]).fadeOut();//'#row-'+ 
+			    		  }
+
+			    		  $(this).sortable("refresh");	// "refresh" of source sortable is required to make "disable" work!
+			    	      
+			    	    },
+				    	stop: function (event, ui) {
+							// call we element is droped
+				    	  	$('.noblockdrop').removeClass('noblockdrop');
+
+				    	  	var TcurrentChilds = ui.item.data('childrens'); // reload child list from data and not attr to prevent load error
+
+							for (var i =TcurrentChilds.length ; i >= 0; i--) {
+				    			  $('#'+ TcurrentChilds[i]).insertAfter(ui.item); //'#row-'+ 
+				    			  $('#'+ TcurrentChilds[i]).fadeIn(); //'#row-'+ 
+							}
+			    	  },
+			    	  update: function (event, ui) {
+			    	        // POST to server using $.post or $.ajax
+			    	        $.ajax({
+			    	            data: {
+									objet_id: <?php print $object->id; ?>,
+							    	roworder: cleanSerialize($(this).sortable('serialize')),
+									table_element_line: "<?php echo $table_element_line; ?>",
+									fk_element: "<?php echo $fk_element; ?>",
+									element_id: "<?php echo $id; ?>",
+									filepath: "<?php echo urlencode($filepath); ?>"
+								},
+			    	            type: 'POST',
+			    	            url: '<?php echo DOL_URL_ROOT; ?>/core/ajax/row.php',
+			    	            success: function(data) {
+			    	                console.log(data);
+			    	            },
+			    	        });
+			    	    }
+			    });
+				
+
+				function getSubtotalTitleChilds(item)
+				{
+		    		var TcurrentChilds = []; // = JSON.parse(item.attr('data-childrens'));
+		    		var level = item.data('level');
+
+		    		var indexOfFirstSubtotal = -1;
+		    		var indexOfFirstTitle = -1;
+		    		
+		    		item.nextAll('[id^="row-"]').each(function(index){
+
+						var dataLevel = $(this).attr('data-level');
+						var dataIsSubtotal = $(this).attr('data-issubtotal');
+						
+						if(dataIsSubtotal != 'undefined' && dataLevel != 'undefined' )
+						{
+
+							if(dataLevel <=  level && indexOfFirstSubtotal < 0 && dataIsSubtotal == 'subtotal' )
+							{
+								indexOfFirstSubtotal = index;
+								if(indexOfFirstTitle < 0)
+								{
+									TcurrentChilds.push($(this).attr('id'));
+								}
+							}
+							
+							if(dataLevel <=  level && indexOfFirstSubtotal < 0 && indexOfFirstTitle < 0 && dataIsSubtotal == 'title' )
+							{
+								indexOfFirstTitle = index;
+							}
+						}
+
+						if(indexOfFirstTitle < 0 && indexOfFirstSubtotal < 0)
+						{
+							TcurrentChilds.push($(this).attr('id'));
+						}
+
+		    		});
+		    		return TcurrentChilds;
+				}
+				
+			});
+			</script>
+			<style type="text/css" >
+         
+            tr.ui-state-highlight td{
+            	border: 1px solid #dad55e;
+            	background: #fffa90;
+            	color: #777620;
+            }
+            </style>
+		<?php
+		
+		} 
+	
+		
+		
 	}
 	
 }
