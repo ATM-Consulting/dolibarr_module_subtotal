@@ -2219,10 +2219,13 @@ class ActionsSubtotal
 			    	  delay: 150, //Needed to prevent accidental drag when trying to select
 			    	  opacity: 0.8,
 			    	  axis: "y", // limit y axis
+			    	  placeholder: "ui-state-highlight",
 			    	  start: function( event, ui ) {
 			    	      //console.log('X:' + e.screenX, 'Y:' + e.screenY);
 			    		  //console.log(ui.item);
-			    		  
+			    		  var colCount = ui.item.children().length;
+   						  ui.placeholder.html('<td colspan="'+colCount+'">&nbsp;</td>');
+   		
 			    		  var TcurrentChilds = getSubtotalTitleChilds(ui.item);
 			    		  ui.item.data('childrens',TcurrentChilds); // store data
 				    		
@@ -2234,7 +2237,7 @@ class ActionsSubtotal
 			    		  $(this).sortable("refresh");	// "refresh" of source sortable is required to make "disable" work!
 			    	      
 			    	    },
-			    	  update: function (event, ui) {
+				    	stop: function (event, ui) {
 							// call we element is droped
 				    	  	$('.noblockdrop').removeClass('noblockdrop');
 
@@ -2244,8 +2247,8 @@ class ActionsSubtotal
 				    			  $('#'+ TcurrentChilds[i]).insertAfter(ui.item); //'#row-'+ 
 				    			  $('#'+ TcurrentChilds[i]).fadeIn(); //'#row-'+ 
 							}
-							
-							//console.log(cleanSerialize($(this).sortable('serialize')));
+			    	  },
+			    	  update: function (event, ui) {
 			    	        // POST to server using $.post or $.ajax
 			    	        $.ajax({
 			    	            data: {
@@ -2308,7 +2311,14 @@ class ActionsSubtotal
 				
 			});
 			</script>
-			
+			<style type="text/css" >
+         
+            tr.ui-state-highlight td{
+            	border: 1px solid #dad55e;
+            	background: #fffa90;
+            	color: #777620;
+            }
+            </style>
 		<?php
 		
 		} 
