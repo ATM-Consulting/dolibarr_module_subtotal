@@ -2285,7 +2285,7 @@ class ActionsSubtotal
 						if(dataIsSubtotal != 'undefined' && dataLevel != 'undefined' )
 						{
 
-							if(dataLevel >=  level && indexOfFirstSubtotal < 0 && dataIsSubtotal == 'subtotal' )
+							if(dataLevel <=  level && indexOfFirstSubtotal < 0 && dataIsSubtotal == 'subtotal' )
 							{
 								indexOfFirstSubtotal = index;
 								if(indexOfFirstTitle < 0)
@@ -2294,7 +2294,7 @@ class ActionsSubtotal
 								}
 							}
 							
-							if(dataLevel >=  level && indexOfFirstSubtotal < 0 && indexOfFirstTitle < 0 && dataIsSubtotal == 'title' )
+							if(dataLevel <=  level && indexOfFirstSubtotal < 0 && indexOfFirstTitle < 0 && dataIsSubtotal == 'title' )
 							{
 								indexOfFirstTitle = index;
 							}
