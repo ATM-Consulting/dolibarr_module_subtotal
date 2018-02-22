@@ -489,7 +489,7 @@ class Interfacesubtotaltrigger
 				 
 				foreach ($object->lines as &$line)
 				{
-					if (!TSubtotal::isSubtotal($line) && !TSubtotal::isTitle($line) && !empty($line->array_options['options_subtotal_nc']))
+					if (!TSubtotal::isModSubtotalLine($line) && !empty($line->array_options['options_subtotal_nc']))
 					{
 						$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 = 
 							$line->multicurrency_total_ht = $line->multicurrency_total_tva = $line->multicurrency_total_ttc = 0;
