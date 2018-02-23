@@ -291,7 +291,7 @@ class Interfacesubtotaltrigger
 				}
 			}
 		}
-
+		
 		// Les lignes libres (y compris les sous-totaux) créées à partir d'une facture modèle n'ont pas la TVA de la ligne du modèle mais la TVA par défaut
 		if ($action == 'BILL_CREATE' && $object->fac_rec > 0) {
 			dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
@@ -478,6 +478,29 @@ class Interfacesubtotaltrigger
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
+			
+			$doli_action = GETPOST('action');
+
+			if (in_array($doli_action, array('confirm_clone')))
+			{
+				dol_syslog(
+					"[SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS] Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". object=".$object->element." id=" . $object->id
+				);
+				 
+				foreach ($object->lines as &$line)
+				{
+					if (!TSubtotal::isModSubtotalLine($line) && !empty($line->array_options['options_subtotal_nc']))
+					{
+						$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 = 
+							$line->multicurrency_total_ht = $line->multicurrency_total_tva = $line->multicurrency_total_ttc = 0;
+
+						$res = $line->update(1);
+						
+						if ($res > 0) setEventMessage($langs->trans('subtotal_update_nc_success'));
+					}
+				}
+			}
+			
         } elseif ($action == 'PROPAL_MODIFY') {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
