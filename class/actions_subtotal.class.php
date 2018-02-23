@@ -1842,6 +1842,8 @@ class ActionsSubtotal
 					
 			<td align="center" class="nowrap linecoledit">
 				<?php
+				if ($action != 'selectlines') {
+				
 					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 						?>
 						<input id="savelinebutton" class="button" type="submit" name="save" value="<?php echo $langs->trans('Save') ?>" />
@@ -1870,7 +1872,7 @@ class ActionsSubtotal
 						}								
 					}
 					
-
+				}
 					
 				?>
 			</td>
@@ -1878,7 +1880,7 @@ class ActionsSubtotal
 			<td align="center" nowrap="nowrap" class="linecoldelete">	
 				<?php
 
-					if ($action != 'editline') {
+				if ($action != 'editline' && $action != 'selectlines') {
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
 						{
 
@@ -1910,6 +1912,10 @@ class ActionsSubtotal
 			</td>
 			<?php } else { ?>
 			<td align="center"<?php echo ((empty($conf->browser->phone) && ($object->statut == 0  && $createRight ))?' class="tdlineupdown"':''); ?>></td>
+			<?php } ?>
+
+			<?php  if($action == 'selectlines'){ // dolibarr 8 ?>
+			<td class="linecolcheck" align="center"><input type="checkbox" class="linecheckbox" name="line_checkbox[<?php echo $i+1; ?>]" value="<?php echo $line->id; ?>" ></td>
 			<?php } ?>
 
 			</tr>
@@ -2303,6 +2309,17 @@ class ActionsSubtotal
 						if(indexOfFirstTitle < 0 && indexOfFirstSubtotal < 0)
 						{
 							TcurrentChilds.push($(this).attr('id'));
+
+							// Add extraffield support for dolibarr > 7
+							var thisId = $(this).attr('data-id');
+							var thisElement = $(this).attr('data-element');
+							if(thisId != undefined && thisElement != undefined )
+							{
+								$('[data-targetid="' + thisId + '"][data-element="extrafield"][data-targetelement="'+ thisElement +'"]').each(function(index){
+									TcurrentChilds.push($(this).attr('id'));
+								});
+							}
+							
 						}
 
 		    		});
