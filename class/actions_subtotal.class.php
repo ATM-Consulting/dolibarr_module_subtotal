@@ -2253,10 +2253,10 @@ class ActionsSubtotal
 				    			  $('#'+ TcurrentChilds[i]).insertAfter(ui.item); //'#row-'+ 
 				    			  $('#'+ TcurrentChilds[i]).fadeIn(); //'#row-'+ 
 							}
-			    	  },
-			    	  update: function (event, ui) {
-			    	        // POST to server using $.post or $.ajax
-			    	        $.ajax({
+							console.log('onstop');
+							console.log(cleanSerialize($(this).sortable('serialize')));
+							
+							$.ajax({
 			    	            data: {
 									objet_id: <?php print $object->id; ?>,
 							    	roworder: cleanSerialize($(this).sortable('serialize')),
@@ -2271,6 +2271,14 @@ class ActionsSubtotal
 			    	                console.log(data);
 			    	            },
 			    	        });
+			    	        
+			    	  },
+			    	  update: function (event, ui) {
+				    	  
+			    	        // POST to server using $.post or $.ajax
+				    	  	$('.noblockdrop').removeClass('noblockdrop');
+							//console.log('onupdate');
+			    	        //console.log(cleanSerialize($(this).sortable('serialize')));
 			    	    }
 			    });
 				
