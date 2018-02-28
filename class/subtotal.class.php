@@ -440,7 +440,7 @@ class TSubtotal {
 		}
 	}
 	
-	public static function getLinesFromTitle(&$object, $key_trad, $level=1, $under_title='', $withBlockLine=false, $key_is_id=false)
+	public static function getLinesFromTitle(&$object, $key_trad, $level=1, $under_title='', $withBlockLine=false, $key_is_id=false, $subtitle_included=true)
 	{
 		global $langs;
 		
@@ -479,6 +479,12 @@ class TSubtotal {
 				if ($add_line)
 				{
 					if (!$withBlockLine && (self::isTitle($line) || self::isSubtotal($line)) ) continue;
+
+					$parentTitleLine = TSubtotal::getParentTitleOfLine($object, $key);
+					if(! $subtitle_included && $key_is_id) {
+						// On prend en compte la ligne seulement si son titre parent est bien celui dont on a appelé la fonction
+						if($parentTitleLine->id == $key_trad) $TLine[] = $line;
+					}
 					else $TLine[] = $line;
 				}
 			}
