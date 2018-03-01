@@ -481,10 +481,8 @@ class TSubtotal {
 					if (!$withBlockLine && (self::isTitle($line) || self::isSubtotal($line)) ) continue;
 
 					$parentTitleLine = TSubtotal::getParentTitleOfLine($object, $key);
-					if(! $subtitle_included && $key_is_id) {
-						// On prend en compte la ligne seulement si son titre parent est bien celui dont on a appelé la fonction
-						if($parentTitleLine->id == $key_trad) $TLine[] = $line;
-					}
+					// On prend en compte la ligne seulement si son titre parent est bien celui avec lequel on a appelé la fonction
+					if(! $subtitle_included && $key_is_id && $parentTitleLine->id == $key_trad) $TLine[] = $line;
 					else $TLine[] = $line;
 				}
 			}
