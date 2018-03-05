@@ -16,19 +16,8 @@
 	}
 	
 	switch ($set) {
-		case 'updateLineNCFromLine': // Gestion du Compris/Non Compris via les lignes directement
-			
-			echo json_encode( _updateLineNCFromLine(GETPOST('element'), GETPOST('elementid'), GETPOST('lineid'), GETPOST('subtotal_nc')) );
-			
-			break;
-		case 'updateLineNC': // Gestion du Compris/Non Compris via les titres
-			
+		case 'updateLineNC': // Gestion du Compris/Non Compris via les titres et/ou lignes
 			echo json_encode( _updateLineNC(GETPOST('element'), GETPOST('elementid'), GETPOST('lineid'), GETPOST('subtotal_nc')) );
-			
-			break;
-		case 'updateLine':
-			
-			echo json_encode( _updateLine(GETPOST('element'), GETPOST('elementid'), GETPOST('lineid')) );
 			
 			break;
 		default:
