@@ -1321,7 +1321,7 @@ class ActionsSubtotal
 					$fk_parent_line = $line->rowid;
 					
 					// Fix tk7201 - si on cache le détail, la TVA est renseigné au niveau du sous-total, l'erreur c'est s'il y a plusieurs sous-totaux pour les même lignes, ça va faire la somme
-					if(TSubtotal::isSubtotal($line) && TSubtotal::getNiveau($line) == 1) 
+					if(TSubtotal::isSubtotal($line)) 
 					{
 						/*$total = $this->getTotalLineFromObject($object, $line, '');
 						
@@ -1330,7 +1330,7 @@ class ActionsSubtotal
 						*/
 						list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
 						
-						$line->TTotal_tva = $TTotal_tva;
+						if (TSubtotal::getNiveau($line) == 1) $line->TTotal_tva = $TTotal_tva;
 						$line->total_ht = $total;
 						$line->total_tva = $total_tva;
 						$line->total = $line->total_ht;
