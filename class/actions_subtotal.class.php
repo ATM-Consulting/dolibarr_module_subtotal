@@ -1336,7 +1336,7 @@ class ActionsSubtotal
 					$fk_parent_line = $line->rowid;
 					
 					// Fix tk7201 - si on cache le détail, la TVA est renseigné au niveau du sous-total, l'erreur c'est s'il y a plusieurs sous-totaux pour les même lignes, ça va faire la somme
-					if(TSubtotal::isSubtotal($line) && TSubtotal::getNiveau($line) == 1) 
+					if(TSubtotal::isSubtotal($line)) 
 					{
 						/*$total = $this->getTotalLineFromObject($object, $line, '');
 						
@@ -1345,7 +1345,7 @@ class ActionsSubtotal
 						*/
 						list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
 						
-						$line->TTotal_tva = $TTotal_tva;
+						if (TSubtotal::getNiveau($line) == 1) $line->TTotal_tva = $TTotal_tva;
 						$line->total_ht = $total;
 						$line->total_tva = $total_tva;
 						$line->total = $line->total_ht;
@@ -2060,46 +2060,10 @@ class ActionsSubtotal
 						var lineid = $(this).data('lineid');
 						var subtotal_nc = 0 | $(this).is(':checked'); // Renvoi 0 ou 1 
 						
-						if (typeof $(this).closest('tr').attr('rel') && $(this).closest('tr').attr('rel') == 'subtotal') callAjaxUpdateLineNC('updateLineNC', lineid, subtotal_nc);
-						else callAjaxUpdateLineNC('updateLineNCFromLine', lineid, subtotal_nc);
+						callAjaxUpdateLineNC('updateLineNC', lineid, subtotal_nc);
 					});
 					
-					$(document).ajaxSuccess(function(event, xhr, options) {
-						if (xhr.status == 200 && xhr.statusText == 'OK' && typeof options.url != 'undefined' && options.url == '/core/ajax/row.php')
-						{
-							var roworder = GetURLParameter('roworder', options.data);
-							if (roworder.length > 0)
-							{
-								var lineid = GetURLParameter('element_id', options.data);
-								if (lineid > 0)
-								{
-									callAjaxUpdateLineNC('updateLine', lineid);
-								}
-							}
-						}
-						
-					});
 				});
-				
-				// source : http://www.jquerybyexample.net/2012/06/get-url-parameters-using-jquery.html
-				function GetURLParameter(sParam, sPageURL)
-				{
-					if (!sPageURL) {
-						sPageURL = window.location.search.substring(1);
-					}
-					
-					var sURLVariables = sPageURL.split('&');
-					for (var i = 0; i < sURLVariables.length; i++)
-					{
-						var sParameterName = sURLVariables[i].split('=');
-						if (sParameterName[0] == sParam)
-						{
-							return sParameterName[1];
-						}
-					}
-					
-					return '';
-				}
 
 			</script>
 			<?php
