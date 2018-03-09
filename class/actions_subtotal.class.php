@@ -743,7 +743,7 @@ class ActionsSubtotal
 			
 			$this->resprints = ' ';
 			
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -769,7 +769,7 @@ class ActionsSubtotal
 			
 			$this->resprints = ' ';
 			
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -786,7 +786,7 @@ class ActionsSubtotal
 			
 			$this->resprints = ' ';
 		
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -801,7 +801,7 @@ class ActionsSubtotal
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 		
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -816,7 +816,7 @@ class ActionsSubtotal
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 		
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -830,7 +830,7 @@ class ActionsSubtotal
 	function pdf_getlineupwithtax($parameters=array(), &$object, &$action='') {
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -845,7 +845,7 @@ class ActionsSubtotal
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 			
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -859,7 +859,7 @@ class ActionsSubtotal
 	function pdf_getlineprogress($parameters=array(), &$object, &$action) {
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
-			if((float)DOL_VERSION<=3.4) {
+			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
@@ -1052,13 +1052,11 @@ class ActionsSubtotal
 					$posy = $pdf->GetY();
 				}
 				
-				if($line->label=='') {
-					$label = $outputlangs->convToOutputCharset($line->desc);
+				$label = $line->label;
+				$description= !empty($line->desc) ? $outputlangs->convToOutputCharset($line->desc) : $outputlangs->convToOutputCharset($line->description);
+				if(empty($label)) {
+					$label = $description;
 					$description='';
-				}
-				else {
-					$label = $outputlangs->convToOutputCharset($line->label);
-					$description=$outputlangs->convToOutputCharset(dol_htmlentitiesbr($line->desc));
 				}
 				
 				if($line->qty>90) {
@@ -1196,6 +1194,7 @@ class ActionsSubtotal
 						 */
 						else if($object->element=='commande') $object->updateline($line->id,$description, 0,$line->qty,0,0,0,0,'HT',$pagebreak,'','',9,0,0,null,0,$_POST['linetitle'], $this->module_number);
 						
+						TSubtotal::generateDoc($object);
 					}
 					else if($action=='editlinetitle') {
 						?>
