@@ -25,7 +25,7 @@ class TSubtotal {
 		}
 		else {
 			$desc = '';
-			if ((float) DOL_VERSION < 6) {
+			if ((float) DOL_VERSION < 6  || $qty==50) {
 				$desc = $label;
 				$label = '';
 			}
