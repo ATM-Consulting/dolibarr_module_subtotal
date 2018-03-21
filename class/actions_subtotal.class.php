@@ -962,7 +962,8 @@ class ActionsSubtotal
 
 		if (empty($object->lines[$i])) return 0; // hideInnerLines => override $object->lines et Dolibarr ne nous permet pas de mettre à jour la variable qui conditionne la boucle sur les lignes (PR faite pour 6.0)
 		
-		$object->lines[$i]->fetch_optionals();
+		if(empty($object->lines[$i]->array_options)) $object->lines[$i]->fetch_optionals();
+
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
 			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
@@ -1576,7 +1577,6 @@ class ActionsSubtotal
 	 * @return int
 	 */
 	function printObjectLine ($parameters, &$object, &$action, $hookmanager){
-		
 		global $conf,$langs,$user,$db,$bc;
 		
 		$num = &$parameters['num'];
@@ -1966,7 +1966,7 @@ class ActionsSubtotal
 	
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
 		global $conf,$langs;
-		
+
 		if ($object->statut == 0 && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && $action != 'editline')
 		{
 			$TSubNc = array();
