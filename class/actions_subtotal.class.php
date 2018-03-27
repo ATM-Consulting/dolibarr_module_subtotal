@@ -2090,6 +2090,8 @@ class ActionsSubtotal
 	// HTML 5 data for js
 	private function _getHtmlData($parameters, &$object, &$action, $hookmanager)
 	{
+		dol_include_once('/subtotal/class/subtotal.class.php');
+
 	    $line = &$parameters['line'];
 
 	    $ThtmlData['data-id']           = $line->id;
