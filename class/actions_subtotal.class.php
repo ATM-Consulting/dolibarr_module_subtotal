@@ -56,14 +56,17 @@ class ActionsSubtotal
 		$langs->load('subtotal@subtotal');
 
 		$contexts = explode(':',$parameters['context']);
-
-		if(in_array('ordercard',$contexts) || in_array('propalcard',$contexts) || in_array('invoicecard',$contexts) || in_array('invoicereccard',$contexts)) {
-
+		
+		if(in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('invoicecard',$contexts) || in_array('invoicereccard',$contexts)) {
+		    
 			$createRight = $user->rights->{$object->element}->creer;
 			if($object->element == 'facturerec' )
 			{
 				$object->statut = 0; // hack for facture rec
 				$createRight = $user->rights->facture->creer;
+			} elseif($object->element == 'order_supplier' )
+			{
+			    $createRight = $user->rights->fournisseur->commande->creer;
 			}
 
 			if ($object->statut == 0  && $createRight) {
@@ -330,13 +333,15 @@ class ActionsSubtotal
 	/* Réponse besoin client */
 
 		global $conf, $langs, $bc;
-
+		
 		$action = GETPOST('action');
+		
 		$TContext = explode(':',$parameters['context']);
 		if (
 				in_array('invoicecard',$TContext)
 				|| in_array('propalcard',$TContext)
 				|| in_array('ordercard',$TContext)
+		        || in_array('ordersuppliercard',$TContext)
 				|| in_array('invoicereccard',$TContext)
 			)
 	        {
@@ -373,6 +378,7 @@ class ActionsSubtotal
 				if (
 					(in_array('propalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
 					|| (in_array('ordercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
+				    || (in_array('ordersuppliercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
 					|| (in_array('invoicecard',$TContext) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
 					|| (in_array('invoicereccard',$TContext)  && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP ))
 				)
@@ -455,6 +461,7 @@ class ActionsSubtotal
 				in_array('invoicecard',explode(':',$parameters['context']))
 				|| in_array('propalcard',explode(':',$parameters['context']))
 				|| in_array('ordercard',explode(':',$parameters['context']))
+		        || in_array('ordersuppliercard',explode(':',$parameters['context']))
 				|| in_array('invoicereccard',explode(':',$parameters['context']))
 		) {
 
@@ -533,6 +540,7 @@ class ActionsSubtotal
 				in_array('invoicecard',explode(':',$parameters['context']))
 				|| in_array('propalcard',explode(':',$parameters['context']))
 				|| in_array('ordercard',explode(':',$parameters['context']))
+			    || in_array('ordersuppliercard',explode(':',$parameters['context']))
 			)
 	        {
 				if(in_array('invoicecard',explode(':',$parameters['context']))) {
@@ -549,6 +557,11 @@ class ActionsSubtotal
 					$sessname = 'subtotal_hideInnerLines_commande';
 					$sessname2 = 'subtotal_hidedetails_commande';
 					$sessname3 = 'subtotal_hideprices_commande';
+				}
+				elseif(in_array('ordersuppliercard',explode(':',$parameters['context']))) {
+				    $sessname = 'subtotal_hideInnerLines_commande_fournisseur';
+				    $sessname2 = 'subtotal_hidedetails_commande_fournisseur';
+				    $sessname3 = 'subtotal_hideprices_commande_fournisseur';
 				}
 				else {
 					$sessname = 'subtotal_hideInnerLines_unknown';
@@ -635,10 +648,8 @@ class ActionsSubtotal
 	}
 
 	function getArrayOfLineForAGroup(&$object, $lineid) {
-		$rang = $line->rang;
-		$qty_line = $line->qty;
 
-		$total = 0;
+		$qty_line = 0;
 
 		$found = false;
 
@@ -646,7 +657,9 @@ class ActionsSubtotal
 
 		foreach($object->lines as $l) {
 
-			if($l->rowid == $lineid) {
+		    $lid = (!empty($l->rowid) ? $l->rowid : $l->id);
+			if($lid == $lineid) {
+
 				$found = true;
 				$qty_line = $l->qty;
 			}
@@ -662,8 +675,7 @@ class ActionsSubtotal
 
 
 		}
-
-
+		
 		return $Tab;
 
 	}
@@ -1607,12 +1619,16 @@ class ActionsSubtotal
 		{
 			$object->statut = 0; // hack for facture rec
 			$createRight = $user->rights->facture->creer;
+		} 
+		elseif($object->element == 'order_supplier' )
+		{
+		    $createRight = $user->rights->fournisseur->commande->creer;
 		}
 
 		if($line->special_code!=$this->module_number || $line->product_type!=9) {
 			null;
-		}
-		else if (in_array('invoicecard',$contexts) || in_array('propalcard',$contexts) || in_array('ordercard',$contexts) || in_array('invoicereccard',$contexts))
+		}	
+		else if (in_array('invoicecard',$contexts) || in_array('propalcard',$contexts) || in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('invoicereccard',$contexts)) 
         {
 			if($object->element=='facture')$idvar = 'facid';
 			else $idvar='id';
@@ -1645,9 +1661,9 @@ class ActionsSubtotal
 
 			$colspan = 5;
 			if($object->element == 'facturerec' ) $colspan = 3;
-
+			if($object->element == 'order_supplier' && $object->statut == 0) $colspan = 3;
 			if(!empty($conf->multicurrency->enabled)) $colspan+=2;
-			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
+			if(($object->element == 'commande') && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
 			if(!empty($conf->margin->enabled)) $colspan++;
 			if(!empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
 			if(!empty($conf->global->DISPLAY_MARK_RATES)) $colspan++;

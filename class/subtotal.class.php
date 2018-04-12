@@ -44,6 +44,13 @@ class TSubtotal {
 			 */
 			else if($object->element=='commande') $res =  $object->addline($desc, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,$rang, TSubtotal::$module_number, 0, null, 0, $label);
 			/**
+			 * @var $object Commande fournisseur
+			 */
+			else if($object->element=='order_supplier') {
+			    $object->special_code = 104777;
+			    $res = $object->addline($label, 0,$qty,0,0,0,0,0,'',0,'HT', 0, 9);
+			}
+			/**
 			 * @var $object Facturerec
 			 */
 			else if($object->element=='facturerec') $res =  $object->addline($desc, 0,$qty, 0, 0, 0, 0, 0, 'HT', 0, '', 0, 9, $rang, TSubtotal::$module_number,$label); 
