@@ -599,7 +599,7 @@ class ActionsSubtotal
 		else if($action === 'confirm_delete_all_lines' && GETPOST('confirm')=='yes') {
 
 			$Tab = $this->getArrayOfLineForAGroup($object, GETPOST('lineid'));
-
+			
 			foreach($Tab as $idLine) {
 				/**
 				 * @var $object Facture
@@ -616,6 +616,13 @@ class ActionsSubtotal
 				{
 					if ((float) DOL_VERSION >= 5.0) $object->deleteline($user, $idLine);
 					else $object->deleteline($idLine);
+				}
+				/**
+				 * @var $object Commande fournisseur
+				 */
+				else if($object->element=='order_supplier')
+				{
+				    $object->deleteline($idLine);
 				}
 				/**
 				 * @var $object Facturerec
@@ -666,7 +673,7 @@ class ActionsSubtotal
 
 			if($found) {
 
-				$Tab[] = $l->rowid;
+			    $Tab[] = (!empty($l->rowid) ? $l->rowid : $l->id);
 
 				if($l->special_code==$this->module_number && (($l->qty==99 && $qty_line==1) || ($l->qty==98 && $qty_line==2))   ) {
 					break; // end of story
