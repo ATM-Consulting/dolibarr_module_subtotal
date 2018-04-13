@@ -68,7 +68,7 @@ class ActionsSubtotal
 			{
 			    $createRight = $user->rights->fournisseur->commande->creer;
 			}
-
+			
 			if ($object->statut == 0  && $createRight) {
 
 
@@ -509,9 +509,10 @@ class ActionsSubtotal
 		{
 			$found = false;
 			$lineid = GETPOST('lineid', 'int');
+			
 			foreach ($object->lines as &$line)
 			{
-
+			    
 				if ($line->id == $lineid && TSubtotal::isModSubtotalLine($line))
 				{
 					$found = true;
@@ -1598,7 +1599,7 @@ class ActionsSubtotal
 				$res = ($line->label) ? $line->label : (($line->description) ? $line->description : $line->desc);
 			}
 		}
-
+		
 		return $res;
 	}
 
@@ -1737,7 +1738,11 @@ class ActionsSubtotal
 						{
 							$isFreeText = true;
 						}
-
+						
+						if ($object->element == 'order_supplier') {
+						    $line->label = !empty($line->description) ? $line->description : $line->desc;
+						    $line->description = '';
+						}
 						$newlabel = $line->label;
 						if($line->label=='' && !$isFreeText) {
 							if(TSubtotal::isSubtotal($line)) {

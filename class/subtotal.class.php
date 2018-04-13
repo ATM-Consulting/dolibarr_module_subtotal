@@ -36,6 +36,13 @@ class TSubtotal {
 			 */
 			if($object->element=='facture') $res =  $object->addline($desc, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,$rang, TSubtotal::$module_number, '', 0, 0, null, 0, $label);
 			/**
+			 * @var $object Facture fournisseur
+			 */
+			else if($object->element=='invoice_supplier') {
+			    $object->special_code = 104777;
+			    $res = $object->addline($desc,0,0,0,0,$qty,0,0,'','',0,0,'HT',9);
+			}
+			/**
 			 * @var $object Propal
 			 */
 			else if($object->element=='propal') $res = $object->addline($desc, 0,$qty,0,0,0,0,0,'HT',0,0,9,$rang, TSubtotal::$module_number, 0, 0, 0, $label);
@@ -48,7 +55,7 @@ class TSubtotal {
 			 */
 			else if($object->element=='order_supplier') {
 			    $object->special_code = 104777;
-			    $res = $object->addline($label, 0,$qty,0,0,0,0,0,'',0,'HT', 0, 9);
+			    $res = $object->addline($desc, 0,$qty,0,0,0,0,0,'',0,'HT', 0, 9);
 			}
 			/**
 			 * @var $object Facturerec
@@ -525,10 +532,22 @@ class TSubtotal {
 			case 'commande':
 				$res = $object->updateline($rowid, $desc, $pu, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $date_start, $date_end, $type, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $special_code, $array_options, $fk_unit);
 				break;
+				
+			case 'order_supplier':
+			    $object->special_code = SELF::$module_number;
+			    if (empty($desc)) $desc = $label;
+			    $res = $object->updateline($rowid, $desc, $pu, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $type, 0, $date_start, $date_end, $array_options, $fk_unit);
+			    break;
 			
 			case 'facture':
 				$res = $object->updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $type, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $special_code, $array_options, $situation_percent, $fk_unit);
 				break;
+				
+			case 'invoice_supplier':
+			    $object->special_code = SELF::$module_number;
+			    if (empty($desc)) $desc = $label;
+			    $res = $object->updateline($rowid, $desc, $pu, $txtva, $txlocaltax1, $txlocaltax2, $qty, 0, $price_base_type, $info_bits, $type, $remise_percent, 0, $date_start, $date_end, $array_options, $fk_unit);
+			    break;
 				
 			case 'facturerec':
 				// Add extrafields and get rang
