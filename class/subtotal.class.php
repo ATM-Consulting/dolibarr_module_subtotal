@@ -40,7 +40,8 @@ class TSubtotal {
 			 */
 			else if($object->element=='invoice_supplier') {
 			    $object->special_code = 104777;
-			    $res = $object->addline($desc,0,0,0,0,$qty,0,0,'','',0,0,'HT',9);
+			    $rang = $object->line_max() + 1;
+			    $res = $object->addline($label,0,0,0,0,$qty,0,0,'','',0,0,'HT',9,$rang);
 			}
 			/**
 			 * @var $object Propal
@@ -55,7 +56,7 @@ class TSubtotal {
 			 */
 			else if($object->element=='order_supplier') {
 			    $object->special_code = 104777;
-			    $res = $object->addline($desc, 0,$qty,0,0,0,0,0,'',0,'HT', 0, 9);
+			    $res = $object->addline($label, 0,$qty,0,0,0,0,0,'',0,'HT', 0, 9);
 			}
 			/**
 			 * @var $object Facturerec

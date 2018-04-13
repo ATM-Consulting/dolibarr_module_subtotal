@@ -96,7 +96,7 @@ class modSubtotal extends DolibarrModules
             // Set this to relative path of css if module has its own css file
             //'css' => '/titre/css/mycss.css.php',
             // Set here all hooks context managed by module
-            'hooks' => array('invoicecard','propalcard','ordercard', 'ordersuppliercard','odtgeneration','orderstoinvoice','admin','invoicereccard')
+            'hooks' => array('invoicecard', 'invoicesuppliercard','propalcard', 'supplier_proposalcard', 'ordercard', 'ordersuppliercard','odtgeneration','orderstoinvoice','admin','invoicereccard')
             // Set here all workflow context managed by module
             //'workflow' => array('order' => array('WORKFLOW_ORDER_AUTOCREATE_INVOICE'))
         );

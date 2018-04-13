@@ -52,12 +52,12 @@ class ActionsSubtotal
     function formObjectOptions($parameters, &$object, &$action, $hookmanager)
     {
       	global $langs,$db,$user, $conf;
-
+      	
 		$langs->load('subtotal@subtotal');
 
 		$contexts = explode(':',$parameters['context']);
 		
-		if(in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('invoicecard',$contexts) || in_array('invoicereccard',$contexts)) {
+		if(in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('invoicereccard',$contexts)) {
 		    
 			$createRight = $user->rights->{$object->element}->creer;
 			if($object->element == 'facturerec' )
@@ -67,11 +67,13 @@ class ActionsSubtotal
 			} elseif($object->element == 'order_supplier' )
 			{
 			    $createRight = $user->rights->fournisseur->commande->creer;
+			} elseif($object->element == 'invoice_supplier' )
+			{
+			    $createRight = $user->rights->fournisseur->facture->creer;
 			}
 			
 			if ($object->statut == 0  && $createRight) {
-
-
+			    
 				if($object->element=='facture')$idvar = 'facid';
 				else $idvar='id';
 
@@ -115,8 +117,8 @@ class ActionsSubtotal
 					dol_include_once('/subtotal/class/subtotal.class.php');
 
 					if (!empty($conf->global->SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE) && $qty < 10) TSubtotal::addSubtotalMissing($object, $qty);
-
-	    			TSubtotal::addSubTotalLine($object, $title, $qty);
+					
+					TSubtotal::addSubTotalLine($object, $title, $qty);
 				}
 				else if($action==='ask_deleteallline') {
 						$form=new Form($db);
@@ -607,6 +609,13 @@ class ActionsSubtotal
 				 */
 				if($object->element=='facture') $object->deleteline($idLine);
 				/**
+				 * @var $object Facture fournisseur
+				 */
+				else if($object->element=='invoice_supplier')
+				{
+				    $object->deleteline($idLine);
+				}
+				/**
 				 * @var $object Propal
 				 */
 				else if($object->element=='propal') $object->deleteline($idLine);
@@ -716,6 +725,7 @@ class ActionsSubtotal
 
 		dol_include_once('/subtotal/class/subtotal.class.php');
 		foreach($object->lines as $l) {
+
 			//print $l->rang.'>='.$rang.' '.$total.'<br/>';
 			if($l->rang>=$rang) {
 				//echo 'return!<br>';
@@ -1632,11 +1642,15 @@ class ActionsSubtotal
 		{
 		    $createRight = $user->rights->fournisseur->commande->creer;
 		}
+		elseif($object->element == 'invoice_supplier' )
+		{
+		    $createRight = $user->rights->fournisseur->facture->creer;
+		}
 
 		if($line->special_code!=$this->module_number || $line->product_type!=9) {
 			null;
 		}	
-		else if (in_array('invoicecard',$contexts) || in_array('propalcard',$contexts) || in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('invoicereccard',$contexts)) 
+		else if (in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('invoicereccard',$contexts)) 
         {
 			if($object->element=='facture')$idvar = 'facid';
 			else $idvar='id';
@@ -1670,6 +1684,7 @@ class ActionsSubtotal
 			$colspan = 5;
 			if($object->element == 'facturerec' ) $colspan = 3;
 			if($object->element == 'order_supplier' && $object->statut == 0) $colspan = 3;
+			if($object->element == 'invoice_supplier' && $object->statut == 0) $colspan = 4;
 			if(!empty($conf->multicurrency->enabled)) $colspan+=2;
 			if(($object->element == 'commande') && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
 			if(!empty($conf->margin->enabled)) $colspan++;
@@ -1739,7 +1754,7 @@ class ActionsSubtotal
 							$isFreeText = true;
 						}
 						
-						if ($object->element == 'order_supplier') {
+						if ($object->element == 'order_supplier' || $object->element == 'invoice_supplier') {
 						    $line->label = !empty($line->description) ? $line->description : $line->desc;
 						    $line->description = '';
 						}
