@@ -2244,7 +2244,7 @@ class ActionsSubtotal
 
 
 				moveBlockCol.disableSelection(); // prevent selection
-
+<?php if ($object->statut == 0) { ?>
 				// apply some graphical stuff
 				moveBlockCol.css("background-image",'url(<?php echo dol_buildpath('subtotal/img/grip_all.png',2);  ?>)');
 				moveBlockCol.css("background-repeat","no-repeat");
@@ -2316,7 +2316,7 @@ class ActionsSubtotal
 			    	        //console.log(cleanSerialize($(this).sortable('serialize')));
 			    	    }
 			    });
-
+ 				<?php } ?>
 
 				function getSubtotalTitleChilds(item)
 				{
