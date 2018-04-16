@@ -74,4 +74,5 @@ subtotalLabelForFreeText=Texte prédéfini :
 subtotalFreeTextOrDesc=ou saisir une description...
 showExtrafields=Editer les attributs complémentaires
 hideExtrafields=Masquer les attributs complémentaires
+AmountBeforeTaxesSubjectToVATX%=Montant HT soumis à %s (%s %%)
 MoveTitleBlock=Déplacer le bloc titre complet
