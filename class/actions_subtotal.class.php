@@ -570,9 +570,9 @@ class ActionsSubtotal
 					$sessname3 = 'subtotal_hideprices_propal';
 				}
 				elseif(in_array('supplier_proposalcard',explode(':',$parameters['context']))) {
-				    $sessname = 'subtotal_hideInnerLines_propal_fournisseur';
-				    $sessname2 = 'subtotal_hidedetails_propal_fournisseur';
-				    $sessname3 = 'subtotal_hideprices_propal_fournisseur';
+				    $sessname = 'subtotal_hideInnerLines_supplier_proposal';
+				    $sessname2 = 'subtotal_hidedetails_supplier_proposal';
+				    $sessname3 = 'subtotal_hideprices_supplier_proposal';
 				}
 				elseif(in_array('ordercard',explode(':',$parameters['context']))) {
 					$sessname = 'subtotal_hideInnerLines_commande';
@@ -600,7 +600,7 @@ class ActionsSubtotal
 
 				$hideprices= (int)GETPOST('hideprices');
 				$_SESSION[$sessname3] = $hideprices;
-
+				
 				foreach($object->lines as &$line) {
 					if ($line->product_type == 9 && $line->special_code == $this->module_number) {
 
