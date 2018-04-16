@@ -1362,7 +1362,7 @@ class ActionsSubtotal
     					            $l->product_type = 1;
     					            $l->special_code = '';
     					            $l->qty = 1;
-    					            $l->desc = 'Montant HT soumis à '.$langs->trans('VAT').' '. price($tx) .' %';
+    					            $l->desc = $langs->trans('AmountBeforeTaxesSubjectToVATX%', $langs->transnoentitiesnoconv('VAT'), price($tx));
     					            $l->tva_tx = $tx;
     					            $l->total_ht = $val['total_ht'];
     					            $l->total_tva = $val['total_tva'];
@@ -1413,7 +1413,7 @@ class ActionsSubtotal
 			        $l->product_type = 1;
 			        $l->special_code = '';
 			        $l->qty = 1;
-			        $l->desc = 'Montant HT soumis à '.$langs->trans('VAT').' '. price($tx) .' %';
+			        $l->desc = $langs->trans('AmountBeforeTaxesSubjectToVATX%', $langs->transnoentitiesnoconv('VAT'), price($tx));
 			        $l->tva_tx = $tx;
 			        $l->total_ht = $val['total_ht'];
 			        $l->total_tva = $val['total_tva'];
