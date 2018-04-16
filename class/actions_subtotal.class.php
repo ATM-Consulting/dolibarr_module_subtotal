@@ -341,7 +341,9 @@ class ActionsSubtotal
 		$TContext = explode(':',$parameters['context']);
 		if (
 				in_array('invoicecard',$TContext)
+		        || in_array('invoicesuppliercard',$TContext)
 				|| in_array('propalcard',$TContext)
+		        || in_array('supplier_proposalcard',$TContext)
 				|| in_array('ordercard',$TContext)
 		        || in_array('ordersuppliercard',$TContext)
 				|| in_array('invoicereccard',$TContext)
@@ -379,9 +381,11 @@ class ActionsSubtotal
 
 				if (
 					(in_array('propalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
+				    || (in_array('supplier_proposalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
 					|| (in_array('ordercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
 				    || (in_array('ordersuppliercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
 					|| (in_array('invoicecard',$TContext) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
+				    || (in_array('invoicesuppliercard',$TContext) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
 					|| (in_array('invoicereccard',$TContext)  && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP ))
 				)
 				{
@@ -461,7 +465,9 @@ class ActionsSubtotal
 
 		if (
 				in_array('invoicecard',explode(':',$parameters['context']))
+		        || in_array('invoicesuppliercard',explode(':',$parameters['context']))
 				|| in_array('propalcard',explode(':',$parameters['context']))
+		        || in_array('supplier_proposalcard',explode(':',$parameters['context']))
 				|| in_array('ordercard',explode(':',$parameters['context']))
 		        || in_array('ordersuppliercard',explode(':',$parameters['context']))
 				|| in_array('invoicereccard',explode(':',$parameters['context']))
@@ -544,6 +550,8 @@ class ActionsSubtotal
 				|| in_array('propalcard',explode(':',$parameters['context']))
 				|| in_array('ordercard',explode(':',$parameters['context']))
 			    || in_array('ordersuppliercard',explode(':',$parameters['context']))
+			    || in_array('invoicesuppliercard',explode(':',$parameters['context']))
+			    || in_array('supplier_proposalcard',explode(':',$parameters['context']))
 			)
 	        {
 				if(in_array('invoicecard',explode(':',$parameters['context']))) {
@@ -551,10 +559,20 @@ class ActionsSubtotal
 					$sessname2 = 'subtotal_hidedetails_facture';
 					$sessname3 = 'subtotal_hideprices_facture';
 				}
+				elseif(in_array('invoicesuppliercard',explode(':',$parameters['context']))) {
+				    $sessname = 'subtotal_hideInnerLines_facture_fournisseur';
+				    $sessname2 = 'subtotal_hidedetails_facture_fournisseur';
+				    $sessname3 = 'subtotal_hideprices_facture_fournisseur';
+				}
 				elseif(in_array('propalcard',explode(':',$parameters['context']))) {
 					$sessname = 'subtotal_hideInnerLines_propal';
 					$sessname2 = 'subtotal_hidedetails_propal';
 					$sessname3 = 'subtotal_hideprices_propal';
+				}
+				elseif(in_array('supplier_proposalcard',explode(':',$parameters['context']))) {
+				    $sessname = 'subtotal_hideInnerLines_propal_fournisseur';
+				    $sessname2 = 'subtotal_hidedetails_propal_fournisseur';
+				    $sessname3 = 'subtotal_hideprices_propal_fournisseur';
 				}
 				elseif(in_array('ordercard',explode(':',$parameters['context']))) {
 					$sessname = 'subtotal_hideInnerLines_commande';
@@ -1683,8 +1701,8 @@ class ActionsSubtotal
 
 			$colspan = 5;
 			if($object->element == 'facturerec' ) $colspan = 3;
-			if($object->element == 'order_supplier' && $object->statut == 0) $colspan = 3;
-			if($object->element == 'invoice_supplier' && $object->statut == 0) $colspan = 4;
+			if($object->element == 'order_supplier' && $object->statut == 0) $colspan = 5;
+			if($object->element == 'invoice_supplier' && $object->statut == 0) $colspan = 6;
 			if(!empty($conf->multicurrency->enabled)) $colspan+=2;
 			if(($object->element == 'commande') && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
 			if(!empty($conf->margin->enabled)) $colspan++;
