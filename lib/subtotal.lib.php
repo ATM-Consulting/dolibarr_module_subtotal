@@ -237,6 +237,21 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 		else
 		{
 			$classname = ucfirst($element);
+			
+			switch ($element) {
+			    case 'supplier_proposal':
+			        $classname = 'SupplierProposal';
+			        break;
+			        
+			    case 'order_supplier':
+			        $classname = 'CommandeFournisseur';
+			        break;
+			        
+			    case 'invoice_supplier':
+			        $classname = 'FactureFournisseur';
+			        break;
+			}
+			
 			$object = new $classname($db); // Propal | Commande | Facture
 			$res = $object->fetch($elementid);
 			if ($res < 0) $error++;
