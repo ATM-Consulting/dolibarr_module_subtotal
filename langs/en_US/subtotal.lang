@@ -65,3 +65,4 @@ subtotalFreeLineDictionary=Pre-existing text line
 subtotalLabelForUnderTitle=Add into bloc:
 subtotalLabelForFreeText=Pre-existing text:
 subtotalFreeTextOrDesc=or write a custom description
+AmountBeforeTaxesSubjectToVATX%=Amount before taxes subject to %s (%s %%)
