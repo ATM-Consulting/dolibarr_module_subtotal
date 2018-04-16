@@ -39,7 +39,7 @@ class TSubtotal {
 			 * @var $object Facture fournisseur
 			 */
 			else if($object->element=='invoice_supplier') {
-			    $object->special_code = 104777;
+			    $object->special_code = TSubtotal::$module_number;
 			    $rang = $object->line_max() + 1;
 			    $res = $object->addline($label,0,0,0,0,$qty,0,0,'','',0,0,'HT',9,$rang);
 			}
@@ -48,6 +48,11 @@ class TSubtotal {
 			 */
 			else if($object->element=='propal') $res = $object->addline($desc, 0,$qty,0,0,0,0,0,'HT',0,0,9,$rang, TSubtotal::$module_number, 0, 0, 0, $label);
 			/**
+			 * @var $object Propal Fournisseur
+			 */
+			else if($object->element=='supplier_proposal') $res = $object->addline($desc, 0,$qty,0,0,0,0,0,'HT',0,0,9,$rang, TSubtotal::$module_number, 0, 0, 0, $label);
+			
+			/**
 			 * @var $object Commande
 			 */
 			else if($object->element=='commande') $res =  $object->addline($desc, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,$rang, TSubtotal::$module_number, 0, null, 0, $label);
@@ -55,7 +60,7 @@ class TSubtotal {
 			 * @var $object Commande fournisseur
 			 */
 			else if($object->element=='order_supplier') {
-			    $object->special_code = 104777;
+			    $object->special_code = TSubtotal::$module_number;
 			    $res = $object->addline($label, 0,$qty,0,0,0,0,0,'',0,'HT', 0, 9);
 			}
 			/**
@@ -526,10 +531,14 @@ class TSubtotal {
 		
 		switch ($object->element) 
 		{
-			case 'propal':
-				$res = $object->updateline($rowid, $pu, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $desc, $price_base_type, $info_bits, $special_code, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $type, $date_start, $date_end, $array_options, $fk_unit);
-				break;
-			
+		    case 'propal':
+		        $res = $object->updateline($rowid, $pu, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $desc, $price_base_type, $info_bits, $special_code, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $type, $date_start, $date_end, $array_options, $fk_unit);
+		        break;
+		        
+		    case 'supplier_proposal':
+		        $res = $object->updateline($rowid, $pu, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $desc, $price_base_type, $info_bits, $special_code, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $type, $date_start, $date_end, $array_options, $fk_unit);
+		        break;
+		        
 			case 'commande':
 				$res = $object->updateline($rowid, $desc, $pu, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $date_start, $date_end, $type, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $special_code, $array_options, $fk_unit);
 				break;

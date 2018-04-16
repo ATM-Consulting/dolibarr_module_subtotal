@@ -638,6 +638,10 @@ class ActionsSubtotal
 				 */
 				else if($object->element=='propal') $object->deleteline($idLine);
 				/**
+				 * @var $object Propal
+				 */
+				else if($object->element=='supplier_proposal') $object->deleteline($idLine);
+				/**
 				 * @var $object Commande
 				 */
 				else if($object->element=='commande')
@@ -1701,8 +1705,9 @@ class ActionsSubtotal
 
 			$colspan = 5;
 			if($object->element == 'facturerec' ) $colspan = 3;
-			if($object->element == 'order_supplier' && $object->statut == 0) $colspan = 5;
-			if($object->element == 'invoice_supplier' && $object->statut == 0) $colspan = 6;
+			if($object->element == 'order_supplier' && $object->statut == 0) $colspan = 3;
+			if($object->element == 'invoice_supplier' && $object->statut == 0) $colspan = 4;
+			if($object->element == 'supplier_proposal' && $object->statut == 0) $colspan = 4;
 			if(!empty($conf->multicurrency->enabled)) $colspan+=2;
 			if(($object->element == 'commande') && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
 			if(!empty($conf->margin->enabled)) $colspan++;
