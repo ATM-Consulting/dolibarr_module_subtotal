@@ -52,13 +52,13 @@ class ActionsSubtotal
     function formObjectOptions($parameters, &$object, &$action, $hookmanager)
     {
       	global $langs,$db,$user, $conf;
-      	
+
 		$langs->load('subtotal@subtotal');
 
 		$contexts = explode(':',$parameters['context']);
-		
+
 		if(in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('invoicereccard',$contexts)) {
-		    
+
 			$createRight = $user->rights->{$object->element}->creer;
 			if($object->element == 'facturerec' )
 			{
@@ -71,9 +71,10 @@ class ActionsSubtotal
 			{
 			    $createRight = $user->rights->fournisseur->facture->creer;
 			}
-			
+
 			if ($object->statut == 0  && $createRight) {
-			    
+
+
 				if($object->element=='facture')$idvar = 'facid';
 				else $idvar='id';
 
@@ -117,8 +118,8 @@ class ActionsSubtotal
 					dol_include_once('/subtotal/class/subtotal.class.php');
 
 					if (!empty($conf->global->SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE) && $qty < 10) TSubtotal::addSubtotalMissing($object, $qty);
-					
-					TSubtotal::addSubTotalLine($object, $title, $qty);
+
+	    			TSubtotal::addSubTotalLine($object, $title, $qty);
 				}
 				else if($action==='ask_deleteallline') {
 						$form=new Form($db);
@@ -335,15 +336,13 @@ class ActionsSubtotal
 	/* Réponse besoin client */
 
 		global $conf, $langs, $bc;
-		
+
 		$action = GETPOST('action');
-		
 		$TContext = explode(':',$parameters['context']);
 		if (
 				in_array('invoicecard',$TContext)
 		        || in_array('invoicesuppliercard',$TContext)
 				|| in_array('propalcard',$TContext)
-		        //|| in_array('supplier_proposalcard',$TContext)
 				|| in_array('ordercard',$TContext)
 		        || in_array('ordersuppliercard',$TContext)
 				|| in_array('invoicereccard',$TContext)
@@ -381,7 +380,6 @@ class ActionsSubtotal
 
 				if (
 					(in_array('propalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
-				    //|| (in_array('supplier_proposalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
 					|| (in_array('ordercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
 				    || (in_array('ordersuppliercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
 					|| (in_array('invoicecard',$TContext) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
@@ -517,10 +515,9 @@ class ActionsSubtotal
 		{
 			$found = false;
 			$lineid = GETPOST('lineid', 'int');
-			
 			foreach ($object->lines as &$line)
 			{
-			    
+
 				if ($line->id == $lineid && TSubtotal::isModSubtotalLine($line))
 				{
 					$found = true;
@@ -600,7 +597,7 @@ class ActionsSubtotal
 
 				$hideprices= (int)GETPOST('hideprices');
 				$_SESSION[$sessname3] = $hideprices;
-				
+
 				foreach($object->lines as &$line) {
 					if ($line->product_type == 9 && $line->special_code == $this->module_number) {
 
@@ -620,7 +617,7 @@ class ActionsSubtotal
 		else if($action === 'confirm_delete_all_lines' && GETPOST('confirm')=='yes') {
 
 			$Tab = $this->getArrayOfLineForAGroup($object, GETPOST('lineid'));
-			
+
 			foreach($Tab as $idLine) {
 				/**
 				 * @var $object Facture
@@ -638,7 +635,7 @@ class ActionsSubtotal
 				 */
 				else if($object->element=='propal') $object->deleteline($idLine);
 				/**
-				 * @var $object Propal
+				 * @var $object Propal Fournisseur
 				 */
 				else if($object->element=='supplier_proposal') $object->deleteline($idLine);
 				/**
@@ -687,6 +684,8 @@ class ActionsSubtotal
 	}
 
 	function getArrayOfLineForAGroup(&$object, $lineid) {
+		$rang = $line->rang;
+		$qty_line = $line->qty;
 
 		$qty_line = 0;
 
@@ -714,7 +713,8 @@ class ActionsSubtotal
 
 
 		}
-		
+
+
 		return $Tab;
 
 	}
@@ -747,7 +747,6 @@ class ActionsSubtotal
 
 		dol_include_once('/subtotal/class/subtotal.class.php');
 		foreach($object->lines as $l) {
-
 			//print $l->rang.'>='.$rang.' '.$total.'<br/>';
 			if($l->rang>=$rang) {
 				//echo 'return!<br>';
@@ -858,7 +857,11 @@ class ActionsSubtotal
 		$cell_height = $pdf->getStringHeight($w, $label);
 		$pdf->SetXY($posx, $posy);
 		$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height, '', 0, '', 1);
+<<<<<<<<< Temporary merge branch 1
+		
+=========
 
+>>>>>>>>> Temporary merge branch 2
 		if (!$hidePriceOnSubtotalLines) {
 			$total_to_print = price($line->total);
 
@@ -1631,7 +1634,7 @@ class ActionsSubtotal
 				$res = ($line->label) ? $line->label : (($line->description) ? $line->description : $line->desc);
 			}
 		}
-		
+
 		return $res;
 	}
 
@@ -1659,7 +1662,7 @@ class ActionsSubtotal
 		{
 			$object->statut = 0; // hack for facture rec
 			$createRight = $user->rights->facture->creer;
-		} 
+		}
 		elseif($object->element == 'order_supplier' )
 		{
 		    $createRight = $user->rights->fournisseur->commande->creer;
@@ -1671,7 +1674,7 @@ class ActionsSubtotal
 
 		if($line->special_code!=$this->module_number || $line->product_type!=9) {
 			null;
-		}	
+		}
 		else if (in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('invoicereccard',$contexts)) 
         {
 			if($object->element=='facture')$idvar = 'facid';
@@ -1709,7 +1712,7 @@ class ActionsSubtotal
 			if($object->element == 'invoice_supplier') $colspan = 4;
 			if($object->element == 'supplier_proposal') $colspan = 4;
 			if(!empty($conf->multicurrency->enabled)) $colspan+=2;
-			if(($object->element == 'commande') && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
+			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
 			if(!empty($conf->margin->enabled)) $colspan++;
 			if(!empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
 			if(!empty($conf->global->DISPLAY_MARK_RATES)) $colspan++;
@@ -1776,7 +1779,7 @@ class ActionsSubtotal
 						{
 							$isFreeText = true;
 						}
-						
+
 						if ($object->element == 'order_supplier' || $object->element == 'invoice_supplier') {
 						    $line->label = !empty($line->description) ? $line->description : $line->desc;
 						    $line->description = '';

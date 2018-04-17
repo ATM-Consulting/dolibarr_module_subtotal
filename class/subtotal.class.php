@@ -626,27 +626,30 @@ class TSubtotal {
 	
 	public static function getAllTitleFromLine(&$origin_line, $reverse = false)
 	{
-		global $db;
+		global $db, $object;
 		
 		$TTitle = array();
-		if ($origin_line->element == 'propaldet')
-		{
-			$object = new Propal($db);
-			$object->fetch($origin_line->fk_propal);
-		}
-		else if ($origin_line->element == 'commandedet')
-		{
-			$object = new Commande($db);
-			$object->fetch($origin_line->fk_commande);
-		}
-		else if ($origin_line->element == 'facturedet')
-		{
-			$object = new Facture($db);
-			$object->fetch($origin_line->fk_facture);
-		}
-		else
-		{
-			return $TTitle;
+		if(! empty($object->id) && in_array($object->element, array('propal', 'commande', 'facture'))) {}
+		else {
+			if ($origin_line->element == 'propaldet')
+			{
+				$object = new Propal($db);
+				$object->fetch($origin_line->fk_propal);
+			}
+			else if ($origin_line->element == 'commandedet')
+			{
+				$object = new Commande($db);
+				$object->fetch($origin_line->fk_commande);
+			}
+			else if ($origin_line->element == 'facturedet')
+			{
+				$object = new Facture($db);
+				$object->fetch($origin_line->fk_facture);
+			}
+			else
+			{
+				return $TTitle;
+			}
 		}
 		
 		// Récupération de la position de la ligne
@@ -1235,15 +1238,19 @@ class TSubtotal {
 	 */
 	public static function hasNcTitle(&$line)
 	{
+		if(isset($line->has_nc_title)) return $line->has_nc_title;
+
 		$TTitle = self::getAllTitleFromLine($line);
 		foreach ($TTitle as &$line_title)
 		{
 			if (!empty($line_title->array_options['options_subtotal_nc']))
 			{
+				$line->has_nc_title = true;
 				return true;
 			}
 		}
 		
+		$line->has_nc_title = false;
 		return false;
 	}
 	
