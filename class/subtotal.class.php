@@ -458,7 +458,21 @@ class TSubtotal {
 							break;
 							
 						case 'invoice_supplier':
-						    var_dump($line);
+						    //var_dump($line); exit;
+						    $rang = $object->line_max() +1;
+						    $object->special_code = $line->special_code;
+						    if (TSubtotal::isModSubtotalLine($line)) {
+						        $object->line = $line;
+						        $object->line->desc = $line->description;
+						        $object->line->description = $line->description;
+						        $object->line->fk_facture_fourn = $object->id;
+						        $object->line->rang = $rang;
+						        //var_dump($object->line); exit;
+    						    $res = $object->line->insert(1);
+						        break;
+						        //var_dump($line->desc, $line->label, $line->description); exit;
+						    }
+						    $res = $object->addline($line->desc, $line->subprice, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->qty, $line->fk_product, $line->remise_percent, $line->date_start, $line->date_end, 0, $line->info_bits, 'HT', $line->product_type, $rang);
 						    break;
 							
 						case 'facturerec':
