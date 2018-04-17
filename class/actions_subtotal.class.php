@@ -857,11 +857,7 @@ class ActionsSubtotal
 		$cell_height = $pdf->getStringHeight($w, $label);
 		$pdf->SetXY($posx, $posy);
 		$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height, '', 0, '', 1);
-<<<<<<<<< Temporary merge branch 1
-		
-=========
 
->>>>>>>>> Temporary merge branch 2
 		if (!$hidePriceOnSubtotalLines) {
 			$total_to_print = price($line->total);
 
