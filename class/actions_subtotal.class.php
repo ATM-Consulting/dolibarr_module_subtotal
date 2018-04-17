@@ -343,7 +343,7 @@ class ActionsSubtotal
 				in_array('invoicecard',$TContext)
 		        || in_array('invoicesuppliercard',$TContext)
 				|| in_array('propalcard',$TContext)
-		        || in_array('supplier_proposalcard',$TContext)
+		        //|| in_array('supplier_proposalcard',$TContext)
 				|| in_array('ordercard',$TContext)
 		        || in_array('ordersuppliercard',$TContext)
 				|| in_array('invoicereccard',$TContext)
@@ -381,7 +381,7 @@ class ActionsSubtotal
 
 				if (
 					(in_array('propalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
-				    || (in_array('supplier_proposalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
+				    //|| (in_array('supplier_proposalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
 					|| (in_array('ordercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
 				    || (in_array('ordersuppliercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
 					|| (in_array('invoicecard',$TContext) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
@@ -1705,9 +1705,9 @@ class ActionsSubtotal
 
 			$colspan = 5;
 			if($object->element == 'facturerec' ) $colspan = 3;
-			if($object->element == 'order_supplier' && $object->statut == 0) $colspan = 3;
-			if($object->element == 'invoice_supplier' && $object->statut == 0) $colspan = 4;
-			if($object->element == 'supplier_proposal' && $object->statut == 0) $colspan = 4;
+			if($object->element == 'order_supplier') $colspan = 3;
+			if($object->element == 'invoice_supplier') $colspan = 4;
+			if($object->element == 'supplier_proposal') $colspan = 4;
 			if(!empty($conf->multicurrency->enabled)) $colspan+=2;
 			if(($object->element == 'commande') && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
 			if(!empty($conf->margin->enabled)) $colspan++;
@@ -1927,7 +1927,7 @@ class ActionsSubtotal
 
 					}
 					else{
-						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK))
+						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) && $object->element !== 'invoice_supplier')
 						{
 							if(TSubtotal::isTitle($line) && ($object->situation_counter == 1 || !$object->situation_cycle_ref) ) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
 						}
