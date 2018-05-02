@@ -582,7 +582,7 @@ class TSubtotal {
 		        break;
 		        
 		    case 'supplier_proposal':
-		        $res = $object->updateline($rowid, $pu, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $desc, $price_base_type, $info_bits, $special_code, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $type, $date_start, $date_end, $array_options, $fk_unit);
+		        $res = $object->updateline($rowid, $pu, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $desc, $price_base_type, $info_bits, $special_code, $fk_parent_line, $skip_update_total, $fk_fournprice, $pa_ht, $label, $type, $array_options,'', $fk_unit);
 		        break;
 		        
 			case 'commande':
