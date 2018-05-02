@@ -6,6 +6,9 @@
 	dol_include_once('/comm/propal/class/propal.class.php');
 	dol_include_once('/commande/class/commande.class.php');
 	dol_include_once('/compta/facture/class/facture.class.php');
+	dol_include_once('/fourn/class/fournisseur.commande.class.php');
+	dol_include_once('/supplier_proposal/class/supplier_proposal.class.php');
+	dol_include_once('/fourn/class/fournisseur.facture.class.php');
 	
 	$get=GETPOST('get');
 	$set=GETPOST('set');

@@ -211,6 +211,9 @@ function _createExtraComprisNonCompris()
 	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'propaldet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
 	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'commandedet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
 	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'facturedet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
+	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'supplier_proposaldet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
+	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'commande_fournisseurdet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
+	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'facture_fourn_det', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
 }
 
 
@@ -308,6 +311,8 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 
 function doUpdate(&$object, &$line, $subtotal_nc)
 {
+    global $user;
+    
 	if (TSubtotal::isFreeText($line) || TSubtotal::isSubtotal($line)) return 1;
 	// Update extrafield et total
 	if(! empty($subtotal_nc)) {
@@ -316,7 +321,7 @@ function doUpdate(&$object, &$line, $subtotal_nc)
 
 		$line->array_options['options_subtotal_nc'] = 1;
 
-		$res = $line->update();
+		$res = $line->update($user);
 	}
 	else {
 		$line->array_options['options_subtotal_nc'] = 0;
