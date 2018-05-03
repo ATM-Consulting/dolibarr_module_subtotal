@@ -134,7 +134,6 @@ class ActionsSubtotal
 
 				
 				if($action!='editline') {
-					
 					// New format is for 3.8
 					$this->printNewFormat($object, $conf, $langs, $idvar);
 				}
@@ -375,6 +374,7 @@ class ActionsSubtotal
 					(in_array('propalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
 					|| (in_array('ordercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
 					|| (in_array('invoicecard',$TContext) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
+					|| (in_array('invoicereccard',$TContext)  && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP ))
 				)
 				{
 					$var=!$var;
@@ -455,6 +455,7 @@ class ActionsSubtotal
 				in_array('invoicecard',explode(':',$parameters['context']))
 				|| in_array('propalcard',explode(':',$parameters['context']))
 				|| in_array('ordercard',explode(':',$parameters['context']))
+				|| in_array('invoicereccard',explode(':',$parameters['context']))
 		) {
 			
 			global $db;
@@ -603,6 +604,10 @@ class ActionsSubtotal
 					if ((float) DOL_VERSION >= 5.0) $object->deleteline($user, $idLine);
 					else $object->deleteline($idLine);
 				}
+				/**
+				 * @var $object Facturerec
+				 */
+				else if($object->element=='facturerec') $object->deleteline($idLine);
 			}
 			
 			header('location:?id='.$object->id);
@@ -800,7 +805,7 @@ class ActionsSubtotal
 		//Print background
 		$cell_height = $pdf->getStringHeight($w, $label);
 		$pdf->SetXY($posx, $posy);
-		$pdf->MultiCell(200-$posx, $cell_height, '', 0, '', 1);
+		$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height, '', 0, '', 1);
 		
 		if (!$hidePriceOnSubtotalLines) {
 			$total_to_print = price($line->total);
@@ -1996,7 +2001,7 @@ class ActionsSubtotal
 	
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
 		global $conf,$langs;
-
+		 
 		if ($object->statut == 0 && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && $action != 'editline')
 		{
 			$TSubNc = array();
