@@ -311,8 +311,8 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 
 function doUpdate(&$object, &$line, $subtotal_nc)
 {
-    global $user;
-    
+	global $user;
+	
 	if (TSubtotal::isFreeText($line) || TSubtotal::isSubtotal($line)) return 1;
 	// Update extrafield et total
 	if(! empty($subtotal_nc)) {
@@ -321,7 +321,8 @@ function doUpdate(&$object, &$line, $subtotal_nc)
 
 		$line->array_options['options_subtotal_nc'] = 1;
 
-		$res = $line->update($user);
+		if ($line->element == 'propaldet') $res = $line->update();
+		else $res = $line->update($user);
 	}
 	else {
 		$line->array_options['options_subtotal_nc'] = 0;

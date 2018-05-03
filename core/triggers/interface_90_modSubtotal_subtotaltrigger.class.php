@@ -166,7 +166,7 @@ class Interfacesubtotaltrigger
         // Users
         dol_include_once('/subtotal/class/subtotal.class.php');
         $langs->load('subtotal@subtotal');
-        
+   
         if (!empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) && in_array($action, array('LINEPROPAL_INSERT', 'LINEORDER_INSERT', 'LINEBILL_INSERT')))
 		{
 			
@@ -420,10 +420,6 @@ class Interfacesubtotaltrigger
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
-        } elseif ($action == 'ORDER_CLONE') {
-            dol_syslog(
-                "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
-            );
         } elseif ($action == 'ORDER_VALIDATE') {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
@@ -474,31 +470,40 @@ class Interfacesubtotaltrigger
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
-        } elseif ($action == 'PROPAL_CLONE') {
+        } elseif (in_array($action, array('PROPAL_CLONE', 'ORDER_CLONE', 'BILL_CLONE'))) {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
 			
 			$doli_action = GETPOST('action');
 
-			if (in_array($doli_action, array('confirm_clone')))
+			if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($doli_action, array('confirm_clone')))
 			{
 				dol_syslog(
 					"[SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS] Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". object=".$object->element." id=" . $object->id
 				);
-				 
+				
+				// En fonction de l'objet et de la version, les lignes conservent l'id de l'objet d'origine
+				if (method_exists($object, 'fetch_lines')) $object->fetch_lines();
+				else $object->fetch($object->id);
+			
 				foreach ($object->lines as &$line)
 				{
+					if (empty($line->array_options)) $line->fetch_optionals();
+					
 					if (!TSubtotal::isModSubtotalLine($line) && !empty($line->array_options['options_subtotal_nc']))
 					{
 						$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 = 
 							$line->multicurrency_total_ht = $line->multicurrency_total_tva = $line->multicurrency_total_ttc = 0;
 
-						$res = $line->update(1);
+						if ($line->element == 'propaldet') $res = $line->update(1);
+						else $res = $line->update($user, 1);
 						
 						if ($res > 0) setEventMessage($langs->trans('subtotal_update_nc_success'));
 					}
 				}
+				
+				if (!empty($line)) $object->update_price(1);
 			}
 			
         } elseif ($action == 'PROPAL_MODIFY') {
@@ -570,11 +575,7 @@ class Interfacesubtotaltrigger
             );
         }
 
-		elseif ($action == 'BILL_CLONE') {
-            dol_syslog(
-                "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
-            );
-        } elseif ($action == 'BILL_MODIFY') {
+		elseif ($action == 'BILL_MODIFY') {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
