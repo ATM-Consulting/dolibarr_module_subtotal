@@ -57,13 +57,19 @@ class ActionsSubtotal
 		
 		$contexts = explode(':',$parameters['context']);
 		
-		if(in_array('ordercard',$contexts) || in_array('propalcard',$contexts) || in_array('invoicecard',$contexts) || in_array('invoicereccard',$contexts)) {
+		if(in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('invoicereccard',$contexts)) {
 			
 			$createRight = $user->rights->{$object->element}->creer;
 			if($object->element == 'facturerec' )
 			{
 				$object->statut = 0; // hack for facture rec
 				$createRight = $user->rights->facture->creer;
+			} elseif($object->element == 'order_supplier' )
+			{
+			    $createRight = $user->rights->fournisseur->commande->creer;
+			} elseif($object->element == 'invoice_supplier' )
+			{
+			    $createRight = $user->rights->fournisseur->facture->creer;
 			}
 			
 			if ($object->statut == 0  && $createRight) {
@@ -335,8 +341,10 @@ class ActionsSubtotal
 		$TContext = explode(':',$parameters['context']);
 		if (
 				in_array('invoicecard',$TContext)
+		        || in_array('invoicesuppliercard',$TContext)
 				|| in_array('propalcard',$TContext)
 				|| in_array('ordercard',$TContext)
+		        || in_array('ordersuppliercard',$TContext)
 				|| in_array('invoicereccard',$TContext)
 			)
 	        {	
@@ -373,7 +381,9 @@ class ActionsSubtotal
 				if ( 
 					(in_array('propalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
 					|| (in_array('ordercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
+				    || (in_array('ordersuppliercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
 					|| (in_array('invoicecard',$TContext) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
+				    || (in_array('invoicesuppliercard',$TContext) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
 					|| (in_array('invoicereccard',$TContext)  && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP ))
 				)
 				{
@@ -453,8 +463,11 @@ class ActionsSubtotal
 	
 		if (
 				in_array('invoicecard',explode(':',$parameters['context']))
+		        || in_array('invoicesuppliercard',explode(':',$parameters['context']))
 				|| in_array('propalcard',explode(':',$parameters['context']))
+		        || in_array('supplier_proposalcard',explode(':',$parameters['context']))
 				|| in_array('ordercard',explode(':',$parameters['context']))
+		        || in_array('ordersuppliercard',explode(':',$parameters['context']))
 				|| in_array('invoicereccard',explode(':',$parameters['context']))
 		) {
 			
@@ -533,6 +546,9 @@ class ActionsSubtotal
 				in_array('invoicecard',explode(':',$parameters['context']))
 				|| in_array('propalcard',explode(':',$parameters['context']))
 				|| in_array('ordercard',explode(':',$parameters['context']))
+			    || in_array('ordersuppliercard',explode(':',$parameters['context']))
+			    || in_array('invoicesuppliercard',explode(':',$parameters['context']))
+			    || in_array('supplier_proposalcard',explode(':',$parameters['context']))
 			)
 	        {								
 				if(in_array('invoicecard',explode(':',$parameters['context']))) {
@@ -540,15 +556,30 @@ class ActionsSubtotal
 					$sessname2 = 'subtotal_hidedetails_facture';
 					$sessname3 = 'subtotal_hideprices_facture';
 				}
+				elseif(in_array('invoicesuppliercard',explode(':',$parameters['context']))) {
+				    $sessname = 'subtotal_hideInnerLines_facture_fournisseur';
+				    $sessname2 = 'subtotal_hidedetails_facture_fournisseur';
+				    $sessname3 = 'subtotal_hideprices_facture_fournisseur';
+				}
 				elseif(in_array('propalcard',explode(':',$parameters['context']))) {
 					$sessname = 'subtotal_hideInnerLines_propal';
 					$sessname2 = 'subtotal_hidedetails_propal';	
 					$sessname3 = 'subtotal_hideprices_propal';
 				}
+				elseif(in_array('supplier_proposalcard',explode(':',$parameters['context']))) {
+				    $sessname = 'subtotal_hideInnerLines_supplier_proposal';
+				    $sessname2 = 'subtotal_hidedetails_supplier_proposal';
+				    $sessname3 = 'subtotal_hideprices_supplier_proposal';
+				}
 				elseif(in_array('ordercard',explode(':',$parameters['context']))) {
 					$sessname = 'subtotal_hideInnerLines_commande';
 					$sessname2 = 'subtotal_hidedetails_commande';	
 					$sessname3 = 'subtotal_hideprices_commande';
+				}
+				elseif(in_array('ordersuppliercard',explode(':',$parameters['context']))) {
+				    $sessname = 'subtotal_hideInnerLines_commande_fournisseur';
+				    $sessname2 = 'subtotal_hidedetails_commande_fournisseur';
+				    $sessname3 = 'subtotal_hideprices_commande_fournisseur';
 				}
 				else {
 					$sessname = 'subtotal_hideInnerLines_unknown';
@@ -593,9 +624,20 @@ class ActionsSubtotal
 				 */
 				if($object->element=='facture') $object->deleteline($idLine);
 				/**
+				 * @var $object Facture fournisseur
+				 */
+				else if($object->element=='invoice_supplier')
+				{
+				    $object->deleteline($idLine);
+				}
+				/**
 				 * @var $object Propal
 				 */
 				else if($object->element=='propal') $object->deleteline($idLine);
+				/**
+				 * @var $object Propal Fournisseur
+				 */
+				else if($object->element=='supplier_proposal') $object->deleteline($idLine);
 				/**
 				 * @var $object Commande
 				 */
@@ -603,6 +645,13 @@ class ActionsSubtotal
 				{
 					if ((float) DOL_VERSION >= 5.0) $object->deleteline($user, $idLine);
 					else $object->deleteline($idLine);
+				}
+				/**
+				 * @var $object Commande fournisseur
+				 */
+				else if($object->element=='order_supplier')
+				{
+				    $object->deleteline($idLine);
 				}
 				/**
 				 * @var $object Facturerec
@@ -638,7 +687,7 @@ class ActionsSubtotal
 		$rang = $line->rang;
 		$qty_line = $line->qty;
 		
-		$total = 0;
+		$qty_line = 0;
 		
 		$found = false;
 
@@ -646,14 +695,16 @@ class ActionsSubtotal
 		
 		foreach($object->lines as $l) {
 		
-			if($l->rowid == $lineid) {
+		    $lid = (!empty($l->rowid) ? $l->rowid : $l->id);
+			if($lid == $lineid) {
+
 				$found = true;
 				$qty_line = $l->qty;
 			}
 			
 			if($found) {
 				
-				$Tab[] = $l->rowid;
+			    $Tab[] = (!empty($l->rowid) ? $l->rowid : $l->id);
 				
 				if($l->special_code==$this->module_number && (($l->qty==99 && $qty_line==1) || ($l->qty==98 && $qty_line==2))   ) {
 					break; // end of story
@@ -1609,11 +1660,19 @@ class ActionsSubtotal
 			$object->statut = 0; // hack for facture rec
 			$createRight = $user->rights->facture->creer;
 		}
+		elseif($object->element == 'order_supplier' )
+		{
+		    $createRight = $user->rights->fournisseur->commande->creer;
+		}
+		elseif($object->element == 'invoice_supplier' )
+		{
+		    $createRight = $user->rights->fournisseur->facture->creer;
+		}
 		
 		if($line->special_code!=$this->module_number || $line->product_type!=9) {
 			null;
 		}	
-		else if (in_array('invoicecard',$contexts) || in_array('propalcard',$contexts) || in_array('ordercard',$contexts) || in_array('invoicereccard',$contexts)) 
+		else if (in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('invoicereccard',$contexts)) 
         {
 			if($object->element=='facture')$idvar = 'facid';
 			else $idvar='id';
@@ -1646,7 +1705,9 @@ class ActionsSubtotal
 			
 			$colspan = 5;
 			if($object->element == 'facturerec' ) $colspan = 3;
-
+			if($object->element == 'order_supplier') $colspan = 3;
+			if($object->element == 'invoice_supplier') $colspan = 4;
+			if($object->element == 'supplier_proposal') $colspan = 4;
 			if(!empty($conf->multicurrency->enabled)) $colspan+=2;
 			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
 			if(!empty($conf->margin->enabled)) $colspan++;
@@ -1716,6 +1777,10 @@ class ActionsSubtotal
 							$isFreeText = true;
 						}
 						
+						if ($object->element == 'order_supplier' || $object->element == 'invoice_supplier') {
+						    $line->label = !empty($line->description) ? $line->description : $line->desc;
+						    $line->description = '';
+						}
 						$newlabel = $line->label;
 						if($line->label=='' && !$isFreeText) {
 							if(TSubtotal::isSubtotal($line)) {
@@ -1862,7 +1927,7 @@ class ActionsSubtotal
 						
 					}
 					else{
-						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK))
+						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) && $object->element !== 'invoice_supplier')
 						{
 							if(TSubtotal::isTitle($line) && ($object->situation_counter == 1 || !$object->situation_cycle_ref) ) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
 						}
@@ -2081,13 +2146,18 @@ class ActionsSubtotal
 		
 		if ((!empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP) && $object->element == 'propal') || (!empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP) && $object->element == 'commande') || (!empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP) && $object->element == 'facture'))
 		{
-			if (GETPOST('subtotal_add_recap')) TSubtotal::addRecapPage($parameters, $pdf);
+			if (GETPOST('subtotal_add_recap')) {
+				dol_include_once('/subtotal/class/subtotal.class.php');
+				TSubtotal::addRecapPage($parameters, $pdf);
+			}
 		}
 	}
 	
 	// HTML 5 data for js
 	private function _getHtmlData($parameters, &$object, &$action, $hookmanager)
 	{
+		dol_include_once('/subtotal/class/subtotal.class.php');
+
 	    $line = &$parameters['line'];
 	    
 	    $ThtmlData['data-id']           = $line->id;
@@ -2174,7 +2244,7 @@ class ActionsSubtotal
 
 				
 				moveBlockCol.disableSelection(); // prevent selection
-
+<?php if ($object->statut == 0) { ?>
 				// apply some graphical stuff
 				moveBlockCol.css("background-image",'url(<?php echo dol_buildpath('subtotal/img/grip_all.png',2);  ?>)');
 				moveBlockCol.css("background-repeat","no-repeat");
@@ -2246,7 +2316,7 @@ class ActionsSubtotal
 			    	        //console.log(cleanSerialize($(this).sortable('serialize')));
 			    	    }
 			    });
-				
+ 				<?php } ?>
 
 				function getSubtotalTitleChilds(item)
 				{

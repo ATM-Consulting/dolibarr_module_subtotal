@@ -211,6 +211,9 @@ function _createExtraComprisNonCompris()
 	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'propaldet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
 	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'commandedet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
 	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'facturedet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
+	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'supplier_proposaldet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
+	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'commande_fournisseurdet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
+	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'facture_fourn_det', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
 }
 
 
@@ -237,6 +240,21 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 		else
 		{
 			$classname = ucfirst($element);
+			
+			switch ($element) {
+			    case 'supplier_proposal':
+			        $classname = 'SupplierProposal';
+			        break;
+			        
+			    case 'order_supplier':
+			        $classname = 'CommandeFournisseur';
+			        break;
+			        
+			    case 'invoice_supplier':
+			        $classname = 'FactureFournisseur';
+			        break;
+			}
+			
 			$object = new $classname($db); // Propal | Commande | Facture
 			$res = $object->fetch($elementid);
 			if ($res < 0) $error++;
