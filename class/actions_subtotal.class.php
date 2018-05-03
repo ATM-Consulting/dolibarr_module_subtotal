@@ -134,6 +134,7 @@ class ActionsSubtotal
 
 				
 				if($action!='editline') {
+					
 					// New format is for 3.8
 					$this->printNewFormat($object, $conf, $langs, $idvar);
 				}
@@ -374,7 +375,6 @@ class ActionsSubtotal
 					(in_array('propalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
 					|| (in_array('ordercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
 					|| (in_array('invoicecard',$TContext) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
-					|| (in_array('invoicereccard',$TContext)  && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP ))
 				)
 				{
 					$var=!$var;
@@ -455,7 +455,6 @@ class ActionsSubtotal
 				in_array('invoicecard',explode(':',$parameters['context']))
 				|| in_array('propalcard',explode(':',$parameters['context']))
 				|| in_array('ordercard',explode(':',$parameters['context']))
-				|| in_array('invoicereccard',explode(':',$parameters['context']))
 		) {
 			
 			global $db;
@@ -604,10 +603,6 @@ class ActionsSubtotal
 					if ((float) DOL_VERSION >= 5.0) $object->deleteline($user, $idLine);
 					else $object->deleteline($idLine);
 				}
-				/**
-				 * @var $object Facturerec
-				 */
-				else if($object->element=='facturerec') $object->deleteline($idLine);
 			}
 			
 			header('location:?id='.$object->id);
@@ -977,7 +972,8 @@ class ActionsSubtotal
 
 		if (empty($object->lines[$i])) return 0; // hideInnerLines => override $object->lines et Dolibarr ne nous permet pas de mettre à jour la variable qui conditionne la boucle sur les lignes (PR faite pour 6.0)
 		
-		$object->lines[$i]->fetch_optionals();
+		if(empty($object->lines[$i]->array_options)) $object->lines[$i]->fetch_optionals();
+
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
 			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
@@ -1376,7 +1372,7 @@ class ActionsSubtotal
     					            $l->product_type = 1;
     					            $l->special_code = '';
     					            $l->qty = 1;
-    					            $l->desc = 'Montant HT soumis à '.$langs->trans('VAT').' '. price($tx) .' %';
+    					            $l->desc = $langs->trans('AmountBeforeTaxesSubjectToVATX%', $langs->transnoentitiesnoconv('VAT'), price($tx));
     					            $l->tva_tx = $tx;
     					            $l->total_ht = $val['total_ht'];
     					            $l->total_tva = $val['total_tva'];
@@ -1427,7 +1423,7 @@ class ActionsSubtotal
 			        $l->product_type = 1;
 			        $l->special_code = '';
 			        $l->qty = 1;
-			        $l->desc = 'Montant HT soumis à '.$langs->trans('VAT').' '. price($tx) .' %';
+			        $l->desc = $langs->trans('AmountBeforeTaxesSubjectToVATX%', $langs->transnoentitiesnoconv('VAT'), price($tx));
 			        $l->tva_tx = $tx;
 			        $l->total_ht = $val['total_ht'];
 			        $l->total_tva = $val['total_tva'];
@@ -2000,7 +1996,7 @@ class ActionsSubtotal
 	
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
 		global $conf,$langs;
-		 
+
 		if ($object->statut == 0 && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && $action != 'editline')
 		{
 			$TSubNc = array();
