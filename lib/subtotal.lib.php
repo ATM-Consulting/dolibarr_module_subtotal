@@ -325,7 +325,16 @@ function doUpdate(&$object, &$line, $subtotal_nc)
 		else $res = $line->update($user);
 	}
 	else {
+	    if(in_array($object->element, array('invoice_supplier', 'order_supplier', 'supplier_proposal'))) {
+	        if(empty($line->label)) $line->label = $line->description; // supplier lines don't have the field label
+	        
+	        require_once(DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php');
+	        $extrafields=new ExtraFields($object->db);
+	        $extralabels=$extrafields->fetch_name_optionals_label($object->table_element_line,true);
+	        $line->fetch_optionals($line->id,$extralabels);
+	    }
 		$line->array_options['options_subtotal_nc'] = 0;
+		if($object->element == 'order_supplier') $line->update($user);
 		$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $line->tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $line->situation_percent, $line->fk_unit);
 	}
 	

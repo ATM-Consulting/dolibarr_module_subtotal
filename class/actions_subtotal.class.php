@@ -2069,6 +2069,19 @@ class ActionsSubtotal
 		 
 		if ($object->statut == 0 && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && $action != 'editline')
 		{
+		    
+		    if($object->element == 'invoice_supplier' || $object->element == 'order_supplier')
+		    {
+		        foreach ($object->lines as $line)
+		        {
+		            // fetch optionals attributes and labels
+		            require_once(DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php');
+		            $extrafields=new ExtraFields($this->db);
+		            $extralabels=$extrafields->fetch_name_optionals_label($object->table_element_line,true);
+		            $line->fetch_optionals($line->id,$extralabels);
+		        }
+		    }
+		    
 			$TSubNc = array();
 			foreach ($object->lines as &$l)
 			{
