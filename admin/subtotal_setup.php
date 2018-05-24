@@ -336,6 +336,14 @@ function showParameters() {
 			<td colspan="2">Paramètrage de l'option "Cacher le prix des lignes des ensembles"</td>
 		</tr>
 		
+<?php 
+	print '<tr class="oddeven" >';
+	print '<td>'.$langs->trans('SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED').'</td>';
+	print '<td align="center" >';
+	print ajax_constantonoff('SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED');
+	print '</td></tr>';
+?>
+
 		<tr>
 			<td>Afficher la quantité sur les lignes de produit</td>
 			<td style="text-align: right;">
