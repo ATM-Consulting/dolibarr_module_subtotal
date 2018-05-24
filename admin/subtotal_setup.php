@@ -353,7 +353,7 @@ function showParameters() {
 					<?php echo $html->selectyesno("SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY",$conf->global->SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY,1); ?>
 					<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
 				</form>
-			</td>				
+			</td>
 		</tr>
 		
 		<tr class="pair">
