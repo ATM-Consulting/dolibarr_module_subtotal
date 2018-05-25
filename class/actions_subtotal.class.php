@@ -1044,7 +1044,7 @@ class ActionsSubtotal
 	}
 	
 	function pdf_getlinetotalexcltax($parameters=array(), &$object, &$action='') {
-		global $conf, $hideprices;
+	    global $conf, $hideprices;
 		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			
@@ -1093,8 +1093,17 @@ class ActionsSubtotal
 		{
 		    if (!empty($hideprices) || !in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
 		    {
-		        $this->resprints = ' ';
-		        return 1;
+		        
+		        if(is_array($parameters)) $i = & $parameters['i'];
+		        else $i = (int)$parameters;
+		        
+		        // Check if a title exist for this line && if the title have subtotal
+		        $lineTitle = TSubtotal::getParentTitleOfLine($object, $i);
+		        if(TSubtotal::getParentTitleOfLine($object, $i) && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
+		        {
+		            $this->resprints = ' ';
+		            return 1;
+		        }
 		    }
 		}
         
