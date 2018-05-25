@@ -1091,7 +1091,7 @@ class ActionsSubtotal
 		    || (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		    )
 		{
-		    if (!empty($hideprices) || !in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
+		    if (!empty($hideprices))
 		    {
 		        
 		        if(is_array($parameters)) $i = & $parameters['i'];
@@ -1104,6 +1104,11 @@ class ActionsSubtotal
 		            $this->resprints = ' ';
 		            return 1;
 		        }
+		    }
+		    elseif (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
+		    {
+		        $this->resprints = ' ';
+		        return 1;
 		    }
 		}
         
