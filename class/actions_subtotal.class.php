@@ -1044,7 +1044,7 @@ class ActionsSubtotal
 	}
 	
 	function pdf_getlinetotalexcltax($parameters=array(), &$object, &$action='') {
-	    global $conf, $hideprices;
+	    global $conf, $hideprices, $hookmanager;
 		
 		if($this->isModSubtotalLine($parameters,$object) ){
 			
@@ -1101,8 +1101,34 @@ class ActionsSubtotal
 		        $lineTitle = TSubtotal::getParentTitleOfLine($object, $i);
 		        if(TSubtotal::getParentTitleOfLine($object, $i) && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
 		        {
+		            
 		            $this->resprints = ' ';
+		            
+		            $reshook=$hookmanager->executeHooks('subtotalHidePrices',$parameters,$object,$action);
+		            
+		            if ($reshook < 0)
+		            {
+		                setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+		                return -1;
+		            }
+		            elseif (empty($reshook))
+		            {
+		                $this->resprints .= $hookmanager->resprints;
+		            }
+		            else
+		            {
+		                $this->resprints = $hookmanager->resprints;
+		                
+		                // override return (use  $this->results['overrideReturn'] or $this->resArray['overrideReturn'] in other module action_xxxx.class.php )
+		                if(isset($hookmanager->resArray['overrideReturn']))
+		                {
+		                    return $hookmanager->resArray['overrideReturn'];
+		                }
+		            }
+		            
 		            return 1;
+		            
+		            
 		        }
 		    }
 		    elseif (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
