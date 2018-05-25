@@ -16,23 +16,36 @@ class ActionsSubtotal
 	function createDictionaryFieldlist($parameters, &$object, &$action, $hookmanager)
 	{
 		global $conf;
-		
-		if ($parameters['tabname'] == MAIN_DB_PREFIX.'c_subtotal_free_text' && empty($conf->global->FCKEDITOR_ENABLE_DETAILS))
+
+		if ($parameters['tabname'] == MAIN_DB_PREFIX.'c_subtotal_free_text' && !empty($conf->global->FCKEDITOR_ENABLE_DETAILS))
 		{
 			// Le CKEditor est forcé sur la page dictionnaire, pas possible de mettre une valeur custom
 			// petit js qui supprimer le wysiwyg et affiche le textarea si la conf (FCKEDITOR_ENABLE_DETAILS) n'est pas active
 			?>
 			<script type="text/javascript">
 				$(function() {
-					CKEDITOR.on('instanceReady', function(ev) {
-						var editor = ev.editor;
+					
+					if ($('input[name=content]').length > 0)
+					{
+						$('input[name=content]').replaceWith($('<textarea name="content">'));
+						$('textarea[name=content]').each(function(i, item) {
+							CKEDITOR.replace(item, {
+								toolbar: 'dolibarr_notes'
+								,customConfig : ckeditorConfig
+							});
+						});
+					} else { // dolibarr <= 5.0
+						CKEDITOR.on('instanceReady', function(ev) {
+							var editor = ev.editor;
 
-						if (editor.name == 'content') // Mon champ en bdd s'appel "content", pas le choix si je veux avoir un textarea sur une page de dictionnaire
-						{
-							editor.element.show();
-							editor.destroy();
-						}
-					});
+							if (editor.name == 'content') // Mon champ en bdd s'appel "content", pas le choix si je veux avoir un textarea sur une page de dictionnaire
+							{
+								editor.element.show();
+								editor.destroy();
+							}
+						});
+					}
+					
 				});
 			</script>
 			<?php
