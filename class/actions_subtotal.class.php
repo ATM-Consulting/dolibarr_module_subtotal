@@ -16,23 +16,57 @@ class ActionsSubtotal
 	function createDictionaryFieldlist($parameters, &$object, &$action, $hookmanager)
 	{
 		global $conf;
-		
-		if ($parameters['tabname'] == MAIN_DB_PREFIX.'c_subtotal_free_text' && empty($conf->global->FCKEDITOR_ENABLE_DETAILS))
+
+		if ($parameters['tabname'] == MAIN_DB_PREFIX.'c_subtotal_free_text')
 		{
-			// Le CKEditor est forcé sur la page dictionnaire, pas possible de mettre une valeur custom
-			// petit js qui supprimer le wysiwyg et affiche le textarea si la conf (FCKEDITOR_ENABLE_DETAILS) n'est pas active
+			// Merci Dolibarr de remplacer les textarea par un input text
+			if ((float) DOL_VERSION >= 6.0)
+			{
+				$value = '';
+				$sql = 'SELECT content FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text WHERE rowid = '.GETPOST('rowid');
+				$resql = $this->db->query($sql);
+				if ($resql && ($obj = $this->db->fetch_object($resql))) $value = $obj->content;
+			}
+			
 			?>
 			<script type="text/javascript">
 				$(function() {
-					CKEDITOR.on('instanceReady', function(ev) {
-						var editor = ev.editor;
+					
+					<?php if ((float) DOL_VERSION >= 6.0) { ?>
+							if ($('input[name=content]').length > 0)
+							{
+								$('input[name=content]').each(function(i,item) {
+									var value = '';
+									// Le dernier item correspond à l'édition
+									if (i == $('input[name=content]').length) value = <?php echo json_encode($value); ?>;
+									$(item).replaceWith($('<textarea name="content">'+value+'</textarea>'));
+								});
+								
+								<?php if (!empty($conf->fckeditor->enabled) && !empty($conf->global->FCKEDITOR_ENABLE_DETAILS)) { ?>
+								$('textarea[name=content]').each(function(i, item) {
+									CKEDITOR.replace(item, {
+										toolbar: 'dolibarr_notes'
+										,customConfig : ckeditorConfig
+									});
+								});
+								<?php } ?>
+							}
+					<?php } else { ?>
+						// <= 5.0
+						// Le CKEditor est forcé sur la page dictionnaire, pas possible de mettre une valeur custom
+						// petit js qui supprimer le wysiwyg et affiche le textarea car avant la version 6.0 le wysiwyg sur une page de dictionnaire est inexploitable
+						<?php if (!empty($conf->fckeditor->enabled)) { ?>
+							CKEDITOR.on('instanceReady', function(ev) {
+								var editor = ev.editor;
 
-						if (editor.name == 'content') // Mon champ en bdd s'appel "content", pas le choix si je veux avoir un textarea sur une page de dictionnaire
-						{
-							editor.element.show();
-							editor.destroy();
-						}
-					});
+								if (editor.name == 'content') // Mon champ en bdd s'appel "content", pas le choix si je veux avoir un textarea sur une page de dictionnaire
+								{
+									editor.element.show();
+									editor.destroy();
+								}
+							});
+						<?php } ?>
+					<?php } ?>
 				});
 			</script>
 			<?php
