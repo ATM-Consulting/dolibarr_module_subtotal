@@ -842,7 +842,7 @@ class ActionsSubtotal
 				}
 			}
 			
-			if($total_to_print) {
+			if($total_to_print !== '') {
 				
 				if (GETPOST('hideInnerLines'))
 				{
