@@ -114,7 +114,7 @@ class ActionsSubtotal
 				
 				if(in_array($action, array('add_title_line', 'add_total_line', 'add_subtitle_line', 'add_subtotal_line', 'add_free_text')) )
 				{
-					$level = GETPOST('level', 'int'); //New avec SUBTOTAL_USE_NEW_FORMAT
+					$level = GETPOST('level', 'int'); //New avec SUBTOTAL_USE_LEVEL
 					
 					if($action=='add_title_line') {
 						$title = GETPOST('title');
@@ -1576,7 +1576,19 @@ class ActionsSubtotal
 						
 						if (!$isFreeText) echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$newlabel.'" size="80" '.$readonlyForSituation.'/>&nbsp;';
 						
-						
+						if (!empty($conf->global->SUBTOTAL_USE_LEVEL) && (TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line)) )
+						{
+						    $select = '<select name="subtotal_level">';
+						    for ($j=1; $j<3; $j++)
+						    {
+						        if (!empty($readonlyForSituation)) {
+						            if ($qty_displayed == $j) $select .= '<option selected="selected" value="'.$j.'">'.$langs->trans('Level').' '.$j.'</option>';
+						        } else $select .= '<option '.($qty_displayed == $j ? 'selected="selected"' : '').' value="'.$j.'">'.$langs->trans('Level').' '.$j.'</option>';
+						    }
+						    $select .= '</select>&nbsp;';
+						    
+						    echo $select;
+						}
 						
 
 						echo '<div class="subtotal_underline" style="margin-left:24px;">';
@@ -1619,8 +1631,21 @@ class ActionsSubtotal
 					else {
 
 						
-					     if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
-					     else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; 
+					    if ($conf->global->SUBTOTAL_USE_LEVEL)
+					    {
+					        if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
+					        {
+					            echo str_repeat('&nbsp;&nbsp;&nbsp;', $line->qty-1);
+					            
+					            if (TSubtotal::isTitle($line)) print img_picto('', 'subtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;">'.$line->qty.'</span>&nbsp;&nbsp;';
+					            else print img_picto('', 'subtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;">'.(100-$line->qty).'</span>&nbsp;&nbsp;';
+					        }
+					    }
+					    else
+					    {
+					        if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
+					        else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+					    }
 						 
 						 
 						 

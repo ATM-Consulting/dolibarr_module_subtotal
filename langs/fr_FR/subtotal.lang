@@ -21,6 +21,7 @@ ConfirmDeleteAllThisLines=Confirmez-vous la suppression de %s lignes ?
 AddBreakPageBefore=Ajouter un saut de page avant.
 Level=Niveau
 SubtotalLabel=<b>Sous-total : </b>
+SUBTOTAL_USE_LEVEL=Autoriser l'utilisation de niveaux de titre et de sous totaux
 SUBTOTAL_ALLOW_ADD_BLOCK=Autoriser l'ajout d'un titre et sous-total
 SUBTOTAL_ALLOW_EDIT_BLOCK=Autoriser l'edition d'un titre ou sous-total
 SUBTOTAL_ALLOW_REMOVE_BLOCK=Autoriser la suppression d'un titre ou sous-total

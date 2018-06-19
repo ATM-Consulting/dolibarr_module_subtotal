@@ -18,6 +18,7 @@ ConfirmDeleteAllThisLines=Delete %s lines ?
 AddBreakPageBefore=Add pagebreak before this item.
 Level=Level
 SubtotalLabel=<b>Subtotal: </b>
+SUBTOTAL_USE_LEVEL=Allow use level of title and subtotal
 SUBTOTAL_ALLOW_ADD_BLOCK=Allow add title and subtotal
 SUBTOTAL_ALLOW_EDIT_BLOCK=Allow edit title and subtotal
 SUBTOTAL_ALLOW_REMOVE_BLOCK=Allow delete title and subtotal

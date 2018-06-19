@@ -102,6 +102,13 @@ function showParameters() {
 	print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
 	print '</tr>';
 	
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_USE_LEVEL").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_USE_LEVEL');
+	print '</td></tr>';
 	
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
