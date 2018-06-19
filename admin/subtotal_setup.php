@@ -61,17 +61,6 @@ if (preg_match('/set_(.*)/',$action,$reg))
 	$value = GETPOST($code);
 	if ($code == 'SUBTOTAL_TFIELD_TO_KEEP_WITH_NC') $value = implode(',', $value);
 	
-	if (dolibarr_set_const($db, $code, $value, 'chaine', 0, '', $conf->entity) > 0)
-	{
-		if ($code == 'SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS' && $value == 1) _createExtraComprisNonCompris();
-		
-		header("Location: ".$_SERVER["PHP_SELF"]);
-		exit;
-	}
-	else
-	{
-		dol_print_error($db);
-	}
 }
 
 
@@ -113,24 +102,6 @@ function showParameters() {
 	print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
 	print '</tr>';
 	
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("SUBTOTAL_USE_NEW_FORMAT").'</td>';
-	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="center" width="300">';
-	print ajax_constantonoff('SUBTOTAL_USE_NEW_FORMAT');
-	print '</td></tr>';
-	
-	if((float)DOL_VERSION>=3.8)
-	{
-		$var=!$var;
-		print '<tr '.$bc[$var].'>';
-		print '<td>'.$langs->trans("SUBTOTAL_USE_NUMEROTATION").'</td>';
-		print '<td align="center" width="20">&nbsp;</td>';
-		print '<td align="center" width="300">';
-		print ajax_constantonoff('SUBTOTAL_USE_NUMEROTATION');
-		print '</td></tr>';	
-	}
 	
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
@@ -171,14 +142,6 @@ function showParameters() {
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE');
 	print '</td></tr>';
-	
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK").'</td>';
-	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="center" width="300">';
-	print ajax_constantonoff('SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK');
-	print '</td></tr>';
 
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
@@ -217,60 +180,6 @@ function showParameters() {
 	print '<input type="text" placeholder="B" name="SUBTOTAL_SUBTOTAL_STYLE" value="'.$conf->global->SUBTOTAL_SUBTOTAL_STYLE.'" />';
 	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 	print '</form>';
-	print '</td></tr>';
-	
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES", $langs->transnoentitiesnoconv('HideInnerLines')).'</td>';
-	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="center" width="300">';
-	print ajax_constantonoff('SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES');
-	print '</td></tr>';
-	
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES", $langs->transnoentitiesnoconv('HideInnerLines')).'</td>';
-	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="center" width="300">';
-	print ajax_constantonoff('SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES');
-	print '</td></tr>';
-	
-	if ((double) DOL_VERSION >= 4.0)
-	{
-		$var=!$var;
-		print '<tr '.$bc[$var].'>';
-		print '<td>'.$langs->trans("SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS").'</td>';
-		print '<td align="center" width="20">&nbsp;</td>';
-		print '<td align="right" width="300">';
-		print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
-		print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-		print '<input type="hidden" name="action" value="set_SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS">';
-		print $html->selectyesno("SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS",$conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS,1);
-		print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
-		print '</form>';
-		print '</td></tr>';
-		
-		$var=!$var;
-		print '<tr '.$bc[$var].'>';
-		print '<td>'.$langs->trans("SUBTOTAL_TFIELD_TO_KEEP_WITH_NC").'</td>';
-		print '<td align="center" width="20">&nbsp;</td>';
-		print '<td align="right" width="300">';
-		print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
-		print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-		print '<input type="hidden" name="action" value="set_SUBTOTAL_TFIELD_TO_KEEP_WITH_NC">';
-		$TField = array('pdf_getlineqty' => $langs->trans('Qty'), 'pdf_getlinevatrate' => $langs->trans('VAT'), 'pdf_getlineupexcltax' => $langs->trans('PriceUHT'), 'pdf_getlinetotalexcltax' => $langs->trans('TotalHT'), 'pdf_getlineunit' => $langs->trans('Unit'));
-		print $html->multiselectarray('SUBTOTAL_TFIELD_TO_KEEP_WITH_NC', $TField, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC), 0, 0, '', 0, 0, 'style="min-width:100px"');
-		print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
-		print '</form>';
-		print '</td></tr>';
-	}
-	
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans('SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE').'</td>';
-	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="center" width="300">';
-	print ajax_constantonoff('SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE');
 	print '</td></tr>';
 	
 	$var=!$var;

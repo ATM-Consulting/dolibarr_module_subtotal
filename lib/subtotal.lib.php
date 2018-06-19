@@ -201,20 +201,7 @@ function _updateSubtotalBloc($object, $line)
 	return 0;
 }
 
-function _createExtraComprisNonCompris()
-{
-	global $db;
-	
-	dol_include_once('/core/class/extrafields.class.php');
-	
-	$extra = new ExtraFields($db); // propaldet, commandedet, facturedet
-	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'propaldet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
-	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'commandedet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
-	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'facturedet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
-	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'supplier_proposaldet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
-	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'commande_fournisseurdet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
-	$extra->addExtraField('subtotal_nc', 'Non compris', 'varchar', 0, 255, 'facture_fourn_det', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
-}
+
 
 
 	

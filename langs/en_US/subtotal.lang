@@ -18,8 +18,6 @@ ConfirmDeleteAllThisLines=Delete %s lines ?
 AddBreakPageBefore=Add pagebreak before this item.
 Level=Level
 SubtotalLabel=<b>Subtotal: </b>
-SUBTOTAL_USE_NEW_FORMAT=Enable the advenced functionnality
-SUBTOTAL_USE_NUMEROTATION=Enable the auto numbering on PDF
 SUBTOTAL_ALLOW_ADD_BLOCK=Allow add title and subtotal
 SUBTOTAL_ALLOW_EDIT_BLOCK=Allow edit title and subtotal
 SUBTOTAL_ALLOW_REMOVE_BLOCK=Allow delete title and subtotal
@@ -29,10 +27,8 @@ subtotal_title_to_add_under_title=Add under
 SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE=Text des titres lors la facturation via onglet client -> bouton "Facturer commandes"
 SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info=Clés de remplacement :<br /><b>__REFORDER__</b> = Référence de la commande<br /><b>__REFCUSTOMER__</b> = Référence client de la commande
 subtotal_add_title_bloc_from_orderstoinvoice=Add subtitle and subtotal block between each order
-SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK=The adding under title will do at end block
 SUBTOTAL_TITLE_STYLE=Title style (B = bold, U = underline, I = italic)
 SUBTOTAL_SUBTOTAL_STYLE=Subtotals style (B = bold, U = underline, I = italic)
-SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES=Get one line with title and subtotal if "%s" is enabled (experimental)
 Duplicate=Duplicate
 subtotal_duplicate_success=%d lines copied
 subtotal_duplicate_lineid_not_found=Clone block fails the title's identifier not found
@@ -47,7 +43,6 @@ subtotal_update_nc_success=Total updated
 subtotal_update_nc_error=Error: total not updated
 subtotal_nc_title=NI
 subtotal_nc_title_help=Management of blocks No Included in the total
-SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS=Enable the management of "Not Included" blocks to exclude the amount
 subtotalRecap=Recapitulation
 subtotalPropalTitle=Proposal %s %s
 subtotalCommandeTitle=Order %s %s
@@ -60,7 +55,6 @@ SUBTOTAL_COMMANDE_ADD_RECAP=Enable the generation of summary on orders
 SUBTOTAL_INVOICE_ADD_RECAP=Enable the generation of summary on invoices
 warning_subtotal_recap_object_element_unknown=Can't generate the summary by title, unknown element: %s
 subtotal_add_recap=Add the summary by title
-SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE=Add a new title will add above the missing subtotals
 subtotalFreeLineDictionary=Pre-existing text line
 subtotalLabelForUnderTitle=Add into bloc:
 subtotalLabelForFreeText=Pre-existing text:

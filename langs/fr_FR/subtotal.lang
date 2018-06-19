@@ -21,8 +21,6 @@ ConfirmDeleteAllThisLines=Confirmez-vous la suppression de %s lignes ?
 AddBreakPageBefore=Ajouter un saut de page avant.
 Level=Niveau
 SubtotalLabel=<b>Sous-total : </b>
-SUBTOTAL_USE_NEW_FORMAT=Activer l'utilisation avancée
-SUBTOTAL_USE_NUMEROTATION=Activer la numérotation automatique sur le PDF
 SUBTOTAL_ALLOW_ADD_BLOCK=Autoriser l'ajout d'un titre et sous-total
 SUBTOTAL_ALLOW_EDIT_BLOCK=Autoriser l'edition d'un titre ou sous-total
 SUBTOTAL_ALLOW_REMOVE_BLOCK=Autoriser la suppression d'un titre ou sous-total
@@ -32,11 +30,8 @@ subtotal_title_to_add_under_title=Ajouter sous
 SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE=Texte des titres lors de la facturation via onglet client -> bouton "Facturer commandes"
 SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info=Clés de remplacement :<br /><b>__REFORDER__</b> = Référence de la commande<br /><b>__REFCUSTOMER__</b> = Référence client de la commande
 subtotal_add_title_bloc_from_orderstoinvoice=Ajouter un bloc titre et sous-total entre chaque commande
-SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK=L'ajout sous un titre se fera en fin de section 
 SUBTOTAL_TITLE_STYLE=Style des titres (B = gras, U = souligné, I = italique)
 SUBTOTAL_SUBTOTAL_STYLE=Style des sous-totaux (B = gras, U = souligné, I = italique)
-SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES=Avoir une seule ligne de titre + total si l'option "%s" est utilisée (expérimental)
-SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES=Remplacer par le détail des TVA si l'option "%s" est utilisée (expérimental)
 SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED=Par defaut, cocher la case "Cacher le prix des lignes des ensembles" lors de la génération des PDF
 Duplicate=Dupliquer
 subtotal_duplicate_success=%d lignes dupliquées
@@ -52,7 +47,6 @@ subtotal_update_nc_success=Total mis à jour
 subtotal_update_nc_error=Erreur : total non mis à jour
 subtotal_nc_title=NC
 subtotal_nc_title_help=Gestion des blocs Non Compris dans le calcul du total
-SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS=Activer la gestion des blocs "Non Compris" pour exclusion du total
 SUBTOTAL_TFIELD_TO_KEEP_WITH_NC=Colonnes à afficher sur lignes marquées "Non Compris"
 subtotalRecap=Récapitulatif
 subtotalPropalTitle=Devis %s %s
@@ -67,7 +61,6 @@ SUBTOTAL_INVOICE_ADD_RECAP=Activer la génération du récapitulatif sur les fac
 warning_subtotal_recap_object_element_unknown=Génération du récapitulatif impossible, element inconnu : %s
 subtotal_add_recap=Ajouter le récapitulatif
 AddFreeText = Ajouter une ligne de texte
-SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE=Ajouter un titre, ajoutera au-dessus les sous-totaux manquants
 SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE=Autoriser l'affichage des extrafields sur les titres (les données enregistrées seront alors peuplées sur les lignes du bloc)
 subtotalFreeLineDictionary=Ligne de texte prédéfini
 subtotalLabelForUnderTitle=Ajouter dans le bloc :

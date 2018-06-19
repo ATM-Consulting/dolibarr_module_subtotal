@@ -191,8 +191,7 @@ class Interfacesubtotaltrigger
 						break;
 				}
 				
-				if (!empty($conf->global->SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK)) $this->addToEnd($parent, $object, $rang);
-				else $this->addToBegin($parent, $object, $rang);
+				$this->addToBegin($parent, $object, $rang);
 				
 			}
 			
@@ -253,44 +252,6 @@ class Interfacesubtotaltrigger
 			}
 		}
 		
-		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($action, array('LINEPROPAL_INSERT', 'LINEPROPAL_UPDATE', 'LINEORDER_INSERT', 'LINEORDER_UPDATE', 'LINEBILL_INSERT', 'LINEBILL_UPDATE')))
-		{
-			$doli_action = GETPOST('action');
-			$set = GETPOST('set');
-			if ( (in_array($doli_action, array('updateligne', 'updateline', 'addline', 'add')) || $set == 'defaultTVA') && !TSubtotal::isTitle($object) && !TSubtotal::isSubtotal($object) && in_array($object->element, array('propaldet', 'commandedet', 'facturedet')))
-			{
-				 dol_syslog(
-					"[SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS] Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". object=".$object->element." id=" . $object->id
-				);
-				 
-				$TTitle = TSubtotal::getAllTitleFromLine($object);
-				foreach ($TTitle as &$line)
-				{
-					if (!empty($line->array_options['options_subtotal_nc']))
-					{
-						$object->total_ht = $object->total_tva = $object->total_ttc = $object->total_localtax1 = $object->total_localtax2 = 
-							$object->multicurrency_total_ht = $object->multicurrency_total_tva = $object->multicurrency_total_ttc = 0;
-
-						if ($object->element == 'propal') $res = $object->update(1);
-						else $res = $object->update($user, 1);
-						
-						if ($res > 0) setEventMessage($langs->trans('subtotal_update_nc_success'));
-						break;
-					}
-				}
-
-				// $object correspond à la ligne ajoutée
-				if(! empty($object->array_options['options_subtotal_nc'])) {
-					$object->total_ht = $object->total_tva = $object->total_ttc = $object->total_localtax1 = $object->total_localtax2 = 
-							$object->multicurrency_total_ht = $object->multicurrency_total_tva = $object->multicurrency_total_ttc = 0;
-
-					if ($object->element == 'propaldet') $res = $object->update(1);
-					else $res = $object->update($user, 1);
-
-					if ($res > 0) setEventMessage($langs->trans('subtotal_update_nc_success'));
-				}
-			}
-		}
 		
 		// Les lignes libres (y compris les sous-totaux) créées à partir d'une facture modèle n'ont pas la TVA de la ligne du modèle mais la TVA par défaut
 		if ($action == 'BILL_CREATE' && $object->fac_rec > 0) {
@@ -476,35 +437,6 @@ class Interfacesubtotaltrigger
             );
 			
 			$doli_action = GETPOST('action');
-
-			if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($doli_action, array('confirm_clone')))
-			{
-				dol_syslog(
-					"[SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS] Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". object=".$object->element." id=" . $object->id
-				);
-				
-				// En fonction de l'objet et de la version, les lignes conservent l'id de l'objet d'origine
-				if (method_exists($object, 'fetch_lines')) $object->fetch_lines();
-				else $object->fetch($object->id);
-			
-				foreach ($object->lines as &$line)
-				{
-					if (empty($line->array_options)) $line->fetch_optionals();
-					
-					if (!TSubtotal::isModSubtotalLine($line) && !empty($line->array_options['options_subtotal_nc']))
-					{
-						$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 = 
-							$line->multicurrency_total_ht = $line->multicurrency_total_tva = $line->multicurrency_total_ttc = 0;
-
-						if ($line->element == 'propaldet') $res = $line->update(1);
-						else $res = $line->update($user, 1);
-						
-						if ($res > 0) setEventMessage($langs->trans('subtotal_update_nc_success'));
-					}
-				}
-				
-				if (!empty($line)) $object->update_price(1);
-			}
 			
         } elseif ($action == 'PROPAL_MODIFY') {
             dol_syslog(
