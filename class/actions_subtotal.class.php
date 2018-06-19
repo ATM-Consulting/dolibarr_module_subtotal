@@ -366,90 +366,8 @@ class ActionsSubtotal
 	}
 	
 	
-	function formBuilddocOptions($parameters) {
-	/* Réponse besoin client */		
-			
-		global $conf, $langs, $bc;
-			
-		$action = GETPOST('action');	
-		$TContext = explode(':',$parameters['context']);
-		if (
-				in_array('invoicecard',$TContext)
-		        || in_array('invoicesuppliercard',$TContext)
-				|| in_array('propalcard',$TContext)
-				|| in_array('ordercard',$TContext)
-		        || in_array('ordersuppliercard',$TContext)
-				|| in_array('invoicereccard',$TContext)
-			)
-	        {	
-				$hideInnerLines	= isset( $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] : 0;
-				$hidedetails	= isset( $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] : 0;
-				$hidepricesDefaultConf = !empty($conf->global->SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED)?$conf->global->SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED:0;
-				$hideprices= isset( $_SESSION['subtotal_hideprices_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hideprices_'.$parameters['modulepart']] : $hidepricesDefaultConf;
-				
-				$var=false;
-		     	$out.= '<tr '.$bc[$var].'>
-		     			<td colspan="4" align="right">
-		     				<label for="hideInnerLines">'.$langs->trans('HideInnerLines').'</label>
-		     				<input type="checkbox" onclick="if($(this).is(\':checked\')) { $(\'#hidedetails\').prop(\'checked\', \'checked\')  }" id="hideInnerLines" name="hideInnerLines" value="1" '.(( $hideInnerLines ) ? 'checked="checked"' : '' ).' />
-		     			</td>
-		     			</tr>';
-				
-		     	$var=!$var;
-		     	$out.= '<tr '.$bc[$var].'>
-		     			<td colspan="4" align="right">
-		     				<label for="hidedetails">'.$langs->trans('SubTotalhidedetails').'</label>
-		     				<input type="checkbox" id="hidedetails" name="hidedetails" value="1" '.(( $hidedetails ) ? 'checked="checked"' : '' ).' />
-		     			</td>
-		     			</tr>';
-		     	
-		     	$var=!$var;
-		     	$out.= '<tr '.$bc[$var].'>
-		     			<td colspan="4" align="right">
-		     				<label for="hidedetails">'.$langs->trans('SubTotalhidePrice').'</label>
-		     				<input type="checkbox" id="hideprices" name="hideprices" value="1" '.(( $hideprices ) ? 'checked="checked"' : '' ).' />
-		     			</td>
-		     			</tr>';
-		     	
-		     	
-				 
-				if ( 
-					(in_array('propalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
-					|| (in_array('ordercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
-				    || (in_array('ordersuppliercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
-					|| (in_array('invoicecard',$TContext) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
-				    || (in_array('invoicesuppliercard',$TContext) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
-					|| (in_array('invoicereccard',$TContext)  && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP ))
-				)
-				{
-					$var=!$var;
-					$out.= '
-						<tr '.$bc[$var].'>
-							<td colspan="4" align="right">
-								<label for="subtotal_add_recap">'.$langs->trans('subtotal_add_recap').'</label>
-								<input type="checkbox" id="subtotal_add_recap" name="subtotal_add_recap" value="1" '.( GETPOST('subtotal_add_recap') ? 'checked="checked"' : '' ).' />
-							</td>
-						</tr>';
-				}
-				
-				
-				$this->resprints = $out;	
-			}
-			
-		
-        return 1;
-	} 
-	 
-    function formEditProductOptions($parameters, &$object, &$action, $hookmanager) 
-    {
-		
-    	if (in_array('invoicecard',explode(':',$parameters['context'])))
-        {
-        	
-        }
-		
-        return 0;
-    }
+	
+    
 	
 	function ODTSubstitutionLine(&$parameters, &$object, $action, $hookmanager) {
 		global $conf;
@@ -1031,15 +949,6 @@ class ActionsSubtotal
 		elseif(!empty($hideprices)) {
 			$this->resprints = $object->lines[$parameters['i']]->qty;
 			return 1;
-		}
-		elseif (!empty($conf->global->SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY))
-		{
-			$hideInnerLines = (int)GETPOST('hideInnerLines');
-			$hidedetails = (int)GETPOST('hidedetails');
-			if (empty($hideInnerLines) && !empty($hidedetails))
-			{
-				$this->resprints = $object->lines[$parameters['i']]->qty;
-			}
 		}
 		
 		if(is_array($parameters)) $i = & $parameters['i'];
@@ -1828,74 +1737,6 @@ class ActionsSubtotal
 			</tr>
 			<?php
 			
-			
-			// Affichage des extrafields à la Dolibarr (car sinon non affiché sur les titres)
-			if(TSubtotal::isTitle($line) && !empty($conf->global->SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE)) {
-				
-				require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
-				
-				// Extrafields
-				$extrafieldsline = new ExtraFields($db);
-				$extralabelsline = $extrafieldsline->fetch_name_optionals_label($object->table_element_line);
-				
-				$colspan+=3; $mode = 'view';
-				if($action === 'editline' && $line->rowid == GETPOST('lineid')) $mode = 'edit';
-				
-				$ex_element = $line->element;
-				$line->element = 'tr_extrafield_title '.$line->element; // Pour pouvoir manipuler ces tr
-				print $line->showOptionals($extrafieldsline, $mode, array('style'=>' style="background:#eeffee;" ','colspan'=>$colspan));
-				$isExtraSelected = false;
-				foreach($line->array_options as $option) {
-					if(!empty($option) && $option != "-1") {
-						$isExtraSelected = true;
-						break;
-					}
-				}
-				
-				if($mode === 'edit') {
-					?>
-					<script>
-						$(document).ready(function(){
-
-							var all_tr_extrafields = $("tr.tr_extrafield_title");
-							<?php 
-							// Si un extrafield est rempli alors on affiche directement les extrafields
-							if(!$isExtraSelected) {
-								echo 'all_tr_extrafields.hide();';
-								echo 'var trad = "'.$langs->trans('showExtrafields').'";';
-								echo 'var extra = 0;';
-							} else {
-								echo 'all_tr_extrafields.show();';
-								echo 'var trad = "'.$langs->trans('hideExtrafields').'";';
-								echo 'var extra = 1;';
-							}
-							?>
-							
-							$("div .subtotal_underline").append(
-									'<a id="printBlocExtrafields" onclick="return false;" href="#">' + trad + '</a>'
-									+ '<input type="hidden" name="showBlockExtrafields" id="showBlockExtrafields" value="'+ extra +'" />');
-
-							$(document).on('click', "#printBlocExtrafields", function() {
-								var btnShowBlock = $("#showBlockExtrafields");
-								var val = btnShowBlock.val();
-								if(val == '0') {
-									btnShowBlock.val('1');
-									$("#printBlocExtrafields").html("<?php print $langs->trans('hideExtrafields'); ?>");
-									$(all_tr_extrafields).show();
-								} else {
-									btnShowBlock.val('0');
-									$("#printBlocExtrafields").html("<?php print $langs->trans('showExtrafields'); ?>");
-									$(all_tr_extrafields).hide();
-								}
-							});
-						});
-					</script>
-					<?php
-				}
-				$line->element = $ex_element;
-				
-			}
-			
 			return 1;	
 			
 		}
@@ -1917,13 +1758,6 @@ class ActionsSubtotal
 		
 		$object = $parameters['object'];
 		
-		if ((!empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP) && $object->element == 'propal') || (!empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP) && $object->element == 'commande') || (!empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP) && $object->element == 'facture'))
-		{
-			if (GETPOST('subtotal_add_recap')) {
-				dol_include_once('/subtotal/class/subtotal.class.php');
-				TSubtotal::addRecapPage($parameters, $pdf);
-			}
-		}
 	}
 	
 	// HTML 5 data for js
