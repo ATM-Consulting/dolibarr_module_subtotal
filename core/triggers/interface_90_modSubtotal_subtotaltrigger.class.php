@@ -269,7 +269,7 @@ class Interfacesubtotaltrigger
 					if (!empty($line->array_options['options_subtotal_nc']))
 					{
 						$object->total_ht = $object->total_tva = $object->total_ttc = $object->total_localtax1 = $object->total_localtax2 = 
-							$object->multicurrency_total_ht = $object->multicurrency_total_tva = $object->multicurrency_total_ttc = 0;
+							$object->multicurrency_total_ht = $object->multicurrency_total_tva = $object->multicurrency_total_ttc = $object->subprice = 0;
 
 						if ($object->element == 'propal') $res = $object->update(1);
 						else $res = $object->update($user, 1);
@@ -282,7 +282,7 @@ class Interfacesubtotaltrigger
 				// $object correspond à la ligne ajoutée
 				if(! empty($object->array_options['options_subtotal_nc'])) {
 					$object->total_ht = $object->total_tva = $object->total_ttc = $object->total_localtax1 = $object->total_localtax2 = 
-							$object->multicurrency_total_ht = $object->multicurrency_total_tva = $object->multicurrency_total_ttc = 0;
+							$object->multicurrency_total_ht = $object->multicurrency_total_tva = $object->multicurrency_total_ttc = $object->subprice = 0;
 
 					if ($object->element == 'propaldet') $res = $object->update(1);
 					else $res = $object->update($user, 1);
