@@ -243,7 +243,7 @@ class ActionsSubtotal
 							if (action == 'addSubtotal') dialog_html += '<input id="sub-total-title" size="30" value="" placeholder="'+label+'" />';
 							
 							dialog_html += "&nbsp;<select name='subtotal_line_level'>";
-							for (var i=1;i<10;i++)
+							for (var i=1;i<3;i++)
 							{
 								dialog_html += "<option value="+i+"><?php echo $langs->trans('Level'); ?> "+i+"</option>";
 							}
