@@ -10,6 +10,26 @@ class ActionsSubtotal
 		$langs->load('subtotal@subtotal');
 	}
 	
+	function printFieldListSelect($parameters, &$object, &$action, $hookmanager) {
+		
+		global $type_element, $where;
+		
+		$contexts = explode(':',$parameters['context']);
+		
+		if(in_array('consumptionthirdparty',$contexts) && in_array($type_element, array('propal', 'order', 'invoice', 'supplier_order', 'supplier_invoice', 'supplier_proposal'))) {
+			$mod_num = TSubtotal::$module_number;
+			
+			// Not a title (can't use TSubtotal class methods in sql)
+			$where.= ' AND (d.special_code != '.$mod_num.' OR d.product_type != 9 OR d.qty > 9)';
+			// Not a subtotal (can't use TSubtotal class methods in sql)
+			$where.= ' AND (d.special_code != '.$mod_num.' OR d.product_type != 9 OR d.qty < 90)';
+			// Not a free line text (can't use TSubtotal class methods in sql)
+			$where.= ' AND (d.special_code != '.$mod_num.' OR d.product_type != 9 OR d.qty != 50)';
+			
+		}
+		
+	}
+	
 	
 	function createDictionaryFieldlist($parameters, &$object, &$action, $hookmanager)
 	{
