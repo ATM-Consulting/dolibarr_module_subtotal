@@ -406,7 +406,7 @@ class ActionsSubtotal
 		     	$var=!$var;
 		     	$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
-		     				<label for="hidedetails">'.$langs->trans('SubTotalhidePrice').'</label>
+		     				<label for="hideprices">'.$langs->trans('SubTotalhidePrice').'</label>
 		     				<input type="checkbox" id="hideprices" name="hideprices" value="1" '.(( $hideprices ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
