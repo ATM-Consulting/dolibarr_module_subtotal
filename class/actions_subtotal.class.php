@@ -717,6 +717,33 @@ class ActionsSubtotal
 	function formAddObjectLine ($parameters, &$object, &$action, $hookmanager) {
 		return 0;
 	}
+	
+	function changeRoundingMode($parameters, &$object, &$action, $hookmanager)
+	{
+		global $conf;
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && !empty($object->table_element_line) && in_array($object->element, array('commande', 'facture', 'propal')))
+		{
+			if ($object->element == 'commande')
+				$obj = new OrderLine($object->db);
+			if ($object->element == 'propal')
+				$obj = new PropaleLigne($object->db);
+			if ($object->element == 'facture')
+				$obj = new FactureLigne($object->db);
+			if (!empty($parameters['fk_element']))
+			{
+				
+				if($obj->fetch($parameters['fk_element'])){
+					$obj->id= $obj->rowid;
+					if (empty($obj->array_options))
+						$obj->fetch_optionals();
+					if (!empty($obj->array_options['options_subtotal_nc']))
+						return 1;
+				}
+			}
+		}
+
+		return 0;
+	}
 
 	function getArrayOfLineForAGroup(&$object, $lineid) {
 		$rang = $line->rang;
