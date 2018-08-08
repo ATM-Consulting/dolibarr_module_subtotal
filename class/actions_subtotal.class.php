@@ -366,7 +366,7 @@ class ActionsSubtotal
 	}
 	
 	
-	function formBuilddocOptions($parameters) {
+	function formBuilddocOptions($parameters, &$object) {
 	/* Réponse besoin client */		
 			
 		global $conf, $langs, $bc;
@@ -382,10 +382,10 @@ class ActionsSubtotal
 				|| in_array('invoicereccard',$TContext)
 			)
 	        {	
-				$hideInnerLines	= isset( $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] : 0;
-				$hidedetails	= isset( $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] : 0;
+	            $hideInnerLines	= isset( $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']][$object->id] ) ?  $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']][$object->id] : 0;
+	            $hidedetails	= isset( $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']][$object->id] ) ?  $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']][$object->id] : 0;
 				$hidepricesDefaultConf = !empty($conf->global->SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED)?$conf->global->SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED:0;
-				$hideprices= isset( $_SESSION['subtotal_hideprices_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hideprices_'.$parameters['modulepart']] : $hidepricesDefaultConf;
+				$hideprices= isset( $_SESSION['subtotal_hideprices_'.$parameters['modulepart']][$object->id] ) ?  $_SESSION['subtotal_hideprices_'.$parameters['modulepart']][$object->id] : $hidepricesDefaultConf;
 				
 				$var=false;
 		     	$out.= '<tr '.$bc[$var].'>
@@ -406,7 +406,7 @@ class ActionsSubtotal
 		     	$var=!$var;
 		     	$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
-		     				<label for="hidedetails">'.$langs->trans('SubTotalhidePrice').'</label>
+		     				<label for="hideprices">'.$langs->trans('SubTotalhidePrice').'</label>
 		     				<input type="checkbox" id="hideprices" name="hideprices" value="1" '.(( $hideprices ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
@@ -625,13 +625,16 @@ class ActionsSubtotal
 				global $hideprices;
 				
 				$hideInnerLines = (int)GETPOST('hideInnerLines');
-				$_SESSION[$sessname] = $hideInnerLines;		
+				if(!empty($_SESSION[$sessname]) && !is_array($_SESSION[$sessname][$object->id]) ) $_SESSION[$sessname] = array(); // prevent old system
+				$_SESSION[$sessname][$object->id] = $hideInnerLines;		
 				
 				$hidedetails= (int)GETPOST('hidedetails');
-				$_SESSION[$sessname2] = $hidedetails;
+				if(!empty($_SESSION[$sessname2]) && !is_array($_SESSION[$sessname2][$object->id]) ) $_SESSION[$sessname2] = array(); // prevent old system
+				$_SESSION[$sessname2][$object->id] = $hidedetails;
 				
 				$hideprices= (int)GETPOST('hideprices');
-				$_SESSION[$sessname3] = $hideprices;
+				if(!empty($_SESSION[$sessname3]) && !is_array($_SESSION[$sessname3][$object->id]) ) $_SESSION[$sessname3] = array(); // prevent old system
+				$_SESSION[$sessname3][$object->id] = $hideprices;
 				
 				foreach($object->lines as &$line) {
 					if ($line->product_type == 9 && $line->special_code == $this->module_number) {
@@ -909,7 +912,7 @@ class ActionsSubtotal
 				}
 			}
 			
-			if($total_to_print) {
+			if($total_to_print !== '') {
 				
 				if (GETPOST('hideInnerLines'))
 				{
@@ -1159,7 +1162,7 @@ class ActionsSubtotal
 	 * Remplace le retour de la méthode qui l'appelle par un standard 1 ou autre chose celon le hook
 	 * @return int 1, 0, -1
 	 */
-	private function callHook(&$object, &$hookmanager, $action, $params)
+	private function callHook(&$object, &$hookmanager, $action, $params, $defaultReturn = 1)
 	{
 		$reshook=$hookmanager->executeHooks('subtotalHidePrices',$params, $object, $action);
 		if ($reshook < 0)
@@ -1183,7 +1186,7 @@ class ActionsSubtotal
 			}
 		}
 
-		return 1;
+		return $defaultReturn;
 	}
 	
 	function pdf_getlinetotalwithtax($parameters=array(), &$object, &$action='') {
@@ -1246,7 +1249,7 @@ class ActionsSubtotal
 	}
 	
 	function pdf_getlineupexcltax($parameters=array(), &$object, &$action='') {
-		global $conf,$hideprices;
+	    global $conf,$hideprices,$hookmanager;
 
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
@@ -1261,15 +1264,39 @@ class ActionsSubtotal
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
 		
-		if (!empty($hideprices) 
-				|| (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
+		
+		// Si la gestion C/NC est active et que je suis sur un ligne dont l'extrafield est coché
+		if (
+		!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) &&
+		(!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i]))
 		)
 		{
-			if (!empty($hideprices) || !in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
-			{
-				$this->resprints = ' ';
-				return 1;
-			}
+		    // alors je dois vérifier si la méthode fait partie de la conf qui l'exclue
+		    if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
+		    {
+		        $this->resprints = ' ';
+		        
+		        // currentcontext à modifier celon l'appel
+		        $params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlineupexcltax', 'currentcontext'=>'subtotal_hide_nc', 'i' => $i);
+		        return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
+		        
+		    }
+		}
+		// Cache le prix pour les lignes standards dolibarr qui sont dans un ensemble
+		else if (!empty($hideprices))
+		{
+		    
+		    // Check if a title exist for this line && if the title have subtotal
+		    $lineTitle = TSubtotal::getParentTitleOfLine($object, $i);
+		    if(TSubtotal::getParentTitleOfLine($object, $i) && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
+		    {
+		        
+		        $this->resprints = ' ';
+		        
+		        // currentcontext à modifier celon l'appel
+		        $params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlineupexcltax', 'currentcontext'=>'subtotal_hideprices', 'i' => $i);
+		        return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
+		    }
 		}
 		
 		return 0;
@@ -1306,8 +1333,8 @@ class ActionsSubtotal
 	}
 	
 	function pdf_getlinevatrate($parameters=array(), &$object, &$action='') {
-		global $conf;
-		
+	    global $conf,$hideprices,$hookmanager;
+	    
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 			
@@ -1325,13 +1352,37 @@ class ActionsSubtotal
 		if (empty($object->lines[$i])) return 0; // hideInnerLines => override $object->lines et Dolibarr ne nous permet pas de mettre à jour la variable qui conditionne la boucle sur les lignes (PR faite pour 6.0)
 
 		$object->lines[$i]->fetch_optionals();
-		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
+		// Si la gestion C/NC est active et que je suis sur un ligne dont l'extrafield est coché
+		if (
+		!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) &&
+		(!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i]))
+		)
 		{
-			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
-			{
-				$this->resprints = ' ';
-				return 1;
-			}
+		    // alors je dois vérifier si la méthode fait partie de la conf qui l'exclue
+		    if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
+		    {
+		        $this->resprints = ' ';
+		        
+		        // currentcontext à modifier celon l'appel
+		        $params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlinevatrate', 'currentcontext'=>'subtotal_hide_nc', 'i' => $i);
+		        return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
+		    }
+		}
+		// Cache le prix pour les lignes standards dolibarr qui sont dans un ensemble
+		else if (!empty($hideprices))
+		{
+		    
+		    // Check if a title exist for this line && if the title have subtotal
+		    $lineTitle = TSubtotal::getParentTitleOfLine($object, $i);
+		    if(TSubtotal::getParentTitleOfLine($object, $i) && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
+		    {
+		        
+		        $this->resprints = ' ';
+		        
+		        // currentcontext à modifier celon l'appel
+		        $params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlinevatrate', 'currentcontext'=>'subtotal_hideprices', 'i' => $i);
+		        return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
+		    }
 		}
 		
 		return 0;
