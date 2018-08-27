@@ -366,7 +366,7 @@ class ActionsSubtotal
 	}
 	
 	
-	function formBuilddocOptions($parameters) {
+	function formBuilddocOptions($parameters, &$object) {
 	/* Réponse besoin client */		
 			
 		global $conf, $langs, $bc;
@@ -382,10 +382,10 @@ class ActionsSubtotal
 				|| in_array('invoicereccard',$TContext)
 			)
 	        {	
-				$hideInnerLines	= isset( $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']] : 0;
-				$hidedetails	= isset( $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']] : 0;
+	            $hideInnerLines	= isset( $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']][$object->id] ) ?  $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']][$object->id] : 0;
+	            $hidedetails	= isset( $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']][$object->id] ) ?  $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']][$object->id] : 0;
 				$hidepricesDefaultConf = !empty($conf->global->SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED)?$conf->global->SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED:0;
-				$hideprices= isset( $_SESSION['subtotal_hideprices_'.$parameters['modulepart']] ) ?  $_SESSION['subtotal_hideprices_'.$parameters['modulepart']] : $hidepricesDefaultConf;
+				$hideprices= isset( $_SESSION['subtotal_hideprices_'.$parameters['modulepart']][$object->id] ) ?  $_SESSION['subtotal_hideprices_'.$parameters['modulepart']][$object->id] : $hidepricesDefaultConf;
 				
 				$var=false;
 		     	$out.= '<tr '.$bc[$var].'>
@@ -625,13 +625,16 @@ class ActionsSubtotal
 				global $hideprices;
 				
 				$hideInnerLines = (int)GETPOST('hideInnerLines');
-				$_SESSION[$sessname] = $hideInnerLines;		
+				if(!empty($_SESSION[$sessname]) && !is_array($_SESSION[$sessname][$object->id]) ) $_SESSION[$sessname] = array(); // prevent old system
+				$_SESSION[$sessname][$object->id] = $hideInnerLines;		
 				
 				$hidedetails= (int)GETPOST('hidedetails');
-				$_SESSION[$sessname2] = $hidedetails;
+				if(!empty($_SESSION[$sessname2]) && !is_array($_SESSION[$sessname2][$object->id]) ) $_SESSION[$sessname2] = array(); // prevent old system
+				$_SESSION[$sessname2][$object->id] = $hidedetails;
 				
 				$hideprices= (int)GETPOST('hideprices');
-				$_SESSION[$sessname3] = $hideprices;
+				if(!empty($_SESSION[$sessname3]) && !is_array($_SESSION[$sessname3][$object->id]) ) $_SESSION[$sessname3] = array(); // prevent old system
+				$_SESSION[$sessname3][$object->id] = $hideprices;
 				
 				foreach($object->lines as &$line) {
 					if ($line->product_type == 9 && $line->special_code == $this->module_number) {
