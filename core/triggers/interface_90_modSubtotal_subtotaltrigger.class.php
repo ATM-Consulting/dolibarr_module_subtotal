@@ -257,7 +257,7 @@ class Interfacesubtotaltrigger
 		{
 			$doli_action = GETPOST('action');
 			$set = GETPOST('set');
-			if ( (in_array($doli_action, array('updateligne', 'updateline', 'addline', 'add')) || $set == 'defaultTVA') && !TSubtotal::isTitle($object) && !TSubtotal::isSubtotal($object) && in_array($object->element, array('propaldet', 'commandedet', 'facturedet')))
+			if ( (in_array($doli_action, array('updateligne', 'updateline', 'addline', 'add', 'create')) || $set == 'defaultTVA') && !TSubtotal::isTitle($object) && !TSubtotal::isSubtotal($object) && in_array($object->element, array('propaldet', 'commandedet', 'facturedet')))
 			{
 				 dol_syslog(
 					"[SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS] Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". object=".$object->element." id=" . $object->id
@@ -269,7 +269,7 @@ class Interfacesubtotaltrigger
 					if (!empty($line->array_options['options_subtotal_nc']))
 					{
 						$object->total_ht = $object->total_tva = $object->total_ttc = $object->total_localtax1 = $object->total_localtax2 = 
-							$object->multicurrency_total_ht = $object->multicurrency_total_tva = $object->multicurrency_total_ttc = 0;
+							$object->multicurrency_total_ht = $object->multicurrency_total_tva = $object->multicurrency_total_ttc = $object->subprice = 0;
 
 						if ($object->element == 'propal') $res = $object->update(1);
 						else $res = $object->update($user, 1);
@@ -282,7 +282,7 @@ class Interfacesubtotaltrigger
 				// $object correspond à la ligne ajoutée
 				if(! empty($object->array_options['options_subtotal_nc'])) {
 					$object->total_ht = $object->total_tva = $object->total_ttc = $object->total_localtax1 = $object->total_localtax2 = 
-							$object->multicurrency_total_ht = $object->multicurrency_total_tva = $object->multicurrency_total_ttc = 0;
+							$object->multicurrency_total_ht = $object->multicurrency_total_tva = $object->multicurrency_total_ttc = $object->subprice = 0;
 
 					if ($object->element == 'propaldet') $res = $object->update(1);
 					else $res = $object->update($user, 1);
