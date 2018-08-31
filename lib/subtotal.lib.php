@@ -224,7 +224,7 @@ function _createExtraComprisNonCompris()
  * @param	$lineid			= title lineid
  * @param	$subtotal_nc	0 = "Compris" prise en compte des totaux des lignes; 1 = "Non compris" non prise en compte des totaux du bloc; null = update de toutes les lignes 
  */
-function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
+function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null, $notrigger = 0)
 {
 	global $db,$langs,$tmp_object_nc;
 	
@@ -283,13 +283,13 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 					$TTitleBlock = TSubtotal::getLinesFromTitleId($object, $lineid, true);
 					foreach($TTitleBlock as &$line_block)
 					{
-						$res = doUpdate($object, $line_block, $subtotal_nc);
+						$res = doUpdate($object, $line_block, $subtotal_nc, $notrigger);
 					}
 				}
 			}
 			else
 			{
-				$res = doUpdate($object, $line, $subtotal_nc);
+				$res = doUpdate($object, $line, $subtotal_nc, $notrigger);
 			}
 			
 			$res = $object->update_price(1);
@@ -309,7 +309,7 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 	}
 }
 
-function doUpdate(&$object, &$line, $subtotal_nc)
+function doUpdate(&$object, &$line, $subtotal_nc, $notrigger = 0)
 {
 	global $user;
 	
@@ -321,8 +321,8 @@ function doUpdate(&$object, &$line, $subtotal_nc)
 
 		$line->array_options['options_subtotal_nc'] = 1;
 
-		if ($line->element == 'propaldet') $res = $line->update();
-		else $res = $line->update($user);
+		if ($line->element == 'propaldet') $res = $line->update($notrigger);
+		else $res = $line->update($user, $notrigger);
 	}
 	else {
 	    if(in_array($object->element, array('invoice_supplier', 'order_supplier', 'supplier_proposal'))) {
@@ -335,7 +335,7 @@ function doUpdate(&$object, &$line, $subtotal_nc)
 	    }
 		$line->array_options['options_subtotal_nc'] = 0;
 		if($object->element == 'order_supplier') $line->update($user);
-		$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $line->tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $line->situation_percent, $line->fk_unit);
+		$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $line->tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $line->situation_percent, $line->fk_unit, $notrigger);
 	}
 	
 	return $res;
