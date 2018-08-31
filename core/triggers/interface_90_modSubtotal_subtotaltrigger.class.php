@@ -165,6 +165,7 @@ class Interfacesubtotaltrigger
         // Data and type of action are stored into $object and $action
         // Users
         dol_include_once('/subtotal/class/subtotal.class.php');
+        dol_include_once('/subtotal/lib/subtotal.lib.php');
         $langs->load('subtotal@subtotal');
    
         if (!empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) && in_array($action, array('LINEPROPAL_INSERT', 'LINEORDER_INSERT', 'LINEBILL_INSERT')))
