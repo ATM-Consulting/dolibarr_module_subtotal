@@ -165,6 +165,7 @@ class Interfacesubtotaltrigger
         // Data and type of action are stored into $object and $action
         // Users
         dol_include_once('/subtotal/class/subtotal.class.php');
+        dol_include_once('/subtotal/lib/subtotal.lib.php');
         $langs->load('subtotal@subtotal');
    
         if (!empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) && in_array($action, array('LINEPROPAL_INSERT', 'LINEORDER_INSERT', 'LINEBILL_INSERT')))
@@ -280,6 +281,8 @@ class Interfacesubtotaltrigger
 				}
 
 				// $object correspond à la ligne ajoutée
+				if(empty($object->array_options)) $object->fetch_optionals();
+
 				if(! empty($object->array_options['options_subtotal_nc'])) {
 					$object->total_ht = $object->total_tva = $object->total_ttc = $object->total_localtax1 = $object->total_localtax2 = 
 							$object->multicurrency_total_ht = $object->multicurrency_total_tva = $object->multicurrency_total_ttc = 0;
@@ -288,6 +291,16 @@ class Interfacesubtotaltrigger
 					else $res = $object->update($user, 1);
 
 					if ($res > 0) setEventMessage($langs->trans('subtotal_update_nc_success'));
+				}
+
+				// Correction d'un bug lors de la création d'une commande depuis une propale qui a, au moins, une ligne NC
+				$parent_element = '';
+				if($object->element == 'propaldet') $parent_element = 'propal';
+				if($object->element == 'commandedet') $parent_element = 'commande';
+				if($object->element == 'facturedet') $parent_element = 'facture';
+
+				if(! empty($parent_element) && ! empty($object->array_options['options_subtotal_nc'])) {
+					_updateLineNC($parent_element, $object->{'fk_'.$parent_element}, $object->id, $object->array_options['options_subtotal_nc'], 1);
 				}
 			}
 		}
