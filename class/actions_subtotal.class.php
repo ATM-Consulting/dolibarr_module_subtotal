@@ -12,6 +12,26 @@ class ActionsSubtotal
 		$this->allow_move_block_lines = true;
 	}
 	
+	function printFieldListSelect($parameters, &$object, &$action, $hookmanager) {
+		
+		global $type_element, $where;
+		
+		$contexts = explode(':',$parameters['context']);
+		
+		if(in_array('consumptionthirdparty',$contexts) && in_array($type_element, array('propal', 'order', 'invoice', 'supplier_order', 'supplier_invoice', 'supplier_proposal'))) {
+			$mod_num = TSubtotal::$module_number;
+			
+			// Not a title (can't use TSubtotal class methods in sql)
+			$where.= ' AND (d.special_code != '.$mod_num.' OR d.product_type != 9 OR d.qty > 9)';
+			// Not a subtotal (can't use TSubtotal class methods in sql)
+			$where.= ' AND (d.special_code != '.$mod_num.' OR d.product_type != 9 OR d.qty < 90)';
+			// Not a free line text (can't use TSubtotal class methods in sql)
+			$where.= ' AND (d.special_code != '.$mod_num.' OR d.product_type != 9 OR d.qty != 50)';
+			
+		}
+		
+	}
+	
 	
 	function createDictionaryFieldlist($parameters, &$object, &$action, $hookmanager)
 	{
@@ -718,6 +738,33 @@ class ActionsSubtotal
 	}
 	
 	function formAddObjectLine ($parameters, &$object, &$action, $hookmanager) {
+		return 0;
+	}
+	
+	function changeRoundingMode($parameters, &$object, &$action, $hookmanager)
+	{
+		global $conf;
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && !empty($object->table_element_line) && in_array($object->element, array('commande', 'facture', 'propal')))
+		{
+			if ($object->element == 'commande')
+				$obj = new OrderLine($object->db);
+			if ($object->element == 'propal')
+				$obj = new PropaleLigne($object->db);
+			if ($object->element == 'facture')
+				$obj = new FactureLigne($object->db);
+			if (!empty($parameters['fk_element']))
+			{
+				
+				if($obj->fetch($parameters['fk_element'])){
+					$obj->id= $obj->rowid;
+					if (empty($obj->array_options))
+						$obj->fetch_optionals();
+					if (!empty($obj->array_options['options_subtotal_nc']))
+						return 1;
+				}
+			}
+		}
+
 		return 0;
 	}
 
