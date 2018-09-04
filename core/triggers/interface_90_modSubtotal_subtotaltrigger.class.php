@@ -165,7 +165,6 @@ class Interfacesubtotaltrigger
         // Data and type of action are stored into $object and $action
         // Users
         dol_include_once('/subtotal/class/subtotal.class.php');
-        dol_include_once('/subtotal/lib/subtotal.lib.php');
         $langs->load('subtotal@subtotal');
    
         if (!empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) && in_array($action, array('LINEPROPAL_INSERT', 'LINEORDER_INSERT', 'LINEBILL_INSERT')))
@@ -256,6 +255,8 @@ class Interfacesubtotaltrigger
 		
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($action, array('LINEPROPAL_INSERT', 'LINEPROPAL_UPDATE', 'LINEORDER_INSERT', 'LINEORDER_UPDATE', 'LINEBILL_INSERT', 'LINEBILL_UPDATE')))
 		{
+            if(! function_exists('_updateLineNC')) dol_include_once('/subtotal/lib/subtotal.lib.php');
+
 			$doli_action = GETPOST('action');
 			$set = GETPOST('set');
 			if ( (in_array($doli_action, array('updateligne', 'updateline', 'addline', 'add', 'create')) || $set == 'defaultTVA') && !TSubtotal::isTitle($object) && !TSubtotal::isSubtotal($object) && in_array($object->element, array('propaldet', 'commandedet', 'facturedet')))
