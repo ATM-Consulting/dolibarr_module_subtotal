@@ -2154,6 +2154,29 @@ class ActionsSubtotal
 				
 			}
 			
+			?>
+			<script type="text/javascript">		
+				$(document).ready(function(){
+					var diffCol=colCount($('.liste_titre .linecoldelete').parent())-colCount($('tr[data-product_type=9]:first'));
+					$('tr[data-product_type=9]').each(function(){
+						$(this).find('td:first').attr('colspan',parseInt($(this).find('td:first').attr('colspan'))+diffCol);
+					});
+				});
+				function colCount(elem) {
+					var colCount = 0;
+					elem.find('td').each(function () {
+						if ($(this).attr('colspan')) {
+							colCount += $(this).attr('colspan');
+						} else {
+							colCount++;
+						}
+					});
+					return colCount;
+				}
+
+			</script>
+		<?php 
+		
 			return 1;	
 			
 		}
