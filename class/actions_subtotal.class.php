@@ -1703,7 +1703,7 @@ class ActionsSubtotal
 			if(empty($line->description)) $line->description = $line->desc;
 			
 			$colspan = 5;
-			if(!empty($conf->multicurrency->enabled)) $colspan+=2;
+			if(!empty($conf->multicurrency->enabled)) $colspan+=1; // colonne PU Devise
 			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
 			if(!empty($conf->margin->enabled)) $colspan++;
 			if(!empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
@@ -1887,13 +1887,15 @@ class ActionsSubtotal
 				if($line->qty>90) {
 					/* Total */
 					$total_line = $this->getTotalLineFromObject($object, $line, '');
-					echo '<td class="nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
+					echo '<td class="linecolht nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
+					if (!empty($conf->multicurrency->enabled)) echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 				} else {
-					echo '<td>&nbsp;</td>';
+					echo '<td class="linecolht">&nbsp;</td>';
+					if(!empty($conf->multicurrency->enabled)) echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 				}	
 			?>
 					
-			<td align="center" class="nowrap">
+			<td align="center" class="nowrap linecoledit">
 				<?php
 					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 						?>
@@ -1928,7 +1930,7 @@ class ActionsSubtotal
 				?>
 			</td>
 
-			<td align="center" nowrap="nowrap">	
+			<td align="center" nowrap="nowrap linecoldelete">	
 				<?php
 
 					if ($action != 'editline') {
@@ -1959,7 +1961,7 @@ class ActionsSubtotal
 			}
 			
 			if ($num > 1 && empty($conf->browser->phone)) { ?>
-			<td align="center" class="tdlineupdown">
+			<td align="center" class="linecolmove tdlineupdown">
 			</td>
 			<?php } else { ?>
 			<td align="center"<?php echo ((empty($conf->browser->phone) && ($object->statut == 0  && $user->rights->{$object->element}->creer))?' class="tdlineupdown"':''); ?>></td>
