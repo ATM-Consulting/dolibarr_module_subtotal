@@ -2044,7 +2044,7 @@ class ActionsSubtotal
 				?>
 			</td>
 
-			<td align="center" nowrap="nowrap linecoldelete">	
+			<td align="center" class="nowrap linecoldelete">	
 				<?php
 
 				if ($action != 'editline' && $action != 'selectlines') {
