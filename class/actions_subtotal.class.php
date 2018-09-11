@@ -2002,7 +2002,7 @@ class ActionsSubtotal
 					echo '<td class="linecolht nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
 					if (!empty($conf->multicurrency->enabled)) echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 				} else {
-					echo '<td class="linecolht">&nbsp;</td>';
+					echo '<td class="linecolht movetitleblock">&nbsp;</td>';
 					if(!empty($conf->multicurrency->enabled)) echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 				}	
 			?>
@@ -2354,7 +2354,7 @@ class ActionsSubtotal
 				// target some elements
 				var titleRow = $('tr[data-issubtotal="title"]');
 				var lastTitleCol = titleRow.find('td:last-child');
-				var moveBlockCol= titleRow.find('td.liencolht');
+				var moveBlockCol= titleRow.find('td.linecolht');
 
 				
 				moveBlockCol.disableSelection(); // prevent selection
