@@ -1807,7 +1807,7 @@ class ActionsSubtotal
 			if($object->element == 'order_supplier') $colspan = 3;
 			if($object->element == 'invoice_supplier') $colspan = 4;
 			if($object->element == 'supplier_proposal') $colspan = 4;
-			if(!empty($conf->multicurrency->enabled)) $colspan+=2;
+			if(!empty($conf->multicurrency->enabled)) $colspan+=1; // colonne PU Devise
 			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
 			if(!empty($conf->margin->enabled)) $colspan++;
 			if(!empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
@@ -1999,9 +1999,11 @@ class ActionsSubtotal
 				if($line->qty>90) {
 					/* Total */
 					$total_line = $this->getTotalLineFromObject($object, $line, '');
-					echo '<td class="nowrap liencolht" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
+					echo '<td class="linecolht nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
+					if (!empty($conf->multicurrency->enabled)) echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 				} else {
-					echo '<td class="liencolht movetitleblock" >&nbsp;</td>';
+					echo '<td class="linecolht">&nbsp;</td>';
+					if(!empty($conf->multicurrency->enabled)) echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 				}	
 			?>
 					
@@ -2042,7 +2044,7 @@ class ActionsSubtotal
 				?>
 			</td>
 
-			<td align="center" nowrap="nowrap" class="linecoldelete">	
+			<td align="center" nowrap="nowrap linecoldelete">	
 				<?php
 
 				if ($action != 'editline' && $action != 'selectlines') {
@@ -2073,7 +2075,7 @@ class ActionsSubtotal
 			}
 			
 			if ($num > 1 && empty($conf->browser->phone)) { ?>
-			<td align="center" class="tdlineupdown">
+			<td align="center" class="linecolmove tdlineupdown">
 			</td>
 			<?php } else { ?>
 			<td align="center"<?php echo ((empty($conf->browser->phone) && ($object->statut == 0  && $createRight ))?' class="tdlineupdown"':''); ?>></td>
