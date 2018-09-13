@@ -288,6 +288,7 @@ class TSubtotal {
 			else
 			{
 				$TTot['total_pa_ht'] += $l->pa_ht * $l->qty;
+				$TTot['total_subprice'] += $l->subprice * $l->qty;
 				$TTot['total_ht'] += $l->total_ht;
 				$TTot['total_tva'] += $l->total_tva;
 				$TTot['total_ttc'] += $l->total_ttc;
