@@ -130,6 +130,8 @@ function _updateSubtotalLine(&$object, &$line)
 	$label = GETPOST('line-title');
 	$description = ($line->qty>90) ? '' : GETPOST('line-description');
 	$pagebreak = (int) GETPOST('line-pagebreak');
+    $showTotalHT = (int) GETPOST('line-showTotalHT');
+    $showReduc = (int) GETPOST('line-showReduc');
 
 	$level = GETPOST('subtotal_level', 'int');
 	if (!empty($level))
@@ -137,6 +139,8 @@ function _updateSubtotalLine(&$object, &$line)
 		if ($line->qty > 90) $line->qty = 100 - $level; // Si on edit une ligne sous-total
 		else $line->qty = $level;
 	}
+    $line->array_options['options_show_total_ht'] = $showTotalHT;
+    $line->array_options['options_show_reduc'] = $showReduc;
 	
 	$res = TSubtotal::doUpdateLine($object, $line->id, $description, 0, $line->qty, 0, '', '', 0, 9, 0, 0, 'HT', $pagebreak, 0, 1, null, 0, $label, TSubtotal::$module_number, $line->array_options);
 

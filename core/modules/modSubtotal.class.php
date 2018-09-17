@@ -452,7 +452,7 @@ class modSubtotal extends DolibarrModules
      */
     public function init($options = '')
     {
-	  	global $conf;
+	  	global $conf, $db;
 		
 		
 /*		if($conf->milestone->enabled) {
@@ -462,7 +462,14 @@ class modSubtotal extends DolibarrModules
 	    $sql = array();
 
         $result = $this->loadTables();
-
+        dol_include_once('/core/class/extrafields.class.php');
+	
+        $extra = new ExtraFields($db); // propaldet, commandedet, facturedet
+        $TElementType = array('propaldet', 'commandedet', 'facturedet', 'supplier_proposaldet', 'commande_fournisseurdet', 'facture_fourn_det');
+        foreach($TElementType as $element_type) {
+            $extra->addExtraField('show_total_ht', 'Afficher le Total HT sur le sous-total', 'int', 0, 10, $element_type, 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
+            $extra->addExtraField('show_reduc', 'Afficher la réduction sur le sous-total', 'int', 0, 10, $element_type, 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
+        }
 		
         return $this->_init($sql, $options);
     }

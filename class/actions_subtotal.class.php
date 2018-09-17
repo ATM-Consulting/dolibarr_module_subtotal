@@ -896,7 +896,7 @@ class ActionsSubtotal
 	 */
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		global $conf,$subtotal_last_title_posy;
-		
+
 		$hideInnerLines = (int)GETPOST('hideInnerLines');
 		if (!empty($conf->global->SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES) && $hideInnerLines && !empty($subtotal_last_title_posy))
 		{
@@ -1298,8 +1298,23 @@ class ActionsSubtotal
 	function pdf_getlineupexcltax($parameters=array(), &$object, &$action='') {
 	    global $conf,$hideprices,$hookmanager;
 
-		if($this->isModSubtotalLine($parameters,$object) ){
+		if(is_array($parameters)) $i = & $parameters['i'];
+		else $i = (int)$parameters;
+
+		if($this->isModSubtotalLine($parameters,$object) ) {
 			$this->resprints = ' ';
+
+            $line = $object->lines[$i];
+
+            // On récupère les montants du bloc pour les afficher dans la ligne de sous-total
+            if(TSubtotal::isSubtotal($line)) {
+                $parentTitle = TSubtotal::getParentTitleOfLine($object, $i);
+
+                if(! empty($parentTitle->array_options['options_show_total_ht'])) {
+                    $TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
+                    $this->resprints = price($TTotal['total_subprice']);
+                }
+            }
 		
 			if((float)DOL_VERSION<=3.6) {
 				return '';
@@ -1308,9 +1323,6 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
-		if(is_array($parameters)) $i = & $parameters['i'];
-		else $i = (int)$parameters;
-		
 		
 		// Si la gestion C/NC est active et que je suis sur un ligne dont l'extrafield est coché
 		if (
@@ -1344,6 +1356,38 @@ class ActionsSubtotal
 		        $params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlineupexcltax', 'currentcontext'=>'subtotal_hideprices', 'i' => $i);
 		        return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
 		    }
+		}
+		
+		return 0;
+	}
+	
+	function pdf_getlineremisepercent($parameters=array(), &$object, &$action='') {
+	    global $conf,$hideprices,$hookmanager;
+
+        if(is_array($parameters)) $i = & $parameters['i'];
+        else $i = (int) $parameters;
+
+		if($this->isModSubtotalLine($parameters,$object) ) {
+			$this->resprints = ' ';
+
+            $line = $object->lines[$i];
+
+            // Affichage de la remise 
+            if(TSubtotal::isSubtotal($line)) {
+                $parentTitle = TSubtotal::getParentTitleOfLine($object, $i);
+
+                if(! empty($parentTitle->array_options['options_show_reduc'])) {
+                    $TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
+                    $this->resprints = price($TTotal['total_ht'] / $TTotal['total_subprice']*100, 0, '', 1, 2, 2).'%';
+                }
+            }
+		
+			if((float)DOL_VERSION<=3.6) {
+				return '';
+			}
+			else if((float)DOL_VERSION>=3.8) {
+				return 1;
+			}
 		}
 		
 		return 0;
@@ -1553,10 +1597,18 @@ class ActionsSubtotal
 		
 		$this->add_numerotation($object);	
 		
-		
+        foreach($object->lines as $k => &$l) {
+            if(TSubtotal::isSubtotal($l)) {
+                $parentTitle = TSubtotal::getParentTitleOfLine($object, $k);
+                if(! empty($parentTitle->id) && ! empty($parentTitle->array_options['options_show_total_ht'])) {
+                    $l->remise_percent = 100;    // Affichage de la réduction sur la ligne de sous-total
+                }
+            }
+        }
+
 		$hideInnerLines = (int)GETPOST('hideInnerLines');
 		$hidedetails = (int)GETPOST('hidedetails');
-		
+
 		if ($hideInnerLines) { // si c une ligne de titre
 	    	$fk_parent_line=0;
 			$TLines =array();
@@ -1586,7 +1638,16 @@ class ActionsSubtotal
 						$line->total_tva = $total_tva;
 						$line->total = $line->total_ht;
 						$line->total_ttc = $total_ttc;
+
+//                        $TTitle = TSubtotal::getParentTitleOfLine($object, $k);
+//                        $parentTitle = array_shift($TTitle);
+//                        if(! empty($parentTitle->id) && ! empty($parentTitle->array_option['options_show_total_ht'])) {
+//                            exit('la?');
+//                            $line->remise_percent = 100;    // Affichage de la réduction sur la ligne de sous-total
+//                            $line->update();
+//                        }
 					} 
+//                    if(TSub)
 						
 				} 
 			
@@ -1996,23 +2057,39 @@ class ActionsSubtotal
 						}
 						
 
-						echo '<div class="subtotal_underline" style="margin-left:24px;">';
-							echo '<label for="subtotal-pagebreak">'.$langs->trans('AddBreakPageBefore').'</label> <input style="vertical-align:sub;"  type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="8" '.(($line->info_bits > 0) ? 'checked="checked"' : '') .' />&nbsp;&nbsp;';
+						echo '<div class="subtotal_underline" style="margin-left:24px; line-height: 25px;">';
+                        echo '<div>';
+                        echo '<input style="vertical-align:sub;"  type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="8" '.(($line->info_bits > 0) ? 'checked="checked"' : '') .' />&nbsp;';
+                        echo '<label for="subtotal-pagebreak">'.$langs->trans('AddBreakPageBefore').'</label>';
+                        echo '</div>';
 
-							if (TSubtotal::isTitle($line))
-							{
-								$form = new Form($db);
-								echo '<label for="subtotal_tva_tx">'.$form->textwithpicto($langs->trans('subtotal_apply_default_tva'), $langs->trans('subtotal_apply_default_tva_help')).'</label>';
-								echo '<select id="subtotal_tva_tx" name="subtotal_tva_tx" class="flat"><option selected="selected" value="">-</option>';
-								if (empty($readonlyForSituation)) echo str_replace('selected', '', $form->load_tva('subtotal_tva_tx', '', $parameters['seller'], $parameters['buyer'], 0, 0, '', true));
-								echo '</select>&nbsp;&nbsp;';
-								
-								if (!empty($conf->global->INVOICE_USE_SITUATION) && $object->element == 'facture' && $object->type == Facture::TYPE_SITUATION)
-								{
-									echo '<label for="subtotal_progress">'.$langs->trans('subtotal_apply_progress').'</label> <input id="subtotal_progress" name="subtotal_progress" value="" size="1" />%';
-								}
-							}
-							else if ($isFreeText) echo TSubtotal::getFreeTextHtml($line, (bool) $readonlyForSituation);
+                        if (TSubtotal::isTitle($line))
+                        {
+                            $form = new Form($db);
+                            echo '<div>';
+                            echo '<label for="subtotal_tva_tx">'.$form->textwithpicto($langs->trans('subtotal_apply_default_tva'), $langs->trans('subtotal_apply_default_tva_help')).'</label>';
+                            echo '<select id="subtotal_tva_tx" name="subtotal_tva_tx" class="flat"><option selected="selected" value="">-</option>';
+                            if (empty($readonlyForSituation)) echo str_replace('selected', '', $form->load_tva('subtotal_tva_tx', '', $parameters['seller'], $parameters['buyer'], 0, 0, '', true));
+                            echo '</select>';
+                            echo '</div>';
+
+                            if (!empty($conf->global->INVOICE_USE_SITUATION) && $object->element == 'facture' && $object->type == Facture::TYPE_SITUATION)
+                            {
+                                echo '<div>';
+                                echo '<label for="subtotal_progress">'.$langs->trans('subtotal_apply_progress').'</label> <input id="subtotal_progress" name="subtotal_progress" value="" size="1" />%';
+                                echo '</div>';
+                            }
+                            echo '<div>';
+                            echo '<input style="vertical-align:sub;"  type="checkbox" name="line-showTotalHT" id="subtotal-showTotalHT" value="9" '.(($line->array_options['options_show_total_ht'] > 0) ? 'checked="checked"' : '') .' />&nbsp;';
+                            echo '<label for="subtotal-showTotalHT">'.$langs->trans('ShowTotalHTOnSubtotalBlock').'</label>';
+                            echo '</div>';
+
+                            echo '<div>';
+                            echo '<input style="vertical-align:sub;"  type="checkbox" name="line-showReduc" id="subtotal-showReduc" value="1" '.(($line->array_options['options_show_reduc'] > 0) ? 'checked="checked"' : '') .' />&nbsp;';
+                            echo '<label for="subtotal-showReduc">'.$langs->trans('ShowReducOnSubtotalBlock').'</label>';
+                            echo '</div>';
+                        }
+                        else if ($isFreeText) echo TSubtotal::getFreeTextHtml($line, (bool) $readonlyForSituation);
 						echo '</div>';
 
 						if($line->qty<10) {
