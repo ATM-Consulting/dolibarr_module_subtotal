@@ -366,9 +366,12 @@ class TSubtotal {
 		
 	}
 	
-	public static function isSubtotal(&$line)
+	public static function isSubtotal(&$line, $level=-1)
 	{
-		return $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty >= 90;
+	    $res = $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty >= 90;
+	    if($res && $level > -1) {
+	        return self::getNiveau($line) == $level;
+	    } else return $res;
 	}
 	
 	public static function isFreeText(&$line)
