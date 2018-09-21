@@ -1703,7 +1703,9 @@ class ActionsSubtotal
 			if(empty($line->description)) $line->description = $line->desc;
 			
 			$colspan = 5;
-			if(!empty($conf->multicurrency->enabled)) $colspan+=1; // colonne PU Devise
+			if(!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+				$colspan++; // Colonne PU Devise
+			}
 			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
 			if(!empty($conf->margin->enabled)) $colspan++;
 			if(!empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
@@ -1888,10 +1890,14 @@ class ActionsSubtotal
 					/* Total */
 					$total_line = $this->getTotalLineFromObject($object, $line, '');
 					echo '<td class="linecolht nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
-					if (!empty($conf->multicurrency->enabled)) echo '<td class="linecoltotalht_currency">&nbsp;</td>';
+					if (!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
+					}
 				} else {
 					echo '<td class="linecolht">&nbsp;</td>';
-					if(!empty($conf->multicurrency->enabled)) echo '<td class="linecoltotalht_currency">&nbsp;</td>';
+					if (!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
+					}
 				}	
 			?>
 					
