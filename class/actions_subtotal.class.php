@@ -1740,7 +1740,11 @@ class ActionsSubtotal
 					}
 
 			?>;">
-			
+
+				<?php if(! empty($conf->global->MAIN_VIEW_LINE_NUMBER)) { ?>
+				<td class="linecolnum"><?php echo $i + 1; ?></td>
+				<?php } ?>
+
 				<td colspan="<?php echo $colspan; ?>" style="<?php TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;'; ?>  <?php echo ($line->qty>90)?'text-align:right':'' ?> "><?php
 					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 
