@@ -1703,7 +1703,9 @@ class ActionsSubtotal
 			if(empty($line->description)) $line->description = $line->desc;
 			
 			$colspan = 5;
-			if(!empty($conf->multicurrency->enabled)) $colspan+=1; // colonne PU Devise
+			if(!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+				$colspan++; // Colonne PU Devise
+			}
 			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
 			if(!empty($conf->margin->enabled)) $colspan++;
 			if(!empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
@@ -1738,7 +1740,11 @@ class ActionsSubtotal
 					}
 
 			?>;">
-			
+
+				<?php if(! empty($conf->global->MAIN_VIEW_LINE_NUMBER)) { ?>
+				<td class="linecolnum"><?php echo $i + 1; ?></td>
+				<?php } ?>
+
 				<td colspan="<?php echo $colspan; ?>" style="<?php TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;'; ?>  <?php echo ($line->qty>90)?'text-align:right':'' ?> "><?php
 					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 
@@ -1888,10 +1894,14 @@ class ActionsSubtotal
 					/* Total */
 					$total_line = $this->getTotalLineFromObject($object, $line, '');
 					echo '<td class="linecolht nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
-					if (!empty($conf->multicurrency->enabled)) echo '<td class="linecoltotalht_currency">&nbsp;</td>';
+					if (!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
+					}
 				} else {
 					echo '<td class="linecolht">&nbsp;</td>';
-					if(!empty($conf->multicurrency->enabled)) echo '<td class="linecoltotalht_currency">&nbsp;</td>';
+					if (!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
+					}
 				}	
 			?>
 					
@@ -1944,8 +1954,28 @@ class ActionsSubtotal
 
 							if(TSubtotal::isTitle($line) && ($object->situation_counter == 1 || !$object->situation_cycle_ref) )
 							{
-								$img_delete = ((float) DOL_VERSION >= 3.8) ? img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal',' class="pictodelete" ') : img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal');
+								if ((float) DOL_VERSION >= 8.0) {
+									$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' class="pictodelete pictodeleteallline"');
+								} elseif ((float) DOL_VERSION >= 3.8) {
+									$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal',' class="pictodelete" ');
+								} else {
+									$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal');
+								}
+
 								echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id.'">'.$img_delete.'</a>';
+
+								/* Depuis la 8.0, les icônes "standard" utilisent FontAwesome et sont préconfigurées selon la clé de l'image
+								 * Impossible d'en customiser par exemple la couleur, même en utilisant img_picto() directement
+								 */
+								if((float) DOL_VERSION >= 8.0) {
+								?>
+								<script>
+									$(document).ready(function () {
+										$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline").css({"color": "#be3535"});
+									});
+								</script>
+								<?php
+								}
 							}
 						}
 					}
