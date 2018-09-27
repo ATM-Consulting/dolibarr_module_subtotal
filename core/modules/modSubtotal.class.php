@@ -63,7 +63,7 @@ class modSubtotal extends DolibarrModules
         // (where XXX is value of numeric property 'numero' of module)
         $this->description = "Module permettant l'ajout de sous-totaux et sous-totaux intermédiaires et le déplacement d'une ligne aisée de l'un dans l'autre";
         // Possible values for version are: 'development', 'experimental' or version
-        $this->version = '3.1.1';
+        $this->version = '3.1.2';
         // Key used in llx_const table to save module status enabled/disabled
         // (where MYMODULE is value of property name of module in uppercase)
         $this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
@@ -96,7 +96,7 @@ class modSubtotal extends DolibarrModules
             // Set this to relative path of css if module has its own css file
             //'css' => '/titre/css/mycss.css.php',
             // Set here all hooks context managed by module
-            'hooks' => array('invoicecard', 'invoicesuppliercard','propalcard', 'supplier_proposalcard', 'ordercard', 'ordersuppliercard','odtgeneration','orderstoinvoice','admin','invoicereccard','consumptionthirdparty')
+            'hooks' => array('invoicecard','propalcard','ordercard','odtgeneration','orderstoinvoice','admin','consumptionthirdparty')
             // Set here all workflow context managed by module
             //'workflow' => array('order' => array('WORKFLOW_ORDER_AUTOCREATE_INVOICE'))
         );
