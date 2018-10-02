@@ -1389,6 +1389,16 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
+		elseif (!empty($hideprices)
+		        || (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
+		        )
+		    {
+		        if (!empty($hideprices) || !in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
+		        {
+		            $this->resprints = ' ';
+		            return 1;
+		        }
+		    }
 		
 		return 0;
 	}
