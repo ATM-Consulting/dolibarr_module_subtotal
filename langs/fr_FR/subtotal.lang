@@ -77,5 +77,5 @@ showExtrafields=Editer les attributs complémentaires
 hideExtrafields=Masquer les attributs complémentaires
 AmountBeforeTaxesSubjectToVATX%=Montant HT soumis à %s (%s %%)
 MoveTitleBlock=Déplacer le bloc titre complet
-ShowTotalHTOnSubtotalBlock=Afficher le Total HT sur la ligne de sous-total
+ShowTotalHTOnSubtotalBlock=Afficher le Prix Unitaire HT du sous-total
 ShowReducOnSubtotalBlock=Afficher la réduction sur la ligne de sous-total
