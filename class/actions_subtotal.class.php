@@ -821,6 +821,7 @@ class ActionsSubtotal
 	 * @param	$use_level		isn't used anymore
 	 */
 	function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=0) {
+		global $conf;
 		
 		$rang = $line->rang;
 		$qty_line = $line->qty;
@@ -829,6 +830,12 @@ class ActionsSubtotal
 		$total_tva = 0;
 		$total_ttc = 0;
 		$TTotal_tva = array();
+		
+		$sign=1;
+		if (isset($object->type) && $object->type == 2 && ! empty($conf->global->INVOICE_POSITIVE_CREDIT_NOTE)) $sign=-1;
+		
+		if (GETPOST('action') == 'builddoc') $builddoc = true;
+		else $builddoc = false;
 		
 		dol_include_once('/subtotal/class/subtotal.class.php');
 		foreach($object->lines as $l) {
@@ -846,41 +853,40 @@ class ActionsSubtotal
 				$TTotal_tva = array();
 			}
 			elseif(!TSubtotal::isTitle($l) && !TSubtotal::isSubtotal($l)) {
-				$total += $l->total_ht;
-				$total_tva += $l->total_tva;
-				$TTotal_tva[$l->tva_tx] += $l->total_tva;
-				$total_ttc += $l->total_ttc;
+				
+				// TODO retirer le test avec $builddoc quand Dolibarr affichera le total progression sur la card et pas seulement dans le PDF
+				if ($builddoc && $object->element == 'facture' && $object->type==Facture::TYPE_SITUATION)
+				{
+					if ($l->situation_percent > 0)
+					{
+						$prev_progress = 0;
+						$progress = 1;
+						if (method_exists($l, 'get_prev_progress'))
+						{
+							$prev_progress = $l->get_prev_progress($object->id);
+							$progress = ($l->situation_percent - $prev_progress) / 100;
+						}
+						
+						$result = $sign * ($l->total_ht / ($l->situation_percent / 100)) * $progress;
+						$total+= $result;
+						// TODO check si les 3 lignes du dessous sont corrects
+						$total_tva += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
+						$TTotal_tva[$l->tva_tx] += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
+						$total_ttc += $sign * ($l->total_tva / ($l->total_ttc / 100)) * $progress;
+					}
+				}
+				else
+				{
+					$total += $l->total_ht;
+					$total_tva += $l->total_tva;
+					$TTotal_tva[$l->tva_tx] += $l->total_tva;
+					$total_ttc += $l->total_ttc;
+				}
 			}
 			
 		}
 		if (!$return_all) return $total;
 		else return array($total, $total_tva, $total_ttc, $TTotal_tva);
-	}
-
-	/*
-	 * Get the sum of situation invoice for last column
-	 */
-	function getTotalToPrintSituation(&$object, &$line) {
-		
-		$rang = $line->rang;
-		$total = 0;
-		foreach($object->lines as $l) {
-			if($l->rang>=$rang) {
-				return price($total);
-			}
-                        if (TSubtotal::isSubtotal($l)){
-                            $total = 0;
-                        } else  if ($l->situation_percent > 0 ){
-                           
-        	
-		 	$prev_progress = $l->get_prev_progress($object->id);
-		 	$progress = ($l->situation_percent - $prev_progress) /100;
-                        $total += ($l->total_ht/($l->situation_percent/100)) * $progress;
-                        
-                    }
-                }
-                
-		return price($total);
 	}
 
 	/**
@@ -959,6 +965,9 @@ class ActionsSubtotal
 				}
 			}
 			
+			
+			
+			
 			if($total_to_print !== '') {
 				
 				if (GETPOST('hideInnerLines'))
@@ -973,13 +982,9 @@ class ActionsSubtotal
 				else
 				{
 					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
-                                        if(get_class($object) == 'Facture' && $object->type==Facture::TYPE_SITUATION){//Facture de situation
-                                                $total_to_print = $this->getTotalToPrintSituation($object, $line);
-                                        } else {
-                                            	$total_to_print = price($total);
-                                        }
-                                            
-					$line->total_ht = $total;
+					$total_to_print = price($total);
+					
+                    $line->total_ht = $total;
 					$line->total = $total;
 					$line->total_tva = $total_tva;
 					$line->total_ttc = $total_ttc;
