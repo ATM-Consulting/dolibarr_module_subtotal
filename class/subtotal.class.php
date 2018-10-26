@@ -553,7 +553,7 @@ class TSubtotal {
 					if ($withBlockLine) $TLine[] = $line;
 					continue;
 				}
-				elseif ($add_line && $line->product_type == 9 && (100 - $line->qty == $level) ) // Si on tombe sur un sous-total, il faut que ce soit un du même niveau que le titre
+				elseif ($add_line && TSubtotal::isModSubtotalLine($line) && TSubtotal::getNiveau($line) == $level) // Si on tombe sur un sous-total, il faut que ce soit un du même niveau que le titre
 				{
 					if ($withBlockLine) $TLine[] = $line;
 					break;
