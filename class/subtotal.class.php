@@ -26,7 +26,9 @@ class TSubtotal {
 		}
 		else {
 			$desc = '';
-			if ((float) DOL_VERSION < 6  || $qty==50) {
+			
+			$TNotElements = array ('invoice_supplier', 'order_supplier');
+			if ((float) DOL_VERSION < 6  || $qty==50 && !in_array($object->element, $TNotElements) ) {
 				$desc = $label;
 				$label = '';
 			}
@@ -41,8 +43,7 @@ class TSubtotal {
 			else if($object->element=='invoice_supplier') {
 			    $object->special_code = TSubtotal::$module_number;
 			    $rang = $object->line_max() + 1;
-			    if($qty==50) $res = $object->addline($desc,0,0,0,0,$qty,0,0,'','',0,0,'HT',9,$rang);
-			    else $res = $object->addline($label,0,0,0,0,$qty,0,0,'','',0,0,'HT',9,$rang);
+			    $res = $object->addline($label,0,0,0,0,$qty,0,0,'','',0,0,'HT',9,$rang);
 			}
 			/**
 			 * @var $object Propal
