@@ -1965,8 +1965,8 @@ class ActionsSubtotal
 			
 			$colspan = 5;
 			if($object->element == 'facturerec' ) $colspan = 3;
-			if($object->element == 'order_supplier') $colspan = 3;
-			if($object->element == 'invoice_supplier') $colspan = 4;
+			if($object->element == 'order_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 3 : $colspan = 6;
+			if($object->element == 'invoice_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 4: $colspan = 7;
 			if($object->element == 'supplier_proposal') (float) DOL_VERSION < 6.0 ? $colspan = 4 : $colspan = 3;
 			if(!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 				$colspan++; // Colonne PU Devise
