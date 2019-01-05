@@ -218,7 +218,7 @@ class ActionsSubtotal
 	function printNewFormat(&$object, &$conf, &$langs, $idvar)
 	{
 		if (empty($conf->global->SUBTOTAL_ALLOW_ADD_BLOCK)) return false;
-		if (!empty($object->situation_cycle_ref) && $object->situation_counter > 1) return false; // Si facture de situation
+		if ($line->fk_prev_id != NULL ) return false; // Si facture de situation
 		?>
 		 	<script type="text/javascript">
 				$(document).ready(function() {
@@ -2059,7 +2059,7 @@ class ActionsSubtotal
 						}
 
 						$readonlyForSituation = '';
-						if (!empty($object->situation_cycle_ref) && $object->situation_counter > 1) $readonlyForSituation = 'readonly';
+						if ($line->fk_prev_id != NULL ) $readonlyForSituation = 'readonly';
 						
 						if (!$isFreeText) echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$newlabel.'" size="80" '.$readonlyForSituation.'/>&nbsp;';
 						
@@ -2217,7 +2217,7 @@ class ActionsSubtotal
 					else{
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) && $object->element !== 'invoice_supplier')
 						{
-							if(TSubtotal::isTitle($line) && ($object->situation_counter == 1 || !$object->situation_cycle_ref) ) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
+							if(TSubtotal::isTitle($line) && ($line->fk_prev_id == NULL ) ) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
 						}
 
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK)) 
@@ -2238,12 +2238,12 @@ class ActionsSubtotal
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
 						{
 
-							if ($object->situation_counter == 1 || !$object->situation_cycle_ref)
+							if ($line->fk_prev_id == NULL )
 							{
 								echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id.'">'.img_delete().'</a>';
 							}
 
-							if(TSubtotal::isTitle($line) && ($object->situation_counter == 1 || !$object->situation_cycle_ref) )
+							if(TSubtotal::isTitle($line) && ($line->fk_prev_id == NULL ))
 							{
 								if ((float) DOL_VERSION >= 8.0) {
 									$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' class="pictodelete pictodeleteallline"');
