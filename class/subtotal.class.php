@@ -270,7 +270,7 @@ class TSubtotal {
 		return $TRes;
 	}
 	
-	public static function getTotalBlockFromTitle(&$object, &$line)
+	public static function getTotalBlockFromTitle(&$object, &$line, $breakOnTitle = false)
 	{
 		dol_include_once('/core/lib/price.lib.php');
 		$TTot = array('total_pa_ht' => 0, 'total_options' => 0, 'total_ht' => 0, 'total_tva' => 0, 'total_ttc' => 0, 'TTotal_tva' => array(), 'multicurrency_total_ht' => 0, 'multicurrency_total_tva' => 0, 'multicurrency_total_ttc' => 0, 'TTotal_tva_multicurrency' => array());
@@ -278,8 +278,8 @@ class TSubtotal {
 		foreach ($object->lines as &$l)
 		{
 			if ($l->rang <= $line->rang) continue;
-			elseif (self::isSubtotal($l) && self::getNiveau($l) == $line->qty) break;
-			elseif (self::isModSubtotalLine($l)) continue;
+			elseif (self::isSubtotal($l) && self::getNiveau($l) <= self::getNiveau($line)) break;
+			elseif ($breakOnTitle && self::isTitle($l) && self::getNiveau($l) <= self::getNiveau($line)) break;
 			
 			if (!empty($l->array_options['options_subtotal_nc']))
 			{
