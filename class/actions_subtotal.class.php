@@ -1315,7 +1315,7 @@ class ActionsSubtotal
             if(TSubtotal::isSubtotal($line)) {
                 $parentTitle = TSubtotal::getParentTitleOfLine($object, $i);
 
-                if(empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
+                if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->array_options['options_show_total_ht'])) {
                     $TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
                     $this->resprints = price($TTotal['total_subprice']);
@@ -1617,7 +1617,7 @@ class ActionsSubtotal
         foreach($object->lines as $k => &$l) {
             if(TSubtotal::isSubtotal($l)) {
                 $parentTitle = TSubtotal::getParentTitleOfLine($object, $k);
-                if(empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
+                if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->id) && ! empty($parentTitle->array_options['options_show_total_ht'])) {
                     $l->remise_percent = 100;    // Affichage de la réduction sur la ligne de sous-total
                 }
@@ -2220,7 +2220,7 @@ class ActionsSubtotal
 					else{
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) && $object->element !== 'invoice_supplier')
 						{
-							if(TSubtotal::isTitle($line) && ( $line->fk_prev_id === null ) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
+							if(TSubtotal::isTitle($line) && ( $line->fk_prev_id === null )) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
 						}
 
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK)) 
