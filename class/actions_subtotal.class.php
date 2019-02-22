@@ -1315,6 +1315,7 @@ class ActionsSubtotal
             if(TSubtotal::isSubtotal($line)) {
                 $parentTitle = TSubtotal::getParentTitleOfLine($object, $i);
 
+                if(empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->array_options['options_show_total_ht'])) {
                     $TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
                     $this->resprints = price($TTotal['total_subprice']);
@@ -1381,9 +1382,10 @@ class ActionsSubtotal
             if(TSubtotal::isSubtotal($line)) {
                 $parentTitle = TSubtotal::getParentTitleOfLine($object, $i);
 
+                if(empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->array_options['options_show_reduc'])) {
                     $TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
-                    $this->resprints = price($TTotal['total_ht'] / $TTotal['total_subprice']*100, 0, '', 1, 2, 2).'%';
+                    $this->resprints = price((1-$TTotal['total_ht'] / $TTotal['total_subprice'])*100, 0, '', 1, 2, 2).'%';
                 }
             }
 		
@@ -1615,6 +1617,7 @@ class ActionsSubtotal
         foreach($object->lines as $k => &$l) {
             if(TSubtotal::isSubtotal($l)) {
                 $parentTitle = TSubtotal::getParentTitleOfLine($object, $k);
+                if(empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->id) && ! empty($parentTitle->array_options['options_show_total_ht'])) {
                     $l->remise_percent = 100;    // Affichage de la réduction sur la ligne de sous-total
                 }
