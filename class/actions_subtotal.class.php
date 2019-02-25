@@ -494,11 +494,13 @@ class ActionsSubtotal
 				if($line->qty>90) {
 					$substitutionarray['line_modsubtotal_total'] = true;
 					
-					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
-					
-					$substitutionarray['line_price_ht'] = $total;
-					$substitutionarray['line_price_vat'] = $total_tva;
-					$substitutionarray['line_price_ttc'] = $total_ttc;
+					//list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
+					$TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
+
+
+					$substitutionarray['line_price_ht'] = $TInfo[0];
+					$substitutionarray['line_price_vat'] = $TInfo[1];
+					$substitutionarray['line_price_ttc'] = $TInfo[2];
 				} else {
 					$substitutionarray['line_modsubtotal_title'] = true;
 				}
@@ -981,13 +983,15 @@ class ActionsSubtotal
 				}
 				else
 				{
-					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
-					$total_to_print = price($total);
-					
-                    $line->total_ht = $total;
-					$line->total = $total;
-					$line->total_tva = $total_tva;
-					$line->total_ttc = $total_ttc;
+//					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
+					$TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
+					$TTotal_tva = $TInfo[3];
+					$total_to_print = price($TInfo[0]);
+
+                    $line->total_ht = $TInfo[0];
+					$line->total = $TInfo[0];
+					if (!TSubtotal::isModSubtotalLine($line)) $line->total_tva = $TInfo[1];
+					$line->total_ttc = $TInfo[2];
 				}
 			}
 
@@ -1649,13 +1653,14 @@ class ActionsSubtotal
 						$line->total_ht = $total;
 						$line->total = $total;
 						*/
-						list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
-						
-						if (TSubtotal::getNiveau($line) == 1) $line->TTotal_tva = $TTotal_tva;
-						$line->total_ht = $total;
-						$line->total_tva = $total_tva;
+						//list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
+						$TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
+
+						if (TSubtotal::getNiveau($line) == 1) $line->TTotal_tva = $TInfo[3];
+						$line->total_ht = $TInfo[0];
+						$line->total_tva = $TInfo[1];
 						$line->total = $line->total_ht;
-						$line->total_ttc = $total_ttc;
+						$line->total_ttc = $TInfo[2];
 
 //                        $TTitle = TSubtotal::getParentTitleOfLine($object, $k);
 //                        $parentTitle = array_shift($TTitle);
