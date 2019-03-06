@@ -111,7 +111,7 @@ class ActionsSubtotal
 		
 		$contexts = explode(':',$parameters['context']);
 		
-		if(in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('invoicereccard',$contexts)) {
+		if(in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('invoicereccard',$contexts) || in_array('expeditioncard',$contexts)) {
 			
 			$createRight = $user->rights->{$object->element}->creer;
 			if($object->element == 'facturerec' )
@@ -124,6 +124,10 @@ class ActionsSubtotal
 			} elseif($object->element == 'invoice_supplier' )
 			{
 			    $createRight = $user->rights->fournisseur->facture->creer;
+			}
+			elseif($object->element == 'shipping')
+			{
+				$createRight = true; // No rights management for shipments
 			}
 			
 			if ($object->statut == 0  && $createRight) {
@@ -177,7 +181,7 @@ class ActionsSubtotal
 				}
 				else if($action==='ask_deleteallline') {
 						$form=new Form($db);
-						
+
 						$lineid = GETPOST('lineid','integer');
 						$TIdForGroup = $this->getArrayOfLineForAGroup($object, $lineid);
 					
@@ -193,7 +197,7 @@ class ActionsSubtotal
 				}
 
 				
-				if($action!='editline') {
+				if($object->element != 'shipping' && $action!='editline') {
 					// New format is for 3.8
 					$this->printNewFormat($object, $conf, $langs, $idvar);
 				}
@@ -715,6 +719,10 @@ class ActionsSubtotal
 				 * @var $object Facturerec
 				 */
 				else if($object->element=='facturerec') $object->deleteline($idLine);
+				/**
+				 * @var $object Expedition
+				 */
+				else if($object->element=='shipping') $object->deleteline($user, $idLine);
 			}
 			
 			header('location:?id='.$object->id);
@@ -1917,6 +1925,8 @@ class ActionsSubtotal
 
 		$contexts = explode(':',$parameters['context']);
 
+		$originline = null;
+
 		$createRight = $user->rights->{$object->element}->creer;
 		if($object->element == 'facturerec' )
 		{
@@ -1931,15 +1941,36 @@ class ActionsSubtotal
 		{
 		    $createRight = $user->rights->fournisseur->facture->creer;
 		}
-		
+		elseif($object->element == 'commande' && in_array('ordershipmentcard', $contexts))
+		{
+			// H4cK 4n0nYm0u$-style : $line n'est pas un objet instancié mais provient d'un fetch_object d'une requête SQL
+			$line->id = $line->rowid;
+			$line->product_type = $line->type;
+		}
+		elseif($object->element == 'shipping')
+		{
+			$originline = new OrderLine($db);
+			$originline->fetch($line->fk_origin_line);
+
+			foreach(get_object_vars($line) as $property => $value)
+			{
+				if(empty($originline->{ $property }))
+				{
+					$originline->{ $property } = $value;
+				}
+			}
+
+			$line = $originline;
+		}
+
 		if($line->special_code!=$this->module_number || $line->product_type!=9) {
 			null;
-		}	
+		}
 		else if (in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('invoicereccard',$contexts)) 
         {
 			if($object->element=='facture')$idvar = 'facid';
 			else $idvar='id';
-			
+
 			if((float)DOL_VERSION <= 3.4)
 			{
 				?>
@@ -2369,7 +2400,253 @@ class ActionsSubtotal
 			return 1;	
 			
 		}
-		
+		elseif(($object->element == 'commande' && in_array('ordershipmentcard', $contexts)) || (in_array('expeditioncard', $contexts) && $action == 'create'))
+		{
+			$colspan = 4;
+
+			// HTML 5 data for js
+			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
+?>
+			<tr <?php echo $bc[$var]; $var=!$var; echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
+					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
+					{
+						if($line->qty==99) print 'background:#adadcf';
+						else if($line->qty==98) print 'background:#ddddff;';
+						else if($line->qty<=97 && $line->qty>=91) print 'background:#eeeeff;';
+						else if($line->qty==1) print 'background:#adadcf;';
+						else if($line->qty==2) print 'background:#ddddff;';
+						else if($line->qty==50) print '';
+						else print 'background:#eeeeff;';
+
+						//A compléter si on veux plus de nuances de couleurs avec les niveau 4,5,6,7,8 et 9
+					}
+					else
+					{
+						if($line->qty==99) print 'background:#ddffdd';
+						else if($line->qty==98) print 'background:#ddddff;';
+						else if($line->qty==2) print 'background:#eeeeff; ';
+						else if($line->qty==50) print '';
+						else print 'background:#eeffee;' ;
+					}
+
+			?>;">
+
+				<td style="<?php TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;'; ?>  <?php echo ($line->qty>90)?'text-align:right':'' ?> "><?php
+
+
+						 if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+						 {
+							if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
+							{
+								echo str_repeat('&nbsp;&nbsp;&nbsp;', $line->qty-1);
+
+								if (TSubtotal::isTitle($line)) print img_picto('', 'subtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;">'.$line->qty.'</span>&nbsp;&nbsp;';
+								else print img_picto('', 'subtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;">'.(100-$line->qty).'</span>&nbsp;&nbsp;';
+							}
+						 }
+						 else
+						 {
+							if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
+							else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+						 }
+
+
+						 // Get display styles and apply them
+						 $titleStyleItalic = strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'I') === false ? '' : ' font-style: italic;';
+						 $titleStyleBold =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'B') === false ? '' : ' font-weight:bold;';
+						 $titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
+
+						 if (empty($line->label)) {
+							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) print  $line->description.' '.$this->getTitle($object, $line);
+							else print  $line->description;
+						 }
+						 else {
+
+							if (! empty($conf->global->PRODUIT_DESC_IN_FORM) && !empty($line->description)) {
+								print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
+							}
+							else{
+								print '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+							}
+
+						 }
+						//if($line->qty>90) print ' : ';
+						if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
+
+			?>
+				</td>
+				 <td colspan="<?php echo $colspan; ?>">
+<?php
+						if(in_array('expeditioncard', $contexts) && $action == 'create'))
+						{
+							$fk_entrepot = GETPOST('entrepot_id', 'int');
+?>
+
+						<input type="hidden" name="idl<?php echo $i; ?>" value="<?php echo $line->id; ?>" />
+						<input type="hidden" name="qtyasked<?php echo $i; ?>" value="1" />
+						<input type="hidden" name="qdelivered<?php echo $i; ?>" value="0" />
+						<input type="hidden" name="qtyl<?php echo $i; ?>" value="1" />
+						<input type="hidden" name="entl<?php echo $i; ?>" value="<?php echo $fk_entrepot; ?>" />
+<?php
+						}
+?>
+					 </td>
+			</tr>
+<?php
+			return 1;
+		}
+		elseif ($object->element == 'shipping')
+		{
+			global $form;
+
+			$alreadysent = $parameters['alreadysent'];
+
+			$shipment_static = new Expedition($db);
+			$warehousestatic = new Entrepot($db);
+			$extrafieldsline = new ExtraFields($db);
+			$extralabelslines=$extrafieldsline->fetch_name_optionals_label($object->table_element_line);
+
+			$colspan = 4;
+			if($object->origin && $object->origin_id > 0) $colspan++;
+			if(! empty($conf->stock->enabled)) $colspan++;
+			if(! empty($conf->productbatch->enabled)) $colspan++;
+			if($object->statut == 0) $colspan++;
+			if($object->statut == 0 && empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK)) $colspan++;
+
+			print '<!-- origin line id = '.$line->origin_line_id.' -->'; // id of order line
+
+			// HTML 5 data for js
+			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
+			?>
+			<tr <?php echo $bc[$var]; $var=!$var; echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
+					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
+					{
+						if($line->qty==99) print 'background:#adadcf';
+						else if($line->qty==98) print 'background:#ddddff;';
+						else if($line->qty<=97 && $line->qty>=91) print 'background:#eeeeff;';
+						else if($line->qty==1) print 'background:#adadcf;';
+						else if($line->qty==2) print 'background:#ddddff;';
+						else if($line->qty==50) print '';
+						else print 'background:#eeeeff;';
+
+						//A compléter si on veux plus de nuances de couleurs avec les niveau 4,5,6,7,8 et 9
+					}
+					else 
+					{
+						if($line->qty==99) print 'background:#ddffdd';
+						else if($line->qty==98) print 'background:#ddddff;';
+						else if($line->qty==2) print 'background:#eeeeff; ';
+						else if($line->qty==50) print '';
+						else print 'background:#eeffee;' ;
+					}
+
+			?>;">
+
+			<?php
+			// #
+			if (! empty($conf->global->MAIN_VIEW_LINE_NUMBER))
+			{
+				print '<td align="center">'.($i+1).'</td>';
+			}
+			?>
+
+			<td style="<?php TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;'; ?>  <?php echo ($line->qty>90)?'text-align:right':'' ?> "><?php
+
+
+			if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+			{
+				if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
+				{
+					echo str_repeat('&nbsp;&nbsp;&nbsp;', $line->qty-1);
+
+					if (TSubtotal::isTitle($line)) print img_picto('', 'subtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;">'.$line->qty.'</span>&nbsp;&nbsp;';
+					else print img_picto('', 'subtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;">'.(100-$line->qty).'</span>&nbsp;&nbsp;';
+				}
+			}
+			else
+			{
+				if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
+				else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+			}
+
+
+			// Get display styles and apply them
+			$titleStyleItalic = strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'I') === false ? '' : ' font-style: italic;';
+			$titleStyleBold =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'B') === false ? '' : ' font-weight:bold;';
+			$titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
+
+			if (empty($line->label)) {
+				if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) print  $line->description.' '.$this->getTitle($object, $line);
+				else print  $line->description;
+			}
+			else {
+				if (! empty($conf->global->PRODUIT_DESC_IN_FORM) && !empty($line->description)) {
+					print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
+				}
+				else{
+					print '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+				}
+			}
+			//if($line->qty>90) print ' : ';
+			if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
+
+			?>
+				</td>
+				<td colspan="<?php echo $colspan; ?>">&nbsp;</td>
+			<?php
+
+			if ($object->statut == 0 && ! empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
+			{
+				print '<td class="linecoldelete nowrap" width="10">';
+
+				if ($line->fk_prev_id === null)
+				{
+					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=deleteline&amp;lineid='.$line->id.'">'.img_delete().'</a>';
+				}
+
+				if(TSubtotal::isTitle($line) && ($line->fk_prev_id === null) )
+				{
+					if ((float) DOL_VERSION >= 8.0) {
+						$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' class="pictodelete pictodeleteallline"');
+					} elseif ((float) DOL_VERSION >= 3.8) {
+						$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal',' class="pictodelete" ');
+					} else {
+						$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal');
+					}
+
+					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=ask_deleteallline&amp;lineid='.$line->id.'">'.$img_delete.'</a>';
+
+					/* Depuis la 8.0, les icônes "standard" utilisent FontAwesome et sont préconfigurées selon la clé de l'image
+					 * Impossible d'en customiser par exemple la couleur, même en utilisant img_picto() directement
+					 */
+					if((float) DOL_VERSION >= 8.0) {
+						?>
+							<script>
+								$(document).ready(function () {
+									$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline").css({"color": "#be3535"});
+								});
+							</script>
+							<?php
+					}
+				}
+
+
+				print '</td>';
+			}
+
+			print "</tr>";
+
+			// Display lines extrafields
+			if (! empty($conf->global->SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE) && is_array($extralabelslines) && count($extralabelslines)>0) {
+				$line = new ExpeditionLigne($db);
+				$line->fetch_optionals($line->id);
+				print '<tr class="oddeven">';
+				print $line->showOptionals($extrafieldsline, 'view', array('style'=>$bc[$var], 'colspan'=>$colspan),$i);
+			}
+
+			return 1;
+		}
+
 		return 0;
 
 	}
