@@ -2322,6 +2322,7 @@ class ActionsSubtotal
 			<td align="center"<?php echo ((empty($conf->browser->phone) && ($object->statut == 0  && $createRight ))?' class="tdlineupdown"':''); ?>></td>
 			<?php } ?>
 
+
 			<?php  if($action == 'selectlines'){ // dolibarr 8 ?>
 			<td class="linecolcheck" align="center"><input type="checkbox" class="linecheckbox" name="line_checkbox[<?php echo $i+1; ?>]" value="<?php echo $line->id; ?>" ></td>
 			<?php } ?>
@@ -2477,7 +2478,7 @@ class ActionsSubtotal
 				</td>
 				 <td colspan="<?php echo $colspan; ?>">
 <?php
-						if(in_array('expeditioncard', $contexts) && $action == 'create'))
+						if(in_array('expeditioncard', $contexts) && $action == 'create')
 						{
 							$fk_entrepot = GETPOST('entrepot_id', 'int');
 ?>
