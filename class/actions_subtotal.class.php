@@ -919,6 +919,11 @@ class ActionsSubtotal
 		}
 		
 		$hidePriceOnSubtotalLines = (int) GETPOST('hide_price_on_subtotal_lines');
+
+		if($object->element == 'shipping' || $object->element == 'delivery')
+		{
+			$hidePriceOnSubtotalLines = 1;
+		}
 		
 		$set_pagebreak_margin = false;
 		if(method_exists('Closure','bind')) {
@@ -1085,7 +1090,7 @@ class ActionsSubtotal
 
 		$line = $object->lines[$i];
 
-		if($object->element == 'shipping')
+		if($object->element == 'shipping' || $object->element == 'delivery')
 		{
 			dol_include_once('/commande/class/commande.class.php');
 			$line = new OrderLine($object->db);
@@ -1103,7 +1108,7 @@ class ActionsSubtotal
 
 	function pdf_getlineqty($parameters=array(), &$object, &$action='') {
 		global $conf,$hideprices;
-		
+
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 			
@@ -1641,8 +1646,9 @@ class ActionsSubtotal
 
 
             // Pas de hook sur les colonnes du PDF expédition, on unset les bonnes variables
-            if($object->element == 'shipping' && $this->isModSubtotalLine($k, $object))
+            if(($object->element == 'shipping' || $object->element == 'delivery') && $this->isModSubtotalLine($k, $object))
 			{
+				$l->qty = $l->qty_asked;
 				unset($l->qty_asked, $l->qty_shipped, $l->volume, $l->weight);
 			}
         }
@@ -1815,7 +1821,9 @@ class ActionsSubtotal
 				}
 			
 				$line = &$object->lines[$i];
-				
+
+				if($object->element == 'delivery' && ! empty($object->commande->expeditions[$line->fk_origin_line])) unset($object->commande->expeditions[$line->fk_origin_line]);
+
 				if($line->info_bits>0) { // PAGE BREAK
 					$pdf->addPage();
 					$posy = $pdf->GetY();
@@ -1838,12 +1846,32 @@ class ActionsSubtotal
 
 					if($pageAfter>$pageBefore) {
 						//print "ST $pageAfter>$pageBefore<br>";
-						$pdf->rollbackTransaction(true);	
-						$pdf->addPage('','', true);
+						$pdf->rollbackTransaction(true);
+						$pdf->addPage('', '', true);
 						$posy = $pdf->GetY();
-						$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
+						$this->pdf_add_total($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
 						$posy = $pdf->GetY();
 						//print 'add ST'.$pdf->getPage().'<br />';
+					}
+
+					// On delivery PDF, we don't want quantities to appear and there are no hooks => setting text color to background color;
+					if($object->element == 'delivery')
+					{
+						switch($line->qty)
+						{
+							case 99:
+								$grey = 220;
+								break;
+
+							case 98:
+								$grey = 230;
+								break;
+
+							default:
+								$grey = 240;
+						}
+
+						$pdf->SetTextColor($grey, $grey, $grey);
 					}
 				
 					$posy = $pdf->GetY();
@@ -1867,6 +1895,12 @@ class ActionsSubtotal
 						$posy = $pdf->GetY();
 					}
 				*/
+
+					if($object->element == 'delivery')
+					{
+						$pdf->SetTextColor(255,255,255);
+					}
+
 					$posy = $pdf->GetY();
 					return 1;
 				}
@@ -1961,8 +1995,13 @@ class ActionsSubtotal
 			$line->id = $line->rowid;
 			$line->product_type = $line->type;
 		}
-		elseif($object->element == 'shipping')
+		elseif($object->element == 'shipping' || $object->element == 'delivery')
 		{
+			if(empty($line->origin_line_id) && ! empty($line->fk_origin_line))
+			{
+				$line->origin_line_id = $line->fk_origin_line;
+			}
+
 			$originline = new OrderLine($db);
 			$originline->fetch($line->fk_origin_line);
 
@@ -2510,7 +2549,7 @@ class ActionsSubtotal
 <?php
 			return 1;
 		}
-		elseif ($object->element == 'shipping')
+		elseif ($object->element == 'shipping' || $object->element == 'delivery')
 		{
 			global $form;
 
@@ -2527,6 +2566,8 @@ class ActionsSubtotal
 			if(! empty($conf->productbatch->enabled)) $colspan++;
 			if($object->statut == 0) $colspan++;
 			if($object->statut == 0 && empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK)) $colspan++;
+
+			if($object->element == 'delivery') $colspan = 2;
 
 			print '<!-- origin line id = '.$line->origin_line_id.' -->'; // id of order line
 
@@ -2610,7 +2651,7 @@ class ActionsSubtotal
 				<td colspan="<?php echo $colspan; ?>">&nbsp;</td>
 			<?php
 
-			if ($object->statut == 0 && ! empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
+			if ($object->element == 'shipping' && $object->statut == 0 && ! empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
 			{
 				print '<td class="linecoldelete nowrap" width="10">';
 
@@ -2652,7 +2693,7 @@ class ActionsSubtotal
 			print "</tr>";
 
 			// Display lines extrafields
-			if (! empty($conf->global->SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE) && is_array($extralabelslines) && count($extralabelslines)>0) {
+			if ($object->element == 'shipping' && ! empty($conf->global->SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE) && is_array($extralabelslines) && count($extralabelslines)>0) {
 				$line = new ExpeditionLigne($db);
 				$line->fetch_optionals($line->id);
 				print '<tr class="oddeven">';

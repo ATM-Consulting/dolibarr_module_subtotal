@@ -110,6 +110,7 @@ class modSubtotal extends DolibarrModules
                 ,'consumptionthirdparty'
             	,'ordershipmentcard'
             	,'expeditioncard'
+				,'deliverycard'
             )
             // Set here all workflow context managed by module
             //'workflow' => array('order' => array('WORKFLOW_ORDER_AUTOCREATE_INVOICE'))
