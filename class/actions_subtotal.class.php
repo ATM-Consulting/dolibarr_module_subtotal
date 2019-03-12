@@ -2484,9 +2484,9 @@ class ActionsSubtotal
 ?>
 
 						<input type="hidden" name="idl<?php echo $i; ?>" value="<?php echo $line->id; ?>" />
-						<input type="hidden" name="qtyasked<?php echo $i; ?>" value="1" />
+						<input type="hidden" name="qtyasked<?php echo $i; ?>" value="<?php echo $line->qty; ?>" />
 						<input type="hidden" name="qdelivered<?php echo $i; ?>" value="0" />
-						<input type="hidden" name="qtyl<?php echo $i; ?>" value="1" />
+						<input type="hidden" name="qtyl<?php echo $i; ?>" value="<?php echo $line->qty; ?>" />
 						<input type="hidden" name="entl<?php echo $i; ?>" value="<?php echo $fk_entrepot; ?>" />
 <?php
 						}
