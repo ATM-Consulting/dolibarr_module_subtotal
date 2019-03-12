@@ -1082,9 +1082,18 @@ class ActionsSubtotal
 		else {
 			$i = (int)$parameters;
 		}
+
+		$line = $object->lines[$i];
+
+		if($object->element == 'shipping')
+		{
+			dol_include_once('/commande/class/commande.class.php');
+			$line = new OrderLine($object->db);
+			$line->fetch($object->lines[$i]->fk_origin_line);
+		}
 		
-		
-		if($object->lines[$i]->special_code == $this->module_number && $object->lines[$i]->product_type == 9) {
+
+		if($line->special_code == $this->module_number && $line->product_type == 9) {
 			return true;
 		}
 		
@@ -1096,7 +1105,6 @@ class ActionsSubtotal
 		global $conf,$hideprices;
 		
 		if($this->isModSubtotalLine($parameters,$object) ){
-			
 			$this->resprints = ' ';
 			
 			if((float)DOL_VERSION<=3.6) {
@@ -1630,6 +1638,13 @@ class ActionsSubtotal
                     $l->remise_percent = 100;    // Affichage de la réduction sur la ligne de sous-total
                 }
             }
+
+
+            // Pas de hook sur les colonnes du PDF expédition, on unset les bonnes variables
+            if($object->element == 'shipping' && $this->isModSubtotalLine($k, $object))
+			{
+				unset($l->qty_asked, $l->qty_shipped, $l->volume, $l->weight);
+			}
         }
 
 		$hideInnerLines = (int)GETPOST('hideInnerLines');
@@ -1813,9 +1828,8 @@ class ActionsSubtotal
 					$label = $description;
 					$description='';
 				}
-				
+
 				if($line->qty>90) {
-					
 					if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)	$label .= ' '.$this->getTitle($object, $line);
 					
 					$pageBefore = $pdf->getPage();
