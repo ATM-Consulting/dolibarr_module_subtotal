@@ -163,6 +163,14 @@ function showParameters() {
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_ALLOW_DUPLICATE_BLOCK');
 	print '</td></tr>';
+
+    $var=!$var;
+    print '<tr '.$bc[$var].'>';
+    print '<td>'.$langs->trans("SUBTOTAL_ALLOW_DUPLICATE_LINE").'</td>';
+    print '<td align="center" width="20">&nbsp;</td>';
+    print '<td align="center" width="300">';
+    print ajax_constantonoff('SUBTOTAL_ALLOW_DUPLICATE_LINE');
+    print '</td></tr>';
 	
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';

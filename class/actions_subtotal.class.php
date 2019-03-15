@@ -1908,7 +1908,7 @@ class ActionsSubtotal
 	function printObjectLine ($parameters, &$object, &$action, $hookmanager){
 		
 		global $conf,$langs,$user,$db,$bc;
-		
+
 		$num = &$parameters['num'];
 		$line = &$parameters['line'];
 		$i = &$parameters['i'];
@@ -1931,14 +1931,29 @@ class ActionsSubtotal
 		{
 		    $createRight = $user->rights->fournisseur->facture->creer;
 		}
-		
+        if($object->element=='facture')$idvar = 'facid';
+        else $idvar='id';
 		if($line->special_code!=$this->module_number || $line->product_type!=9) {
-			null;
+            if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) && $object->element !== 'invoice_supplier')
+            {
+                if(!(TSubtotal::isModSubtotalLine($line)) && ( $line->fk_prev_id === null )) {
+                    echo '<a name="duplicate-'.$line->id.'" href="' . $_SERVER['PHP_SELF'] . '?' . $idvar . '=' . $object->id . '&action=duplicate&lineid=' . $line->id . '">' . img_picto($langs->trans('Duplicate'), 'duplicate@subtotal') . '</a>';
+
+                    ?>
+                        <script type="text/javascript">
+                            $(document).ready(function() {
+                                $("a[name='duplicate-<?php echo $line->id; ?>']").prependTo($('#row-<?php echo $line->id; ?>').find('.linecoledit').contents());
+                            });
+                        </script>
+                    <?php
+                }
+
+            }
+			return 0;
 		}	
 		else if (in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('invoicereccard',$contexts)) 
         {
-			if($object->element=='facture')$idvar = 'facid';
-			else $idvar='id';
+
 			
 			if((float)DOL_VERSION <= 3.4)
 			{
@@ -2365,11 +2380,9 @@ class ActionsSubtotal
 				$line->element = $ex_element;
 				
 			}
-			
-			return 1;	
+			return 1;
 			
 		}
-		
 		return 0;
 
 	}
