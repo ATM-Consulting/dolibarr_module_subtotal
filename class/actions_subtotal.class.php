@@ -1936,13 +1936,13 @@ class ActionsSubtotal
 		if($line->special_code!=$this->module_number || $line->product_type!=9) {
             if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) && $object->element !== 'invoice_supplier')
             {
-                if(!(TSubtotal::isModSubtotalLine($line)) && ( $line->fk_prev_id === null )) {
+                if(!(TSubtotal::isModSubtotalLine($line)) && ( $line->fk_prev_id === null ) && !($action == "editline" && GETPOST('lineid') == $line->id)) {
                     echo '<a name="duplicate-'.$line->id.'" href="' . $_SERVER['PHP_SELF'] . '?' . $idvar . '=' . $object->id . '&action=duplicate&lineid=' . $line->id . '">' . img_picto($langs->trans('Duplicate'), 'duplicate@subtotal') . '</a>';
 
                     ?>
                         <script type="text/javascript">
                             $(document).ready(function() {
-                                $("a[name='duplicate-<?php echo $line->id; ?>']").prependTo($('#row-<?php echo $line->id; ?>').find('.linecoledit').contents());
+                                $("a[name='duplicate-<?php echo $line->id; ?>']").prependTo($('#row-<?php echo $line->id; ?>').find('.linecoledit'));
                             });
                         </script>
                     <?php
