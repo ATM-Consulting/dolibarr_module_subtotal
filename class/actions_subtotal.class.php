@@ -1934,7 +1934,7 @@ class ActionsSubtotal
         if($object->element=='facture')$idvar = 'facid';
         else $idvar='id';
 		if($line->special_code!=$this->module_number || $line->product_type!=9) {
-            if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) && $object->element !== 'invoice_supplier')
+            if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_LINE) && $object->element !== 'invoice_supplier')
             {
                 if(!(TSubtotal::isModSubtotalLine($line)) && ( $line->fk_prev_id === null ) && !($action == "editline" && GETPOST('lineid') == $line->id)) {
                     echo '<a name="duplicate-'.$line->id.'" href="' . $_SERVER['PHP_SELF'] . '?' . $idvar . '=' . $object->id . '&action=duplicate&lineid=' . $line->id . '"><i class="fa fa-clone" aria-hidden="true"></i></a>';
