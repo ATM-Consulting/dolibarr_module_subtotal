@@ -1922,6 +1922,8 @@ class ActionsSubtotal
 
 		$contexts = explode(':',$parameters['context']);
 
+		if($parameters['currentcontext'] === 'paiementcard') return 0;
+
 		$createRight = $user->rights->{$object->element}->creer;
 		if($object->element == 'facturerec' )
 		{
