@@ -421,11 +421,17 @@ class TSubtotal {
 		    $createRight = $user->rights->fournisseur->facture->creer;
 		}
 		
-		if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK))
+		if ($object->statut == 0  && $createRight && (!empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) || !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_LINE)))
 		{
 			dol_include_once('/subtotal/lib/subtotal.lib.php');
-			
-			$TLine = self::getLinesFromTitleId($object, $lineid, $withBlockLine);
+
+            if(!empty($object->lines)) {
+                foreach($object->lines as $line) {
+                    if($line->id == $lineid) $duplicateLine = $line;
+                }
+            }
+            if(!empty($duplicateLine) && !self::isModSubtotalLine($duplicateLine)) $TLine = array($duplicateLine);
+            else $TLine = self::getLinesFromTitleId($object, $lineid, $withBlockLine);
 
 			if (!empty($TLine))
 			{

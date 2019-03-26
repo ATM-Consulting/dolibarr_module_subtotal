@@ -2015,14 +2015,29 @@ class ActionsSubtotal
 
 			$line = $originline;
 		}
-
+ 		if($object->element=='facture')$idvar = 'facid';
+        else $idvar='id';
 		if($line->special_code!=$this->module_number || $line->product_type!=9) {
-			null;
+			if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_LINE) && $object->element !== 'invoice_supplier')
+            {
+                if(!(TSubtotal::isModSubtotalLine($line)) && ( $line->fk_prev_id === null ) && !($action == "editline" && GETPOST('lineid') == $line->id)) {
+                    echo '<a name="duplicate-'.$line->id.'" href="' . $_SERVER['PHP_SELF'] . '?' . $idvar . '=' . $object->id . '&action=duplicate&lineid=' . $line->id . '"><i class="fa fa-clone" aria-hidden="true"></i></a>';
+
+                    ?>
+                        <script type="text/javascript">
+                            $(document).ready(function() {
+                                $("a[name='duplicate-<?php echo $line->id; ?>']").prependTo($('#row-<?php echo $line->id; ?>').find('.linecoledit'));
+                            });
+                        </script>
+                    <?php
+                }
+
+            }
+			return 0;
 		}
 		else if (in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('invoicereccard',$contexts)) 
         {
-			if($object->element=='facture')$idvar = 'facid';
-			else $idvar='id';
+
 
 			if((float)DOL_VERSION <= 3.4)
 			{
