@@ -218,7 +218,7 @@ class ActionsSubtotal
 	function printNewFormat(&$object, &$conf, &$langs, $idvar)
 	{
 		if (empty($conf->global->SUBTOTAL_ALLOW_ADD_BLOCK)) return false;
-		if (!empty($object->situation_cycle_ref) && $object->situation_counter > 1) return false; // Si facture de situation
+		if ($line->fk_prev_id != null && !empty($line->fk_prev_id)) return false; // Si facture de situation
 		?>
 		 	<script type="text/javascript">
 				$(document).ready(function() {
@@ -479,14 +479,14 @@ class ActionsSubtotal
 			$line = &$parameters['line'];
 			$object = &$parameters['object'];
 			$substitutionarray = &$parameters['substitutionarray'];
-
+			
             $substitutionarray['line_not_modsubtotal'] = true;
             $substitutionarray['line_modsubtotal'] = false;
             $substitutionarray['line_modsubtotal_total'] = false;
             $substitutionarray['line_modsubtotal_title'] = false;
 
 			if($line->product_type == 9 && $line->special_code == $this->module_number) {
-				$substitutionarray['line_modsubtotal'] = 1;
+				$substitutionarray['line_modsubtotal'] = 1;	
                 $substitutionarray['line_not_modsubtotal'] = false;
 				
 				$substitutionarray['line_price_ht']
@@ -501,7 +501,7 @@ class ActionsSubtotal
 					$substitutionarray['line_modsubtotal_total'] = true;
 					
 					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
-					
+
 					$substitutionarray['line_price_ht'] = price($total);
 					$substitutionarray['line_price_vat'] = price($total_tva);
 					$substitutionarray['line_price_ttc'] = price($total_ttc);
@@ -510,6 +510,10 @@ class ActionsSubtotal
 				}
 				
 				
+			}	
+			else{
+				$substitutionarray['line_not_modsubtotal'] = true;
+				$substitutionarray['line_modsubtotal'] = 0;
 			}
 			
 		}
@@ -983,13 +987,15 @@ class ActionsSubtotal
 				}
 				else
 				{
-					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
-					$total_to_print = price($total);
-					
-                    $line->total_ht = $total;
-					$line->total = $total;
-					$line->total_tva = $total_tva;
-					$line->total_ttc = $total_ttc;
+//					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
+					$TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
+					$TTotal_tva = $TInfo[3];
+					$total_to_print = price($TInfo[0]);
+
+                    $line->total_ht = $TInfo[0];
+					$line->total = $TInfo[0];
+					if (!TSubtotal::isModSubtotalLine($line)) $line->total_tva = $TInfo[1];
+					$line->total_ttc = $TInfo[2];
 				}
 			}
 
@@ -1317,6 +1323,7 @@ class ActionsSubtotal
             if(TSubtotal::isSubtotal($line)) {
                 $parentTitle = TSubtotal::getParentTitleOfLine($object, $i);
 
+                if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->array_options['options_show_total_ht'])) {
                     $TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
                     $this->resprints = price($TTotal['total_subprice']);
@@ -1383,9 +1390,10 @@ class ActionsSubtotal
             if(TSubtotal::isSubtotal($line)) {
                 $parentTitle = TSubtotal::getParentTitleOfLine($object, $i);
 
+                if(empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->array_options['options_show_reduc'])) {
                     $TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
-                    $this->resprints = price($TTotal['total_ht'] / $TTotal['total_subprice']*100, 0, '', 1, 2, 2).'%';
+                    $this->resprints = price((1-$TTotal['total_ht'] / $TTotal['total_subprice'])*100, 0, '', 1, 2, 2).'%';
                 }
             }
 		
@@ -1617,6 +1625,7 @@ class ActionsSubtotal
         foreach($object->lines as $k => &$l) {
             if(TSubtotal::isSubtotal($l)) {
                 $parentTitle = TSubtotal::getParentTitleOfLine($object, $k);
+                if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->id) && ! empty($parentTitle->array_options['options_show_total_ht'])) {
                     $l->remise_percent = 100;    // Affichage de la réduction sur la ligne de sous-total
                 }
@@ -1648,13 +1657,14 @@ class ActionsSubtotal
 						$line->total_ht = $total;
 						$line->total = $total;
 						*/
-						list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
-						
-						if (TSubtotal::getNiveau($line) == 1) $line->TTotal_tva = $TTotal_tva;
-						$line->total_ht = $total;
-						$line->total_tva = $total_tva;
+						//list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
+						$TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
+
+						if (TSubtotal::getNiveau($line) == 1) $line->TTotal_tva = $TInfo[3];
+						$line->total_ht = $TInfo[0];
+						$line->total_tva = $TInfo[1];
 						$line->total = $line->total_ht;
-						$line->total_ttc = $total_ttc;
+						$line->total_ttc = $TInfo[2];
 
 //                        $TTitle = TSubtotal::getParentTitleOfLine($object, $k);
 //                        $parentTitle = array_shift($TTitle);
@@ -1916,6 +1926,8 @@ class ActionsSubtotal
 
 		$contexts = explode(':',$parameters['context']);
 
+		if($parameters['currentcontext'] === 'paiementcard') return 0;
+
 		$createRight = $user->rights->{$object->element}->creer;
 		if($object->element == 'facturerec' )
 		{
@@ -1967,8 +1979,8 @@ class ActionsSubtotal
 			
 			$colspan = 5;
 			if($object->element == 'facturerec' ) $colspan = 3;
-			if($object->element == 'order_supplier') $colspan = 3;
-			if($object->element == 'invoice_supplier') $colspan = 4;
+			if($object->element == 'order_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 3 : $colspan = 6;
+			if($object->element == 'invoice_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 4: $colspan = 7;
 			if($object->element == 'supplier_proposal') (float) DOL_VERSION < 6.0 ? $colspan = 4 : $colspan = 3;
 			if(!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 				$colspan++; // Colonne PU Devise
@@ -2061,7 +2073,7 @@ class ActionsSubtotal
 						}
 
 						$readonlyForSituation = '';
-						if (!empty($object->situation_cycle_ref) && $object->situation_counter > 1) $readonlyForSituation = 'readonly';
+						if (!empty($line->fk_prev_id) && $line->fk_prev_id != null) $readonlyForSituation = 'readonly';
 						
 						if (!$isFreeText) echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$newlabel.'" size="80" '.$readonlyForSituation.'/>&nbsp;';
 						
@@ -2219,7 +2231,7 @@ class ActionsSubtotal
 					else{
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) && $object->element !== 'invoice_supplier')
 						{
-							if(TSubtotal::isTitle($line) && ($object->situation_counter == 1 || !$object->situation_cycle_ref) ) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
+							if(TSubtotal::isTitle($line) && ( $line->fk_prev_id === null )) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
 						}
 
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK)) 
@@ -2240,12 +2252,12 @@ class ActionsSubtotal
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
 						{
 
-							if ($object->situation_counter == 1 || !$object->situation_cycle_ref)
+							if ($line->fk_prev_id === null)
 							{
 								echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id.'">'.img_delete().'</a>';
 							}
 
-							if(TSubtotal::isTitle($line) && ($object->situation_counter == 1 || !$object->situation_cycle_ref) )
+							if(TSubtotal::isTitle($line) && ($line->fk_prev_id === null) )
 							{
 								if ((float) DOL_VERSION >= 8.0) {
 									$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' class="pictodelete pictodeleteallline"');
