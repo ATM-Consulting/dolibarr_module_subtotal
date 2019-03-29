@@ -480,8 +480,14 @@ class ActionsSubtotal
 			$object = &$parameters['object'];
 			$substitutionarray = &$parameters['substitutionarray'];
 			
+            $substitutionarray['line_not_modsubtotal'] = true;
+            $substitutionarray['line_modsubtotal'] = false;
+            $substitutionarray['line_modsubtotal_total'] = false;
+            $substitutionarray['line_modsubtotal_title'] = false;
+
 			if($line->product_type == 9 && $line->special_code == $this->module_number) {
 				$substitutionarray['line_modsubtotal'] = 1;	
+                $substitutionarray['line_not_modsubtotal'] = false;
 				
 				$substitutionarray['line_price_ht']
 					 = $substitutionarray['line_price_vat'] 
@@ -495,12 +501,11 @@ class ActionsSubtotal
 					$substitutionarray['line_modsubtotal_total'] = true;
 					
 					//list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
-					$TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
+                    $TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
 
-
-					$substitutionarray['line_price_ht'] = $TInfo[0];
-					$substitutionarray['line_price_vat'] = $TInfo[1];
-					$substitutionarray['line_price_ttc'] = $TInfo[2];
+					$substitutionarray['line_price_ht'] = price($TInfo[0]);
+					$substitutionarray['line_price_vat'] = price($TInfo[1]);
+					$substitutionarray['line_price_ttc'] = price($TInfo[2]);
 				} else {
 					$substitutionarray['line_modsubtotal_title'] = true;
 				}
