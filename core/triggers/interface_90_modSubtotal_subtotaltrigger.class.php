@@ -593,6 +593,25 @@ class Interfacesubtotaltrigger
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
+
+
+            global $conf;
+
+            if (!empty($conf->global->INVOICE_USE_SITUATION) && $object->element == 'facture' && $object->type == Facture::TYPE_SITUATION)
+            {
+                $object->situation_final = 1;
+                foreach($object->lines as $i => $line) {
+                    if(!TSubtotal::isModSubtotalLine($line) && $line->situation_percent != 100){
+                        $object->situation_final = 0;
+                        break;
+                    }
+                }
+                // ne pas utiliser $object->setFinal ne peut pas marcher
+                $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'facture SET situation_final = ' . $object->situation_final . ' where rowid = ' . $object->id;
+                $resql=$object->db->query($sql);
+            }
+
+
         } elseif ($action == 'BILL_VALIDATE') {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
