@@ -597,7 +597,7 @@ class Interfacesubtotaltrigger
 
             global $conf;
 
-            if (!empty($conf->global->INVOICE_USE_SITUATION) && $object->element == 'facture')
+            if (!empty($conf->global->INVOICE_USE_SITUATION) && $object->element == 'facture' && $object->type == Facture::TYPE_SITUATION)
             {
                 $object->situation_final = 1;
                 foreach($object->lines as $i => $line) {
