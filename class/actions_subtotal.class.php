@@ -1627,7 +1627,7 @@ class ActionsSubtotal
             if(TSubtotal::isSubtotal($l)) {
                 $parentTitle = TSubtotal::getParentTitleOfLine($object, $k);
                 if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
-                if(! empty($parentTitle->id) && ! empty($parentTitle->array_options['options_show_total_ht'])) {
+                if(! empty($parentTitle->id) && ! empty($parentTitle->array_options['options_show_reduc'])) {
                     $l->remise_percent = 100;    // Affichage de la réduction sur la ligne de sous-total
                 }
             }
