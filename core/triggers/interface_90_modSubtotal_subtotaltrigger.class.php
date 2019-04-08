@@ -199,7 +199,7 @@ class Interfacesubtotaltrigger
 		}
         
 		
-        if ($action == 'LINEBILL_INSERT' && $object->special_code != TSubtotal::$module_number)
+        if ($action == 'LINEBILL_INSERT' )
 		{
 			$subtotal_add_title_bloc_from_orderstoinvoice = GETPOST('subtotal_add_title_bloc_from_orderstoinvoice');
 			if (!empty($subtotal_add_title_bloc_from_orderstoinvoice))
@@ -208,13 +208,13 @@ class Interfacesubtotaltrigger
 				
 				$current_fk_commande = TSubtotal::getOrderIdFromLineId($this->db, $object->origin_id);
 				$last_fk_commandedet = TSubtotal::getLastLineOrderId($this->db, $current_fk_commande);
-				
+
 				$facture = new Facture($this->db);
 				if ($facture->fetch($object->fk_facture) > 0)
 				{
 					$rang = !empty($subtotal_current_rang) ? $subtotal_current_rang : $object->rang;
 					// Si le fk_commande courrant est différent alors on change de commande => ajout d'un titre
-					if ($current_fk_commande != $subtotal_bloc_previous_fk_commande) 
+					if ($current_fk_commande != $subtotal_bloc_previous_fk_commande )
 					{
 						$commande = new Commande($this->db);
 						$commande->fetch($current_fk_commande);
@@ -222,9 +222,11 @@ class Interfacesubtotaltrigger
 						$label = $conf->global->SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE;
 						if (empty($label)) $label = 'Commande [__REFORDER__] - Référence client : [__REFCUSTOMER__]';
 						$label = str_replace(array('__REFORDER__', '__REFCUSTOMER__'), array($commande->ref, $commande->ref_client), $label);
-						
-						TSubtotal::addTitle($facture, $label, 1, $rang);
-						$rang++;
+
+                        if(!empty($current_fk_commande)) {
+                            TSubtotal::addTitle($facture, $label, 1, $rang);
+                            $rang++;
+                        }
 					}
 					
 					$object->rang = $rang;
@@ -232,7 +234,7 @@ class Interfacesubtotaltrigger
 					$rang++;
 						
 					// Est-ce qu'il s'agit de la dernière ligne de la commande d'origine ? Si oui alors on ajout un sous-total
-					if ($last_fk_commandedet == $object->origin_id) 
+					if ($last_fk_commandedet == $object->origin_id && !empty($current_fk_commande))
 					{
 						TSubtotal::addTotal($facture, $langs->trans('SubTotal'), 1, $rang);
 						$rang++;
@@ -259,7 +261,7 @@ class Interfacesubtotaltrigger
 
 			$doli_action = GETPOST('action');
 			$set = GETPOST('set');
-			if ( (in_array($doli_action, array('updateligne', 'updateline', 'addline', 'add', 'create')) || $set == 'defaultTVA') && !TSubtotal::isTitle($object) && !TSubtotal::isSubtotal($object) && in_array($object->element, array('propaldet', 'commandedet', 'facturedet')))
+			if ( (in_array($doli_action, array('updateligne', 'updateline', 'addline', 'add', 'create', 'setstatut')) || $set == 'defaultTVA') && !TSubtotal::isTitle($object) && !TSubtotal::isSubtotal($object) && in_array($object->element, array('propaldet', 'commandedet', 'facturedet')))
 			{
 				 dol_syslog(
 					"[SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS] Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". object=".$object->element." id=" . $object->id
@@ -593,6 +595,25 @@ class Interfacesubtotaltrigger
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
+
+
+            global $conf;
+
+            if (!empty($conf->global->INVOICE_USE_SITUATION) && $object->element == 'facture' && $object->type == Facture::TYPE_SITUATION)
+            {
+                $object->situation_final = 1;
+                foreach($object->lines as $i => $line) {
+                    if(!TSubtotal::isModSubtotalLine($line) && $line->situation_percent != 100){
+                        $object->situation_final = 0;
+                        break;
+                    }
+                }
+                // ne pas utiliser $object->setFinal ne peut pas marcher
+                $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'facture SET situation_final = ' . $object->situation_final . ' where rowid = ' . $object->id;
+                $resql=$object->db->query($sql);
+            }
+
+
         } elseif ($action == 'BILL_VALIDATE') {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id

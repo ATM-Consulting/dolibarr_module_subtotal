@@ -484,8 +484,14 @@ class ActionsSubtotal
 			$object = &$parameters['object'];
 			$substitutionarray = &$parameters['substitutionarray'];
 			
+            $substitutionarray['line_not_modsubtotal'] = true;
+            $substitutionarray['line_modsubtotal'] = false;
+            $substitutionarray['line_modsubtotal_total'] = false;
+            $substitutionarray['line_modsubtotal_title'] = false;
+
 			if($line->product_type == 9 && $line->special_code == $this->module_number) {
 				$substitutionarray['line_modsubtotal'] = 1;	
+                $substitutionarray['line_not_modsubtotal'] = false;
 				
 				$substitutionarray['line_price_ht']
 					 = $substitutionarray['line_price_vat'] 
@@ -498,11 +504,12 @@ class ActionsSubtotal
 				if($line->qty>90) {
 					$substitutionarray['line_modsubtotal_total'] = true;
 					
-					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
-					
-					$substitutionarray['line_price_ht'] = $total;
-					$substitutionarray['line_price_vat'] = $total_tva;
-					$substitutionarray['line_price_ttc'] = $total_ttc;
+					//list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
+                    $TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
+
+					$substitutionarray['line_price_ht'] = price($TInfo[0]);
+					$substitutionarray['line_price_vat'] = price($TInfo[1]);
+					$substitutionarray['line_price_ttc'] = price($TInfo[2]);
 				} else {
 					$substitutionarray['line_modsubtotal_title'] = true;
 				}
@@ -994,13 +1001,16 @@ class ActionsSubtotal
 				}
 				else
 				{
-					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
-					$total_to_print = price($total);
+					//					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
 					
-                    $line->total_ht = $total;
-					$line->total = $total;
-					$line->total_tva = $total_tva;
-					$line->total_ttc = $total_ttc;
+					$TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
+					$TTotal_tva = $TInfo[3];
+					$total_to_print = price($TInfo[0]);
+
+                    $line->total_ht = $TInfo[0];
+					$line->total = $TInfo[0];
+					if (!TSubtotal::isModSubtotalLine($line)) $line->total_tva = $TInfo[1];
+					$line->total_ttc = $TInfo[2];
 				}
 			}
 
@@ -1339,7 +1349,7 @@ class ActionsSubtotal
                 if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->array_options['options_show_total_ht'])) {
                     $TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
-                    $this->resprints = price($TTotal['total_subprice']);
+                    $this->resprints = price($TTotal['total_unit_subprice']);
                 }
             }
 		
@@ -1639,7 +1649,7 @@ class ActionsSubtotal
             if(TSubtotal::isSubtotal($l)) {
                 $parentTitle = TSubtotal::getParentTitleOfLine($object, $k);
                 if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
-                if(! empty($parentTitle->id) && ! empty($parentTitle->array_options['options_show_total_ht'])) {
+                if(! empty($parentTitle->id) && ! empty($parentTitle->array_options['options_show_reduc'])) {
                     $l->remise_percent = 100;    // Affichage de la réduction sur la ligne de sous-total
                 }
             }
@@ -1678,13 +1688,15 @@ class ActionsSubtotal
 						$line->total_ht = $total;
 						$line->total = $total;
 						*/
-						list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
+						//list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
 						
-						if (TSubtotal::getNiveau($line) == 1) $line->TTotal_tva = $TTotal_tva;
-						$line->total_ht = $total;
-						$line->total_tva = $total_tva;
+						$TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
+
+						if (TSubtotal::getNiveau($line) == 1) $line->TTotal_tva = $TInfo[3];
+						$line->total_ht = $TInfo[0];
+						$line->total_tva = $TInfo[1];
 						$line->total = $line->total_ht;
-						$line->total_ttc = $total_ttc;
+						$line->total_ttc = $TInfo[2];
 
 //                        $TTitle = TSubtotal::getParentTitleOfLine($object, $k);
 //                        $parentTitle = array_shift($TTitle);
@@ -1972,7 +1984,7 @@ class ActionsSubtotal
 		$var = &$parameters['var'];
 
 		$contexts = explode(':',$parameters['context']);
-
+		if($parameters['currentcontext'] === 'paiementcard') return 0;
 		$originline = null;
 
 		$createRight = $user->rights->{$object->element}->creer;
