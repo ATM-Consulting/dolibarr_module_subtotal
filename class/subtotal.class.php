@@ -42,7 +42,7 @@ class TSubtotal {
 			 */
 			else if($object->element=='invoice_supplier') {
 			    $object->special_code = TSubtotal::$module_number;
-			    $rang = $object->line_max() + 1;
+                if( (float)DOL_VERSION < 6 ) $rang = $object->line_max() + 1;
 			    $res = $object->addline($label,0,0,0,0,$qty,0,0,'','',0,0,'HT',9,$rang);
 			}
 			/**
@@ -305,22 +305,28 @@ class TSubtotal {
 		return $TTot;
 	}
 
-	public static function getOrderIdFromLineId(&$db, $fk_commandedet)
+	public static function getOrderIdFromLineId(&$db, $fk_commandedet, $supplier = false)
 	{
 		if (empty($fk_commandedet)) return false;
-		
-		$sql = 'SELECT fk_commande FROM '.MAIN_DB_PREFIX.'commandedet WHERE rowid = '.$fk_commandedet;
+
+		$table = 'commandedet';
+		if ($supplier) $table = 'commande_fournisseurdet';
+
+		$sql = 'SELECT fk_commande FROM '.MAIN_DB_PREFIX.$table.' WHERE rowid = '.$fk_commandedet;
 		$resql = $db->query($sql);
-		
+
 		if ($resql && ($row = $db->fetch_object($resql))) return $row->fk_commande;
 		else return false;
 	}
 	
-	public static function getLastLineOrderId(&$db, $fk_commande)
+	public static function getLastLineOrderId(&$db, $fk_commande, $supplier = false)
 	{
 		if (empty($fk_commande)) return false;
-		
-		$sql = 'SELECT rowid FROM '.MAIN_DB_PREFIX.'commandedet WHERE fk_commande = '.$fk_commande.' ORDER BY rang DESC LIMIT 1';
+
+        $table = 'commandedet';
+        if ($supplier) $table = 'commande_fournisseurdet';
+
+		$sql = 'SELECT rowid FROM '.MAIN_DB_PREFIX.$table.' WHERE fk_commande = '.$fk_commande.' ORDER BY rang DESC LIMIT 1';
 		$resql = $db->query($sql);
 		
 		if ($resql && ($row = $db->fetch_object($resql))) return $row->rowid;
