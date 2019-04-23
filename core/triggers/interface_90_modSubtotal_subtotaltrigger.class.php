@@ -210,10 +210,17 @@ class Interfacesubtotaltrigger
 				$current_fk_commande = TSubtotal::getOrderIdFromLineId($this->db, $object->origin_id, $is_supplier);
 				$last_fk_commandedet = TSubtotal::getLastLineOrderId($this->db, $current_fk_commande, $is_supplier);
 
-				if (!$is_supplier) $facture = new Facture($this->db);
-				else $facture = new FactureFournisseur($this->db);
+				if (!$is_supplier){
+				    $facture = new Facture($this->db);
+				    $ret = $facture->fetch($object->fk_facture);
+                }
+				else
+                {
+				    $facture = new FactureFournisseur($this->db);
+				    $ret = $facture->fetch($object->fk_facture_fourn);
+                }
 
-				if ($facture->fetch($object->fk_facture) > 0)
+				if ($ret > 0)
 				{
 					$rang = !empty($subtotal_current_rang) ? $subtotal_current_rang : $object->rang;
 					// Si le fk_commande courrant est différent alors on change de commande => ajout d'un titre
