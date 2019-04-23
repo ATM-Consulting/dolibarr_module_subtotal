@@ -105,6 +105,7 @@ class modSubtotal extends DolibarrModules
                 ,'ordersuppliercard'
                 ,'odtgeneration'
                 ,'orderstoinvoice'
+                ,'orderstoinvoicesupplier'
                 ,'admin'
                 ,'invoicereccard'
                 ,'consumptionthirdparty'

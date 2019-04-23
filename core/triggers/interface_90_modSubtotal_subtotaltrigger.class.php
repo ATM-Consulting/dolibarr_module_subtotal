@@ -166,7 +166,7 @@ class Interfacesubtotaltrigger
         // Users
         dol_include_once('/subtotal/class/subtotal.class.php');
         $langs->load('subtotal@subtotal');
-   
+
         if (!empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) && in_array($action, array('LINEPROPAL_INSERT', 'LINEORDER_INSERT', 'LINEBILL_INSERT')))
 		{
 			
@@ -199,38 +199,52 @@ class Interfacesubtotaltrigger
 		}
         
 		
-        if ($action == 'LINEBILL_INSERT' )
+        if ($action == 'LINEBILL_INSERT' || $action == 'LINEBILL_SUPPLIER_CREATE')
 		{
+		    $is_supplier = $action == 'LINEBILL_SUPPLIER_CREATE' ? true : false;
 			$subtotal_add_title_bloc_from_orderstoinvoice = GETPOST('subtotal_add_title_bloc_from_orderstoinvoice');
 			if (!empty($subtotal_add_title_bloc_from_orderstoinvoice))
 			{
 				global $subtotal_current_rang, $subtotal_bloc_previous_fk_commande, $subtotal_bloc_already_add_title;
 				
-				$current_fk_commande = TSubtotal::getOrderIdFromLineId($this->db, $object->origin_id);
-				$last_fk_commandedet = TSubtotal::getLastLineOrderId($this->db, $current_fk_commande);
+				$current_fk_commande = TSubtotal::getOrderIdFromLineId($this->db, $object->origin_id, $is_supplier);
+				$last_fk_commandedet = TSubtotal::getLastLineOrderId($this->db, $current_fk_commande, $is_supplier);
 
-				$facture = new Facture($this->db);
-				if ($facture->fetch($object->fk_facture) > 0)
+				if (!$is_supplier){
+				    $facture = new Facture($this->db);
+				    $ret = $facture->fetch($object->fk_facture);
+                }
+				else
+                {
+				    $facture = new FactureFournisseur($this->db);
+				    $ret = $facture->fetch($object->fk_facture_fourn);
+                }
+
+				if ($ret > 0)
 				{
 					$rang = !empty($subtotal_current_rang) ? $subtotal_current_rang : $object->rang;
 					// Si le fk_commande courrant est différent alors on change de commande => ajout d'un titre
-					if ($current_fk_commande != $subtotal_bloc_previous_fk_commande )
-					{
-						$commande = new Commande($this->db);
-						$commande->fetch($current_fk_commande);
-						
-						$label = $conf->global->SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE;
-						if (empty($label)) $label = 'Commande [__REFORDER__] - Référence client : [__REFCUSTOMER__]';
-						$label = str_replace(array('__REFORDER__', '__REFCUSTOMER__'), array($commande->ref, $commande->ref_client), $label);
+					if ($current_fk_commande != $subtotal_bloc_previous_fk_commande ) {
+                        if (!$is_supplier) $commande = new Commande($this->db);
+                        else $commande = new CommandeFournisseur($this->db);
+                        $commande->fetch($current_fk_commande);
 
-                        if(!empty($current_fk_commande)) {
+                        $label = $conf->global->SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE;
+                        if (empty($label)) {
+                            $label = 'Commande [__REFORDER__]';
+                            if (!$is_supplier) $label .= ' - Référence client : [__REFCUSTOMER__]';
+                        }
+                        $label = str_replace(array('__REFORDER__', '__REFCUSTOMER__'), array($commande->ref, $commande->ref_client), $label);
+
+                        if (!empty($current_fk_commande)) {
                             TSubtotal::addTitle($facture, $label, 1, $rang);
                             $rang++;
                         }
-					}
-					
-					$object->rang = $rang;
+                    }
+
+                    $object->rang = $rang;
 					$facture->updateRangOfLine($object->id, $rang);
+
 					$rang++;
 						
 					// Est-ce qu'il s'agit de la dernière ligne de la commande d'origine ? Si oui alors on ajout un sous-total

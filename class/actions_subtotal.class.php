@@ -203,7 +203,7 @@ class ActionsSubtotal
 				}
 			}
 		}
-		elseif ((!empty($parameters['currentcontext']) && $parameters['currentcontext'] == 'orderstoinvoice') || in_array('orderstoinvoice',$contexts))
+		elseif ((!empty($parameters['currentcontext']) && $parameters['currentcontext'] == 'orderstoinvoice') || in_array('orderstoinvoice',$contexts) || in_array('orderstoinvoicesupplier',$contexts))
 		{
 			?>
 			<script type="text/javascript">
