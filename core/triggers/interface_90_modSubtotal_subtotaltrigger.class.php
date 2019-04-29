@@ -186,6 +186,9 @@ class Interfacesubtotaltrigger
 						$parent = new Facture($this->db);
 						$parent->fetch($object->fk_facture);
 						break;
+                    case 'LINEBILL_SUPPLIER_CREATE':
+                        $parent = new FactureFournisseur($this->db);
+                        $parent->fetch($object->fk_facture_fourn);
 					default:
 						$parent = $object;
 						break;
@@ -205,7 +208,7 @@ class Interfacesubtotaltrigger
 			$subtotal_add_title_bloc_from_orderstoinvoice = GETPOST('subtotal_add_title_bloc_from_orderstoinvoice');
 			if (!empty($subtotal_add_title_bloc_from_orderstoinvoice))
 			{
-				global $subtotal_current_rang, $subtotal_bloc_previous_fk_commande, $subtotal_bloc_already_add_title;
+				global $subtotal_current_rang, $subtotal_bloc_previous_fk_commande, $subtotal_bloc_already_add_title, $subtotal_bloc_already_add_st;
 				
 				$current_fk_commande = TSubtotal::getOrderIdFromLineId($this->db, $object->origin_id, $is_supplier);
 				$last_fk_commandedet = TSubtotal::getLastLineOrderId($this->db, $current_fk_commande, $is_supplier);
@@ -220,7 +223,7 @@ class Interfacesubtotaltrigger
 				    $ret = $facture->fetch($object->fk_facture_fourn);
                 }
 
-				if ($ret > 0)
+				if ($ret > 0 && !$subtotal_bloc_already_add_st)
 				{
 					$rang = !empty($subtotal_current_rang) ? $subtotal_current_rang : $object->rang;
 					// Si le fk_commande courrant est différent alors on change de commande => ajout d'un titre
@@ -246,15 +249,17 @@ class Interfacesubtotaltrigger
 					$facture->updateRangOfLine($object->id, $rang);
 
 					$rang++;
-						
+
 					// Est-ce qu'il s'agit de la dernière ligne de la commande d'origine ? Si oui alors on ajout un sous-total
 					if ($last_fk_commandedet == $object->origin_id && !empty($current_fk_commande))
 					{
-						TSubtotal::addTotal($facture, $langs->trans('SubTotal'), 1, $rang);
-						$rang++;
+                        $subtotal_bloc_already_add_st = 1;
+                        TSubtotal::addTotal($facture, $langs->trans('SubTotal'), 1, $rang);
+                        $subtotal_bloc_already_add_st = 0;
+                        $rang++;
 					}
 				}
-				
+
 				$subtotal_bloc_previous_fk_commande = $current_fk_commande;
 				$subtotal_current_rang = $rang;
 			}
@@ -269,7 +274,7 @@ class Interfacesubtotaltrigger
 			}
 		}
 		
-		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($action, array('LINEPROPAL_INSERT', 'LINEPROPAL_UPDATE', 'LINEORDER_INSERT', 'LINEORDER_UPDATE', 'LINEBILL_INSERT', 'LINEBILL_UPDATE')))
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($action, array('LINEPROPAL_INSERT', 'LINEPROPAL_UPDATE', 'LINEORDER_INSERT', 'LINEORDER_UPDATE', 'LINEBILL_INSERT', 'LINEBILL_UPDATE', 'LINEBILL_SUPPLIER_CREATE', 'LINEBILL_SUPPLIER_UPDATE')))
 		{
             if(! function_exists('_updateLineNC')) dol_include_once('/subtotal/lib/subtotal.lib.php');
 
