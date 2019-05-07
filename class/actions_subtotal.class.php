@@ -811,22 +811,6 @@ class ActionsSubtotal
 		
 	}
 
-	/**
-	 *  TODO le calcul est faux dans certains cas,  exemple :
-	 *	T1
-	 *		|_ l1 => 50 €
-	 *		|_ l2 => 40 €
-	 *		|_ T2
-	 *			|_l3 => 100 €
-	 *		|_ ST2
-	 *		|_ l4 => 23 €
-	 *	|_ ST1
-	 * 
-	 * On obtiens ST2 = 100 ET ST1 = 123 €
-	 * Alors qu'on devrais avoir ST2 = 100 ET ST1 = 213 €
-	 * 
-	 * @param	$use_level		isn't used anymore
-	 */
 	function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=0) {
 		global $conf;
 
