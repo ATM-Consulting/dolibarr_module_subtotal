@@ -466,6 +466,8 @@ class TSubtotal {
 							
 						case 'order_supplier':
 						    $object->line = $line;
+						    $object->line->origin = $object->element;
+						    $object->line->origin_id = $line->id;
 						    $object->line->fk_commande = $object->id;
 						    $object->line->rang = $object->line_max() +1;
 						    $res = $object->line->insert(1);
