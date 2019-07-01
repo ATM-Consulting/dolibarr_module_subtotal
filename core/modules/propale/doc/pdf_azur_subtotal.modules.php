@@ -140,7 +140,7 @@ class pdf_azur_subtotal extends ModelePDFPropales
 	 */
 	function write_file($object,$outputlangs,$srctemplatepath='',$hidedetails=0,$hidedesc=0,$hideref=0)
 	{
-		global $user,$langs,$conf,$mysoc,$db,$hookmanager;
+		global $user,$langs,$conf,$mysoc,$db,$hookmanager,$nblignes;
 
 		if (! is_object($outputlangs)) $outputlangs=$langs;
 		// For backward compatibility with FPDF, force output charset to ISO, because FPDF expect text to be encoded in ISO
@@ -630,7 +630,7 @@ class pdf_azur_subtotal extends ModelePDFPropales
 					}
 					else {
 						// standard
-						$this->tva[$vatrate] += $tvaligne;
+						if(!empty($tvaligne)) $this->tva[$vatrate] += $tvaligne;
 					}
 
 					if ($posYAfterImage > $posYAfterDescription) $nexY=$posYAfterImage;
