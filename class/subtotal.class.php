@@ -32,15 +32,14 @@ class TSubtotal {
 				$desc = $label;
 				$label = '';
 			}
-			
-			/**
-			 * @var $object Facture
-			 */
-			if($object->element=='facture') $res =  $object->addline($desc, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,$rang, TSubtotal::$module_number, '', 0, 0, null, 0, $label);
-			/**
-			 * @var $object Facture fournisseur
-			 */
-			else if($object->element=='invoice_supplier') {
+
+			if($object->element=='facture')
+            {
+                /** @var Facture $object */
+                $res =  $object->addline($desc, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,$rang, TSubtotal::$module_number, '', 0, 0, null, 0, $label);
+            }
+			elseif($object->element=='invoice_supplier') {
+                /** @var FactureFournisseur $object */
 			    $object->special_code = TSubtotal::$module_number;
                 if( (float)DOL_VERSION < 6 ) $rang = $object->line_max() + 1;
 			    $res = $object->addline($label,0,0,0,0,$qty,0,0,'','',0,0,'HT',9,$rang);
@@ -179,7 +178,7 @@ class TSubtotal {
 	
 	public static function addTotal(&$object, $label, $level, $rang=-1)
 	{
-		self::addSubTotalLine($object, $label, (100-$level), $rang);
+		return self::addSubTotalLine($object, $label, (100-$level), $rang);
 	}
 
 	/**
@@ -329,21 +328,22 @@ class TSubtotal {
 		$sql = 'SELECT rowid FROM '.MAIN_DB_PREFIX.$table.' WHERE fk_commande = '.$fk_commande.' ORDER BY rang DESC LIMIT 1';
 		$resql = $db->query($sql);
 		
-		if ($resql && ($row = $db->fetch_object($resql))) return $row->rowid;
+		if ($resql && ($row = $db->fetch_object($resql))) return (int) $row->rowid;
 		else return false;
 	}
 	
-	public static function getParentTitleOfLine(&$object, $i)
+	public static function getParentTitleOfLine(&$object, $rang)
 	{
-		if ($i <= 0) return false;
+		if ($rang <= 0) return false;
 		
 		$skip_title = 0;
-		// Je parcours les lignes précédentes
-		while ($i--)
+		$TLineReverse = array_reverse($object->lines);
+
+		foreach($TLineReverse as $line)
 		{
-			$line = &$object->lines[$i];
-			// S'il s'agit d'un titre
-			if ($line->product_type == 9 && $line->qty <= 10 && $line->qty >= 1)
+			if ($line->rang >= $rang) continue; // Tout ce qui ce trouve en dessous j'ignore, nous voulons uniquement ce qui ce trouve au dessus
+
+            if (self::isTitle($line))
 			{
 				if ($skip_title)
 				{
@@ -355,7 +355,7 @@ class TSubtotal {
 				return $line;
 				break;
 			}
-			elseif ($line->product_type == 9 && $line->qty >= 90 && $line->qty <= 99)
+			elseif (self::isSubtotal($line))
 			{
 				// Il s'agit d'un sous-total, ça veut dire que le prochain titre théoriquement doit être ignorer (je travail avec un incrément au cas ou je croise plusieurs sous-totaux)
 				$skip_title++;

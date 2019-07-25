@@ -819,28 +819,14 @@ class ActionsSubtotal
 		
 	}
 
-	/**
-	 *  TODO le calcul est faux dans certains cas,  exemple :
-	 *	T1
-	 *		|_ l1 => 50 €
-	 *		|_ l2 => 40 €
-	 *		|_ T2
-	 *			|_l3 => 100 €
-	 *		|_ ST2
-	 *		|_ l4 => 23 €
-	 *	|_ ST1
-	 * 
-	 * On obtiens ST2 = 100 ET ST1 = 123 €
-	 * Alors qu'on devrais avoir ST2 = 100 ET ST1 = 213 €
-	 * 
-	 * @param	$use_level		isn't used anymore
-	 */
 	function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=0) {
 		global $conf;
-		
+
 		$rang = $line->rang;
 		$qty_line = $line->qty;
-		
+
+		$title_break = TSubtotal::getParentTitleOfLine($object, $rang);
+
 		$total = 0;
 		$total_tva = 0;
 		$total_ttc = 0;
@@ -853,52 +839,45 @@ class ActionsSubtotal
 		else $builddoc = false;
 		
 		dol_include_once('/subtotal/class/subtotal.class.php');
-		foreach($object->lines as $l) {
+
+		$TLineReverse = array_reverse($object->lines);
+
+		foreach($TLineReverse as $l)
+		{
 			//print $l->rang.'>='.$rang.' '.$total.'<br/>';
-			if($l->rang>=$rang) {
-				//echo 'return!<br>';
-				if (!$return_all) return $total;
-				else return array($total, $total_tva, $total_ttc, $TTotal_tva);
-			}
-			else if(TSubtotal::isTitle($l, 100 - $qty_line)) 
-		  	{
-				$total = 0;
-				$total_tva = 0;
-				$total_ttc = 0;
-				$TTotal_tva = array();
-			}
-			elseif(!TSubtotal::isTitle($l) && !TSubtotal::isSubtotal($l)) {
-				
-				// TODO retirer le test avec $builddoc quand Dolibarr affichera le total progression sur la card et pas seulement dans le PDF
-				if ($builddoc && $object->element == 'facture' && $object->type==Facture::TYPE_SITUATION)
-				{
-					if ($l->situation_percent > 0)
-					{
-						$prev_progress = 0;
-						$progress = 1;
-						if (method_exists($l, 'get_prev_progress'))
-						{
-							$prev_progress = $l->get_prev_progress($object->id);
-							$progress = ($l->situation_percent - $prev_progress) / 100;
-						}
-						
-						$result = $sign * ($l->total_ht / ($l->situation_percent / 100)) * $progress;
-						$total+= $result;
-						// TODO check si les 3 lignes du dessous sont corrects
-						$total_tva += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
-						$TTotal_tva[$l->tva_tx] += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
-						$total_ttc += $sign * ($l->total_tva / ($l->total_ttc / 100)) * $progress;
-					}
-				}
-				else
-				{
-					$total += $l->total_ht;
-					$total_tva += $l->total_tva;
-					$TTotal_tva[$l->tva_tx] += $l->total_tva;
-					$total_ttc += $l->total_ttc;
-				}
-			}
-			
+            if ($l->rang>=$rang) continue;
+            if (!empty($title_break) && $title_break->id == $l->id) break;
+            elseif (!TSubtotal::isModSubtotalLine($l))
+            {
+                // TODO retirer le test avec $builddoc quand Dolibarr affichera le total progression sur la card et pas seulement dans le PDF
+                if ($builddoc && $object->element == 'facture' && $object->type==Facture::TYPE_SITUATION)
+                {
+                    if ($l->situation_percent > 0)
+                    {
+                        $prev_progress = 0;
+                        $progress = 1;
+                        if (method_exists($l, 'get_prev_progress'))
+                        {
+                            $prev_progress = $l->get_prev_progress($object->id);
+                            $progress = ($l->situation_percent - $prev_progress) / 100;
+                        }
+
+                        $result = $sign * ($l->total_ht / ($l->situation_percent / 100)) * $progress;
+                        $total+= $result;
+                        // TODO check si les 3 lignes du dessous sont corrects
+                        $total_tva += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
+                        $TTotal_tva[$l->tva_tx] += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
+                        $total_ttc += $sign * ($l->total_tva / ($l->total_ttc / 100)) * $progress;
+                    }
+                }
+                else
+                {
+                    $total += $l->total_ht;
+                    $total_tva += $l->total_tva;
+                    $TTotal_tva[$l->tva_tx] += $l->total_tva;
+                    $total_ttc += $l->total_ttc;
+                }
+            }
 		}
 		if (!$return_all) return $total;
 		else return array($total, $total_tva, $total_ttc, $TTotal_tva);
