@@ -499,7 +499,7 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 					$pdf->MultiCell($this->page_largeur-$this->marge_droite-$this->postotalht, 3, $total_excl_tax, 0, 'R', 0);
 
 					// Collecte des totaux par valeur de tva dans $this->tva["taux"]=total_tva
-					$tvaligne=$object->lines[$i]->total_tva;
+					$tvaligne=doubleval($object->lines[$i]->total_tva);
 
 					$localtax1ligne=$object->lines[$i]->total_localtax1;
 					$localtax2ligne=$object->lines[$i]->total_localtax2;
@@ -530,7 +530,7 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 						$this->localtax2[$localtax2_type][$localtax2_rate]+=$localtax2ligne;
 
 					if (($object->lines[$i]->info_bits & 0x01) == 0x01) $vatrate.='*';
-					if (! isset($this->tva[$vatrate])) 				$this->tva[$vatrate]='';
+					if (! isset($this->tva[$vatrate])) 				$this->tva[$vatrate]=0;
 					
 					if (!empty($object->lines[$i]->TTotal_tva))
 					{
@@ -541,7 +541,7 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 					}
 					else {
 						// standard
-						$this->tva[$vatrate] += $tvaligne;
+                        if(!empty($tvaligne)) $this->tva[$vatrate] += $tvaligne;
 					}
 
 					// Add line
@@ -1080,7 +1080,7 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 		//$creditnoteamount=$object->getSumCreditNotesUsed();
 		//$depositsamount=$object->getSumDepositsUsed();
 		//print "x".$creditnoteamount."-".$depositsamount;exit;
-		$resteapayer = price2num($object->total_ttc - $deja_regle - $creditnoteamount - $depositsamount, 'MT');
+		$resteapayer = price2num(doubleval($object->total_ttc) - doubleval($deja_regle) - $creditnoteamount - $depositsamount, 'MT');
 		if (! empty($object->paye)) $resteapayer=0;
 
 		if ($deja_regle > 0)
