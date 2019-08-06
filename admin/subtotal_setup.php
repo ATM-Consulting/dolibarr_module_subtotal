@@ -59,8 +59,13 @@ if (preg_match('/set_(.*)/',$action,$reg))
 {
 	$code=$reg[1];
 	$value = GETPOST($code);
-	if ($code == 'SUBTOTAL_TFIELD_TO_KEEP_WITH_NC') $value = implode(',', $value);
-	
+	if (in_array($code, array(
+		'SUBTOTAL_TFIELD_TO_KEEP_WITH_NC'
+		, 'SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET'
+		, 'SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET'
+		, 'SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET'
+	))) $value = implode(',', $value);
+
 	if (dolibarr_set_const($db, $code, $value, 'chaine', 0, '', $conf->entity) > 0)
 	{
 		if ($code == 'SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS' && $value == 1) _createExtraComprisNonCompris();
@@ -94,7 +99,7 @@ dol_fiche_head(
     $head,
     'settings',
     $langs->trans("Module104777Name"),
-    0,
+    -1,
     "subtotal@subtotal"
 );
 
@@ -295,7 +300,54 @@ function showParameters() {
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE');
 	print '</td></tr>';
-	
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="right" width="300">';
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<input type="hidden" name="action" value="set_SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET">';
+	$extrafields = new ExtraFields($db);
+	$extralabels = $extrafields->fetch_name_optionals_label('propaldet');
+	print Form::multiselectarray("SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET", $extralabels, explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET));
+	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+	print '</form>';
+	print '</td></tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="right" width="300">';
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<input type="hidden" name="action" value="set_SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET">';
+	$extrafields = new ExtraFields($db);
+	$extralabels = $extrafields->fetch_name_optionals_label('commandedet');
+	print Form::multiselectarray("SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET", $extralabels, explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET));
+	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+	print '</form>';
+	print '</td></tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="right" width="300">';
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<input type="hidden" name="action" value="set_SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET">';
+	$extrafields = new ExtraFields($db);
+	$extralabels = $extrafields->fetch_name_optionals_label('facturedet');
+	print Form::multiselectarray("SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET", $extralabels, explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET));
+	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+	print '</form>';
+	print '</td></tr>';
+
+	// TODO ajouter ici la partie fournisseur en ce basant sur les 3 conf du dessus
+
 	print '</table><br />';
 	
 	
@@ -414,7 +466,7 @@ function showParameters() {
 	<?php
 }
 
-dol_fiche_end();
+dol_fiche_end(-1);
 
 // Put here content of your page
 // ...
