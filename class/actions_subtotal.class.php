@@ -2206,7 +2206,8 @@ class ActionsSubtotal
                         else if ($isFreeText) echo TSubtotal::getFreeTextHtml($line, (bool) $readonlyForSituation);
 						echo '</div>';
 
-						if($line->qty<10) {
+						if (TSubtotal::isTitle($line))
+						{
 							// WYSIWYG editor
 							require_once DOL_DOCUMENT_ROOT . '/core/class/doleditor.class.php';
 							$nbrows = ROWS_2;
@@ -2221,6 +2222,28 @@ class ActionsSubtotal
 							$doleditor = new DolEditor('line-description', $line->description, '', 100, $toolbarname, '',
 								false, true, $cked_enabled, $nbrows, '98%', (bool) $readonlyForSituation);
 							$doleditor->Create();
+
+							$TKey = null;
+							if ($line->element == 'propaldet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET);
+							elseif ($line->element == 'commandedet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET);
+							elseif ($line->element == 'facturedet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET);
+							// TODO ajouter la partie fournisseur
+
+							if (!empty($TKey))
+							{
+								$extrafields = new ExtraFields($this->db);
+								$extrafields->fetch_name_optionals_label($object->table_element_line);
+								foreach ($extrafields->attributes[$line->element]['param'] as $code => $val)
+								{
+									if (in_array($code, $TKey) && $extrafields->attributes[$line->element]['list'][$code] > 0)
+									{
+										echo '<div class="sub-'.$code.'">';
+										echo '<label class="">'.$extrafields->attributes[$line->element]['label'][$code].'</label>';
+										echo $extrafields->showInputField($code, $line->array_options['options_'.$code], '', '', 'subtotal_');
+										echo '</div>';
+									}
+								}
+							}
 						}
 						
 					}

@@ -127,6 +127,8 @@ function getHtmlSelectFreeText($withEmpty=true)
 
 function _updateSubtotalLine(&$object, &$line)
 {
+	global $conf;
+
 	$label = GETPOST('line-title');
 	$description = ($line->qty>90) ? '' : GETPOST('line-description');
 	$pagebreak = (int) GETPOST('line-pagebreak');
@@ -143,6 +145,37 @@ function _updateSubtotalLine(&$object, &$line)
     $line->array_options['options_show_reduc'] = $showReduc;
 	
 	$res = TSubtotal::doUpdateLine($object, $line->id, $description, 0, $line->qty, 0, '', '', 0, 9, 0, 0, 'HT', $pagebreak, 0, 1, null, 0, $label, TSubtotal::$module_number, $line->array_options);
+
+	$TKey = null;
+	if ($line->element == 'propaldet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET);
+	elseif ($line->element == 'commandedet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET);
+	elseif ($line->element == 'facturedet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET);
+	// TODO ajouter la partie fournisseur
+
+	// TODO remove "true"
+	if (!empty($TKey))
+	{
+		$extrafields = new ExtraFields($object->db);
+		$extrafields->fetch_name_optionals_label($line->element);
+		$TPost = $extrafields->getOptionalsFromPost($line->element, '', 'subtotal_');
+
+		$TLine = TSubtotal::getLinesFromTitleId($object, $line->id);
+		foreach ($TLine as $object_line)
+		{
+			foreach ($TKey as $key)
+			{
+				// TODO remove "true"
+				if (isset($TPost['subtotal_options_'.$key]))
+				{
+					$object_line->array_options['options_'.$key] = $TPost['subtotal_options_'.$key];
+				}
+			}
+
+			$object_line->insertExtraFields();
+		}
+	}
+
+
 
 	return $res;
 }
