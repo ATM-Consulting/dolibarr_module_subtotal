@@ -1966,9 +1966,11 @@ class ActionsSubtotal
 				$colspan++; // Colonne PU Devise
 			}
 			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
-			if(!empty($conf->margin->enabled)) $colspan++;
-			if(!empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
-			if(!empty($conf->global->DISPLAY_MARK_RATES)) $colspan++;
+
+			$margins_hidden_by_module = empty($conf->affmarges->enabled) ? false : !($_SESSION['marginsdisplayed']);
+			if(!empty($conf->margin->enabled) && !$margins_hidden_by_module) $colspan++;
+			if(!empty($conf->global->DISPLAY_MARGIN_RATES) && !$margins_hidden_by_module) $colspan++;
+			if(!empty($conf->global->DISPLAY_MARK_RATES) && !$margins_hidden_by_module) $colspan++;
 			if($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION) $colspan++;
 			if(!empty($conf->global->PRODUCT_USE_UNITS)) $colspan++;
 					
