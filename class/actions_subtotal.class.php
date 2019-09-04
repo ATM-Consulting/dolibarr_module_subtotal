@@ -2053,9 +2053,7 @@ class ActionsSubtotal
 				</script>
 				<?php
 			}
-			
 			if(empty($line->description)) $line->description = $line->desc;
-			
 			$colspan = 5;
 			if($object->element == 'facturerec' ) $colspan = 3;
 			if($object->element == 'order_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 3 : $colspan = 6;
@@ -2065,12 +2063,12 @@ class ActionsSubtotal
 				$colspan++; // Colonne PU Devise
 			}
 			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
-			if(!empty($conf->margin->enabled)) $colspan++;
-			if(!empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
-			if(!empty($conf->global->DISPLAY_MARK_RATES)) $colspan++;
+			if(!empty($conf->margin->enabled) && false !== $_SESSION['marginsdisplayed']) $colspan++;
+			if(!empty($conf->global->DISPLAY_MARGIN_RATES) && false !== $_SESSION['marginsdisplayed']) $colspan++;
+			if(!empty($conf->global->DISPLAY_MARK_RATES) && false !== $_SESSION['marginsdisplayed']) $colspan++;
 			if($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION) $colspan++;
 			if(!empty($conf->global->PRODUCT_USE_UNITS)) $colspan++;
-					
+
 			/* Titre */
 			//var_dump($line);
             
