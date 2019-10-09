@@ -2093,12 +2093,12 @@ class ActionsSubtotal
 			<script type="text/javascript">
 				$(function() {
 					var subtotal_TSubNc = <?php echo json_encode($TSubNc); ?>;
-					$("#tablelines tbody > tr").each(function(i, item) {
+					$("#tablelines tr").each(function(i, item) {
 						if ($(item).children('.subtotal_nc').length == 0)
 						{
 							var id = $(item).attr('id');
 							
-							if ((typeof id != 'undefined' && id.indexOf('row-') >= 0) || $(item).hasClass('liste_titre'))
+							if ((typeof id != 'undefined' && id.indexOf('row-') == 0) || $(item).hasClass('liste_titre'))
 							{
 								$(item).children('td:last-child').before('<td class="subtotal_nc"></td>');
 								
@@ -2115,7 +2115,7 @@ class ActionsSubtotal
 						}
 					});
 					
-					$('#tablelines tbody tr.liste_titre:first .subtotal_nc').html(<?php echo json_encode($form->textwithtooltip($langs->trans('subtotal_nc_title'), $langs->trans('subtotal_nc_title_help'))); ?>);
+					$('#tablelines tr.liste_titre:first .subtotal_nc').html(<?php echo json_encode($form->textwithtooltip($langs->trans('subtotal_nc_title'), $langs->trans('subtotal_nc_title_help'))); ?>);
 					
 					function callAjaxUpdateLineNC(set, lineid, subtotal_nc)
 					{
