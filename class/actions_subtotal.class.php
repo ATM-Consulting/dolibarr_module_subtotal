@@ -2098,7 +2098,7 @@ class ActionsSubtotal
 						{
 							var id = $(item).attr('id');
 							
-							if ((typeof id != 'undefined' && id.indexOf('row-') >= 0) || $(item).hasClass('liste_titre'))
+							if ((typeof id != 'undefined' && id.indexOf('row-') == 0) || $(item).hasClass('liste_titre'))
 							{
 								$(item).children('td:last-child').before('<td class="subtotal_nc"></td>');
 								
