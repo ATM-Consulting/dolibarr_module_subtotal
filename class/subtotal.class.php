@@ -41,7 +41,7 @@ class TSubtotal {
 			elseif($object->element=='invoice_supplier') {
                 /** @var FactureFournisseur $object */
 			    $object->special_code = TSubtotal::$module_number;
-			    $rang = $object->line_max() + 1;
+                if( (float)DOL_VERSION < 6 ) $rang = $object->line_max() + 1;
 			    $res = $object->addline($label,0,0,0,0,$qty,0,0,'','',0,0,'HT',9,$rang);
 			}
 			/**
@@ -304,22 +304,28 @@ class TSubtotal {
 		return $TTot;
 	}
 
-	public static function getOrderIdFromLineId(&$db, $fk_commandedet)
+	public static function getOrderIdFromLineId(&$db, $fk_commandedet, $supplier = false)
 	{
 		if (empty($fk_commandedet)) return false;
-		
-		$sql = 'SELECT fk_commande FROM '.MAIN_DB_PREFIX.'commandedet WHERE rowid = '.$fk_commandedet;
+
+		$table = 'commandedet';
+		if ($supplier) $table = 'commande_fournisseurdet';
+
+		$sql = 'SELECT fk_commande FROM '.MAIN_DB_PREFIX.$table.' WHERE rowid = '.$fk_commandedet;
 		$resql = $db->query($sql);
-		
+
 		if ($resql && ($row = $db->fetch_object($resql))) return $row->fk_commande;
 		else return false;
 	}
 	
-	public static function getLastLineOrderId(&$db, $fk_commande)
+	public static function getLastLineOrderId(&$db, $fk_commande, $supplier = false)
 	{
 		if (empty($fk_commande)) return false;
-		
-		$sql = 'SELECT rowid FROM '.MAIN_DB_PREFIX.'commandedet WHERE fk_commande = '.$fk_commande.' ORDER BY rang DESC LIMIT 1';
+
+        $table = 'commandedet';
+        if ($supplier) $table = 'commande_fournisseurdet';
+
+		$sql = 'SELECT rowid FROM '.MAIN_DB_PREFIX.$table.' WHERE fk_commande = '.$fk_commande.' ORDER BY rang DESC LIMIT 1';
 		$resql = $db->query($sql);
 		
 		if ($resql && ($row = $db->fetch_object($resql))) return (int) $row->rowid;
@@ -422,11 +428,17 @@ class TSubtotal {
 		    $createRight = $user->rights->fournisseur->facture->creer;
 		}
 		
-		if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK))
+		if ($object->statut == 0  && $createRight && (!empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) || !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_LINE)))
 		{
 			dol_include_once('/subtotal/lib/subtotal.lib.php');
-			
-			$TLine = self::getLinesFromTitleId($object, $lineid, $withBlockLine);
+
+            if(!empty($object->lines)) {
+                foreach($object->lines as $line) {
+                    if($line->id == $lineid) $duplicateLine = $line;
+                }
+            }
+            if(!empty($duplicateLine) && !self::isModSubtotalLine($duplicateLine)) $TLine = array($duplicateLine);
+            else $TLine = self::getLinesFromTitleId($object, $lineid, $withBlockLine);
 
 			if (!empty($TLine))
 			{
@@ -440,20 +452,22 @@ class TSubtotal {
 					switch ($object->element) {
 						case 'propal':
 							//$desc, $pu_ht, $qty, $txtva, $txlocaltax1=0.0, $txlocaltax2=0.0, $fk_product=0, $remise_percent=0.0, $price_base_type='HT', $pu_ttc=0.0, $info_bits=0, $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=0, $pa_ht=0, $label='',$date_start='', $date_end='',$array_options=0, $fk_unit=null, $origin='', $origin_id=0)
-							$res = $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, $line->remise_percent, 'HT', 0, $line->info_bits, $line->product_type, -1, $line->special_code, 0, 0, $line->pa_ht, $line->label, $line->date_start, $line->date_end, $line->array_options, $line->fk_unit, $line->origin, $line->origin_id);
+							$res = $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, $line->remise_percent, 'HT', 0, $line->info_bits, $line->product_type, -1, $line->special_code, 0, 0, $line->pa_ht, $line->label, $line->date_start, $line->date_end, $line->array_options, $line->fk_unit, $object->element, $line->id);
 							break;
 							
 						case 'supplier_proposal':
-						    $res = $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, $line->remise_percent, 'HT', 0, $line->info_bits, $line->product_type, -1, $line->special_code, 0, 0, $line->pa_ht, $line->label, $line->date_start, $line->date_end, $line->array_options, $line->fk_unit, $line->origin, $line->origin_id);
+						    $res = $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, $line->remise_percent, 'HT', 0, $line->info_bits, $line->product_type, -1, $line->special_code, 0, 0, $line->pa_ht, $line->label, $line->date_start, $line->date_end, $line->array_options, $line->fk_unit, $object->element, $line->id);
 						    break;
 							
 						case 'commande':
 							//$desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $info_bits=0, $fk_remise_except=0, $price_base_type='HT', $pu_ttc=0, $date_start='', $date_end='', $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='',$array_options=0, $fk_unit=null, $origin='', $origin_id=0)
-							$res = $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, $line->remise_percent, $line->info_bits, $line->fk_remise_except, 'HT', 0, $line->date_start, $line->date_end, $line->product_type, -1, $line->special_code, 0, 0, $line->pa_ht, $line->label, $line->array_options, $line->fk_unit, $line->origin, $line->origin_id);
+							$res = $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, $line->remise_percent, $line->info_bits, $line->fk_remise_except, 'HT', 0, $line->date_start, $line->date_end, $line->product_type, -1, $line->special_code, 0, 0, $line->pa_ht, $line->label, $line->array_options, $line->fk_unit, $object->element, $line->id);
 							break;
 							
 						case 'order_supplier':
 						    $object->line = $line;
+						    $object->line->origin = $object->element;
+						    $object->line->origin_id = $line->id;
 						    $object->line->fk_commande = $object->id;
 						    $object->line->rang = $object->line_max() +1;
 						    $res = $object->line->insert(1);
@@ -461,7 +475,7 @@ class TSubtotal {
 							
 						case 'facture':
 							//$desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits=0, $fk_remise_except='', $price_base_type='HT', $pu_ttc=0, $type=self::TYPE_STANDARD, $rang=-1, $special_code=0, $origin='', $origin_id=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='', $array_options=0, $situation_percent=100, $fk_prev_id='', $fk_unit = null
-							$res = $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, $line->remise_percent, $line->date_start, $line->date_end, 0, $line->info_bits, $line->fk_remise_except, 'HT', 0, $line->product_type, -1, $line->special_code, $line->origin, $line->origin_id, $line->fk_parent_line, $line->fk_fournprice, $line->pa_ht, $line->label, $line->array_options, $line->situation_percent, $line->fk_prev_id, $line->fk_unit);
+							$res = $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, $line->remise_percent, $line->date_start, $line->date_end, 0, $line->info_bits, $line->fk_remise_except, 'HT', 0, $line->product_type, -1, $line->special_code, $object->element, $line->id, $line->fk_parent_line, $line->fk_fournprice, $line->pa_ht, $line->label, $line->array_options, $line->situation_percent, $line->fk_prev_id, $line->fk_unit);
 							break;
 						/*	Totally useless on invoice supplier
 						case 'invoice_supplier':
