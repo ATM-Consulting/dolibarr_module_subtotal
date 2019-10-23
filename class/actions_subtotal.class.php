@@ -183,7 +183,7 @@ class ActionsSubtotal
 						$form=new Form($db);
 
 						$lineid = GETPOST('lineid','integer');
-						$TIdForGroup = getLinesFromTitleId($object, $lineid, true);
+						$TIdForGroup = TSubtotal::getLinesFromTitleId($object, $lineid, true);
 					
 						$nbLines = count($TIdForGroup);
 					
