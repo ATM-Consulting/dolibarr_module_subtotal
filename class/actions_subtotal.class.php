@@ -183,7 +183,7 @@ class ActionsSubtotal
 						$form=new Form($db);
 
 						$lineid = GETPOST('lineid','integer');
-						$TIdForGroup = $this->getArrayOfLineForAGroup($object, $lineid);
+						$TIdForGroup = getLinesFromTitleId($object, $lineid, true);
 					
 						$nbLines = count($TIdForGroup);
 					
@@ -685,9 +685,9 @@ class ActionsSubtotal
 		}
 		else if($action === 'confirm_delete_all_lines' && GETPOST('confirm')=='yes') {
 			
-			$Tab = $this->getArrayOfLineForAGroup($object, GETPOST('lineid'));
-			
-			foreach($Tab as $idLine) {
+			$Tab = TSubtotal::getLinesFromTitleId($object, GETPOST('lineid'), true);
+			foreach($Tab as $line) {
+				$idLine = $line->id;
 				/**
 				 * @var $object Facture
 				 */
