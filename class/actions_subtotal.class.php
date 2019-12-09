@@ -656,15 +656,15 @@ class ActionsSubtotal
 				global $hideprices;
 				
 				$hideInnerLines = (int)GETPOST('hideInnerLines');
-				if(!empty($_SESSION[$sessname]) && !is_array($_SESSION[$sessname][$object->id]) ) $_SESSION[$sessname] = array(); // prevent old system
+				if(empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname][$object->id]) ) $_SESSION[$sessname] = array(); // prevent old system
 				$_SESSION[$sessname][$object->id] = $hideInnerLines;		
-				
+
 				$hidedetails= (int)GETPOST('hidedetails');
-				if(!empty($_SESSION[$sessname2]) && !is_array($_SESSION[$sessname2][$object->id]) ) $_SESSION[$sessname2] = array(); // prevent old system
+				if(empty($_SESSION[$sessname2]) || !is_array($_SESSION[$sessname2][$object->id]) ) $_SESSION[$sessname2] = array(); // prevent old system
 				$_SESSION[$sessname2][$object->id] = $hidedetails;
 				
 				$hideprices= (int)GETPOST('hideprices');
-				if(!empty($_SESSION[$sessname3]) && !is_array($_SESSION[$sessname3][$object->id]) ) $_SESSION[$sessname3] = array(); // prevent old system
+				if(empty($_SESSION[$sessname3]) || !is_array($_SESSION[$sessname3][$object->id]) ) $_SESSION[$sessname3] = array(); // prevent old system
 				$_SESSION[$sessname3][$object->id] = $hideprices;
 				
 				foreach($object->lines as &$line) {
@@ -844,6 +844,9 @@ class ActionsSubtotal
 
 		foreach($TLineReverse as $l)
 		{
+			$l->total_ttc = doubleval($l->total_ttc);
+			$l->total_ht = doubleval($l->total_ht);
+
 			//print $l->rang.'>='.$rang.' '.$total.'<br/>';
             if ($l->rang>=$rang) continue;
             if (!empty($title_break) && $title_break->id == $l->id) break;
@@ -852,7 +855,7 @@ class ActionsSubtotal
                 // TODO retirer le test avec $builddoc quand Dolibarr affichera le total progression sur la card et pas seulement dans le PDF
                 if ($builddoc && $object->element == 'facture' && $object->type==Facture::TYPE_SITUATION)
                 {
-                    if ($l->situation_percent > 0)
+                    if ($l->situation_percent > 0 && !empty($l->total_ht))
                     {
                         $prev_progress = 0;
                         $progress = 1;
@@ -868,6 +871,7 @@ class ActionsSubtotal
                         $total_tva += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
                         $TTotal_tva[$l->tva_tx] += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
                         $total_ttc += $sign * ($l->total_tva / ($l->total_ttc / 100)) * $progress;
+
                     }
                 }
                 else
