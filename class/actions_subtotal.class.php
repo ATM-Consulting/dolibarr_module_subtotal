@@ -2382,7 +2382,7 @@ class ActionsSubtotal
 								?>
 								<script>
 									$(document).ready(function () {
-										$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline").css({"color": "#be3535"});
+										$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline,span.fas.fa-trash.pictodeleteallline").css({"color": "#be3535"});
 									});
 								</script>
 								<?php
