@@ -332,7 +332,7 @@ class TSubtotal {
 		else return false;
 	}
 
-	public static function getParentTitleOfLine(&$object, $rang)
+	public static function getParentTitleOfLine(&$object, $rang, $lvl = 0)
 	{
 		if ($rang <= 0) return false;
 
@@ -341,7 +341,7 @@ class TSubtotal {
 
 		foreach($TLineReverse as $line)
 		{
-			if ($line->rang >= $rang) continue; // Tout ce qui ce trouve en dessous j'ignore, nous voulons uniquement ce qui ce trouve au dessus
+			if ($line->rang >= $rang || ($lvl > 0 && self::getNiveau($line) > $lvl)) continue; // Tout ce qui ce trouve en dessous j'ignore, nous voulons uniquement ce qui ce trouve au dessus
 
             if (self::isTitle($line))
 			{
