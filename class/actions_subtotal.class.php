@@ -824,8 +824,10 @@ class ActionsSubtotal
 
 		$rang = $line->rang;
 		$qty_line = $line->qty;
+		$lvl = 0;
+        if (TSubtotal::isSubtotal($line)) $lvl = TSubtotal::getNiveau($line);
 
-		$title_break = TSubtotal::getParentTitleOfLine($object, $rang);
+		$title_break = TSubtotal::getParentTitleOfLine($object, $rang, $lvl);
 
 		$total = 0;
 		$total_tva = 0;
