@@ -813,8 +813,8 @@ class ActionsSubtotal
 			}
 
 			if ($found) {
-				if ($l->special_code == $this->module_number && $lid != $lineid && ($l->qty == $qty_line || $l->qty == $qty_end_line)) {
-					if ($l->qty == $qty_end_line) $Tab[] = $lid;
+				if ($l->special_code == $this->module_number && $lid != $lineid && ($l->qty <= $qty_line || $l->qty >= $qty_end_line)) {
+					if ($l->qty >= $qty_end_line) $Tab[] = $lid;
 					break;
 				}
 				else $Tab[] = $lid;
