@@ -332,6 +332,12 @@ class TSubtotal {
 		else return false;
 	}
 
+	/**
+	 * @param FactureLigne|PropaleLigne|OrderLine $object
+	 * @param int $rang  rank of the line in the object; The first line has rank = 1, not 0.
+	 * @param int $lvl
+	 * @return bool|FactureLigne|PropaleLigne|OrderLine
+	 */
 	public static function getParentTitleOfLine(&$object, $rang, $lvl = 0)
 	{
 		if ($rang <= 0) return false;
