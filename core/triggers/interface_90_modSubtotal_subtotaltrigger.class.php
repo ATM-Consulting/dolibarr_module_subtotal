@@ -461,11 +461,7 @@ class Interfacesubtotaltrigger
         }
 
         // Customer orders
-        elseif ($action == 'ORDER_CREATE') {
-            dol_syslog(
-                "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
-            );
-        } elseif ($action == 'ORDER_VALIDATE') {
+        elseif ($action == 'ORDER_VALIDATE') {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
@@ -511,11 +507,8 @@ class Interfacesubtotaltrigger
         }
 
         // Proposals
-        elseif ($action == 'PROPAL_CREATE') {
-            dol_syslog(
-                "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
-            );
-        } elseif (in_array($action, array('PROPAL_CLONE', 'ORDER_CLONE', 'BILL_CLONE'))) {
+        elseif ((floatval(DOL_VERSION) <= 7.0 && in_array($action, array('PROPAL_CLONE', 'ORDER_CLONE', 'BILL_CLONE'))) ||
+                (floatval(DOL_VERSION) >= 8.0 && ! empty($object->context) && in_array('createfromclone', $object->context) && in_array($action, array('PROPAL_CREATE', 'ORDER_CREATE', 'BILL_CREATE')))) {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );

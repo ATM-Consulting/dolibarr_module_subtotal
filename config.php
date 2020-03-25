@@ -1,8 +1,6 @@
 <?php
 
 		
-	if(is_file('../main.inc.php'))$dir = '../';
-	else  if(is_file('../../../main.inc.php'))$dir = '../../../';
-	else $dir = '../../';
-
-	include($dir."main.inc.php");
+	if(is_file('../main.inc.php')) include("../main.inc.php");
+	else  if(is_file('../../../main.inc.php')) include("../../../main.inc.php");
+	else include("../../main.inc.php");

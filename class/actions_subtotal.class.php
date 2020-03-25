@@ -183,7 +183,7 @@ class ActionsSubtotal
 						$form=new Form($db);
 
 						$lineid = GETPOST('lineid','integer');
-						$TIdForGroup = $this->getArrayOfLineForAGroup($object, $lineid);
+						$TIdForGroup = TSubtotal::getLinesFromTitleId($object, $lineid, true);
 
 						$nbLines = count($TIdForGroup);
 
@@ -656,15 +656,15 @@ class ActionsSubtotal
 				global $hideprices;
 
 				$hideInnerLines = (int)GETPOST('hideInnerLines');
-				if(!empty($_SESSION[$sessname]) && !is_array($_SESSION[$sessname][$object->id]) ) $_SESSION[$sessname] = array(); // prevent old system
+				if(empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname][$object->id]) ) $_SESSION[$sessname] = array(); // prevent old system
 				$_SESSION[$sessname][$object->id] = $hideInnerLines;
 
 				$hidedetails= (int)GETPOST('hidedetails');
-				if(!empty($_SESSION[$sessname2]) && !is_array($_SESSION[$sessname2][$object->id]) ) $_SESSION[$sessname2] = array(); // prevent old system
+				if(empty($_SESSION[$sessname2]) || !is_array($_SESSION[$sessname2][$object->id]) ) $_SESSION[$sessname2] = array(); // prevent old system
 				$_SESSION[$sessname2][$object->id] = $hidedetails;
 
 				$hideprices= (int)GETPOST('hideprices');
-				if(!empty($_SESSION[$sessname3]) && !is_array($_SESSION[$sessname3][$object->id]) ) $_SESSION[$sessname3] = array(); // prevent old system
+				if(empty($_SESSION[$sessname3]) || !is_array($_SESSION[$sessname3][$object->id]) ) $_SESSION[$sessname3] = array(); // prevent old system
 				$_SESSION[$sessname3][$object->id] = $hideprices;
 
 				foreach($object->lines as &$line) {
@@ -685,9 +685,9 @@ class ActionsSubtotal
 		}
 		else if($action === 'confirm_delete_all_lines' && GETPOST('confirm')=='yes') {
 
-			$Tab = $this->getArrayOfLineForAGroup($object, GETPOST('lineid'));
-
-			foreach($Tab as $idLine) {
+			$Tab = TSubtotal::getLinesFromTitleId($object, GETPOST('lineid'), true);
+			foreach($Tab as $line) {
+				$idLine = $line->id;
 				/**
 				 * @var $object Facture
 				 */
@@ -824,8 +824,10 @@ class ActionsSubtotal
 
 		$rang = $line->rang;
 		$qty_line = $line->qty;
+		$lvl = 0;
+        if (TSubtotal::isSubtotal($line)) $lvl = TSubtotal::getNiveau($line);
 
-		$title_break = TSubtotal::getParentTitleOfLine($object, $rang);
+		$title_break = TSubtotal::getParentTitleOfLine($object, $rang, $lvl);
 
 		$total = 0;
 		$total_tva = 0;
@@ -844,6 +846,9 @@ class ActionsSubtotal
 
 		foreach($TLineReverse as $l)
 		{
+			$l->total_ttc = doubleval($l->total_ttc);
+			$l->total_ht = doubleval($l->total_ht);
+
 			//print $l->rang.'>='.$rang.' '.$total.'<br/>';
             if ($l->rang>=$rang) continue;
             if (!empty($title_break) && $title_break->id == $l->id) break;
@@ -852,7 +857,7 @@ class ActionsSubtotal
                 // TODO retirer le test avec $builddoc quand Dolibarr affichera le total progression sur la card et pas seulement dans le PDF
                 if ($builddoc && $object->element == 'facture' && $object->type==Facture::TYPE_SITUATION)
                 {
-                    if ($l->situation_percent > 0)
+                    if ($l->situation_percent > 0 && !empty($l->total_ht))
                     {
                         $prev_progress = 0;
                         $progress = 1;
@@ -1126,7 +1131,8 @@ class ActionsSubtotal
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
 
-		if (empty($object->lines[$i])) return 0; // hideInnerLines => override $object->lines et Dolibarr ne nous permet pas de mettre à jour la variable qui conditionne la boucle sur les lignes (PR faite pour 6.0)
+		/** Attention, ici on peut ce retrouver avec un objet de type stdClass à cause de l'option cacher le détail des ensembles avec la notion de Non Compris (@see beforePDFCreation()) et dû à l'appel de TSubtotal::hasNcTitle() */
+		if (empty($object->lines[$i]->id)) return 0; // hideInnerLines => override $object->lines et Dolibarr ne nous permet pas de mettre à jour la variable qui conditionne la boucle sur les lignes (PR faite pour 6.0)
 
 		if(empty($object->lines[$i]->array_options)) $object->lines[$i]->fetch_optionals();
 
@@ -1205,8 +1211,8 @@ class ActionsSubtotal
 		else if (!empty($hideprices))
 		{
 			// Check if a title exist for this line && if the title have subtotal
-			$lineTitle = TSubtotal::getParentTitleOfLine($object, $i);
-			if(TSubtotal::getParentTitleOfLine($object, $i) && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
+			$lineTitle = TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang);
+			if ($lineTitle && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
 			{
 
 				$this->resprints = ' ';
@@ -1323,7 +1329,7 @@ class ActionsSubtotal
 
             // On récupère les montants du bloc pour les afficher dans la ligne de sous-total
             if(TSubtotal::isSubtotal($line)) {
-                $parentTitle = TSubtotal::getParentTitleOfLine($object, $i);
+                $parentTitle = TSubtotal::getParentTitleOfLine($object, $line->rang);
 
                 if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->array_options['options_show_total_ht'])) {
@@ -1362,8 +1368,8 @@ class ActionsSubtotal
 		{
 
 		    // Check if a title exist for this line && if the title have subtotal
-		    $lineTitle = TSubtotal::getParentTitleOfLine($object, $i);
-		    if(TSubtotal::getParentTitleOfLine($object, $i) && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
+		    $lineTitle = TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang);
+		    if ($lineTitle && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
 		    {
 
 		        $this->resprints = ' ';
@@ -1390,7 +1396,7 @@ class ActionsSubtotal
 
             // Affichage de la remise
             if(TSubtotal::isSubtotal($line)) {
-                $parentTitle = TSubtotal::getParentTitleOfLine($object, $i);
+                $parentTitle = TSubtotal::getParentTitleOfLine($object, $line->rang);
 
                 if(empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->array_options['options_show_reduc'])) {
@@ -1491,8 +1497,8 @@ class ActionsSubtotal
 		{
 
 		    // Check if a title exist for this line && if the title have subtotal
-		    $lineTitle = TSubtotal::getParentTitleOfLine($object, $i);
-		    if(TSubtotal::getParentTitleOfLine($object, $i) && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
+		    $lineTitle = TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang);
+		    if ($lineTitle && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
 		    {
 
 		        $this->resprints = ' ';
@@ -1626,7 +1632,7 @@ class ActionsSubtotal
 
         foreach($object->lines as $k => &$l) {
             if(TSubtotal::isSubtotal($l)) {
-                $parentTitle = TSubtotal::getParentTitleOfLine($object, $k);
+                $parentTitle = TSubtotal::getParentTitleOfLine($object, $l->rang);
                 if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->id) && ! empty($parentTitle->array_options['options_show_reduc'])) {
                     $l->remise_percent = 100;    // Affichage de la réduction sur la ligne de sous-total
@@ -1677,7 +1683,7 @@ class ActionsSubtotal
 						$line->total = $line->total_ht;
 						$line->total_ttc = $TInfo[2];
 
-//                        $TTitle = TSubtotal::getParentTitleOfLine($object, $k);
+//                        $TTitle = TSubtotal::getParentTitleOfLine($object, $line->rang);
 //                        $parentTitle = array_shift($TTitle);
 //                        if(! empty($parentTitle->id) && ! empty($parentTitle->array_option['options_show_total_ht'])) {
 //                            exit('la?');
@@ -2012,11 +2018,12 @@ class ActionsSubtotal
 			if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_LINE) && $object->element !== 'invoice_supplier')
             {
                 if(!(TSubtotal::isModSubtotalLine($line)) && ( $line->fk_prev_id === null ) && !($action == "editline" && GETPOST('lineid') == $line->id)) {
+                    echo '<a name="duplicate-'.$line->id.'" href="' . $_SERVER['PHP_SELF'] . '?' . $idvar . '=' . $object->id . '&action=duplicate&lineid=' . $line->id . '"><i class="fa fa-clone" aria-hidden="true"></i></a>';
+
                     ?>
                         <script type="text/javascript">
                             $(document).ready(function() {
-                            	let duplicate = '<a name="duplicate-<?php echo $line->id; ?>" href="<?php echo $_SERVER['PHP_SELF']; ?>?<?php echo $idvar; ?>=<?php echo $object->id; ?>&action=duplicate&lineid=<?php echo $line->id ?>"><i class="fa fa-clone" aria-hidden="true"></i></a>';
-                                $(duplicate).prependTo($('#row-<?php echo $line->id; ?>').find('.linecoledit'));
+                                $("a[name='duplicate-<?php echo $line->id; ?>']").prependTo($('#row-<?php echo $line->id; ?>').find('.linecoledit'));
                             });
                         </script>
                     <?php
@@ -2377,7 +2384,7 @@ class ActionsSubtotal
 								?>
 								<script>
 									$(document).ready(function () {
-										$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline").css({"color": "#be3535"});
+										$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline,span.fas.fa-trash.pictodeleteallline").css({"color": "#be3535"});
 									});
 								</script>
 								<?php
@@ -2707,7 +2714,7 @@ class ActionsSubtotal
 						?>
 							<script>
 								$(document).ready(function () {
-									$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline").css({"color": "#be3535"});
+									$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline,span.fas.fa-trash.pictodeleteallline").css({"color": "#be3535"});
 								});
 							</script>
 							<?php
