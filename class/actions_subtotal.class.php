@@ -30,6 +30,7 @@ class ActionsSubtotal
 
 		}
 
+		return 0;
 	}
 
 
@@ -91,6 +92,8 @@ class ActionsSubtotal
 			</script>
 			<?php
 		}
+
+		return 0;
 	}
 
 	/** Overloading the doActions function : replacing the parent's function with the one below
@@ -523,6 +526,7 @@ class ActionsSubtotal
 
 		}
 
+		return 0;
 	}
 
 	function createFrom($parameters, &$object, $action, $hookmanager) {
@@ -562,6 +566,7 @@ class ActionsSubtotal
 
 		}
 
+		return 0;
 	}
 
 	function doActions($parameters, &$object, $action, $hookmanager)
@@ -1925,7 +1930,7 @@ class ActionsSubtotal
 		}*/
 
 
-
+        return 0;
 	}
 
 	/**
@@ -2829,6 +2834,8 @@ class ActionsSubtotal
 		}
 
 		$this->_ajax_block_order_js($object);
+
+		return 0;
 	}
 
 	function afterPDFCreation($parameters, &$pdf, &$action, $hookmanager)
@@ -2844,6 +2851,8 @@ class ActionsSubtotal
 				TSubtotal::addRecapPage($parameters, $pdf);
 			}
 		}
+
+		return 0;
 	}
 
 	// HTML 5 data for js
