@@ -555,7 +555,7 @@ class ActionsSubtotal
 
 							$idLine = (int) ($line->id ? $line->id : $line->rowid);
 
-							if($line->info_bits !== $lineOld->info_bits) {
+							if($line->info_bits != $lineOld->info_bits) {
 								$db->query("UPDATE ".MAIN_DB_PREFIX.$line->table_element."
 								SET info_bits=".(int)$lineOld->info_bits."
 								WHERE rowid = ".$idLine."
