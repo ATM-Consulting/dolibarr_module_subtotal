@@ -545,6 +545,8 @@ class ActionsSubtotal
 
 			$objFrom = $parameters['objFrom'];
 
+			if(empty($object->lines) && method_exists($object, 'fetch_lines')) $object->fetch_lines();
+
 			foreach($objFrom->lines as $k=> &$lineOld) {
 
 					if($lineOld->product_type == 9 && $lineOld->info_bits > 0 ) {
@@ -553,10 +555,12 @@ class ActionsSubtotal
 
 							$idLine = (int) ($line->id ? $line->id : $line->rowid);
 
-							$db->query("UPDATE ".MAIN_DB_PREFIX.$line->table_element."
-							SET info_bits=".(int)$lineOld->info_bits."
-							WHERE rowid = ".$idLine."
-							");
+							if($line->info_bits != $lineOld->info_bits) {
+								$db->query("UPDATE ".MAIN_DB_PREFIX.$line->table_element."
+								SET info_bits=".(int)$lineOld->info_bits."
+								WHERE rowid = ".$idLine."
+								");
+							}
 
 					}
 
