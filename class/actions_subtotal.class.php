@@ -2858,6 +2858,25 @@ class ActionsSubtotal
 		return 0;
 	}
 
+	/** Overloading the getlinetotalremise function : replacing the parent's function with the one below
+	 * @param      $parameters  array           meta datas of the hook (context, etc...)
+	 * @param      $object      CommonObject    the object you want to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @param      $action      string          current action (if set). Generally create or edit or null
+	 * @param      $hookmanager HookManager     current hook manager
+	 * @return     void
+	 */
+	function getlinetotalremise($parameters, &$object, &$action, $hookmanager)
+	{
+	    // Les lignes NC ne sont pas censées afficher de montant total de remise, nouveau hook en v11 dans pdf_sponge
+	    if (! empty($object->lines[$parameters['i']]->array_options['options_subtotal_nc']))
+	    {
+            $this->resprints = '';
+            return 1;
+	    }
+
+		return 0;
+	}
+
 	// HTML 5 data for js
 	private function _getHtmlData($parameters, &$object, &$action, $hookmanager)
 	{
