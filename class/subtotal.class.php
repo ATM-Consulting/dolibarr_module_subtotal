@@ -520,7 +520,8 @@ class TSubtotal {
 					foreach ($TLineAdded as &$line)
 					{
 					    // ça peut paraitre non optimisé de déclancher la fonction sur toutes les lignes mais ceci est nécessaire pour réappliquer l'état exact de chaque ligne
-					    _updateLineNC($object->element, $object->id, $line->id, $line->array_options['options_subtotal_nc']);
+                        //En gros ça met à jour le sous total
+					   if(!empty($line->array_options['options_subtotal_nc'])) _updateLineNC($object->element, $object->id, $line->id, $line->array_options['options_subtotal_nc']);
 					}
 					return count($TLineAdded);
 				}
