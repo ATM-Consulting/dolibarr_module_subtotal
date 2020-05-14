@@ -2767,6 +2767,8 @@ class ActionsSubtotal
 		{
 			/** @var Commande $object */
 
+			if(class_exists('TSubtotal')){ dol_include_once('/subtotal/class/subtotal.class.php'); }
+
 			if (TSubtotal::isModSubtotalLine($line))
 			{
 				$object->tpl['subtotal'] = $line->id;
