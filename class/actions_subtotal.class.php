@@ -2752,6 +2752,113 @@ class ActionsSubtotal
 
 	}
 
+	function printOriginObjectLine($parameters, &$object, &$action, $hookmanager)
+	{
+		global $conf,$langs,$user,$db,$bc, $restrictlist, $selectedLines;
+
+		$line = &$parameters['line'];
+		$i = &$parameters['i'];
+
+		$var = &$parameters['var'];
+
+		$contexts = explode(':',$parameters['context']);
+
+		if (in_array('ordercard',$contexts))
+		{
+			/** @var Commande $object */
+
+			if(class_exists('TSubtotal')){ dol_include_once('/subtotal/class/subtotal.class.php'); }
+
+			if (TSubtotal::isModSubtotalLine($line))
+			{
+				$object->tpl['subtotal'] = $line->id;
+				if (TSubtotal::isTitle($line)) $object->tpl['sub-type'] = 'title';
+				else if (TSubtotal::isSubtotal($line)) $object->tpl['sub-type'] = 'total';
+
+				$object->tpl['sub-tr-style'] = '';
+				if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
+				{
+					if($line->qty==99) $object->tpl['sub-tr-style'].= 'background:#adadcf';
+					else if($line->qty==98) $object->tpl['sub-tr-style'].= 'background:#ddddff;';
+					else if($line->qty<=97 && $line->qty>=91) $object->tpl['sub-tr-style'].= 'background:#eeeeff;';
+					else if($line->qty==1) $object->tpl['sub-tr-style'].= 'background:#adadcf;';
+					else if($line->qty==2) $object->tpl['sub-tr-style'].= 'background:#ddddff;';
+					else if($line->qty==50) $object->tpl['sub-tr-style'].= '';
+					else $object->tpl['sub-tr-style'].= 'background:#eeeeff;';
+
+					//A compléter si on veux plus de nuances de couleurs avec les niveau 4,5,6,7,8 et 9
+				}
+				else
+				{
+					if($line->qty==99) $object->tpl['sub-tr-style'].= 'background:#ddffdd';
+					else if($line->qty==98) $object->tpl['sub-tr-style'].= 'background:#ddddff;';
+					else if($line->qty==2) $object->tpl['sub-tr-style'].= 'background:#eeeeff; ';
+					else if($line->qty==50) $object->tpl['sub-tr-style'].= '';
+					else $object->tpl['sub-tr-style'].= 'background:#eeffee;' ;
+				}
+
+				$object->tpl['sub-td-style'] = '';
+				if ($line->qty>90) $object->tpl['sub-td-style'] = 'style="text-align:right"';
+
+
+				if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+				{
+					if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
+					{
+						$object->tpl["sublabel"] = str_repeat('&nbsp;&nbsp;&nbsp;', $line->qty-1);
+
+						if (TSubtotal::isTitle($line)) $object->tpl["sublabel"].= img_picto('', 'subtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;">'.$line->qty.'</span>&nbsp;&nbsp;';
+						else $object->tpl["sublabel"].= img_picto('', 'subtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;">'.(100-$line->qty).'</span>&nbsp;&nbsp;';
+					}
+				}
+				else
+				{
+					$object->tpl["sublabel"] = '';
+					if($line->qty<=1) $object->tpl["sublabel"] = img_picto('', 'subtotal@subtotal');
+					else if($line->qty==2) $object->tpl["sublabel"] = img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+				}
+
+				// Get display styles and apply them
+				$titleStyleItalic = strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'I') === false ? '' : ' font-style: italic;';
+				$titleStyleBold =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'B') === false ? '' : ' font-weight:bold;';
+				$titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
+
+				if (empty($line->label)) {
+					if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) $object->tpl["sublabel"].=  $line->description.' '.$this->getTitle($object, $line);
+					else $object->tpl["sublabel"].=  $line->description;
+				}
+				else {
+
+					if (! empty($conf->global->PRODUIT_DESC_IN_FORM) && !empty($line->description)) {
+						$object->tpl["sublabel"].= '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
+					}
+					else{
+						$object->tpl["sublabel"].= '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+					}
+
+				}
+				if($line->qty>90)
+				{
+					$total = $this->getTotalLineFromObject($object, $line, '');
+					$object->tpl["sublabel"].= ' : <b>'.$total.'</b>';
+				}
+
+
+
+			}
+
+			$object->printOriginLine($line, '', $restrictlist, '/core/tpl', $selectedLines);
+
+			unset($object->tpl["sublabel"]);
+			unset($object->tpl['sub-td-style']);
+			unset($object->tpl['sub-tr-style']);
+			unset($object->tpl['sub-type']);
+			unset($object->tpl['subtotal']);
+		}
+
+		return 0;
+	}
+
 
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
 		global $conf,$langs;

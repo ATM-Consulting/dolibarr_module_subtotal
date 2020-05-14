@@ -36,7 +36,7 @@ class modSubtotal extends DolibarrModules
      *
      * 	@param	DoliDB		$db	Database handler
      */
-     
+
     public function __construct($db)
     {
         global $langs, $conf;
@@ -114,9 +114,10 @@ class modSubtotal extends DolibarrModules
 				,'deliverycard'
 				,'paiementcard'
 				,'referencelettersinstacecard'
-            )
+            ),
             // Set here all workflow context managed by module
-            //'workflow' => array('order' => array('WORKFLOW_ORDER_AUTOCREATE_INVOICE'))
+            //'workflow' => array('order' => array('WORKFLOW_ORDER_AUTOCREATE_INVOICE')),
+            'tpl' => 1
         );
 
         // Data directories to create when module is enabled.
@@ -164,7 +165,7 @@ class modSubtotal extends DolibarrModules
             //		0
             //	)
         );
-		
+
 
 
 
@@ -210,7 +211,7 @@ class modSubtotal extends DolibarrModules
             'tabfieldvalue'=>array('label,content'),						// List of fields (list of fields to edit a record)
             'tabfieldinsert'=>array('label,content,entity'),					// List of fields (list of fields for insert)
             'tabrowid'=>array('rowid'),											// Name of columns with primary key (try to always name it 'rowid')
-            'tabcond'=>array($conf->subtotal->enabled)	
+            'tabcond'=>array($conf->subtotal->enabled)
 		);
         /* Example:
           // This is to avoid warnings
@@ -256,7 +257,7 @@ class modSubtotal extends DolibarrModules
         // Boxes
         // Add here list of php file(s) stored in core/boxes that contains class to show a box.
         $this->boxes = array(); // Boxes list
-       
+
         /*
           $this->boxes[$r][1] = "myboxb.php";
           $r++;
@@ -471,8 +472,8 @@ class modSubtotal extends DolibarrModules
     public function init($options = '')
     {
 	  	global $conf, $db;
-		
-		
+
+
 /*		if($conf->milestone->enabled) {
 			exit("Attention, ce module rentre ne conflit avec le module Jalon/Milestones. Merci de le désactiver auparavant.");
 		}
@@ -481,14 +482,14 @@ class modSubtotal extends DolibarrModules
 
         $result = $this->loadTables();
         dol_include_once('/core/class/extrafields.class.php');
-	
+
         $extra = new ExtraFields($db); // propaldet, commandedet, facturedet
         $TElementType = array('propaldet', 'commandedet', 'facturedet', 'supplier_proposaldet', 'commande_fournisseurdet', 'facture_fourn_det');
         foreach($TElementType as $element_type) {
             $extra->addExtraField('show_total_ht', 'Afficher le Total HT sur le sous-total', 'int', 0, 10, $element_type, 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
             $extra->addExtraField('show_reduc', 'Afficher la réduction sur le sous-total', 'int', 0, 10, $element_type, 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
         }
-		
+
         return $this->_init($sql, $options);
     }
 
