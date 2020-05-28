@@ -1557,8 +1557,9 @@ class ActionsSubtotal
 
 		if(!empty($conf->global->SUBTOTAL_USE_NUMEROTATION)) {
 
-			$TLevelTitre = array();
+			$TLineTitle = $TTitle = $TLineSubtotal = array();
 			$prevlevel = 0;
+			dol_include_once('/subtotal/class/subtotal.class.php');
 
 			foreach($object->lines as $k=>&$line)
 			{
@@ -1566,11 +1567,51 @@ class ActionsSubtotal
 				{
 					$TLineTitle[] = &$line;
 				}
+				else if ($line->id > 0 && TSubtotal::isSubtotal($line))
+				{
+					$TLineSubtotal[] = &$line;
+				}
+
 			}
 
-			if (!empty($TLineTitle)) $TTitleNumeroted = $this->formatNumerotation($TLineTitle);
+			if (!empty($TLineTitle))
+			{
+				$TTitleNumeroted = $this->formatNumerotation($TLineTitle);
+
+				$TTitle = $this->getTitlesFlatArray($TTitleNumeroted);
+
+				if (!empty($TLineSubtotal))
+				{
+					foreach ($TLineSubtotal as &$stLine)
+					{
+						$parentTitle = TSubtotal::getParentTitleOfLine($object, $stLine->rang);
+						if (!empty($parentTitle) && array_key_exists($parentTitle->id, $TTitle))
+						{
+							$stLine->label = $TTitle[$parentTitle->id]['numerotation'] . ' ' . $stLine->label;
+						}
+					}
+				}
+			}
 		}
 
+	}
+
+	private function getTitlesFlatArray($TTitleNumeroted = array(), &$resArray = array())
+	{
+		if (is_array($TTitleNumeroted) && !empty($TTitleNumeroted))
+		{
+			foreach ($TTitleNumeroted as $tn)
+			{
+				$resArray[$tn['line']->id] = $tn;
+				if (array_key_exists('children', $tn))
+				{
+					$this->getTitlesFlatArray($tn['children'], $resArray);
+				}
+
+			}
+		}
+
+		return $resArray;
 	}
 
 	// TODO ne gère pas encore la numération des lignes "Totaux"
