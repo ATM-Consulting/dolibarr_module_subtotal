@@ -884,7 +884,6 @@ class ActionsSubtotal
                         $total_tva += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
                         $TTotal_tva[$l->tva_tx] += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
                         $total_ttc += $sign * ($l->total_tva / ($l->total_ttc / 100)) * $progress;
-
                     }
                 }
                 else
