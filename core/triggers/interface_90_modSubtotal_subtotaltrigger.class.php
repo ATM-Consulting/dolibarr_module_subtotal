@@ -98,7 +98,7 @@ class Interfacesubtotaltrigger
             return $langs->trans("Unknown");
         }
     }
-	
+
 	public function addToBegin(&$parent, &$object, $rang)
 	{
 		foreach ($parent->lines as &$line)
@@ -110,12 +110,12 @@ class Interfacesubtotaltrigger
 				$parent->updateRangOfLine($line->id, $line->rang+1);
 			}
 		}
-		
+
 		// Update du rang de la ligne fraichement ajouté pour la déplacer sous mon titre
 		$parent->updateRangOfLine($object->id, $rang+1);
 		$object->rang = $rang+1;
 	}
-	
+
 	public function addToEnd(&$parent, &$object, $rang)
 	{
 		$title_level = -1;
@@ -132,14 +132,14 @@ class Interfacesubtotaltrigger
 				$subtotal_line_found = true;
 				$rang = $line->rang;
 			}
-			
-			
+
+
 			if ($subtotal_line_found)
 			{
 				$parent->updateRangOfLine($line->id, $line->rang+1);
 			}
 		}
-		
+
 		if ($subtotal_line_found)
 		{
 			$parent->updateRangOfLine($object->id, $rang);
@@ -163,7 +163,7 @@ class Interfacesubtotaltrigger
 	{
 		return $this->run_trigger($action, $object, $user, $langs, $conf);
 	}
-	
+
     /**
      * Function called when a Dolibarrr business event is done.
      * All functions "run_trigger" are triggered if file
@@ -209,15 +209,15 @@ class Interfacesubtotaltrigger
 						$parent = $object;
 						break;
 				}
-				
+
 				if (!empty($conf->global->SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK)) $this->addToEnd($parent, $object, $rang);
 				else $this->addToBegin($parent, $object, $rang);
-				
+
 			}
-			
+
 		}
-        
-		
+
+
         if ($action == 'LINEBILL_INSERT' || $action == 'LINEBILL_SUPPLIER_CREATE')
 		{
 		    $is_supplier = $action == 'LINEBILL_SUPPLIER_CREATE' ? true : false;
@@ -234,7 +234,7 @@ class Interfacesubtotaltrigger
 			    if (!empty($subtotal_add_title_bloc_from_orderstoinvoice))
 			    {
 				    global $subtotal_current_rang, $subtotal_bloc_previous_fk_commande, $subtotal_bloc_already_add_title, $subtotal_bloc_already_add_st;
-				    
+
 				    $current_fk_commande = TSubtotal::getOrderIdFromLineId($this->db, $object->origin_id, $is_supplier);
 				    $last_fk_commandedet = TSubtotal::getLastLineOrderId($this->db, $current_fk_commande, $is_supplier);
 
@@ -289,9 +289,9 @@ class Interfacesubtotaltrigger
 				    $subtotal_current_rang = $rang;
 			    }
 		    }
-		
+
 		}
-		
+
 		if ($action == 'LINEBILL_UPDATE')
 		{
 			if (GETPOST('all_progress') && TSubtotal::isModSubtotalLine($object))
@@ -300,7 +300,7 @@ class Interfacesubtotaltrigger
 				$object->update($user, true); // notrigger pour éviter la boucle infinie
 			}
 		}
-		
+
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($action, array('LINEPROPAL_INSERT', 'LINEPROPAL_UPDATE', 'LINEORDER_INSERT', 'LINEORDER_UPDATE', 'LINEBILL_INSERT', 'LINEBILL_UPDATE', 'LINEBILL_SUPPLIER_CREATE', 'LINEBILL_SUPPLIER_UPDATE')))
 		{
             if(! function_exists('_updateLineNC')) dol_include_once('/subtotal/lib/subtotal.lib.php');
@@ -312,18 +312,18 @@ class Interfacesubtotaltrigger
 				 dol_syslog(
 					"[SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS] Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". object=".$object->element." id=" . $object->id
 				);
-				 
+
 				$TTitle = TSubtotal::getAllTitleFromLine($object);
 				foreach ($TTitle as &$line)
 				{
 					if (!empty($line->array_options['options_subtotal_nc']))
 					{
-						$object->total_ht = $object->total_tva = $object->total_ttc = $object->total_localtax1 = $object->total_localtax2 = 
+						$object->total_ht = $object->total_tva = $object->total_ttc = $object->total_localtax1 = $object->total_localtax2 =
 							$object->multicurrency_total_ht = $object->multicurrency_total_tva = $object->multicurrency_total_ttc = 0;
 
 						if ($object->element == 'propal') $res = $object->update(1);
 						else $res = $object->update($user, 1);
-						
+
 						if ($res > 0) setEventMessage($langs->trans('subtotal_update_nc_success'));
 						break;
 					}
@@ -333,7 +333,7 @@ class Interfacesubtotaltrigger
 				if(empty($object->array_options)) $object->fetch_optionals();
 
 				if(! empty($object->array_options['options_subtotal_nc'])) {
-					$object->total_ht = $object->total_tva = $object->total_ttc = $object->total_localtax1 = $object->total_localtax2 = 
+					$object->total_ht = $object->total_tva = $object->total_ttc = $object->total_localtax1 = $object->total_localtax2 =
 							$object->multicurrency_total_ht = $object->multicurrency_total_tva = $object->multicurrency_total_ttc = 0;
 
 					if ($object->element == 'propaldet') $res = $object->update(1);
@@ -353,7 +353,7 @@ class Interfacesubtotaltrigger
 				}
 			}
 		}
-		
+
 		// Les lignes libres (y compris les sous-totaux) créées à partir d'une facture modèle n'ont pas la TVA de la ligne du modèle mais la TVA par défaut
 		if ($action == 'BILL_CREATE' && $object->fac_rec > 0) {
 			dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
@@ -367,8 +367,37 @@ class Interfacesubtotaltrigger
 				}
 			}
 		}
-		
-        
+
+		// Gestion des titres et sous-totaux dans les expéditions
+		// Il faut supprimer de l'expédition les titres et sous-totaux s'ils n'ont pas de lignes de produits / services entre eux
+		if ($action == 'SHIPPING_CREATE') {
+			$object->fetch_lines(); // Obligé de fetch les lines car au retour de la création, les lignes n'ont pas leur id...
+
+			$prevline = null;
+			$prevorderline = null;
+			// Parcours des lignes et lorsque un tire et un sous-total de même niveau, ou 2 titres de même niveau sont à la suite, on les supprime
+			foreach ($object->lines as $line) {
+				$orderline = new OrderLine($this->db);
+				$orderline->fetch($line->origin_line_id);
+
+				if(TSubtotal::isTitle($orderline)) { // Nous sommes sur une ligne titre, si la ligne précédente est un titre de même niveau, on supprime la ligne précédente
+					if(!is_null($prevorderline) && TSubtotal::isTitle($prevorderline) && $prevorderline->qty == $orderline->qty) {
+						$prevline->delete($user);
+					}
+				}
+				if(TSubtotal::isSubtotal($orderline)) { // Nous sommes sur une ligne de sous-total, si la ligne précédente est un titre de même niveau, on supprime les 2 lignes
+					if(!is_null($prevorderline) && TSubtotal::isTitle($prevorderline) && ($prevorderline->qty + $orderline->qty) == 100) { // Titre est sous-total sont de même niveau si leur somme de quantité est 100
+						$prevline->delete($user);
+						$line->delete($user);
+					}
+				}
+				$prevline = $line;
+				$prevorderline = $orderline;
+			}
+
+			//exit;
+		}
+
         if ($action == 'USER_LOGIN') {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
@@ -529,7 +558,7 @@ class Interfacesubtotaltrigger
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
-			
+
 			$doli_action = GETPOST('action');
 
 			if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($doli_action, array('confirm_clone')))
@@ -537,30 +566,30 @@ class Interfacesubtotaltrigger
 				dol_syslog(
 					"[SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS] Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". object=".$object->element." id=" . $object->id
 				);
-				
+
 				// En fonction de l'objet et de la version, les lignes conservent l'id de l'objet d'origine
 				if (method_exists($object, 'fetch_lines')) $object->fetch_lines();
 				else $object->fetch($object->id);
-			
+
 				foreach ($object->lines as &$line)
 				{
 					if (empty($line->array_options)) $line->fetch_optionals();
-					
+
 					if (!TSubtotal::isModSubtotalLine($line) && !empty($line->array_options['options_subtotal_nc']))
 					{
-						$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 = 
+						$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 =
 							$line->multicurrency_total_ht = $line->multicurrency_total_tva = $line->multicurrency_total_ttc = 0;
 
 						if ($line->element == 'propaldet') $res = $line->update(1);
 						else $res = $line->update($user, 1);
-						
+
 						if ($res > 0) setEventMessage($langs->trans('subtotal_update_nc_success'));
 					}
 				}
-				
+
 				if (!empty($line)) $object->update_price(1);
 			}
-			
+
         } elseif ($action == 'PROPAL_MODIFY') {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
@@ -674,7 +703,7 @@ class Interfacesubtotaltrigger
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
         } elseif ($action == 'LINEBILL_INSERT') {
-				
+
         	dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
