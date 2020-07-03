@@ -376,25 +376,34 @@ class Interfacesubtotaltrigger
 			$prevline = null;
 			$prevorderline = null;
 			// Parcours des lignes et lorsque un tire et un sous-total de même niveau, ou 2 titres de même niveau sont à la suite, on les supprime
-			foreach ($object->lines as $line) {
+			foreach ($object->lines as &$line) {
 				$orderline = new OrderLine($this->db);
 				$orderline->fetch($line->origin_line_id);
 
-				if(TSubtotal::isTitle($orderline)) { // Nous sommes sur une ligne titre, si la ligne précédente est un titre de même niveau, on supprime la ligne précédente
-					if(!is_null($prevorderline) && TSubtotal::isTitle($prevorderline) && $prevorderline->qty == $orderline->qty) {
-						$prevline->delete($user);
-					}
+				if(TSubtotal::isTitle($orderline) || TSubtotal::isSubtotal($orderline)) { // Nous sommes sur une ligne titre, si la ligne précédente est un titre de même niveau, on supprime la ligne précédente
+					$line->special_code = TSubtotal::$module_number;
 				}
-				if(TSubtotal::isSubtotal($orderline)) { // Nous sommes sur une ligne de sous-total, si la ligne précédente est un titre de même niveau, on supprime les 2 lignes
-					if(!is_null($prevorderline) && TSubtotal::isTitle($prevorderline) && ($prevorderline->qty + $orderline->qty) == 100) { // Titre est sous-total sont de même niveau si leur somme de quantité est 100
-						$prevline->delete($user);
-						$line->delete($user);
-					}
-				}
-				$prevline = $line;
-				$prevorderline = $orderline;
 			}
-
+			$TLinesToDelete = array();
+			foreach ($object->lines as $line) {
+				if(TSubtotal::isTitle($line)) {
+					$TLines = TSubtotal::getLinesFromTitleId($object, $line->id, true);
+					$TBlocks = array();
+					$isThereProduct = false;
+					foreach($TLines as $lineInBlock) {
+						if(TSubtotal::isTitle($lineInBlock) || TSubtotal::isSubtotal($lineInBlock)) $TBlocks[$lineInBlock->id] = $lineInBlock;
+						else $isThereProduct = true;
+					}
+					if(!$isThereProduct) {
+						$TLinesToDelete = array_merge($TLinesToDelete, $TBlocks);
+					}
+				}
+			}
+			if (!empty($TLinesToDelete)) {
+				foreach ($TLinesToDelete as $lineToDelete) {
+					$lineToDelete->delete($user);
+				}
+			}
 			//exit;
 		}
 
