@@ -30,6 +30,7 @@ class ActionsSubtotal
 
 		}
 
+		return 0;
 	}
 
 
@@ -91,6 +92,8 @@ class ActionsSubtotal
 			</script>
 			<?php
 		}
+
+		return 0;
 	}
 
 	/** Overloading the doActions function : replacing the parent's function with the one below
@@ -243,6 +246,7 @@ class ActionsSubtotal
 					     $( "#dialog-prompt-subtotal" ).remove();
 
 						 var dialog_html = '<div id="dialog-prompt-subtotal" '+(action == 'addSubtotal' ? 'class="center"' : '')+' >';
+						 dialog_html += '<input id="token" name="token" type="hidden" value="<?php echo ((float) DOL_VERSION < 11.0) ?  $_SESSION['newtoken'] : newToken(); ?>" />';
 
 						 if (typeof show_under_title != 'undefined' && show_under_title)
 						 {
@@ -301,10 +305,11 @@ class ActionsSubtotal
 	                        buttons: {
 	                            "Ok": function() {
 	                            	if (typeof use_textarea != 'undefined' && use_textarea && typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" ){ updateAllMessageForms(); }
-									params.title = params.title = (typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" && "sub-total-title" in CKEDITOR.instances ? CKEDITOR.instances["sub-total-title"].getData() : $(this).find('#sub-total-title').val());
+									params.title = (typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" && "sub-total-title" in CKEDITOR.instances ? CKEDITOR.instances["sub-total-title"].getData() : $(this).find('#sub-total-title').val());
 									params.under_title = $(this).find('select[name=under_title]').val();
 									params.free_text = $(this).find('select[name=free_text]').val();
 									params.level = $(this).find('select[name=subtotal_line_level]').val();
+									params.token = $(this).find('input[name=token]').val();
 
 									$.ajax({
 										url: url_ajax
@@ -523,6 +528,7 @@ class ActionsSubtotal
 
 		}
 
+		return 0;
 	}
 
 	function createFrom($parameters, &$object, $action, $hookmanager) {
@@ -541,6 +547,8 @@ class ActionsSubtotal
 
 			$objFrom = $parameters['objFrom'];
 
+			if(empty($object->lines) && method_exists($object, 'fetch_lines')) $object->fetch_lines();
+
 			foreach($objFrom->lines as $k=> &$lineOld) {
 
 					if($lineOld->product_type == 9 && $lineOld->info_bits > 0 ) {
@@ -549,10 +557,12 @@ class ActionsSubtotal
 
 							$idLine = (int) ($line->id ? $line->id : $line->rowid);
 
-							$db->query("UPDATE ".MAIN_DB_PREFIX.$line->table_element."
-							SET info_bits=".(int)$lineOld->info_bits."
-							WHERE rowid = ".$idLine."
-							");
+							if($line->info_bits != $lineOld->info_bits) {
+								$db->query("UPDATE ".MAIN_DB_PREFIX.$line->table_element."
+								SET info_bits=".(int)$lineOld->info_bits."
+								WHERE rowid = ".$idLine."
+								");
+							}
 
 					}
 
@@ -562,6 +572,7 @@ class ActionsSubtotal
 
 		}
 
+		return 0;
 	}
 
 	function doActions($parameters, &$object, $action, $hookmanager)
@@ -824,8 +835,10 @@ class ActionsSubtotal
 
 		$rang = $line->rang;
 		$qty_line = $line->qty;
+		$lvl = 0;
+        if (TSubtotal::isSubtotal($line)) $lvl = TSubtotal::getNiveau($line);
 
-		$title_break = TSubtotal::getParentTitleOfLine($object, $rang);
+		$title_break = TSubtotal::getParentTitleOfLine($object, $rang, $lvl);
 
 		$total = 0;
 		$total_tva = 0;
@@ -1130,7 +1143,8 @@ class ActionsSubtotal
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
 
-		if (empty($object->lines[$i])) return 0; // hideInnerLines => override $object->lines et Dolibarr ne nous permet pas de mettre à jour la variable qui conditionne la boucle sur les lignes (PR faite pour 6.0)
+		/** Attention, ici on peut ce retrouver avec un objet de type stdClass à cause de l'option cacher le détail des ensembles avec la notion de Non Compris (@see beforePDFCreation()) et dû à l'appel de TSubtotal::hasNcTitle() */
+		if (empty($object->lines[$i]->id)) return 0; // hideInnerLines => override $object->lines et Dolibarr ne nous permet pas de mettre à jour la variable qui conditionne la boucle sur les lignes (PR faite pour 6.0)
 
 		if(empty($object->lines[$i]->array_options)) $object->lines[$i]->fetch_optionals();
 
@@ -1209,8 +1223,8 @@ class ActionsSubtotal
 		else if (!empty($hideprices))
 		{
 			// Check if a title exist for this line && if the title have subtotal
-			$lineTitle = TSubtotal::getParentTitleOfLine($object, $i);
-			if(TSubtotal::getParentTitleOfLine($object, $i) && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
+			$lineTitle = TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang);
+			if ($lineTitle && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
 			{
 
 				$this->resprints = ' ';
@@ -1327,7 +1341,7 @@ class ActionsSubtotal
 
             // On récupère les montants du bloc pour les afficher dans la ligne de sous-total
             if(TSubtotal::isSubtotal($line)) {
-                $parentTitle = TSubtotal::getParentTitleOfLine($object, $i);
+                $parentTitle = TSubtotal::getParentTitleOfLine($object, $line->rang);
 
                 if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->array_options['options_show_total_ht'])) {
@@ -1366,8 +1380,8 @@ class ActionsSubtotal
 		{
 
 		    // Check if a title exist for this line && if the title have subtotal
-		    $lineTitle = TSubtotal::getParentTitleOfLine($object, $i);
-		    if(TSubtotal::getParentTitleOfLine($object, $i) && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
+		    $lineTitle = TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang);
+		    if ($lineTitle && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
 		    {
 
 		        $this->resprints = ' ';
@@ -1394,7 +1408,7 @@ class ActionsSubtotal
 
             // Affichage de la remise
             if(TSubtotal::isSubtotal($line)) {
-                $parentTitle = TSubtotal::getParentTitleOfLine($object, $i);
+                $parentTitle = TSubtotal::getParentTitleOfLine($object, $line->rang);
 
                 if(empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->array_options['options_show_reduc'])) {
@@ -1495,8 +1509,8 @@ class ActionsSubtotal
 		{
 
 		    // Check if a title exist for this line && if the title have subtotal
-		    $lineTitle = TSubtotal::getParentTitleOfLine($object, $i);
-		    if(TSubtotal::getParentTitleOfLine($object, $i) && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
+		    $lineTitle = TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang);
+		    if ($lineTitle && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
 		    {
 
 		        $this->resprints = ' ';
@@ -1543,8 +1557,9 @@ class ActionsSubtotal
 
 		if(!empty($conf->global->SUBTOTAL_USE_NUMEROTATION)) {
 
-			$TLevelTitre = array();
+			$TLineTitle = $TTitle = $TLineSubtotal = array();
 			$prevlevel = 0;
+			dol_include_once('/subtotal/class/subtotal.class.php');
 
 			foreach($object->lines as $k=>&$line)
 			{
@@ -1552,11 +1567,51 @@ class ActionsSubtotal
 				{
 					$TLineTitle[] = &$line;
 				}
+				else if ($line->id > 0 && TSubtotal::isSubtotal($line))
+				{
+					$TLineSubtotal[] = &$line;
+				}
+
 			}
 
-			if (!empty($TLineTitle)) $TTitleNumeroted = $this->formatNumerotation($TLineTitle);
+			if (!empty($TLineTitle))
+			{
+				$TTitleNumeroted = $this->formatNumerotation($TLineTitle);
+
+				$TTitle = $this->getTitlesFlatArray($TTitleNumeroted);
+
+				if (!empty($TLineSubtotal))
+				{
+					foreach ($TLineSubtotal as &$stLine)
+					{
+						$parentTitle = TSubtotal::getParentTitleOfLine($object, $stLine->rang);
+						if (!empty($parentTitle) && array_key_exists($parentTitle->id, $TTitle))
+						{
+							$stLine->label = $TTitle[$parentTitle->id]['numerotation'] . ' ' . $stLine->label;
+						}
+					}
+				}
+			}
 		}
 
+	}
+
+	private function getTitlesFlatArray($TTitleNumeroted = array(), &$resArray = array())
+	{
+		if (is_array($TTitleNumeroted) && !empty($TTitleNumeroted))
+		{
+			foreach ($TTitleNumeroted as $tn)
+			{
+				$resArray[$tn['line']->id] = $tn;
+				if (array_key_exists('children', $tn))
+				{
+					$this->getTitlesFlatArray($tn['children'], $resArray);
+				}
+
+			}
+		}
+
+		return $resArray;
 	}
 
 	// TODO ne gère pas encore la numération des lignes "Totaux"
@@ -1630,7 +1685,7 @@ class ActionsSubtotal
 
         foreach($object->lines as $k => &$l) {
             if(TSubtotal::isSubtotal($l)) {
-                $parentTitle = TSubtotal::getParentTitleOfLine($object, $k);
+                $parentTitle = TSubtotal::getParentTitleOfLine($object, $l->rang);
                 if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->id) && ! empty($parentTitle->array_options['options_show_reduc'])) {
                     $l->remise_percent = 100;    // Affichage de la réduction sur la ligne de sous-total
@@ -1681,7 +1736,7 @@ class ActionsSubtotal
 						$line->total = $line->total_ht;
 						$line->total_ttc = $TInfo[2];
 
-//                        $TTitle = TSubtotal::getParentTitleOfLine($object, $k);
+//                        $TTitle = TSubtotal::getParentTitleOfLine($object, $line->rang);
 //                        $parentTitle = array_shift($TTitle);
 //                        if(! empty($parentTitle->id) && ! empty($parentTitle->array_option['options_show_total_ht'])) {
 //                            exit('la?');
@@ -1922,7 +1977,7 @@ class ActionsSubtotal
 		}*/
 
 
-
+        return 0;
 	}
 
 	/**
@@ -2747,6 +2802,113 @@ class ActionsSubtotal
 
 	}
 
+	function printOriginObjectLine($parameters, &$object, &$action, $hookmanager)
+	{
+		global $conf,$langs,$user,$db,$bc, $restrictlist, $selectedLines;
+
+		$line = &$parameters['line'];
+		$i = &$parameters['i'];
+
+		$var = &$parameters['var'];
+
+		$contexts = explode(':',$parameters['context']);
+
+		if (in_array('ordercard',$contexts))
+		{
+			/** @var Commande $object */
+
+			if(class_exists('TSubtotal')){ dol_include_once('/subtotal/class/subtotal.class.php'); }
+
+			if (TSubtotal::isModSubtotalLine($line))
+			{
+				$object->tpl['subtotal'] = $line->id;
+				if (TSubtotal::isTitle($line)) $object->tpl['sub-type'] = 'title';
+				else if (TSubtotal::isSubtotal($line)) $object->tpl['sub-type'] = 'total';
+
+				$object->tpl['sub-tr-style'] = '';
+				if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
+				{
+					if($line->qty==99) $object->tpl['sub-tr-style'].= 'background:#adadcf';
+					else if($line->qty==98) $object->tpl['sub-tr-style'].= 'background:#ddddff;';
+					else if($line->qty<=97 && $line->qty>=91) $object->tpl['sub-tr-style'].= 'background:#eeeeff;';
+					else if($line->qty==1) $object->tpl['sub-tr-style'].= 'background:#adadcf;';
+					else if($line->qty==2) $object->tpl['sub-tr-style'].= 'background:#ddddff;';
+					else if($line->qty==50) $object->tpl['sub-tr-style'].= '';
+					else $object->tpl['sub-tr-style'].= 'background:#eeeeff;';
+
+					//A compléter si on veux plus de nuances de couleurs avec les niveau 4,5,6,7,8 et 9
+				}
+				else
+				{
+					if($line->qty==99) $object->tpl['sub-tr-style'].= 'background:#ddffdd';
+					else if($line->qty==98) $object->tpl['sub-tr-style'].= 'background:#ddddff;';
+					else if($line->qty==2) $object->tpl['sub-tr-style'].= 'background:#eeeeff; ';
+					else if($line->qty==50) $object->tpl['sub-tr-style'].= '';
+					else $object->tpl['sub-tr-style'].= 'background:#eeffee;' ;
+				}
+
+				$object->tpl['sub-td-style'] = '';
+				if ($line->qty>90) $object->tpl['sub-td-style'] = 'style="text-align:right"';
+
+
+				if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+				{
+					if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
+					{
+						$object->tpl["sublabel"] = str_repeat('&nbsp;&nbsp;&nbsp;', $line->qty-1);
+
+						if (TSubtotal::isTitle($line)) $object->tpl["sublabel"].= img_picto('', 'subtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;">'.$line->qty.'</span>&nbsp;&nbsp;';
+						else $object->tpl["sublabel"].= img_picto('', 'subtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;">'.(100-$line->qty).'</span>&nbsp;&nbsp;';
+					}
+				}
+				else
+				{
+					$object->tpl["sublabel"] = '';
+					if($line->qty<=1) $object->tpl["sublabel"] = img_picto('', 'subtotal@subtotal');
+					else if($line->qty==2) $object->tpl["sublabel"] = img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+				}
+
+				// Get display styles and apply them
+				$titleStyleItalic = strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'I') === false ? '' : ' font-style: italic;';
+				$titleStyleBold =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'B') === false ? '' : ' font-weight:bold;';
+				$titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
+
+				if (empty($line->label)) {
+					if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) $object->tpl["sublabel"].=  $line->description.' '.$this->getTitle($object, $line);
+					else $object->tpl["sublabel"].=  $line->description;
+				}
+				else {
+
+					if (! empty($conf->global->PRODUIT_DESC_IN_FORM) && !empty($line->description)) {
+						$object->tpl["sublabel"].= '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
+					}
+					else{
+						$object->tpl["sublabel"].= '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+					}
+
+				}
+				if($line->qty>90)
+				{
+					$total = $this->getTotalLineFromObject($object, $line, '');
+					$object->tpl["sublabel"].= ' : <b>'.$total.'</b>';
+				}
+
+
+
+			}
+
+			$object->printOriginLine($line, '', $restrictlist, '/core/tpl', $selectedLines);
+
+			unset($object->tpl["sublabel"]);
+			unset($object->tpl['sub-td-style']);
+			unset($object->tpl['sub-tr-style']);
+			unset($object->tpl['sub-type']);
+			unset($object->tpl['subtotal']);
+		}
+
+		return 0;
+	}
+
 
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
 		global $conf,$langs;
@@ -2833,6 +2995,8 @@ class ActionsSubtotal
 		}
 
 		$this->_ajax_block_order_js($object);
+
+		return 0;
 	}
 
 	function afterPDFCreation($parameters, &$pdf, &$action, $hookmanager)
@@ -2848,6 +3012,27 @@ class ActionsSubtotal
 				TSubtotal::addRecapPage($parameters, $pdf);
 			}
 		}
+
+		return 0;
+	}
+
+	/** Overloading the getlinetotalremise function : replacing the parent's function with the one below
+	 * @param      $parameters  array           meta datas of the hook (context, etc...)
+	 * @param      $object      CommonObject    the object you want to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @param      $action      string          current action (if set). Generally create or edit or null
+	 * @param      $hookmanager HookManager     current hook manager
+	 * @return     void
+	 */
+	function getlinetotalremise($parameters, &$object, &$action, $hookmanager)
+	{
+	    // Les lignes NC ne sont pas censées afficher de montant total de remise, nouveau hook en v11 dans pdf_sponge
+	    if (! empty($object->lines[$parameters['i']]->array_options['options_subtotal_nc']))
+	    {
+            $this->resprints = '';
+            return 1;
+	    }
+
+		return 0;
 	}
 
 	// HTML 5 data for js

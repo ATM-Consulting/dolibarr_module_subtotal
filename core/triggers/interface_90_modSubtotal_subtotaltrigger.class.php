@@ -146,6 +146,23 @@ class Interfacesubtotaltrigger
 			$object->rang = $rang;
 		}
 	}
+
+	/**
+	  * Function called when a Dolibarrr business event is done.
+	  * All functions "runTrigger" are triggered if file
+	  * is inside directory core/triggers
+	  *
+	  * 	@param		string		$action		Event action code
+	  * 	@param		Object		$object		Object
+	  * 	@param		User		$user		Object user
+	  * 	@param		Translate	$langs		Object langs
+	  * 	@param		conf		$conf		Object conf
+	  * 	@return		int						<0 if KO, 0 if no triggered ran, >0 if OK
+	  */
+	public function runTrigger($action, $object, $user, $langs, $conf)
+	{
+		return $this->run_trigger($action, $object, $user, $langs, $conf);
+	}
 	
     /**
      * Function called when a Dolibarrr business event is done.
