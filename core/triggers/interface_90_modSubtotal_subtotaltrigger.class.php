@@ -385,7 +385,7 @@ class Interfacesubtotaltrigger
 				}
 			}
 			$TLinesToDelete = array();
-			foreach ($object->lines as $line) {
+			foreach ($object->lines as &$line) {
 				if(TSubtotal::isTitle($line)) {
 					$TLines = TSubtotal::getLinesFromTitleId($object, $line->id, true);
 					$TBlocks = array();
