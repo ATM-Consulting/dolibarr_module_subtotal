@@ -884,6 +884,7 @@ class ActionsSubtotal
                         $total_tva += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
                         $TTotal_tva[$l->tva_tx] += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
                         $total_ttc += $sign * ($l->total_tva / ($l->total_ttc / 100)) * $progress;
+
                     }
                 }
                 else
@@ -2741,10 +2742,17 @@ class ActionsSubtotal
 			if ($object->element == 'shipping' && $object->statut == 0 && ! empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
 			{
 				print '<td class="linecoldelete nowrap" width="10">';
-
+				$lineid = $line->id;
+				if($line->element === 'commandedet') {
+					foreach($object->lines as $shipmentLine) {
+						if(!empty($shipmentLine->fk_origin_line) && $shipmentLine->fk_origin == 'orderline' && $shipmentLine->fk_origin_line == $line->id) {
+							$lineid = $shipmentLine->id;
+						}
+					}
+				}
 				if ($line->fk_prev_id === null)
 				{
-					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=deleteline&amp;lineid='.$line->id.'">'.img_delete().'</a>';
+					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=deleteline&amp;lineid='.$lineid.'">'.img_delete().'</a>';
 				}
 
 				if(TSubtotal::isTitle($line) && ($line->fk_prev_id === null) )
@@ -2757,7 +2765,7 @@ class ActionsSubtotal
 						$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal');
 					}
 
-					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=ask_deleteallline&amp;lineid='.$line->id.'">'.$img_delete.'</a>';
+					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=ask_deleteallline&amp;lineid='.$lineid.'">'.$img_delete.'</a>';
 
 					/* Depuis la 8.0, les icônes "standard" utilisent FontAwesome et sont préconfigurées selon la clé de l'image
 					 * Impossible d'en customiser par exemple la couleur, même en utilisant img_picto() directement
