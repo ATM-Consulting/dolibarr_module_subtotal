@@ -149,7 +149,7 @@ class ActionsSubtotal
 						$qty = $level<1 ? 1 : $level ;
 					}
 					else if($action=='add_free_text') {
-						$title = GETPOST('title');
+						$title = GETPOST('title', 'restricthtml');
 
 						if (empty($title)) {
 							$free_text = GETPOST('free_text', 'int');
