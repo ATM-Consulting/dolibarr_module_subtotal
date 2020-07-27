@@ -130,7 +130,7 @@ function _updateSubtotalLine(&$object, &$line)
 	global $conf;
 
 	$label = GETPOST('line-title');
-	$description = ($line->qty>90) ? '' : GETPOST('line-description');
+	$description = ($line->qty>90) ? '' : GETPOST('line-description', 'restricthtml');
 	$pagebreak = (int) GETPOST('line-pagebreak');
     $showTotalHT = (int) GETPOST('line-showTotalHT');
     $showReduc = (int) GETPOST('line-showReduc');
