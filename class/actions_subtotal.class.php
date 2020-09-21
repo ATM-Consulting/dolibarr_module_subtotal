@@ -1,38 +1,39 @@
 <?php
 class ActionsSubtotal
 {
-	
+
 	function __construct($db)
 	{
 		global $langs;
-		
+
 		$this->db = $db;
 		$langs->load('subtotal@subtotal');
-		
+
 		$this->allow_move_block_lines = true;
 	}
-	
+
 	function printFieldListSelect($parameters, &$object, &$action, $hookmanager) {
-		
+
 		global $type_element, $where;
-		
+
 		$contexts = explode(':',$parameters['context']);
-		
+
 		if(in_array('consumptionthirdparty',$contexts) && in_array($type_element, array('propal', 'order', 'invoice', 'supplier_order', 'supplier_invoice', 'supplier_proposal'))) {
 			$mod_num = TSubtotal::$module_number;
-			
+
 			// Not a title (can't use TSubtotal class methods in sql)
 			$where.= ' AND (d.special_code != '.$mod_num.' OR d.product_type != 9 OR d.qty > 9)';
 			// Not a subtotal (can't use TSubtotal class methods in sql)
 			$where.= ' AND (d.special_code != '.$mod_num.' OR d.product_type != 9 OR d.qty < 90)';
 			// Not a free line text (can't use TSubtotal class methods in sql)
 			$where.= ' AND (d.special_code != '.$mod_num.' OR d.product_type != 9 OR d.qty != 50)';
-			
+
 		}
-		
+
+		return 0;
 	}
-	
-	
+
+
 	function createDictionaryFieldlist($parameters, &$object, &$action, $hookmanager)
 	{
 		global $conf;
@@ -47,11 +48,11 @@ class ActionsSubtotal
 				$resql = $this->db->query($sql);
 				if ($resql && ($obj = $this->db->fetch_object($resql))) $value = $obj->content;
 			}
-			
+
 			?>
 			<script type="text/javascript">
 				$(function() {
-					
+
 					<?php if ((float) DOL_VERSION >= 6.0) { ?>
 							if ($('input[name=content]').length > 0)
 							{
@@ -61,7 +62,7 @@ class ActionsSubtotal
 									if (i == $('input[name=content]').length) value = <?php echo json_encode($value); ?>;
 									$(item).replaceWith($('<textarea name="content">'+value+'</textarea>'));
 								});
-								
+
 								<?php if (!empty($conf->fckeditor->enabled) && !empty($conf->global->FCKEDITOR_ENABLE_DETAILS)) { ?>
 								$('textarea[name=content]').each(function(i, item) {
 									CKEDITOR.replace(item, {
@@ -91,8 +92,10 @@ class ActionsSubtotal
 			</script>
 			<?php
 		}
+
+		return 0;
 	}
-	
+
 	/** Overloading the doActions function : replacing the parent's function with the one below
 	 * @param      $parameters  array           meta datas of the hook (context, etc...)
 	 * @param      $object      CommonObject    the object you want to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
@@ -100,19 +103,19 @@ class ActionsSubtotal
 	 * @param      $hookmanager HookManager     current hook manager
 	 * @return     void
 	 */
-    
+
     var $module_number = 104777;
-    
-    function formObjectOptions($parameters, &$object, &$action, $hookmanager) 
+
+    function formObjectOptions($parameters, &$object, &$action, $hookmanager)
     {
       	global $langs,$db,$user, $conf;
-		
+
 		$langs->load('subtotal@subtotal');
-		
+
 		$contexts = explode(':',$parameters['context']);
-		
+
 		if(in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('invoicereccard',$contexts) || in_array('expeditioncard',$contexts)) {
-			
+
 			$createRight = $user->rights->{$object->element}->creer;
 			if($object->element == 'facturerec' )
 			{
@@ -129,24 +132,24 @@ class ActionsSubtotal
 			{
 				$createRight = true; // No rights management for shipments
 			}
-			
+
 			if ($object->statut == 0  && $createRight) {
-			
+
 
 				if($object->element=='facture')$idvar = 'facid';
 				else $idvar='id';
-				
+
 				if(in_array($action, array('add_title_line', 'add_total_line', 'add_subtitle_line', 'add_subtotal_line', 'add_free_text')) )
 				{
 					$level = GETPOST('level', 'int'); //New avec SUBTOTAL_USE_NEW_FORMAT
-					
+
 					if($action=='add_title_line') {
 						$title = GETPOST('title');
 						if(empty($title)) $title = $langs->trans('title');
 						$qty = $level<1 ? 1 : $level ;
 					}
 					else if($action=='add_free_text') {
-						$title = GETPOST('title');
+						$title = GETPOST('title', 'restricthtml');
 
 						if (empty($title)) {
 							$free_text = GETPOST('free_text', 'int');
@@ -174,19 +177,19 @@ class ActionsSubtotal
 						$qty = $level ? 100-$level : 99;
 					}
 					dol_include_once('/subtotal/class/subtotal.class.php');
-					
+
 					if (!empty($conf->global->SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE) && $qty < 10) TSubtotal::addSubtotalMissing($object, $qty);
-					
+
 	    			TSubtotal::addSubTotalLine($object, $title, $qty);
 				}
 				else if($action==='ask_deleteallline') {
 						$form=new Form($db);
 
 						$lineid = GETPOST('lineid','integer');
-						$TIdForGroup = $this->getArrayOfLineForAGroup($object, $lineid);
-					
+						$TIdForGroup = TSubtotal::getLinesFromTitleId($object, $lineid, true);
+
 						$nbLines = count($TIdForGroup);
-					
+
 						$formconfirm=$form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id.'&lineid='.$lineid, $langs->trans('deleteWithAllLines'), $langs->trans('ConfirmDeleteAllThisLines',$nbLines), 'confirm_delete_all_lines','',0,1);
 						print $formconfirm;
 				}
@@ -196,7 +199,7 @@ class ActionsSubtotal
 					$this->showSelectTitleToAdd($object);
 				}
 
-				
+
 				if($object->element != 'shipping' && $action!='editline') {
 					// New format is for 3.8
 					$this->printNewFormat($object, $conf, $langs, $idvar);
@@ -213,12 +216,12 @@ class ActionsSubtotal
 				});
 			</script>
 			<?php
-			
+
 		}
 
 		return 0;
 	}
-     
+
 	function printNewFormat(&$object, &$conf, &$langs, $idvar)
 	{
 		if (empty($conf->global->SUBTOTAL_ALLOW_ADD_BLOCK)) return false;
@@ -227,7 +230,7 @@ class ActionsSubtotal
 		 	<script type="text/javascript">
 				$(document).ready(function() {
 					$('div.fiche div.tabsAction').append('<br />');
-					
+
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" rel="add_title_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddTitle' )?></a></div>');
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" rel="add_total_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubTotal')?></a></div>');
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_free_text" rel="add_free_text" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddFreeText')?></a></div>');
@@ -238,18 +241,19 @@ class ActionsSubtotal
 				             CKEDITOR.instances[instance].updateElement();
 				         }
 				    }
-					
+
 					function promptSubTotal(action, titleDialog, label, url_to, url_ajax, params, use_textarea, show_free_text, show_under_title) {
 					     $( "#dialog-prompt-subtotal" ).remove();
-						 
+
 						 var dialog_html = '<div id="dialog-prompt-subtotal" '+(action == 'addSubtotal' ? 'class="center"' : '')+' >';
-						 
+						 dialog_html += '<input id="token" name="token" type="hidden" value="<?php echo ((float) DOL_VERSION < 11.0) ?  $_SESSION['newtoken'] : newToken(); ?>" />';
+
 						 if (typeof show_under_title != 'undefined' && show_under_title)
 						 {
 							 var selectUnderTitle = <?php echo json_encode(getHtmlSelectTitle($object, true)); ?>;
 							 dialog_html += selectUnderTitle + '<br /><br />';
 						 }
-						
+
 						if (action == 'addTitle' || action == 'addFreeTxt')
 						{
 							if (typeof show_free_text != 'undefined' && show_free_text)
@@ -257,15 +261,15 @@ class ActionsSubtotal
 							   var selectFreeText = <?php echo json_encode(getHtmlSelectFreeText()); ?>;
 							   dialog_html += selectFreeText + ' <?php echo $langs->transnoentities('subtotalFreeTextOrDesc'); ?><br />';
 							}
-						 
+
 							if (typeof use_textarea != 'undefined' && use_textarea) dialog_html += '<textarea id="sub-total-title" rows="<?php echo ROWS_8; ?>" cols="80" placeholder="'+label+'"></textarea>';
 							else dialog_html += '<input id="sub-total-title" size="30" value="" placeholder="'+label+'" />';
 						}
-						 
+
 						if (action == 'addTitle' || action == 'addSubtotal')
 						{
 							if (action == 'addSubtotal') dialog_html += '<input id="sub-total-title" size="30" value="" placeholder="'+label+'" />';
-							
+
 							dialog_html += "&nbsp;<select name='subtotal_line_level'>";
 							for (var i=1;i<10;i++)
 							{
@@ -273,15 +277,15 @@ class ActionsSubtotal
 							}
 							dialog_html += "</select>";
 						}
-						 
+
 						 dialog_html += '</div>';
-					    
+
 						$('body').append(dialog_html);
 
-						<?php 
+						<?php
 						$editorTool = empty($conf->global->FCKEDITOR_EDITORNAME)?'ckeditor':$conf->global->FCKEDITOR_EDITORNAME;
 						$editorConf = empty($conf->global->FCKEDITOR_ENABLE_DETAILS)?false:$conf->global->FCKEDITOR_ENABLE_DETAILS;
-						if($editorConf && in_array($editorTool,array('textarea','ckeditor'))){ 
+						if($editorConf && in_array($editorTool,array('textarea','ckeditor'))){
 						?>
 						if (action == 'addTitle' || action == 'addFreeTxt')
 						{
@@ -291,7 +295,7 @@ class ActionsSubtotal
 							}
 						}
 						<?php } ?>
-						
+
 					     $( "#dialog-prompt-subtotal" ).dialog({
 	                        resizable: false,
 							height: 'auto',
@@ -301,11 +305,12 @@ class ActionsSubtotal
 	                        buttons: {
 	                            "Ok": function() {
 	                            	if (typeof use_textarea != 'undefined' && use_textarea && typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" ){ updateAllMessageForms(); }
-									params.title = params.title = (typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" && "sub-total-title" in CKEDITOR.instances ? CKEDITOR.instances["sub-total-title"].getData() : $(this).find('#sub-total-title').val());
+									params.title = (typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" && "sub-total-title" in CKEDITOR.instances ? CKEDITOR.instances["sub-total-title"].getData() : $(this).find('#sub-total-title').val());
 									params.under_title = $(this).find('select[name=under_title]').val();
 									params.free_text = $(this).find('select[name=free_text]').val();
 									params.level = $(this).find('select[name=subtotal_line_level]').val();
-									
+									params.token = $(this).find('input[name=token]').val();
+
 									$.ajax({
 										url: url_ajax
 										,type: 'POST'
@@ -313,7 +318,7 @@ class ActionsSubtotal
 									}).done(function() {
 										document.location.href=url_to;
 									});
-									
+
                                     $( this ).dialog( "close" );
 	                            },
 	                            "<?php echo $langs->trans('Cancel') ?>": function() {
@@ -322,8 +327,8 @@ class ActionsSubtotal
 	                        }
 	                     });
 					}
-					
-					$('a[rel=add_title_line]').click(function() 
+
+					$('a[rel=add_title_line]').click(function()
 					{
 						promptSubTotal('addTitle'
 							 , "<?php echo $langs->trans('YourTitleLabel') ?>"
@@ -333,7 +338,7 @@ class ActionsSubtotal
 							 , {<?php echo $idvar; ?>: <?php echo (int) $object->id; ?>, action:'add_title_line'}
 						);
 					});
-					
+
 					$('a[rel=add_total_line]').click(function()
 					{
 						promptSubTotal('addSubtotal'
@@ -345,8 +350,8 @@ class ActionsSubtotal
 							/*,false,false, <?php echo !empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) ? 'true' : 'false'; ?>*/
 						);
 					});
-					
-					$('a[rel=add_free_text]').click(function() 
+
+					$('a[rel=add_free_text]').click(function()
 					{
 						promptSubTotal('addFreeTxt'
 							, "<?php echo $langs->transnoentitiesnoconv('YourTextLabel') ?>"
@@ -362,40 +367,40 @@ class ActionsSubtotal
 				});
 		 	</script>
 		 <?php
-	}	 
-	 
+	}
+
 	function showSelectTitleToAdd(&$object)
 	{
 		global $langs;
-		
+
 		dol_include_once('/subtotal/class/subtotal.class.php');
 		dol_include_once('/subtotal/lib/subtotal.lib.php');
 		$TTitle = TSubtotal::getAllTitleFromDocument($object);
-		
+
 		?>
 		<script type="text/javascript">
 			$(function() {
 				var add_button = $("#addline");
-				
+
 				if (add_button.length > 0)
 				{
 					add_button.closest('tr').prev('tr.liste_titre').children('td:last').addClass('center').text("<?php echo $langs->trans('subtotal_title_to_add_under_title'); ?>");
 					var select_title = $(<?php echo json_encode(getHtmlSelectTitle($object)); ?>);
-					
+
 					add_button.before(select_title);
 				}
 			});
 		</script>
 		<?php
 	}
-	
-	
+
+
 	function formBuilddocOptions($parameters, &$object) {
-	/* Réponse besoin client */		
-			
+	/* Réponse besoin client */
+
 		global $conf, $langs, $bc;
-			
-		$action = GETPOST('action');	
+
+		$action = GETPOST('action');
 		$TContext = explode(':',$parameters['context']);
 		if (
 				in_array('invoicecard',$TContext)
@@ -405,12 +410,12 @@ class ActionsSubtotal
 		        || in_array('ordersuppliercard',$TContext)
 				|| in_array('invoicereccard',$TContext)
 			)
-	        {	
+	        {
 	            $hideInnerLines	= isset( $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']][$object->id] ) ?  $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']][$object->id] : 0;
 	            $hidedetails	= isset( $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']][$object->id] ) ?  $_SESSION['subtotal_hidedetails_'.$parameters['modulepart']][$object->id] : 0;
 				$hidepricesDefaultConf = !empty($conf->global->SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED)?$conf->global->SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED:0;
 				$hideprices= isset( $_SESSION['subtotal_hideprices_'.$parameters['modulepart']][$object->id] ) ?  $_SESSION['subtotal_hideprices_'.$parameters['modulepart']][$object->id] : $hidepricesDefaultConf;
-				
+
 				$var=false;
 		     	$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
@@ -418,7 +423,7 @@ class ActionsSubtotal
 		     				<input type="checkbox" onclick="if($(this).is(\':checked\')) { $(\'#hidedetails\').prop(\'checked\', \'checked\')  }" id="hideInnerLines" name="hideInnerLines" value="1" '.(( $hideInnerLines ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
-				
+
 		     	$var=!$var;
 		     	$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
@@ -426,7 +431,7 @@ class ActionsSubtotal
 		     				<input type="checkbox" id="hidedetails" name="hidedetails" value="1" '.(( $hidedetails ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
-		     	
+
 		     	$var=!$var;
 		     	$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
@@ -434,10 +439,10 @@ class ActionsSubtotal
 		     				<input type="checkbox" id="hideprices" name="hideprices" value="1" '.(( $hideprices ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
-		     	
-		     	
-				 
-				if ( 
+
+
+
+				if (
 					(in_array('propalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
 					|| (in_array('ordercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
 				    || (in_array('ordersuppliercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
@@ -455,55 +460,55 @@ class ActionsSubtotal
 							</td>
 						</tr>';
 				}
-				
-				
-				$this->resprints = $out;	
+
+
+				$this->resprints = $out;
 			}
-			
-		
+
+
         return 1;
-	} 
-	 
-    function formEditProductOptions($parameters, &$object, &$action, $hookmanager) 
+	}
+
+    function formEditProductOptions($parameters, &$object, &$action, $hookmanager)
     {
-		
+
     	if (in_array('invoicecard',explode(':',$parameters['context'])))
         {
-        	
+
         }
-		
+
         return 0;
     }
-	
+
 	function ODTSubstitutionLine(&$parameters, &$object, $action, $hookmanager) {
 		global $conf;
-		
+
 		if($action === 'builddoc') {
-			
+
 			$line = &$parameters['line'];
 			$object = &$parameters['object'];
 			$substitutionarray = &$parameters['substitutionarray'];
-			
+
             $substitutionarray['line_not_modsubtotal'] = true;
             $substitutionarray['line_modsubtotal'] = false;
             $substitutionarray['line_modsubtotal_total'] = false;
             $substitutionarray['line_modsubtotal_title'] = false;
 
 			if($line->product_type == 9 && $line->special_code == $this->module_number) {
-				$substitutionarray['line_modsubtotal'] = 1;	
+				$substitutionarray['line_modsubtotal'] = 1;
                 $substitutionarray['line_not_modsubtotal'] = false;
-				
+
 				$substitutionarray['line_price_ht']
-					 = $substitutionarray['line_price_vat'] 
+					 = $substitutionarray['line_price_vat']
 					 = $substitutionarray['line_price_ttc']
 					 = $substitutionarray['line_vatrate']
 					 = $substitutionarray['line_qty']
-					 = $substitutionarray['line_up'] 
+					 = $substitutionarray['line_up']
 					 = '';
-				
+
 				if($line->qty>90) {
 					$substitutionarray['line_modsubtotal_total'] = true;
-					
+
 					//list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
                     $TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
 
@@ -513,20 +518,21 @@ class ActionsSubtotal
 				} else {
 					$substitutionarray['line_modsubtotal_title'] = true;
 				}
-				
-				
-			}	
+
+
+			}
 			else{
 				$substitutionarray['line_not_modsubtotal'] = true;
 				$substitutionarray['line_modsubtotal'] = 0;
 			}
-			
+
 		}
-		
+
+		return 0;
 	}
-	
+
 	function createFrom($parameters, &$object, $action, $hookmanager) {
-	
+
 		if (
 				in_array('invoicecard',explode(':',$parameters['context']))
 		        || in_array('invoicesuppliercard',explode(':',$parameters['context']))
@@ -536,54 +542,59 @@ class ActionsSubtotal
 		        || in_array('ordersuppliercard',explode(':',$parameters['context']))
 				|| in_array('invoicereccard',explode(':',$parameters['context']))
 		) {
-			
+
 			global $db;
-			
+
 			$objFrom = $parameters['objFrom'];
-			
+
+			if(empty($object->lines) && method_exists($object, 'fetch_lines')) $object->fetch_lines();
+
 			foreach($objFrom->lines as $k=> &$lineOld) {
-				
+
 					if($lineOld->product_type == 9 && $lineOld->info_bits > 0 ) {
-							
+
 							$line = & $object->lines[$k];
-				
-							$idLine = (int) ($line->id ? $line->id : $line->rowid); 
-				
-							$db->query("UPDATE ".MAIN_DB_PREFIX.$line->table_element."
-							SET info_bits=".(int)$lineOld->info_bits."
-							WHERE rowid = ".$idLine."
-							");
-						
+
+							$idLine = (int) ($line->id ? $line->id : $line->rowid);
+
+							if($line->info_bits != $lineOld->info_bits) {
+								$db->query("UPDATE ".MAIN_DB_PREFIX.$line->table_element."
+								SET info_bits=".(int)$lineOld->info_bits."
+								WHERE rowid = ".$idLine."
+								");
+							}
+
 					}
-				
-				
+
+
 			}
-			
-			
+
+
 		}
-		
+
+		return 0;
 	}
-	
+
 	function doActions($parameters, &$object, $action, $hookmanager)
 	{
 		global $db, $conf, $langs,$user;
-		
+
 		dol_include_once('/subtotal/class/subtotal.class.php');
 		dol_include_once('/subtotal/lib/subtotal.lib.php');
 		require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
-		
+
 		$showBlockExtrafields = GETPOST('showBlockExtrafields');
-		
+
 		if($object->element=='facture') $idvar = 'facid';
 		else $idvar = 'id';
-			
+
 		if ($action == 'updateligne' || $action == 'updateline')
 		{
 			$found = false;
 			$lineid = GETPOST('lineid', 'int');
 			foreach ($object->lines as &$line)
 			{
-				
+
 				if ($line->id == $lineid && TSubtotal::isModSubtotalLine($line))
 				{
 					$found = true;
@@ -594,12 +605,12 @@ class ActionsSubtotal
 					}
 					_updateSubtotalLine($object, $line);
 					_updateSubtotalBloc($object, $line);
-					
+
 					TSubtotal::generateDoc($object);
 					break;
 				}
 			}
-			
+
 			if ($found)
 			{
 				header('Location: '.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id);
@@ -607,7 +618,7 @@ class ActionsSubtotal
 			}
 		}
 		else if($action === 'builddoc') {
-			
+
 			if (
 				in_array('invoicecard',explode(':',$parameters['context']))
 				|| in_array('propalcard',explode(':',$parameters['context']))
@@ -616,9 +627,9 @@ class ActionsSubtotal
 			    || in_array('invoicesuppliercard',explode(':',$parameters['context']))
 			    || in_array('supplier_proposalcard',explode(':',$parameters['context']))
 			)
-	        {								
+	        {
 				if(in_array('invoicecard',explode(':',$parameters['context']))) {
-					$sessname = 'subtotal_hideInnerLines_facture';	
+					$sessname = 'subtotal_hideInnerLines_facture';
 					$sessname2 = 'subtotal_hidedetails_facture';
 					$sessname3 = 'subtotal_hideprices_facture';
 				}
@@ -629,7 +640,7 @@ class ActionsSubtotal
 				}
 				elseif(in_array('propalcard',explode(':',$parameters['context']))) {
 					$sessname = 'subtotal_hideInnerLines_propal';
-					$sessname2 = 'subtotal_hidedetails_propal';	
+					$sessname2 = 'subtotal_hidedetails_propal';
 					$sessname3 = 'subtotal_hideprices_propal';
 				}
 				elseif(in_array('supplier_proposalcard',explode(':',$parameters['context']))) {
@@ -639,7 +650,7 @@ class ActionsSubtotal
 				}
 				elseif(in_array('ordercard',explode(':',$parameters['context']))) {
 					$sessname = 'subtotal_hideInnerLines_commande';
-					$sessname2 = 'subtotal_hidedetails_commande';	
+					$sessname2 = 'subtotal_hidedetails_commande';
 					$sessname3 = 'subtotal_hideprices_commande';
 				}
 				elseif(in_array('ordersuppliercard',explode(':',$parameters['context']))) {
@@ -652,42 +663,42 @@ class ActionsSubtotal
 					$sessname2 = 'subtotal_hidedetails_unknown';
 					$sessname3 = 'subtotal_hideprices_unknown';
 				}
-					
+
 				global $hideprices;
-				
+
 				$hideInnerLines = (int)GETPOST('hideInnerLines');
-				if(!empty($_SESSION[$sessname]) && !is_array($_SESSION[$sessname][$object->id]) ) $_SESSION[$sessname] = array(); // prevent old system
-				$_SESSION[$sessname][$object->id] = $hideInnerLines;		
-				
+				if(empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname][$object->id]) ) $_SESSION[$sessname] = array(); // prevent old system
+				$_SESSION[$sessname][$object->id] = $hideInnerLines;
+
 				$hidedetails= (int)GETPOST('hidedetails');
-				if(!empty($_SESSION[$sessname2]) && !is_array($_SESSION[$sessname2][$object->id]) ) $_SESSION[$sessname2] = array(); // prevent old system
+				if(empty($_SESSION[$sessname2]) || !is_array($_SESSION[$sessname2][$object->id]) ) $_SESSION[$sessname2] = array(); // prevent old system
 				$_SESSION[$sessname2][$object->id] = $hidedetails;
-				
+
 				$hideprices= (int)GETPOST('hideprices');
-				if(!empty($_SESSION[$sessname3]) && !is_array($_SESSION[$sessname3][$object->id]) ) $_SESSION[$sessname3] = array(); // prevent old system
+				if(empty($_SESSION[$sessname3]) || !is_array($_SESSION[$sessname3][$object->id]) ) $_SESSION[$sessname3] = array(); // prevent old system
 				$_SESSION[$sessname3][$object->id] = $hideprices;
-				
+
 				foreach($object->lines as &$line) {
 					if ($line->product_type == 9 && $line->special_code == $this->module_number) {
-					    
+
                         if($line->qty>=90) {
                             $line->modsubtotal_total = 1;
                         }
                         else{
                             $line->modsubtotal_title = 1;
                         }
-                        
+
 						$line->total_ht = $this->getTotalLineFromObject($object, $line, '');
 					}
 	        	}
 	        }
-			
+
 		}
 		else if($action === 'confirm_delete_all_lines' && GETPOST('confirm')=='yes') {
-			
-			$Tab = $this->getArrayOfLineForAGroup($object, GETPOST('lineid'));
-			
-			foreach($Tab as $idLine) {
+
+			$Tab = TSubtotal::getLinesFromTitleId($object, GETPOST('lineid'), true);
+			foreach($Tab as $line) {
+				$idLine = $line->id;
 				/**
 				 * @var $object Facture
 				 */
@@ -710,7 +721,7 @@ class ActionsSubtotal
 				/**
 				 * @var $object Commande
 				 */
-				else if($object->element=='commande') 
+				else if($object->element=='commande')
 				{
 					if ((float) DOL_VERSION >= 5.0) $object->deleteline($user, $idLine);
 					else $object->deleteline($idLine);
@@ -731,31 +742,31 @@ class ActionsSubtotal
 				 */
 				else if($object->element=='shipping') $object->deleteline($user, $idLine);
 			}
-			
+
 			header('location:?id='.$object->id);
 			exit;
-			
+
 		}
 		else if ($action == 'duplicate')
 		{
 			$lineid = GETPOST('lineid', 'int');
 			$nbDuplicate = TSubtotal::duplicateLines($object, $lineid, true);
-			
+
 			if ($nbDuplicate > 0) setEventMessage($langs->trans('subtotal_duplicate_success', $nbDuplicate));
 			elseif ($nbDuplicate == 0) setEventMessage($langs->trans('subtotal_duplicate_lineid_not_found'), 'warnings');
 			else setEventMessage($langs->trans('subtotal_duplicate_error'), 'errors');
-			
+
 			header('Location: ?id='.$object->id);
 			exit;
 		}
-		
+
 		return 0;
 	}
-	
+
 	function formAddObjectLine ($parameters, &$object, &$action, $hookmanager) {
 		return 0;
 	}
-	
+
 	function changeRoundingMode($parameters, &$object, &$action, $hookmanager)
 	{
 		global $conf;
@@ -769,7 +780,7 @@ class ActionsSubtotal
 				$obj = new FactureLigne($object->db);
 			if (!empty($parameters['fk_element']))
 			{
-				
+
 				if($obj->fetch($parameters['fk_element'])){
 					$obj->id= $obj->rowid;
 					if (empty($obj->array_options))
@@ -786,37 +797,37 @@ class ActionsSubtotal
 	function getArrayOfLineForAGroup(&$object, $lineid) {
 		$rang = $line->rang;
 		$qty_line = $line->qty;
-		
+
 		$qty_line = 0;
-		
+
 		$found = false;
 
 		$Tab= array();
-		
+
 		foreach($object->lines as $l) {
-		
+
 		    $lid = (!empty($l->rowid) ? $l->rowid : $l->id);
 			if($lid == $lineid) {
 
 				$found = true;
 				$qty_line = $l->qty;
 			}
-			
+
 			if($found) {
-				
+
 			    $Tab[] = (!empty($l->rowid) ? $l->rowid : $l->id);
-				
+
 				if($l->special_code==$this->module_number && (($l->qty==99 && $qty_line==1) || ($l->qty==98 && $qty_line==2))   ) {
 					break; // end of story
 				}
 			}
-			
-			
+
+
 		}
-		
-		
+
+
 		return $Tab;
-		
+
 	}
 
 	function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=0) {
@@ -824,26 +835,31 @@ class ActionsSubtotal
 
 		$rang = $line->rang;
 		$qty_line = $line->qty;
+		$lvl = 0;
+        if (TSubtotal::isSubtotal($line)) $lvl = TSubtotal::getNiveau($line);
 
-		$title_break = TSubtotal::getParentTitleOfLine($object, $rang);
+		$title_break = TSubtotal::getParentTitleOfLine($object, $rang, $lvl);
 
 		$total = 0;
 		$total_tva = 0;
 		$total_ttc = 0;
 		$TTotal_tva = array();
-		
+
 		$sign=1;
 		if (isset($object->type) && $object->type == 2 && ! empty($conf->global->INVOICE_POSITIVE_CREDIT_NOTE)) $sign=-1;
-		
+
 		if (GETPOST('action') == 'builddoc') $builddoc = true;
 		else $builddoc = false;
-		
+
 		dol_include_once('/subtotal/class/subtotal.class.php');
 
 		$TLineReverse = array_reverse($object->lines);
 
 		foreach($TLineReverse as $l)
 		{
+			$l->total_ttc = doubleval($l->total_ttc);
+			$l->total_ht = doubleval($l->total_ht);
+
 			//print $l->rang.'>='.$rang.' '.$total.'<br/>';
             if ($l->rang>=$rang) continue;
             if (!empty($title_break) && $title_break->id == $l->id) break;
@@ -852,7 +868,7 @@ class ActionsSubtotal
                 // TODO retirer le test avec $builddoc quand Dolibarr affichera le total progression sur la card et pas seulement dans le PDF
                 if ($builddoc && $object->element == 'facture' && $object->type==Facture::TYPE_SITUATION)
                 {
-                    if ($l->situation_percent > 0)
+                    if ($l->situation_percent > 0 && !empty($l->total_ht))
                     {
                         $prev_progress = 0;
                         $progress = 1;
@@ -868,6 +884,7 @@ class ActionsSubtotal
                         $total_tva += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
                         $TTotal_tva[$l->tva_tx] += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
                         $total_ttc += $sign * ($l->total_tva / ($l->total_ttc / 100)) * $progress;
+
                     }
                 }
                 else
@@ -903,14 +920,14 @@ class ActionsSubtotal
 			$posy = $subtotal_last_title_posy;
 			$subtotal_last_title_posy = null;
 		}
-		
+
 		$hidePriceOnSubtotalLines = (int) GETPOST('hide_price_on_subtotal_lines');
 
 		if($object->element == 'shipping' || $object->element == 'delivery')
 		{
 			$hidePriceOnSubtotalLines = 1;
 		}
-		
+
 		$set_pagebreak_margin = false;
 		if(method_exists('Closure','bind')) {
 			$pageBreakOriginalValue = $pdf->AcceptPageBreak();
@@ -918,39 +935,39 @@ class ActionsSubtotal
 		    		return $pdf->bMargin ;
 			};
 			$sweetsThief = Closure::bind($sweetsThief, null, $pdf);
-	
+
 			$bMargin  = $sweetsThief($pdf);
-	
+
 			$pdf->SetAutoPageBreak( false );
 
-			$set_pagebreak_margin = true;			
+			$set_pagebreak_margin = true;
 		}
-		
-			
+
+
 		if($line->qty==99)
 			$pdf->SetFillColor(220,220,220);
 		elseif ($line->qty==98)
 			$pdf->SetFillColor(230,230,230);
 		else
 			$pdf->SetFillColor(240,240,240);
-		
+
 		$style = 'B';
 		if (!empty($conf->global->SUBTOTAL_SUBTOTAL_STYLE)) $style = $conf->global->SUBTOTAL_SUBTOTAL_STYLE;
-		
+
 		$pdf->SetFont('', $style, 9);
-		
+
 		$pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'R',true);
 //		var_dump($bMargin);
 		$pageAfter = $pdf->getPage();
-		
+
 		//Print background
 		$cell_height = $pdf->getStringHeight($w, $label);
 		$pdf->SetXY($posx, $posy);
 		$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height, '', 0, '', 1);
-		
+
 		if (!$hidePriceOnSubtotalLines) {
 			$total_to_print = price($line->total);
-			
+
 			if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS))
 			{
 				$TTitle = TSubtotal::getAllTitleFromLine($line);
@@ -963,12 +980,12 @@ class ActionsSubtotal
 					}
 				}
 			}
-			
-			
-			
-			
+
+
+
+
 			if($total_to_print !== '') {
-				
+
 				if (GETPOST('hideInnerLines'))
 				{
 					// Dans le cas des lignes cachés, le calcul est déjà fait dans la méthode beforePDFCreation et les lignes de sous-totaux sont déjà renseignés
@@ -981,7 +998,7 @@ class ActionsSubtotal
 				else
 				{
 					//					list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
-					
+
 					$TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
 					$TTotal_tva = $TInfo[3];
 					$total_to_print = price($TInfo[0]);
@@ -1000,11 +1017,11 @@ class ActionsSubtotal
 		else{
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
 		}
-		
+
 		$posy = $posy + $cell_height;
-		$pdf->SetXY($posx, $posy); 
-			
-		
+		$pdf->SetXY($posx, $posy);
+
+
 	}
 
 	/**
@@ -1019,22 +1036,22 @@ class ActionsSubtotal
 	 * @param $h            float               height
 	 */
 	function pdf_add_title(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
-		
+
 		global $db,$conf,$subtotal_last_title_posy;
-		
+
 		$subtotal_last_title_posy = $posy;
 		$pdf->SetXY ($posx, $posy);
-		
+
 		$hideInnerLines = (int)GETPOST('hideInnerLines');
-		
-		
- 
+
+
+
 		$style = ($line->qty==1) ? 'BU' : 'BUI';
 		if (!empty($conf->global->SUBTOTAL_TITLE_STYLE)) $style = $conf->global->SUBTOTAL_TITLE_STYLE;
-		
+
 		if($hideInnerLines) {
 			if($line->qty==1)$pdf->SetFont('', $style, 9);
-			else 
+			else
 			{
 				if (!empty($conf->global->SUBTOTAL_STYLE_TITRES_SI_LIGNES_CACHEES)) $style = $conf->global->SUBTOTAL_STYLE_TITRES_SI_LIGNES_CACHEES;
 				$pdf->SetFont('', $style, 9);
@@ -1044,34 +1061,34 @@ class ActionsSubtotal
 
 			if($line->qty==1)$pdf->SetFont('', $style, 9); //TODO if super utile
 			else $pdf->SetFont('', $style, 9);
-			
+
 		}
-		
+
 		if ($label === strip_tags($label) && $label === dol_html_entity_decode($label, ENT_QUOTES)) $pdf->MultiCell($w, $h, $label, 0, 'L'); // Pas de HTML dans la chaine
 		else $pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'J',true); // et maintenant avec du HTML
-		
+
 		if($description && !$hidedesc) {
 			$posy = $pdf->GetY();
-			
+
 			$pdf->SetFont('', '', 8);
-			
+
 			$pdf->writeHTMLCell($w, $h, $posx, $posy, $description, 0, 1, false, true, 'J',true);
 
 		}
-		
+
 	}
 
 	function pdf_writelinedesc_ref($parameters=array(), &$object, &$action='') {
 	// ultimate PDF hook O_o
-		
+
 		return $this->pdf_writelinedesc($parameters,$object,$action);
-		
+
 	}
 
 	function isModSubtotalLine(&$parameters, &$object) {
-		
+
 		if(is_array($parameters)) {
-			$i = & $parameters['i'];	
+			$i = & $parameters['i'];
 		}
 		else {
 			$i = (int)$parameters;
@@ -1085,14 +1102,14 @@ class ActionsSubtotal
 			$line = new OrderLine($object->db);
 			$line->fetch($object->lines[$i]->fk_origin_line);
 		}
-		
+
 
 		if($line->special_code == $this->module_number && $line->product_type == 9) {
 			return true;
 		}
-		
+
 		return false;
-		
+
 	}
 
 	function pdf_getlineqty($parameters=array(), &$object, &$action='') {
@@ -1100,14 +1117,14 @@ class ActionsSubtotal
 
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
-			
+
 			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
-			
+
 		}
 		elseif(!empty($hideprices)) {
 			$this->resprints = $object->lines[$parameters['i']]->qty;
@@ -1122,12 +1139,13 @@ class ActionsSubtotal
 				$this->resprints = $object->lines[$parameters['i']]->qty;
 			}
 		}
-		
+
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
 
-		if (empty($object->lines[$i])) return 0; // hideInnerLines => override $object->lines et Dolibarr ne nous permet pas de mettre à jour la variable qui conditionne la boucle sur les lignes (PR faite pour 6.0)
-		
+		/** Attention, ici on peut ce retrouver avec un objet de type stdClass à cause de l'option cacher le détail des ensembles avec la notion de Non Compris (@see beforePDFCreation()) et dû à l'appel de TSubtotal::hasNcTitle() */
+		if (empty($object->lines[$i]->id)) return 0; // hideInnerLines => override $object->lines et Dolibarr ne nous permet pas de mettre à jour la variable qui conditionne la boucle sur les lignes (PR faite pour 6.0)
+
 		if(empty($object->lines[$i]->array_options)) $object->lines[$i]->fetch_optionals();
 
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
@@ -1138,33 +1156,33 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
-		
+
 		return 0;
 	}
-	
+
 	function pdf_getlinetotalexcltax($parameters=array(), &$object, &$action='') {
 	    global $conf, $hideprices, $hookmanager;
-		
+
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
-			
+
 		if($this->isModSubtotalLine($parameters,$object) ){
-			
+
 			$this->resprints = ' ';
-			
+
 			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
 			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
-			
+
 		}
 		elseif (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS))
 		{
 			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
 			{
-				if (!empty($object->lines[$i]->array_options['options_subtotal_nc'])) 
+				if (!empty($object->lines[$i]->array_options['options_subtotal_nc']))
 				{
 					$this->resprints = ' ';
 					return 1;
@@ -1184,18 +1202,18 @@ class ActionsSubtotal
 		if ((int)GETPOST('hideInnerLines') && !empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES)){
 		    $this->resprints = price($object->lines[$i]->total_ht);
 		}
-		
+
 		// Si la gestion C/NC est active et que je suis sur un ligne dont l'extrafield est coché
-		if ( 
-			!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && 
-			(!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) 
+		if (
+			!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) &&
+			(!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i]))
 		)
 		{
 			// alors je dois vérifier si la méthode fait partie de la conf qui l'exclue
 			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
 			{
 				$this->resprints = ' ';
-				
+
 				// currentcontext à modifier celon l'appel
 				$params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlinetotalexcltax', 'currentcontext'=>'subtotal_hide_nc', 'i' => $i);
 				return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
@@ -1205,21 +1223,21 @@ class ActionsSubtotal
 		else if (!empty($hideprices))
 		{
 			// Check if a title exist for this line && if the title have subtotal
-			$lineTitle = TSubtotal::getParentTitleOfLine($object, $i);
-			if(TSubtotal::getParentTitleOfLine($object, $i) && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
+			$lineTitle = TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang);
+			if ($lineTitle && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
 			{
 
 				$this->resprints = ' ';
-				
+
 				// currentcontext à modifier celon l'appel
 				$params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlinetotalexcltax', 'currentcontext'=>'subtotal_hideprices', 'i' => $i);
 				return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
 			}
 		}
-        
+
 		return 0;
 	}
-	
+
 	/**
 	 * Remplace le retour de la méthode qui l'appelle par un standard 1 ou autre chose celon le hook
 	 * @return int 1, 0, -1
@@ -1250,14 +1268,14 @@ class ActionsSubtotal
 
 		return $defaultReturn;
 	}
-	
+
 	function pdf_getlinetotalwithtax($parameters=array(), &$object, &$action='') {
 		global $conf;
-		
+
 		if($this->isModSubtotalLine($parameters,$object) ){
-			
+
 			$this->resprints = ' ';
-		
+
 			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
@@ -1265,39 +1283,10 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
-		
+
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
-		
-		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) ) 
-		{
-			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
-			{
-				$this->resprints = ' ';
-				return 1;
-			}
-		}
-		
-		return 0;
-	}
-	
-	function pdf_getlineunit($parameters=array(), &$object, &$action='') {
-		global $conf;
-		
-		if($this->isModSubtotalLine($parameters,$object) ){
-			$this->resprints = ' ';
-		
-			if((float)DOL_VERSION<=3.6) {
-				return '';
-			}
-			else if((float)DOL_VERSION>=3.8) {
-				return 1;
-			}
-		}
-		
-		if(is_array($parameters)) $i = & $parameters['i'];
-		else $i = (int)$parameters;
-			
+
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
 			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
@@ -1306,10 +1295,39 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
-		
+
 		return 0;
 	}
-	
+
+	function pdf_getlineunit($parameters=array(), &$object, &$action='') {
+		global $conf;
+
+		if($this->isModSubtotalLine($parameters,$object) ){
+			$this->resprints = ' ';
+
+			if((float)DOL_VERSION<=3.6) {
+				return '';
+			}
+			else if((float)DOL_VERSION>=3.8) {
+				return 1;
+			}
+		}
+
+		if(is_array($parameters)) $i = & $parameters['i'];
+		else $i = (int)$parameters;
+
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
+		{
+			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
+			{
+				$this->resprints = ' ';
+				return 1;
+			}
+		}
+
+		return 0;
+	}
+
 	function pdf_getlineupexcltax($parameters=array(), &$object, &$action='') {
 	    global $conf,$hideprices,$hookmanager;
 
@@ -1323,7 +1341,7 @@ class ActionsSubtotal
 
             // On récupère les montants du bloc pour les afficher dans la ligne de sous-total
             if(TSubtotal::isSubtotal($line)) {
-                $parentTitle = TSubtotal::getParentTitleOfLine($object, $i);
+                $parentTitle = TSubtotal::getParentTitleOfLine($object, $line->rang);
 
                 if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->array_options['options_show_total_ht'])) {
@@ -1331,7 +1349,7 @@ class ActionsSubtotal
                     $this->resprints = price($TTotal['total_unit_subprice']);
                 }
             }
-		
+
 			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
@@ -1339,7 +1357,7 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
-		
+
 		// Si la gestion C/NC est active et que je suis sur un ligne dont l'extrafield est coché
 		if (
 		!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) &&
@@ -1350,33 +1368,33 @@ class ActionsSubtotal
 		    if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
 		    {
 		        $this->resprints = ' ';
-		        
+
 		        // currentcontext à modifier celon l'appel
 		        $params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlineupexcltax', 'currentcontext'=>'subtotal_hide_nc', 'i' => $i);
 		        return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
-		        
+
 		    }
 		}
 		// Cache le prix pour les lignes standards dolibarr qui sont dans un ensemble
 		else if (!empty($hideprices))
 		{
-		    
+
 		    // Check if a title exist for this line && if the title have subtotal
-		    $lineTitle = TSubtotal::getParentTitleOfLine($object, $i);
-		    if(TSubtotal::getParentTitleOfLine($object, $i) && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
+		    $lineTitle = TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang);
+		    if ($lineTitle && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
 		    {
-		        
+
 		        $this->resprints = ' ';
-		        
+
 		        // currentcontext à modifier celon l'appel
 		        $params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlineupexcltax', 'currentcontext'=>'subtotal_hideprices', 'i' => $i);
 		        return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
 		    }
 		}
-		
+
 		return 0;
 	}
-	
+
 	function pdf_getlineremisepercent($parameters=array(), &$object, &$action='') {
 	    global $conf,$hideprices,$hookmanager;
 
@@ -1388,9 +1406,9 @@ class ActionsSubtotal
 
             $line = $object->lines[$i];
 
-            // Affichage de la remise 
+            // Affichage de la remise
             if(TSubtotal::isSubtotal($line)) {
-                $parentTitle = TSubtotal::getParentTitleOfLine($object, $i);
+                $parentTitle = TSubtotal::getParentTitleOfLine($object, $line->rang);
 
                 if(empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->array_options['options_show_reduc'])) {
@@ -1398,7 +1416,7 @@ class ActionsSubtotal
                     $this->resprints = price((1-$TTotal['total_ht'] / $TTotal['total_subprice'])*100, 0, '', 1, 2, 2).'%';
                 }
             }
-		
+
 			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
@@ -1416,13 +1434,13 @@ class ActionsSubtotal
 		            return 1;
 		        }
 		    }
-		
+
 		return 0;
 	}
-	
+
 	function pdf_getlineupwithtax($parameters=array(), &$object, &$action='') {
 		global $conf,$hideprices;
-		
+
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 			if((float)DOL_VERSION<=3.6) {
@@ -1432,10 +1450,10 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
-		
+
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
-			
+
 		if (!empty($hideprices)
 				|| (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		)
@@ -1446,16 +1464,16 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
-		
+
 		return 0;
 	}
-	
+
 	function pdf_getlinevatrate($parameters=array(), &$object, &$action='') {
 	    global $conf,$hideprices,$hookmanager;
-	    
+
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
-			
+
 			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
@@ -1463,10 +1481,10 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
-		
+
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
-		
+
 		if (empty($object->lines[$i])) return 0; // hideInnerLines => override $object->lines et Dolibarr ne nous permet pas de mettre à jour la variable qui conditionne la boucle sur les lignes (PR faite pour 6.0)
 
 		$object->lines[$i]->fetch_optionals();
@@ -1480,7 +1498,7 @@ class ActionsSubtotal
 		    if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
 		    {
 		        $this->resprints = ' ';
-		        
+
 		        // currentcontext à modifier celon l'appel
 		        $params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlinevatrate', 'currentcontext'=>'subtotal_hide_nc', 'i' => $i);
 		        return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
@@ -1489,26 +1507,26 @@ class ActionsSubtotal
 		// Cache le prix pour les lignes standards dolibarr qui sont dans un ensemble
 		else if (!empty($hideprices))
 		{
-		    
+
 		    // Check if a title exist for this line && if the title have subtotal
-		    $lineTitle = TSubtotal::getParentTitleOfLine($object, $i);
-		    if(TSubtotal::getParentTitleOfLine($object, $i) && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
+		    $lineTitle = TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang);
+		    if ($lineTitle && TSubtotal::titleHasTotalLine($object, $lineTitle, true))
 		    {
-		        
+
 		        $this->resprints = ' ';
-		        
+
 		        // currentcontext à modifier celon l'appel
 		        $params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlinevatrate', 'currentcontext'=>'subtotal_hideprices', 'i' => $i);
 		        return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
 		    }
 		}
-		
+
 		return 0;
 	}
-		
+
 	function pdf_getlineprogress($parameters=array(), &$object, &$action) {
 		global $conf;
-		
+
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 			if((float)DOL_VERSION<=3.6) {
@@ -1518,10 +1536,10 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
-		
+
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
-			
+
 		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
 		{
 			if (!in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
@@ -1530,43 +1548,84 @@ class ActionsSubtotal
 				return 1;
 			}
 		}
-		
+
 		return 0;
 	}
-	
+
 	function add_numerotation(&$object) {
 		global $conf;
-		
+
 		if(!empty($conf->global->SUBTOTAL_USE_NUMEROTATION)) {
-		
-			$TLevelTitre = array();
+
+			$TLineTitle = $TTitle = $TLineSubtotal = array();
 			$prevlevel = 0;
-		
-			foreach($object->lines as $k=>&$line) 
+			dol_include_once('/subtotal/class/subtotal.class.php');
+
+			foreach($object->lines as $k=>&$line)
 			{
 				if ($line->id > 0 && $this->isModSubtotalLine($k, $object) && $line->qty <= 10)
 				{
 					$TLineTitle[] = &$line;
 				}
+				else if ($line->id > 0 && TSubtotal::isSubtotal($line))
+				{
+					$TLineSubtotal[] = &$line;
+				}
+
 			}
-			
-			if (!empty($TLineTitle)) $TTitleNumeroted = $this->formatNumerotation($TLineTitle);
+
+			if (!empty($TLineTitle))
+			{
+				$TTitleNumeroted = $this->formatNumerotation($TLineTitle);
+
+				$TTitle = $this->getTitlesFlatArray($TTitleNumeroted);
+
+				if (!empty($TLineSubtotal))
+				{
+					foreach ($TLineSubtotal as &$stLine)
+					{
+						$parentTitle = TSubtotal::getParentTitleOfLine($object, $stLine->rang);
+						if (!empty($parentTitle) && array_key_exists($parentTitle->id, $TTitle))
+						{
+							$stLine->label = $TTitle[$parentTitle->id]['numerotation'] . ' ' . $stLine->label;
+						}
+					}
+				}
+			}
 		}
-		
+
+	}
+
+	private function getTitlesFlatArray($TTitleNumeroted = array(), &$resArray = array())
+	{
+		if (is_array($TTitleNumeroted) && !empty($TTitleNumeroted))
+		{
+			foreach ($TTitleNumeroted as $tn)
+			{
+				$resArray[$tn['line']->id] = $tn;
+				if (array_key_exists('children', $tn))
+				{
+					$this->getTitlesFlatArray($tn['children'], $resArray);
+				}
+
+			}
+		}
+
+		return $resArray;
 	}
 
 	// TODO ne gère pas encore la numération des lignes "Totaux"
 	private function formatNumerotation(&$TLineTitle, $line_reference='', $level=1, $prefix_num=0)
 	{
 		$TTitle = array();
-		
+
 		$i=1;
 		$j=0;
 		foreach ($TLineTitle as $k => &$line)
 		{
 			if (!empty($line_reference) && $line->rang <= $line_reference->rang) continue;
 			if (!empty($line_reference) && $line->qty <= $line_reference->qty) break;
-			
+
 			if ($line->qty == $level)
 			{
 				$TTitle[$j]['numerotation'] = ($prefix_num == 0) ? $i : $prefix_num.'.'.$i;
@@ -1576,17 +1635,17 @@ class ActionsSubtotal
 					$line->label = !empty($line->desc) ? $line->desc : $line->description;
 					$line->desc = $line->description = '';
 				}
-				
+
 				$line->label = $TTitle[$j]['numerotation'].' '.$line->label;
 				$TTitle[$j]['line'] = &$line;
-				
+
 				$deep_level = $line->qty;
 				do {
 					$deep_level++;
 					$TTitle[$j]['children'] = $this->formatNumerotation($TLineTitle, $line, $deep_level, $TTitle[$j]['numerotation']);
 				} while (empty($TTitle[$j]['children']) && $deep_level <= 10); // Exemple si un bloc Titre lvl 1 contient pas de sous lvl 2 mais directement un sous lvl 5
 				// Rappel on peux avoir jusqu'a 10 niveau de titre
-				
+
 				$i++;
 				$j++;
 			}
@@ -1594,18 +1653,18 @@ class ActionsSubtotal
 
 		return $TTitle;
 	}
-	
+
 	function setDocTVA(&$pdf, &$object) {
-		
+
 		$hidedetails = (int)GETPOST('hidedetails');
-		
+
 		if(empty($hidedetails)) return false;
-		
+
 		// TODO can't add VAT to document without lines... :-/
-		
+
 		return true;
 	}
-	
+
 	function beforePDFCreation($parameters=array(), &$object, &$action)
 	{
 		/**
@@ -1619,14 +1678,14 @@ class ActionsSubtotal
 		foreach($parameters as $key=>$value) {
 			${$key} = $value;
 		}
-		
+
 		$this->setDocTVA($pdf, $object);
-		
-		$this->add_numerotation($object);	
-		
+
+		$this->add_numerotation($object);
+
         foreach($object->lines as $k => &$l) {
             if(TSubtotal::isSubtotal($l)) {
-                $parentTitle = TSubtotal::getParentTitleOfLine($object, $k);
+                $parentTitle = TSubtotal::getParentTitleOfLine($object, $l->rang);
                 if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->id) && ! empty($parentTitle->array_options['options_show_reduc'])) {
                     $l->remise_percent = 100;    // Affichage de la réduction sur la ligne de sous-total
@@ -1648,27 +1707,27 @@ class ActionsSubtotal
 		if ($hideInnerLines) { // si c une ligne de titre
 	    	$fk_parent_line=0;
 			$TLines =array();
-		
+
 			$original_count=count($object->lines);
 		    $TTvas = array(); // tableau de tva
-		    
-			foreach($object->lines as $k=>&$line) 
+
+			foreach($object->lines as $k=>&$line)
 			{
-			    
-				if($line->product_type==9 && $line->rowid>0) 
+
+				if($line->product_type==9 && $line->rowid>0)
 				{
 					$fk_parent_line = $line->rowid;
-					
+
 					// Fix tk7201 - si on cache le détail, la TVA est renseigné au niveau du sous-total, l'erreur c'est s'il y a plusieurs sous-totaux pour les même lignes, ça va faire la somme
-					if(TSubtotal::isSubtotal($line)) 
+					if(TSubtotal::isSubtotal($line))
 					{
 						/*$total = $this->getTotalLineFromObject($object, $line, '');
-						
+
 						$line->total_ht = $total;
 						$line->total = $total;
 						*/
 						//list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
-						
+
 						$TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
 
 						if (TSubtotal::getNiveau($line) == 1) $line->TTotal_tva = $TInfo[3];
@@ -1677,28 +1736,28 @@ class ActionsSubtotal
 						$line->total = $line->total_ht;
 						$line->total_ttc = $TInfo[2];
 
-//                        $TTitle = TSubtotal::getParentTitleOfLine($object, $k);
+//                        $TTitle = TSubtotal::getParentTitleOfLine($object, $line->rang);
 //                        $parentTitle = array_shift($TTitle);
 //                        if(! empty($parentTitle->id) && ! empty($parentTitle->array_option['options_show_total_ht'])) {
 //                            exit('la?');
 //                            $line->remise_percent = 100;    // Affichage de la réduction sur la ligne de sous-total
 //                            $line->update();
 //                        }
-					} 
+					}
 //                    if(TSub)
-						
-				} 
-			
+
+				}
+
 				if ($hideInnerLines)
 				{
 				    if(!empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES))
 				    {
 				        if($line->tva_tx != '0.000' && $line->product_type!=9){
-				            
+
     				        // on remplit le tableau de tva pour substituer les lignes cachées
     				        $TTvas[$line->tva_tx]['total_tva'] += $line->total_tva;
     				        $TTvas[$line->tva_tx]['total_ht'] += $line->total_ht;
-    				        $TTvas[$line->tva_tx]['total_ttc'] += $line->total_ttc; 
+    				        $TTvas[$line->tva_tx]['total_ttc'] += $line->total_ttc;
     				    }
     					if($line->product_type==9 && $line->rowid>0)
     					{
@@ -1721,38 +1780,38 @@ class ActionsSubtotal
     					            array_shift($TTvas);
     					       }
     					    }
-    					    
+
     					    // ajoute la ligne de sous-total
-    					    $TLines[] = $line; 
+    					    $TLines[] = $line;
     					}
 				    } else {
-				        
+
 				        if($line->product_type==9 && $line->rowid>0)
 				        {
 				            // ajoute la ligne de sous-total
-				            $TLines[] = $line; 
+				            $TLines[] = $line;
 				        }
 				    }
-				    
-					
+
+
 				}
 				elseif ($hidedetails)
 				{
-					$TLines[] = $line; //Cas où je cache uniquement les prix des produits	
+					$TLines[] = $line; //Cas où je cache uniquement les prix des produits
 				}
-				
+
 				if ($line->product_type != 9) { // jusqu'au prochain titre ou total
 					//$line->fk_parent_line = $fk_parent_line;
-					
+
 				}
-			
+
 				/*if($hideTotal) {
 					$line->total = 0;
 					$line->subprice= 0;
 				}*/
-				
+
 			}
-			
+
 			// cas incongru où il y aurait des produits en dessous du dernier sous-total
 			$nbtva = count($TTvas);
 			if(!empty($nbtva) && $hideInnerLines && !empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES))
@@ -1772,18 +1831,18 @@ class ActionsSubtotal
 			        array_shift($TTvas);
 			    }
 			}
-			
+
 			global $nblignes;
 			$nblignes=count($TLines);
 
 			$object->lines = $TLines;
-			
+
 			if($i>count($object->lines)) {
 				$this->resprints = '';
 				return 0;
 			}
 	    }
-		
+
 		return 0;
 	}
 
@@ -1797,20 +1856,20 @@ class ActionsSubtotal
 		foreach($parameters as $key=>$value) {
 			${$key} = $value;
 		}
-		
+
 		$hideInnerLines = (int)GETPOST('hideInnerLines');
 		$hidedetails = (int)GETPOST('hidedetails');
-		
-		if($this->isModSubtotalLine($parameters,$object) ){			
-		
+
+		if($this->isModSubtotalLine($parameters,$object) ){
+
 				global $hideprices;
-				
+
 				if(!empty($hideprices)) {
 					foreach($object->lines as &$line) {
-						if($line->fk_product_type!=9) $line->fk_parent_line = -1;	
+						if($line->fk_product_type!=9) $line->fk_parent_line = -1;
 					}
 				}
-			
+
 				$line = &$object->lines[$i];
 
 				if($object->element == 'delivery' && ! empty($object->commande->expeditions[$line->fk_origin_line])) unset($object->commande->expeditions[$line->fk_origin_line]);
@@ -1819,10 +1878,10 @@ class ActionsSubtotal
 					$pdf->addPage();
 					$posy = $pdf->GetY();
 				}
-				
+
 				$label = $line->label;
 				$description= !empty($line->desc) ? $outputlangs->convToOutputCharset($line->desc) : $outputlangs->convToOutputCharset($line->description);
-				
+
 				if(empty($label)) {
 					$label = $description;
 					$description='';
@@ -1830,10 +1889,10 @@ class ActionsSubtotal
 
 				if($line->qty>90) {
 					if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)	$label .= ' '.$this->getTitle($object, $line);
-					
+
 					$pageBefore = $pdf->getPage();
 					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-					$pageAfter = $pdf->getPage();	
+					$pageAfter = $pdf->getPage();
 
 					if($pageAfter>$pageBefore) {
 						//print "ST $pageAfter>$pageBefore<br>";
@@ -1864,23 +1923,23 @@ class ActionsSubtotal
 
 						$pdf->SetTextColor($grey, $grey, $grey);
 					}
-				
+
 					$posy = $pdf->GetY();
 					return 1;
-				}	
+				}
 				else if ($line->qty < 10) {
 					$pageBefore = $pdf->getPage();
 
-					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h); 
-					$pageAfter = $pdf->getPage();	
+					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
+					$pageAfter = $pdf->getPage();
 
-					
+
 					/*if($pageAfter>$pageBefore) {
 						print "T $pageAfter>$pageBefore<br>";
 						$pdf->rollbackTransaction(true);
 						$pdf->addPage('','', true);
 						print 'add T'.$pdf->getPage().' '.$line->rowid.' '.$pdf->GetY().' '.$posy.'<br />';
-						
+
 						$posy = $pdf->GetY();
 						$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 						$posy = $pdf->GetY();
@@ -1896,7 +1955,7 @@ class ActionsSubtotal
 					return 1;
 				}
 //	if($line->rowid==47) exit;
-			
+
 			return 0;
 		}
 		elseif (empty($object->lines[$parameters['i']]))
@@ -1906,7 +1965,7 @@ class ActionsSubtotal
 
 		/* TODO je desactive parce que je comprends pas PH Style, mais à test
 		else {
-			
+
 			if($hideInnerLines) {
 				$pdf->rollbackTransaction(true);
 			}
@@ -1914,37 +1973,37 @@ class ActionsSubtotal
 				$labelproductservice=pdf_getlinedesc($object, $i, $outputlangs, $hideref, $hidedesc, $issupplierline);
 				$pdf->writeHTMLCell($w, $h, $posx, $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1);
 			}
-			
+
 		}*/
 
 
-		
+        return 0;
 	}
 
 	/**
 	 * Permet de récupérer le titre lié au sous-total
-	 * 
+	 *
 	 * @return string
 	 */
 	function getTitle(&$object, &$currentLine)
 	{
 		$res = '';
-		
+
 		foreach ($object->lines as $line)
 		{
 			if ($line->id == $currentLine->id) break;
-			
+
 			$qty_search = 100 - $currentLine->qty;
-			
-			if ($line->product_type == 9 && $line->special_code == $this->module_number && $line->qty == $qty_search) 
+
+			if ($line->product_type == 9 && $line->special_code == $this->module_number && $line->qty == $qty_search)
 			{
 				$res = ($line->label) ? $line->label : (($line->description) ? $line->description : $line->desc);
 			}
 		}
-		
+
 		return $res;
 	}
-	
+
 	/**
 	 * @param $parameters   array
 	 * @param $object       CommonObject
@@ -1953,13 +2012,13 @@ class ActionsSubtotal
 	 * @return int
 	 */
 	function printObjectLine ($parameters, &$object, &$action, $hookmanager){
-		
+
 		global $conf,$langs,$user,$db,$bc;
-		
+
 		$num = &$parameters['num'];
 		$line = &$parameters['line'];
 		$i = &$parameters['i'];
-		
+
 		$var = &$parameters['var'];
 
 		$contexts = explode(':',$parameters['context']);
@@ -2026,7 +2085,7 @@ class ActionsSubtotal
             }
 			return 0;
 		}
-		else if (in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('invoicereccard',$contexts)) 
+		else if (in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('invoicereccard',$contexts))
         {
 
 
@@ -2053,9 +2112,7 @@ class ActionsSubtotal
 				</script>
 				<?php
 			}
-			
 			if(empty($line->description)) $line->description = $line->desc;
-			
 			$colspan = 5;
 			if($object->element == 'facturerec' ) $colspan = 3;
 			if($object->element == 'order_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 3 : $colspan = 6;
@@ -2065,19 +2122,21 @@ class ActionsSubtotal
 				$colspan++; // Colonne PU Devise
 			}
 			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
-			if(!empty($conf->margin->enabled)) $colspan++;
-			if(!empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
-			if(!empty($conf->global->DISPLAY_MARK_RATES)) $colspan++;
+
+			$margins_hidden_by_module = empty($conf->affmarges->enabled) ? false : !($_SESSION['marginsdisplayed']);
+			if(!empty($conf->margin->enabled) && !$margins_hidden_by_module) $colspan++;
+			if(!empty($conf->global->DISPLAY_MARGIN_RATES) && !$margins_hidden_by_module) $colspan++;
+			if(!empty($conf->global->DISPLAY_MARK_RATES) && !$margins_hidden_by_module) $colspan++;
 			if($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION) $colspan++;
 			if(!empty($conf->global->PRODUCT_USE_UNITS)) $colspan++;
-					
+
 			/* Titre */
 			//var_dump($line);
-            
+
 			// HTML 5 data for js
             $data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
-            
-			
+
+
 			?>
 			<tr <?php echo $bc[$var]; $var=!$var; echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
@@ -2092,7 +2151,7 @@ class ActionsSubtotal
 
 						//A compléter si on veux plus de nuances de couleurs avec les niveau 4,5,6,7,8 et 9
 					}
-					else 
+					else
 					{
 						if($line->qty==99) print 'background:#ddffdd';
 						else if($line->qty==98) print 'background:#ddddff;';
@@ -2112,7 +2171,7 @@ class ActionsSubtotal
 
 						$params=array('line'=>$line);
 						$reshook=$hookmanager->executeHooks('formEditProductOptions',$params,$object,$action);
-						
+
 						echo '<div id="line_'.$line->id.'"></div>'; // Imitation Dolibarr
 						echo '<input type="hidden" value="'.$line->id.'" name="lineid">';
 						echo '<input id="product_type" type="hidden" value="'.$line->product_type.'" name="type">';
@@ -2124,7 +2183,7 @@ class ActionsSubtotal
 						{
 							$qty_displayed = $line->qty;
 							print img_picto('', 'subsubtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;color:#0075DE;">'.$qty_displayed.'</span>&nbsp;&nbsp;';
-							
+
 						}
 						else if (TSubtotal::isSubtotal($line))
 						{
@@ -2135,7 +2194,7 @@ class ActionsSubtotal
 						{
 							$isFreeText = true;
 						}
-						
+
 						if ($object->element == 'order_supplier' || $object->element == 'invoice_supplier') {
 						    $line->label = !empty($line->description) ? $line->description : $line->desc;
 						    $line->description = '';
@@ -2153,9 +2212,9 @@ class ActionsSubtotal
 
 						$readonlyForSituation = '';
 						if (!empty($line->fk_prev_id) && $line->fk_prev_id != null) $readonlyForSituation = 'readonly';
-						
+
 						if (!$isFreeText) echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$newlabel.'" size="80" '.$readonlyForSituation.'/>&nbsp;';
-						
+
 						if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT) && (TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line)) )
 						{
 							$select = '<select name="subtotal_level">';
@@ -2169,7 +2228,7 @@ class ActionsSubtotal
 
 							echo $select;
 						}
-						
+
 
 						echo '<div class="subtotal_underline" style="margin-left:24px; line-height: 25px;">';
                         echo '<div>';
@@ -2206,7 +2265,8 @@ class ActionsSubtotal
                         else if ($isFreeText) echo TSubtotal::getFreeTextHtml($line, (bool) $readonlyForSituation);
 						echo '</div>';
 
-						if($line->qty<10) {
+						if (TSubtotal::isTitle($line))
+						{
 							// WYSIWYG editor
 							require_once DOL_DOCUMENT_ROOT . '/core/class/doleditor.class.php';
 							$nbrows = ROWS_2;
@@ -2221,56 +2281,78 @@ class ActionsSubtotal
 							$doleditor = new DolEditor('line-description', $line->description, '', 100, $toolbarname, '',
 								false, true, $cked_enabled, $nbrows, '98%', (bool) $readonlyForSituation);
 							$doleditor->Create();
+
+							$TKey = null;
+							if ($line->element == 'propaldet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET);
+							elseif ($line->element == 'commandedet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET);
+							elseif ($line->element == 'facturedet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET);
+							// TODO ajouter la partie fournisseur
+
+							if (!empty($TKey))
+							{
+								$extrafields = new ExtraFields($this->db);
+								$extrafields->fetch_name_optionals_label($object->table_element_line);
+								foreach ($extrafields->attributes[$line->element]['param'] as $code => $val)
+								{
+									if (in_array($code, $TKey) && $extrafields->attributes[$line->element]['list'][$code] > 0)
+									{
+										echo '<div class="sub-'.$code.'">';
+										echo '<label class="">'.$extrafields->attributes[$line->element]['label'][$code].'</label>';
+										echo $extrafields->showInputField($code, $line->array_options['options_'.$code], '', '', 'subtotal_');
+										echo '</div>';
+									}
+								}
+							}
 						}
-						
+
 					}
 					else {
 
 						 if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
 						 {
-							if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line)) 
+							if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
 							{
 								echo str_repeat('&nbsp;&nbsp;&nbsp;', $line->qty-1);
-								
+
 								if (TSubtotal::isTitle($line)) print img_picto('', 'subtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;">'.$line->qty.'</span>&nbsp;&nbsp;';
 								else print img_picto('', 'subtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;">'.(100-$line->qty).'</span>&nbsp;&nbsp;';
 							}
 						 }
-						 else 
+						 else
 						 {
 							if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
-							else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; 
+							else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 						 }
-						 
-						 
+
+
 						 // Get display styles and apply them
 						 $titleStyleItalic = strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'I') === false ? '' : ' font-style: italic;';
 						 $titleStyleBold =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'B') === false ? '' : ' font-weight:bold;';
 						 $titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
-						 
+
 						 if (empty($line->label)) {
 							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) print  $line->description.' '.$this->getTitle($object, $line);
 							else print  $line->description;
-						 } 
+						 }
 						 else {
 
 							if (! empty($conf->global->PRODUIT_DESC_IN_FORM) && !empty($line->description)) {
 								print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
 							}
 							else{
-								print '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';    
+								print '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
 							}
 
-						 } 
+						 }
 						if($line->qty>90) print ' : ';
 						if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
 
-						 
+
 
 
 					}
 			?></td>
-					 
+
 			<?php
 				if($line->qty>90) {
 					/* Total */
@@ -2284,13 +2366,13 @@ class ActionsSubtotal
 					if (!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 					}
-				}	
+				}
 			?>
-					
+
 			<td align="center" class="nowrap linecoledit">
 				<?php
 				if ($action != 'selectlines') {
-				
+
 					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 						?>
 						<input id="savelinebutton" class="button" type="submit" name="save" value="<?php echo $langs->trans('Save') ?>" />
@@ -2305,7 +2387,7 @@ class ActionsSubtotal
 
 						</script>
 						<?php
-						
+
 					}
 					else{
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) && $object->element !== 'invoice_supplier')
@@ -2313,18 +2395,18 @@ class ActionsSubtotal
 							if(TSubtotal::isTitle($line) && ( $line->fk_prev_id === null )) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
 						}
 
-						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK)) 
+						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK))
 						{
 							echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=editline&lineid='.$line->id.'">'.img_edit().'</a>';
-						}								
+						}
 					}
-					
+
 				}
-					
+
 				?>
 			</td>
 
-			<td align="center" class="nowrap linecoldelete">	
+			<td align="center" class="nowrap linecoldelete">
 				<?php
 
 				if ($action != 'editline' && $action != 'selectlines') {
@@ -2355,7 +2437,7 @@ class ActionsSubtotal
 								?>
 								<script>
 									$(document).ready(function () {
-										$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline").css({"color": "#be3535"});
+										$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline,span.fas.fa-trash.pictodeleteallline").css({"color": "#be3535"});
 									});
 								</script>
 								<?php
@@ -2365,15 +2447,15 @@ class ActionsSubtotal
 					}
 				?>
 			</td>
-			
-			<?php 
+
+			<?php
 			if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::isTitle($line) && $action != 'editline')
 			{
 				echo '<td class="subtotal_nc">';
 				echo '<input id="subtotal_nc-'.$line->id.'" class="subtotal_nc_chkbx" data-lineid="'.$line->id.'" type="checkbox" name="subtotal_nc" value="1" '.(!empty($line->array_options['options_subtotal_nc']) ? 'checked="checked"' : '').' />';
 				echo '</td>';
 			}
-			
+
 			if ($num > 1 && empty($conf->browser->phone)) { ?>
 			<td align="center" class="linecolmove tdlineupdown">
 			</td>
@@ -2388,20 +2470,20 @@ class ActionsSubtotal
 
 			</tr>
 			<?php
-			
-			
+
+
 			// Affichage des extrafields à la Dolibarr (car sinon non affiché sur les titres)
 			if(TSubtotal::isTitle($line) && !empty($conf->global->SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE)) {
-				
+
 				require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
-				
+
 				// Extrafields
 				$extrafieldsline = new ExtraFields($db);
 				$extralabelsline = $extrafieldsline->fetch_name_optionals_label($object->table_element_line);
-				
+
 				$colspan+=3; $mode = 'view';
 				if($action === 'editline' && $line->rowid == GETPOST('lineid')) $mode = 'edit';
-				
+
 				$ex_element = $line->element;
 				$line->element = 'tr_extrafield_title '.$line->element; // Pour pouvoir manipuler ces tr
 				print $line->showOptionals($extrafieldsline, $mode, array('style'=>' style="background:#eeffee;" ','colspan'=>$colspan));
@@ -2412,14 +2494,14 @@ class ActionsSubtotal
 						break;
 					}
 				}
-				
+
 				if($mode === 'edit') {
 					?>
 					<script>
 						$(document).ready(function(){
 
 							var all_tr_extrafields = $("tr.tr_extrafield_title");
-							<?php 
+							<?php
 							// Si un extrafield est rempli alors on affiche directement les extrafields
 							if(!$isExtraSelected) {
 								echo 'all_tr_extrafields.hide();';
@@ -2431,7 +2513,7 @@ class ActionsSubtotal
 								echo 'var extra = 1;';
 							}
 							?>
-							
+
 							$("div .subtotal_underline").append(
 									'<a id="printBlocExtrafields" onclick="return false;" href="#">' + trad + '</a>'
 									+ '<input type="hidden" name="showBlockExtrafields" id="showBlockExtrafields" value="'+ extra +'" />');
@@ -2454,11 +2536,11 @@ class ActionsSubtotal
 					<?php
 				}
 				$line->element = $ex_element;
-				
+
 			}
-			
-			return 1;	
-			
+
+			return 1;
+
 		}
 		elseif(($object->element == 'commande' && in_array('ordershipmentcard', $contexts)) || (in_array('expeditioncard', $contexts) && $action == 'create'))
 		{
@@ -2593,7 +2675,7 @@ class ActionsSubtotal
 
 						//A compléter si on veux plus de nuances de couleurs avec les niveau 4,5,6,7,8 et 9
 					}
-					else 
+					else
 					{
 						if($line->qty==99) print 'background:#ddffdd';
 						else if($line->qty==98) print 'background:#ddddff;';
@@ -2660,10 +2742,17 @@ class ActionsSubtotal
 			if ($object->element == 'shipping' && $object->statut == 0 && ! empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
 			{
 				print '<td class="linecoldelete nowrap" width="10">';
-
+				$lineid = $line->id;
+				if($line->element === 'commandedet') {
+					foreach($object->lines as $shipmentLine) {
+						if(!empty($shipmentLine->fk_origin_line) && $shipmentLine->fk_origin == 'orderline' && $shipmentLine->fk_origin_line == $line->id) {
+							$lineid = $shipmentLine->id;
+						}
+					}
+				}
 				if ($line->fk_prev_id === null)
 				{
-					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=deleteline&amp;lineid='.$line->id.'">'.img_delete().'</a>';
+					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=deleteline&amp;lineid='.$lineid.'">'.img_delete().'</a>';
 				}
 
 				if(TSubtotal::isTitle($line) && ($line->fk_prev_id === null) )
@@ -2676,7 +2765,7 @@ class ActionsSubtotal
 						$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal');
 					}
 
-					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=ask_deleteallline&amp;lineid='.$line->id.'">'.$img_delete.'</a>';
+					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=ask_deleteallline&amp;lineid='.$lineid.'">'.$img_delete.'</a>';
 
 					/* Depuis la 8.0, les icônes "standard" utilisent FontAwesome et sont préconfigurées selon la clé de l'image
 					 * Impossible d'en customiser par exemple la couleur, même en utilisant img_picto() directement
@@ -2685,7 +2774,7 @@ class ActionsSubtotal
 						?>
 							<script>
 								$(document).ready(function () {
-									$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline").css({"color": "#be3535"});
+									$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline,span.fas.fa-trash.pictodeleteallline").css({"color": "#be3535"});
 								});
 							</script>
 							<?php
@@ -2713,13 +2802,120 @@ class ActionsSubtotal
 
 	}
 
-	
+	function printOriginObjectLine($parameters, &$object, &$action, $hookmanager)
+	{
+		global $conf,$langs,$user,$db,$bc, $restrictlist, $selectedLines;
+
+		$line = &$parameters['line'];
+		$i = &$parameters['i'];
+
+		$var = &$parameters['var'];
+
+		$contexts = explode(':',$parameters['context']);
+
+		if (in_array('ordercard',$contexts))
+		{
+			/** @var Commande $object */
+
+			if(class_exists('TSubtotal')){ dol_include_once('/subtotal/class/subtotal.class.php'); }
+
+			if (TSubtotal::isModSubtotalLine($line))
+			{
+				$object->tpl['subtotal'] = $line->id;
+				if (TSubtotal::isTitle($line)) $object->tpl['sub-type'] = 'title';
+				else if (TSubtotal::isSubtotal($line)) $object->tpl['sub-type'] = 'total';
+
+				$object->tpl['sub-tr-style'] = '';
+				if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
+				{
+					if($line->qty==99) $object->tpl['sub-tr-style'].= 'background:#adadcf';
+					else if($line->qty==98) $object->tpl['sub-tr-style'].= 'background:#ddddff;';
+					else if($line->qty<=97 && $line->qty>=91) $object->tpl['sub-tr-style'].= 'background:#eeeeff;';
+					else if($line->qty==1) $object->tpl['sub-tr-style'].= 'background:#adadcf;';
+					else if($line->qty==2) $object->tpl['sub-tr-style'].= 'background:#ddddff;';
+					else if($line->qty==50) $object->tpl['sub-tr-style'].= '';
+					else $object->tpl['sub-tr-style'].= 'background:#eeeeff;';
+
+					//A compléter si on veux plus de nuances de couleurs avec les niveau 4,5,6,7,8 et 9
+				}
+				else
+				{
+					if($line->qty==99) $object->tpl['sub-tr-style'].= 'background:#ddffdd';
+					else if($line->qty==98) $object->tpl['sub-tr-style'].= 'background:#ddddff;';
+					else if($line->qty==2) $object->tpl['sub-tr-style'].= 'background:#eeeeff; ';
+					else if($line->qty==50) $object->tpl['sub-tr-style'].= '';
+					else $object->tpl['sub-tr-style'].= 'background:#eeffee;' ;
+				}
+
+				$object->tpl['sub-td-style'] = '';
+				if ($line->qty>90) $object->tpl['sub-td-style'] = 'style="text-align:right"';
+
+
+				if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+				{
+					if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
+					{
+						$object->tpl["sublabel"] = str_repeat('&nbsp;&nbsp;&nbsp;', $line->qty-1);
+
+						if (TSubtotal::isTitle($line)) $object->tpl["sublabel"].= img_picto('', 'subtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;">'.$line->qty.'</span>&nbsp;&nbsp;';
+						else $object->tpl["sublabel"].= img_picto('', 'subtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;">'.(100-$line->qty).'</span>&nbsp;&nbsp;';
+					}
+				}
+				else
+				{
+					$object->tpl["sublabel"] = '';
+					if($line->qty<=1) $object->tpl["sublabel"] = img_picto('', 'subtotal@subtotal');
+					else if($line->qty==2) $object->tpl["sublabel"] = img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+				}
+
+				// Get display styles and apply them
+				$titleStyleItalic = strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'I') === false ? '' : ' font-style: italic;';
+				$titleStyleBold =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'B') === false ? '' : ' font-weight:bold;';
+				$titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
+
+				if (empty($line->label)) {
+					if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) $object->tpl["sublabel"].=  $line->description.' '.$this->getTitle($object, $line);
+					else $object->tpl["sublabel"].=  $line->description;
+				}
+				else {
+
+					if (! empty($conf->global->PRODUIT_DESC_IN_FORM) && !empty($line->description)) {
+						$object->tpl["sublabel"].= '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
+					}
+					else{
+						$object->tpl["sublabel"].= '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+					}
+
+				}
+				if($line->qty>90)
+				{
+					$total = $this->getTotalLineFromObject($object, $line, '');
+					$object->tpl["sublabel"].= ' : <b>'.$total.'</b>';
+				}
+
+
+
+			}
+
+			$object->printOriginLine($line, '', $restrictlist, '/core/tpl', $selectedLines);
+
+			unset($object->tpl["sublabel"]);
+			unset($object->tpl['sub-td-style']);
+			unset($object->tpl['sub-tr-style']);
+			unset($object->tpl['sub-type']);
+			unset($object->tpl['subtotal']);
+		}
+
+		return 0;
+	}
+
+
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
 		global $conf,$langs;
-		 
+
 		if ($object->statut == 0 && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && $action != 'editline')
 		{
-		    
+
 		    if($object->element == 'invoice_supplier' || $object->element == 'order_supplier')
 		    {
 		        foreach ($object->lines as $line)
@@ -2731,42 +2927,42 @@ class ActionsSubtotal
 		            $line->fetch_optionals($line->id,$extralabels);
 		        }
 		    }
-		    
+
 			$TSubNc = array();
 			foreach ($object->lines as &$l)
 			{
 				$TSubNc[$l->id] = (int) $l->array_options['options_subtotal_nc'];
 			}
-			
+
 			$form = new Form($db);
 			?>
 			<script type="text/javascript">
 				$(function() {
 					var subtotal_TSubNc = <?php echo json_encode($TSubNc); ?>;
-					$("#tablelines tbody > tr").each(function(i, item) {
+					$("#tablelines tr").each(function(i, item) {
 						if ($(item).children('.subtotal_nc').length == 0)
 						{
 							var id = $(item).attr('id');
-							
-							if ((typeof id != 'undefined' && id.indexOf('row-') >= 0) || $(item).hasClass('liste_titre'))
+
+							if ((typeof id != 'undefined' && id.indexOf('row-') == 0) || $(item).hasClass('liste_titre'))
 							{
 								$(item).children('td:last-child').before('<td class="subtotal_nc"></td>');
-								
+
 								if ($(item).attr('rel') != 'subtotal' && typeof $(item).attr('id') != 'undefined')
 								{
 									var idSplit = $(item).attr('id').split('-');
 									$(item).children('td.subtotal_nc').append($('<input type="checkbox" id="subtotal_nc-'+idSplit[1]+'" class="subtotal_nc_chkbx" data-lineid="'+idSplit[1]+'" value="1" '+(typeof subtotal_TSubNc[idSplit[1]] != 'undefined' && subtotal_TSubNc[idSplit[1]] == 1 ? 'checked="checked"' : '')+' />'));
 								}
 							}
-							else 
+							else
 							{
 								$(item).append('<td class="subtotal_nc"></td>');
 							}
 						}
 					});
-					
-					$('#tablelines tbody tr.liste_titre:first .subtotal_nc').html(<?php echo json_encode($form->textwithtooltip($langs->trans('subtotal_nc_title'), $langs->trans('subtotal_nc_title_help'))); ?>);
-					
+
+					$('#tablelines tr.liste_titre:first .subtotal_nc').html(<?php echo json_encode($form->textwithtooltip($langs->trans('subtotal_nc_title'), $langs->trans('subtotal_nc_title_help'))); ?>);
+
 					function callAjaxUpdateLineNC(set, lineid, subtotal_nc)
 					{
 						$.ajax({
@@ -2784,29 +2980,31 @@ class ActionsSubtotal
 							window.location.href = window.location.pathname + '?id=<?php echo $object->id; ?>&page_y=' + window.pageYOffset;
 						});
 					}
-					
+
 					$(".subtotal_nc_chkbx").change(function(event) {
 						var lineid = $(this).data('lineid');
-						var subtotal_nc = 0 | $(this).is(':checked'); // Renvoi 0 ou 1 
-						
+						var subtotal_nc = 0 | $(this).is(':checked'); // Renvoi 0 ou 1
+
 						callAjaxUpdateLineNC('updateLineNC', lineid, subtotal_nc);
 					});
-					
+
 				});
 
 			</script>
 			<?php
 		}
-		
+
 		$this->_ajax_block_order_js($object);
+
+		return 0;
 	}
-	
+
 	function afterPDFCreation($parameters, &$pdf, &$action, $hookmanager)
 	{
 		global $conf;
-		
+
 		$object = $parameters['object'];
-		
+
 		if ((!empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP) && $object->element == 'propal') || (!empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP) && $object->element == 'commande') || (!empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP) && $object->element == 'facture'))
 		{
 			if (GETPOST('subtotal_add_recap')) {
@@ -2814,20 +3012,41 @@ class ActionsSubtotal
 				TSubtotal::addRecapPage($parameters, $pdf);
 			}
 		}
+
+		return 0;
 	}
-	
+
+	/** Overloading the getlinetotalremise function : replacing the parent's function with the one below
+	 * @param      $parameters  array           meta datas of the hook (context, etc...)
+	 * @param      $object      CommonObject    the object you want to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @param      $action      string          current action (if set). Generally create or edit or null
+	 * @param      $hookmanager HookManager     current hook manager
+	 * @return     void
+	 */
+	function getlinetotalremise($parameters, &$object, &$action, $hookmanager)
+	{
+	    // Les lignes NC ne sont pas censées afficher de montant total de remise, nouveau hook en v11 dans pdf_sponge
+	    if (! empty($object->lines[$parameters['i']]->array_options['options_subtotal_nc']))
+	    {
+            $this->resprints = '';
+            return 1;
+	    }
+
+		return 0;
+	}
+
 	// HTML 5 data for js
 	private function _getHtmlData($parameters, &$object, &$action, $hookmanager)
 	{
 		dol_include_once('/subtotal/class/subtotal.class.php');
 
 	    $line = &$parameters['line'];
-	    
+
 	    $ThtmlData['data-id']           = $line->id;
 	    $ThtmlData['data-product_type'] = $line->product_type;
 	    $ThtmlData['data-qty']          = 0; //$line->qty;
 	    $ThtmlData['data-level']        = TSubtotal::getNiveau($line);
-	    
+
 	    if(TSubtotal::isTitle($line)){
 	        $ThtmlData['data-issubtotal'] = 'title';
 	    }elseif(TSubtotal::isSubtotal($line)){
@@ -2836,12 +3055,12 @@ class ActionsSubtotal
 	    else{
 	        $ThtmlData['data-issubtotal'] = 'freetext';
 	    }
-	    
-	    
+
+
 	    // Change or add data  from hooks
 	    $parameters = array_replace($parameters , array(  'ThtmlData' => $ThtmlData )  );
-	    
-	    // hook 
+
+	    // hook
 	    $reshook = $hookmanager->executeHooks('subtotalLineHtmlData',$parameters,$object,$action); // Note that $action and $object may have been modified by hook
 	    if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 	    if ($reshook>0)
@@ -2850,10 +3069,10 @@ class ActionsSubtotal
 	    }
 
 	    return $this->implodeHtmlData($ThtmlData);
-	
+
 	}
-	
-	
+
+
 	function implodeHtmlData($ThtmlData = array())
 	{
 	    $data = '';
@@ -2863,40 +3082,40 @@ class ActionsSubtotal
 	        {
 	            $h = json_encode($h);
 	        }
-	        
+
 	        $data .= $k . '="'.dol_htmlentities($h, ENT_QUOTES).'" ';
 	    }
-	    
+
 	    return $data;
 	}
-	
+
 	function _ajax_block_order_js($object)
 	{
 	    global $conf,$tagidfortablednd,$filepath,$langs;
-	    
+
 	    /*
-	     * this part of js is base on dolibarr htdocs/core/tpl/ajaxrow.tpl.php 
+	     * this part of js is base on dolibarr htdocs/core/tpl/ajaxrow.tpl.php
 	     * for compatibility reasons we don't use tableDnD but jquery sortable
 	     */
-	    
+
 	    $id=$object->id;
 	    $nboflines=(isset($object->lines)?count($object->lines):0);
 	    $forcereloadpage=empty($conf->global->MAIN_FORCE_RELOAD_PAGE)?0:1;
-	    
+
 	    $id=$object->id;
 	    $fk_element=$object->fk_element;
 	    $table_element_line=$object->table_element_line;
 	    $nboflines=(isset($object->lines)?count($object->lines):(empty($nboflines)?0:$nboflines));
 	    $tagidfortablednd=(empty($tagidfortablednd)?'tablelines':$tagidfortablednd);
 	    $filepath=(empty($filepath)?'':$filepath);
-	    
-	    
+
+
 	    if (GETPOST('action','aZ09') != 'editline' && $nboflines > 1)
 	    {
-	        
+
 	        ?>
-		
-		
+
+
 			<script type="text/javascript">
 			$(document).ready(function(){
 
@@ -2905,7 +3124,7 @@ class ActionsSubtotal
 				var lastTitleCol = titleRow.find('td:last-child');
 				var moveBlockCol= titleRow.find('td.linecolht');
 
-				
+
 				moveBlockCol.disableSelection(); // prevent selection
 <?php if ($object->statut == 0) { ?>
 				// apply some graphical stuff
@@ -2914,7 +3133,7 @@ class ActionsSubtotal
 				moveBlockCol.css("background-position","center center");
 				moveBlockCol.css("cursor","move");
 				titleRow.attr('title', '<?php echo html_entity_decode($langs->trans('MoveTitleBlock')); ?>');
-			
+
 
  				$( "#<?php echo $tagidfortablednd; ?>" ).sortable({
 			    	  cursor: "move",
@@ -2929,17 +3148,17 @@ class ActionsSubtotal
 			    		  //console.log(ui.item);
 			    		  var colCount = ui.item.children().length;
    						  ui.placeholder.html('<td colspan="'+colCount+'">&nbsp;</td>');
-   		
+
 			    		  var TcurrentChilds = getSubtotalTitleChilds(ui.item);
 			    		  ui.item.data('childrens',TcurrentChilds); // store data
-				    		
+
 			    		  for (var key in TcurrentChilds) {
-			    			  $('#'+ TcurrentChilds[key]).addClass('noblockdrop');//'#row-'+ 
-			    			  $('#'+ TcurrentChilds[key]).fadeOut();//'#row-'+ 
+			    			  $('#'+ TcurrentChilds[key]).addClass('noblockdrop');//'#row-'+
+			    			  $('#'+ TcurrentChilds[key]).fadeOut();//'#row-'+
 			    		  }
 
 			    		  $(this).sortable("refresh");	// "refresh" of source sortable is required to make "disable" work!
-			    	      
+
 			    	    },
 				    	stop: function (event, ui) {
 							// call we element is droped
@@ -2948,12 +3167,12 @@ class ActionsSubtotal
 				    	  	var TcurrentChilds = ui.item.data('childrens'); // reload child list from data and not attr to prevent load error
 
 							for (var i =TcurrentChilds.length ; i >= 0; i--) {
-				    			  $('#'+ TcurrentChilds[i]).insertAfter(ui.item); //'#row-'+ 
-				    			  $('#'+ TcurrentChilds[i]).fadeIn(); //'#row-'+ 
+				    			  $('#'+ TcurrentChilds[i]).insertAfter(ui.item); //'#row-'+
+				    			  $('#'+ TcurrentChilds[i]).fadeIn(); //'#row-'+
 							}
 							console.log('onstop');
 							console.log(cleanSerialize($(this).sortable('serialize')));
-							
+
 							$.ajax({
 			    	            data: {
 									objet_id: <?php print $object->id; ?>,
@@ -2969,10 +3188,10 @@ class ActionsSubtotal
 			    	                console.log(data);
 			    	            },
 			    	        });
-			    	        
+
 			    	  },
 			    	  update: function (event, ui) {
-				    	  
+
 			    	        // POST to server using $.post or $.ajax
 				    	  	$('.noblockdrop').removeClass('noblockdrop');
 							//console.log('onupdate');
@@ -2988,12 +3207,12 @@ class ActionsSubtotal
 
 		    		var indexOfFirstSubtotal = -1;
 		    		var indexOfFirstTitle = -1;
-		    		
+
 		    		item.nextAll('[id^="row-"]').each(function(index){
 
 						var dataLevel = $(this).attr('data-level');
 						var dataIsSubtotal = $(this).attr('data-issubtotal');
-						
+
 						if(dataIsSubtotal != 'undefined' && dataLevel != 'undefined' )
 						{
 
@@ -3005,7 +3224,7 @@ class ActionsSubtotal
 									TcurrentChilds.push($(this).attr('id'));
 								}
 							}
-							
+
 							if(dataLevel <=  level && indexOfFirstSubtotal < 0 && indexOfFirstTitle < 0 && dataIsSubtotal == 'title' )
 							{
 								indexOfFirstTitle = index;
@@ -3025,17 +3244,17 @@ class ActionsSubtotal
 									TcurrentChilds.push($(this).attr('id'));
 								});
 							}
-							
+
 						}
 
 		    		});
 		    		return TcurrentChilds;
 				}
-				
+
 			});
 			</script>
 			<style type="text/css" >
-         
+
             tr.ui-state-highlight td{
             	border: 1px solid #dad55e;
             	background: #fffa90;
@@ -3043,11 +3262,11 @@ class ActionsSubtotal
             }
             </style>
 		<?php
-		
-		} 
-	
-		
-		
+
+		}
+
+
+
 	}
-	
+
 }

@@ -146,6 +146,23 @@ class Interfacesubtotaltrigger
 			$object->rang = $rang;
 		}
 	}
+
+	/**
+	  * Function called when a Dolibarrr business event is done.
+	  * All functions "runTrigger" are triggered if file
+	  * is inside directory core/triggers
+	  *
+	  * 	@param		string		$action		Event action code
+	  * 	@param		Object		$object		Object
+	  * 	@param		User		$user		Object user
+	  * 	@param		Translate	$langs		Object langs
+	  * 	@param		conf		$conf		Object conf
+	  * 	@return		int						<0 if KO, 0 if no triggered ran, >0 if OK
+	  */
+	public function runTrigger($action, $object, $user, $langs, $conf)
+	{
+		return $this->run_trigger($action, $object, $user, $langs, $conf);
+	}
 	
     /**
      * Function called when a Dolibarrr business event is done.
@@ -290,7 +307,7 @@ class Interfacesubtotaltrigger
 
 			$doli_action = GETPOST('action');
 			$set = GETPOST('set');
-			if ( (in_array($doli_action, array('updateligne', 'updateline', 'addline', 'add', 'create', 'setstatut')) || $set == 'defaultTVA') && !TSubtotal::isTitle($object) && !TSubtotal::isSubtotal($object) && in_array($object->element, array('propaldet', 'commandedet', 'facturedet')))
+			if ( (in_array($doli_action, array('updateligne', 'updateline', 'addline', 'add', 'create', 'setstatut', 'save_nomenclature')) || $set == 'defaultTVA') && !TSubtotal::isTitle($object) && !TSubtotal::isSubtotal($object) && in_array($object->element, array('propaldet', 'commandedet', 'facturedet')))
 			{
 				 dol_syslog(
 					"[SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS] Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". object=".$object->element." id=" . $object->id
@@ -461,11 +478,7 @@ class Interfacesubtotaltrigger
         }
 
         // Customer orders
-        elseif ($action == 'ORDER_CREATE') {
-            dol_syslog(
-                "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
-            );
-        } elseif ($action == 'ORDER_VALIDATE') {
+        elseif ($action == 'ORDER_VALIDATE') {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
@@ -511,11 +524,8 @@ class Interfacesubtotaltrigger
         }
 
         // Proposals
-        elseif ($action == 'PROPAL_CREATE') {
-            dol_syslog(
-                "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
-            );
-        } elseif (in_array($action, array('PROPAL_CLONE', 'ORDER_CLONE', 'BILL_CLONE'))) {
+        elseif ((floatval(DOL_VERSION) <= 7.0 && in_array($action, array('PROPAL_CLONE', 'ORDER_CLONE', 'BILL_CLONE'))) ||
+                (floatval(DOL_VERSION) >= 8.0 && ! empty($object->context) && in_array('createfromclone', $object->context) && in_array($action, array('PROPAL_CREATE', 'ORDER_CREATE', 'BILL_CREATE')))) {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
