@@ -33,10 +33,10 @@
 /**
  * Trigger class
  */
-class Interfacesubtotaltrigger
+class Interfacesubtotaltrigger extends DolibarrTriggers
 {
 
-    private $db;
+    protected $db;
 
     /**
      * Constructor
@@ -372,7 +372,7 @@ class Interfacesubtotaltrigger
 		// Il faut supprimer de l'expédition les titres et sous-totaux s'ils n'ont pas de lignes de produits / services entre eux
 		if ($action == 'SHIPPING_CREATE') {
 			$object->fetch_lines(); // Obligé de fetch les lines car au retour de la création, les lignes n'ont pas leur id...
-			
+
 			// Parcours des lignes et lorsque un tire et un sous-total de même niveau, ou 2 titres de même niveau sont à la suite, on les supprime
 			foreach ($object->lines as &$line) {
 				$orderline = new OrderLine($this->db);
