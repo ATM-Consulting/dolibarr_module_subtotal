@@ -156,7 +156,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
      * 	@param		conf		$conf		Object conf
      * 	@return		int						<0 if KO, 0 if no triggered ran, >0 if OK
      */
-    public function runTrigger($action, $object, $user, $langs, $conf)
+    public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
         // Put here code you want to execute when a Dolibarr business events occurs.
         // Data and type of action are stored into $object and $action
