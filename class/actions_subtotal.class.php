@@ -2392,7 +2392,7 @@ class ActionsSubtotal
 					else{
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) && $object->element !== 'invoice_supplier')
 						{
-							if(TSubtotal::isTitle($line) && ( $line->fk_prev_id === null )) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
+							if(TSubtotal::isTitle($line) && ( $line->fk_prev_id === null )) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'"><i class="fa fa-clone" aria-hidden="true"></i></a> ';
 						}
 
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK))
