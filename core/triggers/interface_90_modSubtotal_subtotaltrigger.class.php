@@ -46,12 +46,10 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 
         $this->name = preg_replace('/^Interface/i', '', get_class($this));
         $this->family = "demo";
-        $this->description = "Triggers of this module are empty functions."
-            . "They have no effect."
-            . "They are provided for tutorial purpose only.";
+        $this->description = "Triggers of this module are subtotal functions."
         // 'development', 'experimental', 'dolibarr' or version
         $this->version = 'development';
-        $this->picto = 'titre@titre';
+        $this->picto = 'subtotal@subtotal';
     }
 
     /**
