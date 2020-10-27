@@ -10,9 +10,11 @@ class TSubtotal {
 	 * @param string       $label
 	 * @param int          $qty
 	 * @param int          $rang
+	 * @param bool         $generatePDF
 	 * @return int
 	 */
-	static function addSubTotalLine(&$object, $label, $qty, $rang=-1) {
+	static function addSubTotalLine(&$object, $label, $qty, $rang=-1, $generatePDF=true)
+	{
 
 		$res = 0;
 
@@ -78,7 +80,7 @@ class TSubtotal {
 
 		}
 
-		self::generateDoc($object);
+		if ($generatePDF) self::generateDoc($object);
 
 		return $res;
 	}
@@ -150,8 +152,9 @@ class TSubtotal {
 	 * @global Translate   $langs
 	 * @param CommonObject $object
 	 * @param int          $level_new_title
+	 * @param bool         $generatePDF
 	 */
-	public static function addSubtotalMissing(&$object, $level_new_title)
+	public static function addSubtotalMissing(&$object, $level_new_title, $generatePDF=true)
 	{
 		global $langs;
 		$TTitle = self::getAllTitleWithoutTotalFromDocument($object);
@@ -169,7 +172,7 @@ class TSubtotal {
 			{
 				if ($rang_to_add != -1) self::updateRang($object, $rang_to_add);
 
-				self::addSubTotalLine($object, $langs->trans('SubTotal'), 100-$title_niveau, $rang_to_add);
+				self::addSubTotalLine($object, $langs->trans('SubTotal'), 100-$title_niveau, $rang_to_add, $generatePDF);
 
 				$object->lines[] = $object->line; // ajout de la ligne dans le tableau de ligne (Dolibarr ne le fait pas)
 				if ($rang_to_add != -1)
@@ -181,27 +184,30 @@ class TSubtotal {
 		}
 	}
 
-	public static function addTitle(&$object, $label, $level, $rang=-1)
 	/**
 	 * @param CommonObject $object
 	 * @param string       $label
 	 * @param int          $level
 	 * @param int          $rang
+	 * @param bool         $generatePDF
 	 * @return int
 	 */
+	public static function addTitle(&$object, $label, $level, $rang=-1, $generatePDF=true)
 	{
-		self::addSubTotalLine($object, $label, $level, $rang);
+		return self::addSubTotalLine($object, $label, $level, $rang, $generatePDF);
 	}
 
-	public static function addTotal(&$object, $label, $level, $rang=-1)
+	/**
 	 * @param CommonObject $object
 	 * @param string       $label
 	 * @param int          $level
 	 * @param int          $rang
+	 * @param bool         $generatePDF
 	 * @return int
 	 */
+	public static function addTotal(&$object, $label, $level, $rang=-1, $generatePDF=true)
 	{
-		return self::addSubTotalLine($object, $label, (100-$level), $rang);
+		return self::addSubTotalLine($object, $label, (100-$level), $rang, $generatePDF);
 	}
 
 	/**
