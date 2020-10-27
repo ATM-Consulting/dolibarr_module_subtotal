@@ -194,6 +194,7 @@ class TSubtotal {
 	}
 
 	public static function addTotal(&$object, $label, $level, $rang=-1)
+	/**
 	 * @param CommonObject $object
 	 * @param string       $label
 	 * @param int          $level
