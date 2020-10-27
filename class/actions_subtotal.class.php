@@ -417,6 +417,7 @@ class ActionsSubtotal
 				$hideprices= isset( $_SESSION['subtotal_hideprices_'.$parameters['modulepart']][$object->id] ) ?  $_SESSION['subtotal_hideprices_'.$parameters['modulepart']][$object->id] : $hidepricesDefaultConf;
 
 				$var=false;
+				$out = '';
 		     	$out.= '<tr '.$bc[$var].'>
 		     			<td colspan="4" align="right">
 		     				<label for="hideInnerLines">'.$langs->trans('HideInnerLines').'</label>
@@ -2011,8 +2012,8 @@ class ActionsSubtotal
 	 * @param $hookmanager  HookManager
 	 * @return int
 	 */
-	function printObjectLine ($parameters, &$object, &$action, $hookmanager){
-
+	function printObjectLine ($parameters, &$object, &$action, $hookmanager)
+	{
 		global $conf,$langs,$user,$db,$bc;
 
 		$num = &$parameters['num'];
