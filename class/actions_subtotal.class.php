@@ -44,7 +44,7 @@ class ActionsSubtotal
 			if ((float) DOL_VERSION >= 6.0)
 			{
 				$value = '';
-				$sql = 'SELECT content FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text WHERE rowid = '.GETPOST('rowid');
+				$sql = 'SELECT content FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text WHERE rowid = '.GETPOST('rowid', 'int');
 				$resql = $this->db->query($sql);
 				if ($resql && ($obj = $this->db->fetch_object($resql))) $value = $obj->content;
 			}
@@ -144,7 +144,7 @@ class ActionsSubtotal
 					$level = GETPOST('level', 'int'); //New avec SUBTOTAL_USE_NEW_FORMAT
 
 					if($action=='add_title_line') {
-						$title = GETPOST('title');
+						$title = GETPOST('title', 'none');
 						if(empty($title)) $title = $langs->trans('title');
 						$qty = $level<1 ? 1 : $level ;
 					}
@@ -164,7 +164,7 @@ class ActionsSubtotal
 						$qty = 50;
 					}
 					else if($action=='add_subtitle_line') {
-						$title = GETPOST('title');
+						$title = GETPOST('title', 'none');
 						if(empty($title)) $title = $langs->trans('subtitle');
 						$qty = 2;
 					}
@@ -173,7 +173,7 @@ class ActionsSubtotal
 						$qty = 98;
 					}
 					else {
-						$title = GETPOST('title') ? GETPOST('title') : $langs->trans('SubTotal');
+						$title = GETPOST('title', 'none') ? GETPOST('title', 'none') : $langs->trans('SubTotal');
 						$qty = $level ? 100-$level : 99;
 					}
 					dol_include_once('/subtotal/class/subtotal.class.php');
@@ -400,7 +400,7 @@ class ActionsSubtotal
 
 		global $conf, $langs, $bc;
 
-		$action = GETPOST('action');
+		$action = GETPOST('action', 'none');
 		$TContext = explode(':',$parameters['context']);
 		if (
 				in_array('invoicecard',$TContext)
@@ -456,7 +456,7 @@ class ActionsSubtotal
 						<tr '.$bc[$var].'>
 							<td colspan="4" align="right">
 								<label for="subtotal_add_recap">'.$langs->trans('subtotal_add_recap').'</label>
-								<input type="checkbox" id="subtotal_add_recap" name="subtotal_add_recap" value="1" '.( GETPOST('subtotal_add_recap') ? 'checked="checked"' : '' ).' />
+								<input type="checkbox" id="subtotal_add_recap" name="subtotal_add_recap" value="1" '.( GETPOST('subtotal_add_recap', 'none') ? 'checked="checked"' : '' ).' />
 							</td>
 						</tr>';
 				}
@@ -583,7 +583,7 @@ class ActionsSubtotal
 		dol_include_once('/subtotal/lib/subtotal.lib.php');
 		require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 
-		$showBlockExtrafields = GETPOST('showBlockExtrafields');
+		$showBlockExtrafields = GETPOST('showBlockExtrafields', 'none');
 
 		if($object->element=='facture') $idvar = 'facid';
 		else $idvar = 'id';
@@ -666,15 +666,15 @@ class ActionsSubtotal
 
 				global $hideprices;
 
-				$hideInnerLines = (int)GETPOST('hideInnerLines');
+				$hideInnerLines = GETPOST('hideInnerLines', 'int');
 				if(empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname][$object->id]) ) $_SESSION[$sessname] = array(); // prevent old system
 				$_SESSION[$sessname][$object->id] = $hideInnerLines;
 
-				$hidedetails= (int)GETPOST('hidedetails');
+				$hidedetails= GETPOST('hidedetails', 'int');
 				if(empty($_SESSION[$sessname2]) || !is_array($_SESSION[$sessname2][$object->id]) ) $_SESSION[$sessname2] = array(); // prevent old system
 				$_SESSION[$sessname2][$object->id] = $hidedetails;
 
-				$hideprices= (int)GETPOST('hideprices');
+				$hideprices= GETPOST('hideprices', 'int');
 				if(empty($_SESSION[$sessname3]) || !is_array($_SESSION[$sessname3][$object->id]) ) $_SESSION[$sessname3] = array(); // prevent old system
 				$_SESSION[$sessname3][$object->id] = $hideprices;
 
@@ -694,9 +694,9 @@ class ActionsSubtotal
 	        }
 
 		}
-		else if($action === 'confirm_delete_all_lines' && GETPOST('confirm')=='yes') {
+		else if($action === 'confirm_delete_all_lines' && GETPOST('confirm', 'none')=='yes') {
 
-			$Tab = TSubtotal::getLinesFromTitleId($object, GETPOST('lineid'), true);
+			$Tab = TSubtotal::getLinesFromTitleId($object, GETPOST('lineid', 'int'), true);
 			foreach($Tab as $line) {
 				$idLine = $line->id;
 				/**
@@ -848,7 +848,7 @@ class ActionsSubtotal
 		$sign=1;
 		if (isset($object->type) && $object->type == 2 && ! empty($conf->global->INVOICE_POSITIVE_CREDIT_NOTE)) $sign=-1;
 
-		if (GETPOST('action') == 'builddoc') $builddoc = true;
+		if (GETPOST('action', 'none') == 'builddoc') $builddoc = true;
 		else $builddoc = false;
 
 		dol_include_once('/subtotal/class/subtotal.class.php');
@@ -914,14 +914,14 @@ class ActionsSubtotal
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		global $conf,$subtotal_last_title_posy;
 
-		$hideInnerLines = (int)GETPOST('hideInnerLines');
+		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 		if (!empty($conf->global->SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES) && $hideInnerLines && !empty($subtotal_last_title_posy))
 		{
 			$posy = $subtotal_last_title_posy;
 			$subtotal_last_title_posy = null;
 		}
 
-		$hidePriceOnSubtotalLines = (int) GETPOST('hide_price_on_subtotal_lines');
+		$hidePriceOnSubtotalLines = GETPOST('hide_price_on_subtotal_lines', 'int');
 
 		if($object->element == 'shipping' || $object->element == 'delivery')
 		{
@@ -986,7 +986,7 @@ class ActionsSubtotal
 
 			if($total_to_print !== '') {
 
-				if (GETPOST('hideInnerLines'))
+				if (GETPOST('hideInnerLines', 'int'))
 				{
 					// Dans le cas des lignes cachés, le calcul est déjà fait dans la méthode beforePDFCreation et les lignes de sous-totaux sont déjà renseignés
 //					$line->TTotal_tva
@@ -1042,7 +1042,7 @@ class ActionsSubtotal
 		$subtotal_last_title_posy = $posy;
 		$pdf->SetXY ($posx, $posy);
 
-		$hideInnerLines = (int)GETPOST('hideInnerLines');
+		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 
 
 
@@ -1132,8 +1132,8 @@ class ActionsSubtotal
 		}
 		elseif (!empty($conf->global->SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY))
 		{
-			$hideInnerLines = (int)GETPOST('hideInnerLines');
-			$hidedetails = (int)GETPOST('hidedetails');
+			$hideInnerLines = GETPOST('hideInnerLines', 'int');
+			$hidedetails = GETPOST('hidedetails', 'int');
 			if (empty($hideInnerLines) && !empty($hidedetails))
 			{
 				$this->resprints = $object->lines[$parameters['i']]->qty;
@@ -1199,7 +1199,7 @@ class ActionsSubtotal
 				}
 			}
 		}
-		if ((int)GETPOST('hideInnerLines') && !empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES)){
+		if (GETPOST('hideInnerLines', 'int') && !empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES)){
 		    $this->resprints = price($object->lines[$i]->total_ht);
 		}
 
@@ -1656,7 +1656,7 @@ class ActionsSubtotal
 
 	function setDocTVA(&$pdf, &$object) {
 
-		$hidedetails = (int)GETPOST('hidedetails');
+		$hidedetails = GETPOST('hidedetails', 'int');
 
 		if(empty($hidedetails)) return false;
 
@@ -1701,8 +1701,8 @@ class ActionsSubtotal
 			}
         }
 
-		$hideInnerLines = (int)GETPOST('hideInnerLines');
-		$hidedetails = (int)GETPOST('hidedetails');
+		$hideInnerLines = GETPOST('hideInnerLines', 'int');
+		$hidedetails = GETPOST('hidedetails', 'int');
 
 		if ($hideInnerLines) { // si c une ligne de titre
 	    	$fk_parent_line=0;
@@ -1857,8 +1857,8 @@ class ActionsSubtotal
 			${$key} = $value;
 		}
 
-		$hideInnerLines = (int)GETPOST('hideInnerLines');
-		$hidedetails = (int)GETPOST('hidedetails');
+		$hideInnerLines = GETPOST('hideInnerLines', 'int');
+		$hidedetails = GETPOST('hidedetails', 'int');
 
 		if($this->isModSubtotalLine($parameters,$object) ){
 
@@ -2070,7 +2070,7 @@ class ActionsSubtotal
 		if($line->special_code!=$this->module_number || $line->product_type!=9) {
 			if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_LINE) && $object->element !== 'invoice_supplier')
             {
-                if(!(TSubtotal::isModSubtotalLine($line)) && ( $line->fk_prev_id === null ) && !($action == "editline" && GETPOST('lineid') == $line->id)) {
+                if(!(TSubtotal::isModSubtotalLine($line)) && ( $line->fk_prev_id === null ) && !($action == "editline" && GETPOST('lineid', 'int') == $line->id)) {
                     echo '<a name="duplicate-'.$line->id.'" href="' . $_SERVER['PHP_SELF'] . '?' . $idvar . '=' . $object->id . '&action=duplicate&lineid=' . $line->id . '"><i class="fa fa-clone" aria-hidden="true"></i></a>';
 
                     ?>
@@ -2167,7 +2167,7 @@ class ActionsSubtotal
 				<?php } ?>
 
 				<td colspan="<?php echo $colspan; ?>" style="<?php TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;'; ?>  <?php echo ($line->qty>90)?'text-align:right':'' ?> "><?php
-					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
+					if($action=='editline' && GETPOST('lineid', 'int') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 
 						$params=array('line'=>$line);
 						$reshook=$hookmanager->executeHooks('formEditProductOptions',$params,$object,$action);
@@ -2373,7 +2373,7 @@ class ActionsSubtotal
 				<?php
 				if ($action != 'selectlines') {
 
-					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
+					if($action=='editline' && GETPOST('lineid', 'int') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 						?>
 						<input id="savelinebutton" class="button" type="submit" name="save" value="<?php echo $langs->trans('Save') ?>" />
 						<br />
@@ -2482,7 +2482,7 @@ class ActionsSubtotal
 				$extralabelsline = $extrafieldsline->fetch_name_optionals_label($object->table_element_line);
 
 				$colspan+=3; $mode = 'view';
-				if($action === 'editline' && $line->rowid == GETPOST('lineid')) $mode = 'edit';
+				if($action === 'editline' && $line->rowid == GETPOST('lineid', 'int')) $mode = 'edit';
 
 				$ex_element = $line->element;
 				$line->element = 'tr_extrafield_title '.$line->element; // Pour pouvoir manipuler ces tr
@@ -3007,7 +3007,7 @@ class ActionsSubtotal
 
 		if ((!empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP) && $object->element == 'propal') || (!empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP) && $object->element == 'commande') || (!empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP) && $object->element == 'facture'))
 		{
-			if (GETPOST('subtotal_add_recap')) {
+			if (GETPOST('subtotal_add_recap', 'none')) {
 				dol_include_once('/subtotal/class/subtotal.class.php');
 				TSubtotal::addRecapPage($parameters, $pdf);
 			}
