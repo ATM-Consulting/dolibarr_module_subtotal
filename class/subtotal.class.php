@@ -5,6 +5,13 @@ class TSubtotal {
 
 	static $module_number = 104777;
 
+	/**
+	 * @param CommonObject $object
+	 * @param string       $label
+	 * @param int          $qty
+	 * @param int          $rang
+	 * @return int
+	 */
 	static function addSubTotalLine(&$object, $label, $qty, $rang=-1) {
 
 		$res = 0;
@@ -76,6 +83,9 @@ class TSubtotal {
 		return $res;
 	}
 
+	/**
+	 * @param CommonObject $object
+	 */
 	public static function generateDoc(&$object)
 	{
 		global $conf,$langs,$db;
@@ -137,9 +147,9 @@ class TSubtotal {
 	/**
 	 * Méthode qui se charge de faire les ajouts de sous-totaux manquant afin de fermer les titres ouvert lors de l'ajout d'un nouveau titre
 	 *
-	 * @global type $langs
-	 * @param type $object
-	 * @param type $level_new_title
+	 * @global Translate   $langs
+	 * @param CommonObject $object
+	 * @param int          $level_new_title
 	 */
 	public static function addSubtotalMissing(&$object, $level_new_title)
 	{
@@ -172,11 +182,25 @@ class TSubtotal {
 	}
 
 	public static function addTitle(&$object, $label, $level, $rang=-1)
+	/**
+	 * @param CommonObject $object
+	 * @param string       $label
+	 * @param int          $level
+	 * @param int          $rang
+	 * @return int
+	 */
 	{
 		self::addSubTotalLine($object, $label, $level, $rang);
 	}
 
 	public static function addTotal(&$object, $label, $level, $rang=-1)
+	/**
+	 * @param CommonObject $object
+	 * @param string       $label
+	 * @param int          $level
+	 * @param int          $rang
+	 * @return int
+	 */
 	{
 		return self::addSubTotalLine($object, $label, (100-$level), $rang);
 	}
@@ -236,6 +260,11 @@ class TSubtotal {
 		return ($return_rang_on_false) ? -1 : false;
 	}
 
+	/**
+	 * @param CommonObject $object
+	 * @param boolean      $get_block_total
+	 * @return array
+	 */
 	public static function getAllTitleFromDocument(&$object, $get_block_total=false)
 	{
 		$TRes = array();
@@ -269,6 +298,12 @@ class TSubtotal {
 		return $TRes;
 	}
 
+	/**
+	 * @param CommonObject     $object
+	 * @param CommonObjectLine $line
+	 * @param boolean          $breakOnTitle
+	 * @return array
+	 */
 	public static function getTotalBlockFromTitle(&$object, &$line, $breakOnTitle = false)
 	{
 		dol_include_once('/core/lib/price.lib.php');
@@ -304,6 +339,12 @@ class TSubtotal {
 		return $TTot;
 	}
 
+	/**
+	 * @param DoliDB  $db
+	 * @param int     $fk_commandedet
+	 * @param boolean $supplier
+	 * @return int|false
+	 */
 	public static function getOrderIdFromLineId(&$db, $fk_commandedet, $supplier = false)
 	{
 		if (empty($fk_commandedet)) return false;
@@ -318,6 +359,12 @@ class TSubtotal {
 		else return false;
 	}
 
+	/**
+	 * @param DoliDB  $db
+	 * @param int     $fk_commande
+	 * @param boolean $supplier
+	 * @return false|int
+	 */
 	public static function getLastLineOrderId(&$db, $fk_commande, $supplier = false)
 	{
 		if (empty($fk_commande)) return false;
@@ -371,6 +418,11 @@ class TSubtotal {
 		return false;
 	}
 
+	/**
+	 * @param CommonObjectLine $line
+	 * @param int              $level
+	 * @return bool
+	 */
 	public static function isTitle(&$line, $level=-1)
 	{
 		$res = $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty <= 9;
@@ -380,6 +432,11 @@ class TSubtotal {
 
 	}
 
+	/**
+	 * @param CommonObjectLine $line
+	 * @param int              $level
+	 * @return bool
+	 */
 	public static function isSubtotal(&$line, $level=-1)
 	{
 	    $res = $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty >= 90;
@@ -388,16 +445,29 @@ class TSubtotal {
 	    } else return $res;
 	}
 
+	/**
+	 * @param CommonObjectLine $line
+	 * @return bool
+	 */
 	public static function isFreeText(&$line)
 	{
 		return $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty == 50;
 	}
 
+	/**
+	 * @param CommonObjectLine $line
+	 * @return bool
+	 */
 	public static function isModSubtotalLine(&$line)
 	{
 		return self::isTitle($line) || self::isSubtotal($line) || self::isFreeText($line);
 	}
 
+	/**
+	 * @param CommonObjectLine $line
+	 * @param int $readonly
+	 * @return string|void
+	 */
 	public static function getFreeTextHtml(&$line, $readonly=0)
 	{
 		global $conf;
@@ -415,6 +485,12 @@ class TSubtotal {
 		return $doleditor->Create(1);
 	}
 
+	/**
+	 * @param CommonObject $object
+	 * @param int          $lineid
+	 * @param bool         $withBlockLine
+	 * @return int
+	 */
 	public static function duplicateLines(&$object, $lineid, $withBlockLine=false)
 	{
 		global $db,$user,$conf;
@@ -536,6 +612,15 @@ class TSubtotal {
 		}
 	}
 
+	/**
+	 * @param CommonObject $object
+	 * @param string       $key_trad
+	 * @param int          $level
+	 * @param string       $under_title
+	 * @param bool         $withBlockLine
+	 * @param bool         $key_is_id
+	 * @return array
+	 */
 	public static function getLinesFromTitle(&$object, $key_trad, $level=1, $under_title='', $withBlockLine=false, $key_is_id=false)
 	{
 		global $langs;
@@ -583,11 +668,47 @@ class TSubtotal {
 		return $TLine;
 	}
 
+	/**
+	 * @param CommonObject $object
+	 * @param int          $lineid
+	 * @param bool         $withBlockLine
+	 * @return array
+	 */
 	public static function getLinesFromTitleId(&$object, $lineid, $withBlockLine=false)
 	{
 		return self::getLinesFromTitle($object, $lineid, '', '', $withBlockLine, true);
 	}
 
+	/**
+	 * Wrapper around $object->updateline() to ensure it is called with the right parameters depending on the object's
+	 * type.
+	 *
+	 * @param CommonObject $object
+	 * @param int $rowid
+	 * @param string $desc
+	 * @param double $pu
+	 * @param double $qty
+	 * @param double $remise_percent
+	 * @param $date_start
+	 * @param $date_end
+	 * @param double $txtva
+	 * @param $type
+	 * @param int $txlocaltax1
+	 * @param int $txlocaltax2
+	 * @param string $price_base_type
+	 * @param int $info_bits
+	 * @param int $fk_parent_line
+	 * @param int $skip_update_total
+	 * @param null $fk_fournprice
+	 * @param int $pa_ht
+	 * @param string $label
+	 * @param int $special_code
+	 * @param int $array_options
+	 * @param int $situation_percent
+	 * @param null $fk_unit
+	 * @param int $notrigger
+	 * @return int
+	 */
 	public static function doUpdateLine(&$object, $rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $type, $txlocaltax1=0, $txlocaltax2=0, $price_base_type='HT', $info_bits=0, $fk_parent_line=0, $skip_update_total=0, $fk_fournprice=null, $pa_ht=0, $label='', $special_code=0, $array_options=0, $situation_percent=0, $fk_unit = null, $notrigger = 0)
 	{
 		$res = 0;
@@ -642,6 +763,11 @@ class TSubtotal {
 		return $res;
 	}
 
+	/**
+	 * @param CommonObjectLine $origin_line
+	 * @param bool             $reverse
+	 * @return array
+	 */
 	public static function getAllTitleFromLine(&$origin_line, $reverse = false)
 	{
 		global $db, $object;
@@ -714,6 +840,10 @@ class TSubtotal {
 		return $TTitle;
 	}
 
+	/**
+	 * @param CommonObjectLine $line
+	 * @return int
+	 */
 	public static function getNiveau(&$line)
 	{
 		if (self::isTitle($line)) return $line->qty;
@@ -724,6 +854,9 @@ class TSubtotal {
 	/**
 	 * Ajoute une page de récap à la génération du PDF
 	 * Le tableau total en bas du document se base sur les totaux des titres niveau 1 pour le moment
+	 *
+	 * @param array $parameters assoc array; keys: 'object' (CommonObject), 'file' (string), 'outputlangs' (Translate)
+	 * @param null  $origin_pdf unused [lines that used it are commented out]
 	 */
 	public static function addRecapPage(&$parameters, &$origin_pdf)
 	{
@@ -974,6 +1107,13 @@ class TSubtotal {
 		if (empty($conf->global->SUBTOTAL_KEEP_RECAP_FILE)) unlink($file);
 	}
 
+	/**
+	 * @param stdClass         $objmarge Fields: 'marge_gauche', …
+	 * @param TCPDF            $pdf
+	 * @param CommonObjectLine $line
+	 * @param int              $curY
+	 * @param int              $posx_designation
+	 */
 	private static function printLevel($objmarge, $pdf, $line, $curY, $posx_designation)
 	{
 		$level = $line->qty; // TODO à améliorer
@@ -985,10 +1125,10 @@ class TSubtotal {
 	/**
 	 *  Show top header of page.
 	 *
-	 *  @param	PDF			$pdf     		Object PDF
-	 *  @param  Object		$object     	Object to show
-	 *  @param  int	    	$showdetail    0=no, 1=yes
-	 *  @param  Translate	$outputlangs	Object lang for output
+	 *  @param	TCPDF     $pdf          Object PDF
+	 *  @param  Object    $object       Object to show
+	 *  @param  int       $showdetail   0=no, 1=yes
+	 *  @param  Translate $outputlangs  Object lang for output
 	 *  @return	void
 	 */
 	private static function pagehead(&$objmarge, &$pdf, &$object, $showdetail, $outputlangs)
@@ -1112,6 +1252,15 @@ class TSubtotal {
 
 	}
 
+	/**
+	 * @param stdClass     $objmarge
+	 * @param TCPDF        $pdf
+	 * @param CommonObject $object
+	 * @param int          $posy
+	 * @param Translate    $outputlangs
+	 * @param array        $TTot
+	 * @return float|int
+	 */
 	private static function tableau_tot(&$objmarge, &$pdf, $object, $posy, $outputlangs, $TTot)
 	{
 		global $conf;
@@ -1204,15 +1353,20 @@ class TSubtotal {
 	 * @param	int		$hidebottom		Hide bottom
 	 * @return	void
 	 */
-    private static function printRect($pdf, $x, $y, $l, $h, $hidetop=0, $hidebottom=0)
-    {
+	private static function printRect($pdf, $x, $y, $l, $h, $hidetop=0, $hidebottom=0)
+	{
 	    if (empty($hidetop) || $hidetop==-1) $pdf->line($x, $y, $x+$l, $y);
 	    $pdf->line($x+$l, $y, $x+$l, $y+$h);
 	    if (empty($hidebottom)) $pdf->line($x+$l, $y+$h, $x, $y+$h);
 	    $pdf->line($x, $y+$h, $x, $y);
-    }
+	}
 
-
+	/**
+	 * @param Translate $outputlangs
+	 * @param array     $files
+	 * @param string    $fileoutput
+	 * @return int
+	 */
 	public static function concat(&$outputlangs, $files, $fileoutput='')
 	{
 		global $conf;
