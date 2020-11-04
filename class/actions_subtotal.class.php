@@ -2814,10 +2814,8 @@ class ActionsSubtotal
 
 		$contexts = explode(':',$parameters['context']);
 
-		if (in_array('ordercard',$contexts))
+		if (in_array('ordercard',$contexts) || in_array('invoicecard',$contexts))
 		{
-			/** @var Commande $object */
-
 			if(class_exists('TSubtotal')){ dol_include_once('/subtotal/class/subtotal.class.php'); }
 
 			if (TSubtotal::isModSubtotalLine($line))
