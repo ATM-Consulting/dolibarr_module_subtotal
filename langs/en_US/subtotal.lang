@@ -1,3 +1,5 @@
+# SubTotal lang en_US 
+
 Module104777Name = SubTotal
 Module104777Desc = Allows to add titles and subtotals in proposal, orders and invoices
 ATMAbout = This module has been developed by <a href="http://www.atm-consulting.fr" target="_blank">ATM Consulting</a><br>You can find the documentation on our <a href="http://wiki.atm-consulting.fr/index.php/Accueil" target="_blank">wiki</a><br><br>For any question or feedback, contact us on <a href="mailto:support@atm-consulting.fr">support@atm-consulting.fr</a><br><br>For any commercial question, contact us on <a href="mailto:contact@atm-consulting.fr">contact@atm-consulting.fr</a> or at +33 9 77 19 50 70<br><br>Find our other modules on <a href="http://www.dolistore.com/search.php?orderby=position&orderway=desc&search_query=atm&submit_search=Rechercher" target="_blank">Dolistore</a>
@@ -27,15 +29,15 @@ SUBTOTAL_ALLOW_DUPLICATE_BLOCK = Allow clone block
 SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE = Can add line directly under title
 
 subtotal_title_to_add_under_title = Add under 
-SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE=Text des titres lors la facturation via onglet client -> bouton "Facturer commandes"
-SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info=Clés de remplacement :<br /><b>__REFORDER__</b> = Référence de la commande<br /><b>__REFCUSTOMER__</b> = Référence client de la commande
-subtotal_add_title_bloc_from_orderstoinvoice=Add subtitle and subtotal block between each order
-SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK=The adding under title will do at end block
-SUBTOTAL_TITLE_STYLE=Title style (B = bold, U = underline, I = italic)
-SUBTOTAL_SUBTOTAL_STYLE=Subtotals style (B = bold, U = underline, I = italic)
-SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES=Get one line with title and subtotal if "%s" is enabled (experimental)
-Duplicate=Duplicate
-subtotal_duplicate_success=%d lines copied
+SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE = Text of titles when invoicing via customer tab -> button "Invoice orders"
+SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info = Replacement keys :<br /><b>__REFORDER__</b> = Order reference<br /><b>__REFCUSTOMER__</b> = Customer reference of the order
+subtotal_add_title_bloc_from_orderstoinvoice = Add subtitle and subtotal block between each order
+SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK = The adding under title will do at end block
+SUBTOTAL_TITLE_STYLE = Title style (B = bold, U = underline, I = italic)
+SUBTOTAL_SUBTOTAL_STYLE = Subtotals style (B = bold, U = underline, I = italic)
+SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES = Get one line with title and subtotal if "%s" is enabled (experimental)
+Duplicate = Duplicate
+subtotal_duplicate_success= %d lines copied
 subtotal_duplicate_lineid_not_found=Clone block fails the title's identifier not found
 subtotal_duplicate_error=Failure about clone
 subtotal_apply_default_tva=Apply a default TVA to the block
