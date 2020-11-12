@@ -36,7 +36,7 @@ class modSubtotal extends DolibarrModules
      *
      * 	@param	DoliDB		$db	Database handler
      */
-     
+
     public function __construct($db)
     {
         global $langs, $conf;
@@ -96,7 +96,8 @@ class modSubtotal extends DolibarrModules
             // Set this to relative path of css if module has its own css file
             //'css' => '/titre/css/mycss.css.php',
             // Set here all hooks context managed by module
-            'hooks' => array('invoicecard', 'invoicesuppliercard','propalcard', 'supplier_proposalcard', 'ordercard', 'ordersuppliercard','odtgeneration','orderstoinvoice','admin','invoicereccard')
+            'hooks' => array('invoicecard', 'invoicesuppliercard','propalcard', 'supplier_proposalcard', 'ordercard', 'ordersuppliercard','odtgeneration','orderstoinvoice','admin','invoicereccard'),
+            'tpl' => 1
             // Set here all workflow context managed by module
             //'workflow' => array('order' => array('WORKFLOW_ORDER_AUTOCREATE_INVOICE'))
         );
@@ -146,7 +147,7 @@ class modSubtotal extends DolibarrModules
             //		0
             //	)
         );
-		
+
 
 
 
@@ -192,7 +193,7 @@ class modSubtotal extends DolibarrModules
             'tabfieldvalue'=>array('label,content'),						// List of fields (list of fields to edit a record)
             'tabfieldinsert'=>array('label,content,entity'),					// List of fields (list of fields for insert)
             'tabrowid'=>array('rowid'),											// Name of columns with primary key (try to always name it 'rowid')
-            'tabcond'=>array($conf->subtotal->enabled)	
+            'tabcond'=>array($conf->subtotal->enabled)
 		);
         /* Example:
           // This is to avoid warnings
@@ -238,7 +239,7 @@ class modSubtotal extends DolibarrModules
         // Boxes
         // Add here list of php file(s) stored in core/boxes that contains class to show a box.
         $this->boxes = array(); // Boxes list
-       
+
         /*
           $this->boxes[$r][1] = "myboxb.php";
           $r++;
@@ -453,8 +454,8 @@ class modSubtotal extends DolibarrModules
     public function init($options = '')
     {
 	  	global $conf;
-		
-		
+
+
 /*		if($conf->milestone->enabled) {
 			exit("Attention, ce module rentre ne conflit avec le module Jalon/Milestones. Merci de le désactiver auparavant.");
 		}
@@ -463,7 +464,7 @@ class modSubtotal extends DolibarrModules
 
         $result = $this->loadTables();
 
-		
+
         return $this->_init($sql, $options);
     }
 
