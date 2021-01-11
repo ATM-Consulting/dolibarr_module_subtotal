@@ -699,50 +699,61 @@ class ActionsSubtotal
 
 			$Tab = TSubtotal::getLinesFromTitleId($object, GETPOST('lineid', 'int'), true);
 			foreach($Tab as $line) {
+                $result = 0;
+
 				$idLine = $line->id;
 				/**
 				 * @var $object Facture
 				 */
-				if($object->element=='facture') $object->deleteline($idLine);
+				if($object->element=='facture') $result = $object->deleteline($idLine);
 				/**
 				 * @var $object Facture fournisseur
 				 */
 				else if($object->element=='invoice_supplier')
 				{
-				    $object->deleteline($idLine);
+                    $result = $object->deleteline($idLine);
 				}
 				/**
 				 * @var $object Propal
 				 */
-				else if($object->element=='propal') $object->deleteline($idLine);
+				else if($object->element=='propal') $result = $object->deleteline($idLine);
 				/**
 				 * @var $object Propal Fournisseur
 				 */
-				else if($object->element=='supplier_proposal') $object->deleteline($idLine);
+				else if($object->element=='supplier_proposal') $result = $object->deleteline($idLine);
 				/**
 				 * @var $object Commande
 				 */
 				else if($object->element=='commande')
 				{
-					if ((float) DOL_VERSION >= 5.0) $object->deleteline($user, $idLine);
-					else $object->deleteline($idLine);
+					if ((float) DOL_VERSION >= 5.0) $result = $object->deleteline($user, $idLine);
+					else $result = $object->deleteline($idLine);
 				}
 				/**
 				 * @var $object Commande fournisseur
 				 */
 				else if($object->element=='order_supplier')
 				{
-				    $object->deleteline($idLine);
+                    $result = $object->deleteline($idLine);
 				}
 				/**
 				 * @var $object Facturerec
 				 */
-				else if($object->element=='facturerec') $object->deleteline($idLine);
+				else if($object->element=='facturerec') $result = $object->deleteline($idLine);
 				/**
 				 * @var $object Expedition
 				 */
-				else if($object->element=='shipping') $object->deleteline($user, $idLine);
+				else if($object->element=='shipping') $result = $object->deleteline($user, $idLine);
+
+                if ($result < 0) $error++;
 			}
+
+            if ($error) {
+                setEventMessages($object->error, $object->errors, 'errors');
+                $db->rollback();
+            } else {
+                $db->commit();
+            }
 
 			header('location:?id='.$object->id);
 			exit;
@@ -796,39 +807,30 @@ class ActionsSubtotal
 	}
 
 	function getArrayOfLineForAGroup(&$object, $lineid) {
-		$rang = $line->rang;
-		$qty_line = $line->qty;
-
 		$qty_line = 0;
-
+        $qty_end_line = 0;
 		$found = false;
-
 		$Tab= array();
 
 		foreach($object->lines as $l) {
-
 		    $lid = (!empty($l->rowid) ? $l->rowid : $l->id);
-			if($lid == $lineid) {
 
+			if($lid == $lineid && $l->qty > 0 && $l->qty < 10) {
 				$found = true;
 				$qty_line = $l->qty;
+                $qty_end_line = 100 - $qty_line;
 			}
 
 			if($found) {
-
-			    $Tab[] = (!empty($l->rowid) ? $l->rowid : $l->id);
-
-				if($l->special_code==$this->module_number && (($l->qty==99 && $qty_line==1) || ($l->qty==98 && $qty_line==2))   ) {
-					break; // end of story
-				}
+                if ($l->special_code == $this->module_number && $lid != $lineid && ($l->qty <= $qty_line || $l->qty >= $qty_end_line)) {
+                    if ($l->qty == $qty_end_line) $Tab[] = $lid;
+                    break;
+                }
+                else $Tab[] = $lid;
 			}
-
-
 		}
 
-
 		return $Tab;
-
 	}
 
 	function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=0) {
