@@ -2130,6 +2130,8 @@ class ActionsSubtotal
 			if(!empty($conf->global->DISPLAY_MARK_RATES) && !$margins_hidden_by_module) $colspan++;
 			if($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION) $colspan++;
 			if(!empty($conf->global->PRODUCT_USE_UNITS)) $colspan++;
+			// Compatibility module showprice
+			if(!empty($conf->showprice->enabled)) $colspan++;
 
 			/* Titre */
 			//var_dump($line);
