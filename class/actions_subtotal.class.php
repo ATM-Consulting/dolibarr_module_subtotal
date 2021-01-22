@@ -2426,7 +2426,7 @@ class ActionsSubtotal
 							if(TSubtotal::isTitle($line) && ($line->fk_prev_id === null) )
 							{
 								if ((float) DOL_VERSION >= 8.0) {
-									$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' class="pictodelete pictodeleteallline"');
+									$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' style="color:#be3535 !important;" class="pictodelete pictodeleteallline"');
 								} elseif ((float) DOL_VERSION >= 3.8) {
 									$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal',' class="pictodelete" ');
 								} else {
@@ -2434,19 +2434,6 @@ class ActionsSubtotal
 								}
 
 								echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id.'">'.$img_delete.'</a>';
-
-								/* Depuis la 8.0, les icônes "standard" utilisent FontAwesome et sont préconfigurées selon la clé de l'image
-								 * Impossible d'en customiser par exemple la couleur, même en utilisant img_picto() directement
-								 */
-								if((float) DOL_VERSION >= 8.0) {
-								?>
-								<script>
-									$(document).ready(function () {
-										$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline,span.fas.fa-trash.pictodeleteallline").css({"color": "#be3535"});
-									});
-								</script>
-								<?php
-								}
 							}
 						}
 					}
@@ -2763,7 +2750,7 @@ class ActionsSubtotal
 				if(TSubtotal::isTitle($line) && ($line->fk_prev_id === null) )
 				{
 					if ((float) DOL_VERSION >= 8.0) {
-						$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' class="pictodelete pictodeleteallline"');
+						$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' style="color:#be3535 !important;" class="pictodelete pictodeleteallline"');
 					} elseif ((float) DOL_VERSION >= 3.8) {
 						$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal',' class="pictodelete" ');
 					} else {
@@ -2771,21 +2758,7 @@ class ActionsSubtotal
 					}
 
 					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=ask_deleteallline&amp;lineid='.$lineid.'">'.$img_delete.'</a>';
-
-					/* Depuis la 8.0, les icônes "standard" utilisent FontAwesome et sont préconfigurées selon la clé de l'image
-					 * Impossible d'en customiser par exemple la couleur, même en utilisant img_picto() directement
-					 */
-					if((float) DOL_VERSION >= 8.0) {
-						?>
-							<script>
-								$(document).ready(function () {
-									$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline,span.fas.fa-trash.pictodeleteallline").css({"color": "#be3535"});
-								});
-							</script>
-							<?php
-					}
 				}
-
 
 				print '</td>';
 			}
