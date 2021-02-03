@@ -114,6 +114,7 @@ class modSubtotal extends DolibarrModules
 				,'deliverycard'
 				,'paiementcard'
 				,'referencelettersinstacecard'
+                ,'shippableorderlist'
             ),
             // Set here all workflow context managed by module
             //'workflow' => array('order' => array('WORKFLOW_ORDER_AUTOCREATE_INVOICE')),

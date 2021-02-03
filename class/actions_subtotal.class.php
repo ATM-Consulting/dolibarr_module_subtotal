@@ -3267,5 +3267,30 @@ class ActionsSubtotal
 
 
 	}
+    /**
+     * @param $parameters
+     * @param $object
+     * @param $action
+     * @param $hookmanager
+     */
+	function HandlerExpeditiontitleAndTotal($parameters, &$object, &$action, $hookmanager){
+        global $conf;
+        //var_dump($parameters['line']);
+	    dol_include_once('subtotal/class/subtotal.class.php');
+        $currentcontext = explode(':', $parameters['context']);
 
+	    if ( in_array('shippableorderlist',$currentcontext)) {
+
+            //var_dump($parameters['line']);
+            if(TSubtotal::isModSubtotalLine($parameters['line'])) {
+
+                $confOld = $conf->global->STOCK_MUST_BE_ENOUGH_FOR_SHIPMENT;
+                $conf->global->STOCK_MUST_BE_ENOUGH_FOR_SHIPMENT = 0;
+                $res =  $parameters['shipping']->addline($parameters['TEnt_comm'][$object->order->id], $parameters['line']->id, $parameters['line']->qty);
+                $conf->global->STOCK_MUST_BE_ENOUGH_FOR_SHIPMENT = $confOld;
+            }
+
+        }
+
+    }
 }

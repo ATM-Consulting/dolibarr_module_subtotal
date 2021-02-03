@@ -468,6 +468,30 @@ function showParameters() {
 				</td>
 			</tr>
 		<?php } ?>
+    </table>
+
+
+
+    <?php if ($conf->shippableorder->enabled) { ?>
+    <br />
+
+    <table width="100%" class="noborder" style="background-color: #fff;">
+        <tr class="liste_titre">
+            <td colspan="2"><?= $langs->trans("addLineTitle_in_order_shippable_TITLE") ?> </td>
+        </tr>
+        <tr>
+            <td> <?php echo $langs->trans("addLineTitle_in_order_shippable") ?> </td>
+
+            <td style="text-align: right;">
+                <form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
+                    <input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
+                    <input type="hidden" name="action" value="set_SUBTOTAL_ORDER_SHIPPABLE" />
+                    <?php echo $html->selectyesno("SUBTOTAL_ORDER_SHIPPABLE",$conf->global->SUBTOTAL_ORDER_SHIPPABLE,1); ?>
+                    <input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
+                </form>
+            </td>
+        </tr>
+        <?php } ?>
 	</table>
 
 	<br /><br />
