@@ -485,8 +485,8 @@ function showParameters() {
             <td style="text-align: right;">
                 <form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
                     <input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
-                    <input type="hidden" name="action" value="set_SUBTOTAL_ORDER_SHIPPABLE" />
-                    <?php echo $html->selectyesno("SUBTOTAL_ORDER_SHIPPABLE",$conf->global->SUBTOTAL_ORDER_SHIPPABLE,1); ?>
+                    <input type="hidden" name="action" value="set_SUBTOTAL_SHIPPABLE_ORDER" />
+                    <?php echo $html->selectyesno("SUBTOTAL_SHIPPABLE_ORDER",$conf->global->SUBTOTAL_SHIPPABLE_ORDER,1); ?>
                     <input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
                 </form>
             </td>

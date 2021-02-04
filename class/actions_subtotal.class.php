@@ -3273,7 +3273,7 @@ class ActionsSubtotal
      * @param $action
      * @param $hookmanager
      */
-	function HandlerExpeditiontitleAndTotal($parameters, &$object, &$action, $hookmanager){
+	function handleExpeditionTitleAndTotal($parameters, &$object, &$action, $hookmanager){
         global $conf;
         //var_dump($parameters['line']);
 	    dol_include_once('subtotal/class/subtotal.class.php');
