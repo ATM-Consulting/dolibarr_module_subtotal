@@ -82,3 +82,5 @@ ShowTotalHTOnSubtotalBlock=Afficher le Prix Unitaire HT du sous-total
 ShowReducOnSubtotalBlock=Afficher la réduction sur la ligne de sous-total
 SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT=La gestion des non-compris vide aussi le prix de revient
 SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT_info=Attention, si vous rendez de nouveau la ligne comprise, il faudra de nouveau saisir le prix de revient
+addLineTitle_in_order_shippable=Ajouter les lignes Titre , total , libre aux commandes expédiables (il faudra supprimer les lignes de sous-total à la main si le besoin s'en fait sentir )
+addLineTitle_in_order_shippable_TITLE=Paramétrage de l'option gestion des lignes  du module subTotal pour les commandes expédiables
