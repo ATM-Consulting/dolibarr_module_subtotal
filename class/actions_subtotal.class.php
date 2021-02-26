@@ -915,7 +915,7 @@ class ActionsSubtotal
 	 * @param $h            float               height
 	 */
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
-		global $conf,$subtotal_last_title_posy;
+		global $conf,$subtotal_last_title_posy,$langs;
 
 		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 		if (!empty($conf->global->SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES) && $hideInnerLines && !empty($subtotal_last_title_posy))
@@ -965,8 +965,26 @@ class ActionsSubtotal
 
 		//Print background
 		$cell_height = $pdf->getStringHeight($w, $label);
-		$pdf->SetXY($posx, $posy);
-		$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height, '', 0, '', 1);
+
+		if(!empty($object->subtotalPdfModelInfo->cols)){
+			include_once __DIR__ . '/staticPdf.model.php';
+			$staticPdfModel = new ModelePDFStatic($object->db);
+			$staticPdfModel->marge_droite 	= $object->subtotalPdfModelInfo->marge_droite;
+			$staticPdfModel->marge_gauche 	= $object->subtotalPdfModelInfo->marge_gauche;
+			$staticPdfModel->page_largeur 	= $object->subtotalPdfModelInfo->page_largeur;
+			$staticPdfModel->page_hauteur 	= $object->subtotalPdfModelInfo->page_hauteur;
+			$staticPdfModel->cols 			= $object->subtotalPdfModelInfo->cols;
+			$staticPdfModel->defaultTitlesFieldsStyle 	= $object->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
+			$staticPdfModel->defaultContentsFieldsStyle = $object->subtotalPdfModelInfo->defaultContentsFieldsStyle;
+			$staticPdfModel->prepareArrayColumnField($object, $langs);
+
+			$pdf->SetXY($object->subtotalPdfModelInfo->marge_droite, $posy);
+			$pdf->MultiCell($object->subtotalPdfModelInfo->page_largeur - $object->subtotalPdfModelInfo->marge_gauche - $object->subtotalPdfModelInfo->marge_droite, $cell_height, '', 0, '', 1);
+		}
+		else{
+			$pdf->SetXY($posx, $posy);
+			$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height, '', 0, '', 1);
+		}
 
 		if (!$hidePriceOnSubtotalLines) {
 			$total_to_print = price($line->total);
@@ -983,9 +1001,6 @@ class ActionsSubtotal
 					}
 				}
 			}
-
-
-
 
 			if($total_to_print !== '') {
 
@@ -1015,7 +1030,13 @@ class ActionsSubtotal
 
 			$pdf->SetXY($pdf->postotalht, $posy);
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
-			$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, $total_to_print, 0, 'R', 0);
+
+			if(!empty($object->subtotalPdfModelInfo->cols)){
+				$staticPdfModel->printStdColumnContent($pdf, $posy, 'totalexcltax', $total_to_print);
+			}
+			else{
+				$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, $total_to_print, 0, 'R', 0);
+			}
 		}
 		else{
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
@@ -1675,9 +1696,13 @@ class ActionsSubtotal
 		 */
 		global $pdf,$conf, $langs;
 
+		$object->subtotalPdfModelInfo = new stdClass(); // see defineColumnFiel method in this class
+		$object->subtotalPdfModelInfo->cols = false;
+
 		// var_dump($object->lines);
 		dol_include_once('/subtotal/class/subtotal.class.php');
 
+		$i = $parameters['i'];
 		foreach($parameters as $key=>$value) {
 			${$key} = $value;
 		}
@@ -1860,6 +1885,13 @@ class ActionsSubtotal
 			${$key} = $value;
 		}
 
+		// même si le foreach du dessu fait ce qu'il faut, l'IDE n'aime pas
+		$outputlangs = $parameters['outputlangs'];
+		$i = $parameters['i'];
+		$posx = $parameters['posx'];
+		$h = $parameters['h'];
+		$w = $parameters['w'];
+
 		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 		$hidedetails = GETPOST('hidedetails', 'int');
 
@@ -1936,19 +1968,6 @@ class ActionsSubtotal
 					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 					$pageAfter = $pdf->getPage();
 
-
-					/*if($pageAfter>$pageBefore) {
-						print "T $pageAfter>$pageBefore<br>";
-						$pdf->rollbackTransaction(true);
-						$pdf->addPage('','', true);
-						print 'add T'.$pdf->getPage().' '.$line->rowid.' '.$pdf->GetY().' '.$posy.'<br />';
-
-						$posy = $pdf->GetY();
-						$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-						$posy = $pdf->GetY();
-					}
-				*/
-
 					if($object->element == 'delivery')
 					{
 						$pdf->SetTextColor(255,255,255);
@@ -1957,7 +1976,6 @@ class ActionsSubtotal
 					$posy = $pdf->GetY();
 					return 1;
 				}
-//	if($line->rowid==47) exit;
 
 			return 0;
 		}
@@ -1965,20 +1983,6 @@ class ActionsSubtotal
 		{
 			$this->resprints = -1;
 		}
-
-		/* TODO je desactive parce que je comprends pas PH Style, mais à test
-		else {
-
-			if($hideInnerLines) {
-				$pdf->rollbackTransaction(true);
-			}
-			else {
-				$labelproductservice=pdf_getlinedesc($object, $i, $outputlangs, $hideref, $hidedesc, $issupplierline);
-				$pdf->writeHTMLCell($w, $h, $posx, $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1);
-			}
-
-		}*/
-
 
         return 0;
 	}
@@ -3247,4 +3251,31 @@ class ActionsSubtotal
 
 	}
 
+
+
+	/**
+	 * Overloading the defineColumnField function
+	 *
+	 * @param   array()         $parameters     Hook metadatas (context, etc...)
+	 * @param   CommonDocGenerator object      $pdfDoc         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @param   string          $action         Current action (if set). Generally create or edit or null
+	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
+	 */
+	public function defineColumnField($parameters, &$pdfDoc, &$action, $hookmanager)
+	{
+
+		// If this model is column field compatible it will add info to change subtotal behavior
+		$parameters['object']->subtotalPdfModelInfo->cols = $pdfDoc->cols;
+
+		// HACK Pour passer les paramettres du model dans les hooks sans infos
+		$parameters['object']->subtotalPdfModelInfo->marge_droite 	= $pdfDoc->marge_droite;
+		$parameters['object']->subtotalPdfModelInfo->marge_gauche 	= $pdfDoc->marge_gauche;
+		$parameters['object']->subtotalPdfModelInfo->page_largeur 	= $pdfDoc->page_largeur;
+		$parameters['object']->subtotalPdfModelInfo->page_hauteur 	= $pdfDoc->page_hauteur;
+		$parameters['object']->subtotalPdfModelInfo->format 		= $pdfDoc->format;
+		$parameters['object']->subtotalPdfModelInfo->defaultTitlesFieldsStyle = $pdfDoc->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
+		$parameters['object']->subtotalPdfModelInfo->defaultContentsFieldsStyle = $pdfDoc->subtotalPdfModelInfo->defaultContentsFieldsStyle;
+
+	}
 }
