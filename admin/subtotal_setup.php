@@ -287,6 +287,14 @@ function showParameters() {
 
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
+	print '<td>'.$html->textwithpicto($langs->trans("SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT"), $langs->trans("SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT_info")).'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT');
+	print '</td></tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
 	print '<td>'.$langs->trans('SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE').'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
@@ -455,6 +463,30 @@ function showParameters() {
 						<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
 						<input type="hidden" name="action" value="set_SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES" />
 						<?php echo $html->selectyesno("SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES",$conf->global->SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES,1); ?>
+						<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
+					</form>
+				</td>
+			</tr>
+		<?php } ?>
+    </table>
+
+
+
+    <?php if ($conf->shippableorder->enabled) { ?>
+    <br />
+
+    <table width="100%" class="noborder" style="background-color: #fff;">
+        <tr class="liste_titre">
+            <td colspan="2"><?= $langs->trans("addLineTitle_in_order_shippable_TITLE") ?> </td>
+        </tr>
+        <tr>
+            <td> <?php echo $langs->trans("addLineTitle_in_order_shippable") ?> </td>
+
+            <td style="text-align: right;">
+                <form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
+                    <input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
+                    <input type="hidden" name="action" value="set_SUBTOTAL_SHIPPABLE_ORDER" />
+                    <?php echo $html->selectyesno("SUBTOTAL_SHIPPABLE_ORDER",$conf->global->SUBTOTAL_SHIPPABLE_ORDER,1); ?>
 						<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
 					</form>
 				</td>

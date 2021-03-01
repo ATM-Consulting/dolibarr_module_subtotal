@@ -63,7 +63,7 @@ class modSubtotal extends DolibarrModules
         // (where XXX is value of numeric property 'numero' of module)
         $this->description = "Module permettant l'ajout de sous-totaux et sous-totaux intermédiaires et le déplacement d'une ligne aisée de l'un dans l'autre";
         // Possible values for version are: 'development', 'experimental' or version
-        $this->version = '3.4.5';
+        $this->version = '3.5.5';
         // Key used in llx_const table to save module status enabled/disabled
         // (where MYMODULE is value of property name of module in uppercase)
         $this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
@@ -114,6 +114,7 @@ class modSubtotal extends DolibarrModules
 				,'deliverycard'
 				,'paiementcard'
 				,'referencelettersinstacecard'
+                ,'shippableorderlist'
 				,'propallist'
 				,'orderlist'
 				,'invoicelist'

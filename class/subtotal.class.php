@@ -190,7 +190,7 @@ class TSubtotal {
 	 * @return int
 	 */
 	{
-		self::addSubTotalLine($object, $label, $level, $rang);
+		return self::addSubTotalLine($object, $label, $level, $rang);
 	}
 
 	public static function addTotal(&$object, $label, $level, $rang=-1)
