@@ -893,10 +893,12 @@ class ActionsSubtotal
                 }
                 else
                 {
-                    $total += $l->total_ht;
-                    $total_tva += $l->total_tva;
-                    $TTotal_tva[$l->tva_tx] += $l->total_tva;
-                    $total_ttc += $l->total_ttc;
+			if ($l->product_type != 9) {
+                    		$total += $l->total_ht;
+                    		$total_tva += $l->total_tva;
+                    		$TTotal_tva[$l->tva_tx] += $l->total_tva;
+                    		$total_ttc += $l->total_ttc;
+			}
                 }
             }
 		}
