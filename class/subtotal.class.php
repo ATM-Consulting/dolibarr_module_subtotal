@@ -322,17 +322,23 @@ class TSubtotal {
 			}
 			else
 			{
-				$TTot['total_pa_ht'] += $l->pa_ht * $l->qty;
-				$TTot['total_subprice'] += $l->subprice * $l->qty;
-				$TTot['total_unit_subprice'] += $l->subprice; // Somme des prix unitaires non remisés
-				$TTot['total_ht'] += $l->total_ht;
-				$TTot['total_tva'] += $l->total_tva;
-				$TTot['total_ttc'] += $l->total_ttc;
-				$TTot['TTotal_tva'][$l->tva_tx] += $l->total_tva;
-				$TTot['multicurrency_total_ht'] += $l->multicurrency_total_ht;
-				$TTot['multicurrency_total_tva'] += $l->multicurrency_total_tva;
-				$TTot['multicurrency_total_ttc'] += $l->multicurrency_total_ttc;
-				$TTot['TTotal_tva_multicurrency'][$l->tva_tx] += $l->multicurrency_total_tva;
+				// Fix DA020000 : exlure les sous-totaux du calcul (calcul pété)
+				// sinon ça compte les ligne de produit puis les sous-totaux qui leurs correspondent...
+				if (! self::isSubtotal($l))
+				{
+					$TTot['total_pa_ht'] += $l->pa_ht * $l->qty;
+					$TTot['total_subprice'] += $l->subprice * $l->qty;
+					$TTot['total_unit_subprice'] += $l->subprice; // Somme des prix unitaires non remisés
+					$TTot['total_ht'] += $l->total_ht;
+					$TTot['total_tva'] += $l->total_tva;
+					$TTot['total_ttc'] += $l->total_ttc;
+					$TTot['TTotal_tva'][$l->tva_tx] += $l->total_tva;
+					$TTot['multicurrency_total_ht'] += $l->multicurrency_total_ht;
+					$TTot['multicurrency_total_tva'] += $l->multicurrency_total_tva;
+					$TTot['multicurrency_total_ttc'] += $l->multicurrency_total_ttc;
+					$TTot['TTotal_tva_multicurrency'][$l->tva_tx] += $l->multicurrency_total_tva;
+				}
+
 			}
 		}
 
