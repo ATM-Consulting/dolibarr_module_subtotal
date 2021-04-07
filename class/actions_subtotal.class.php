@@ -44,7 +44,7 @@ class ActionsSubtotal
 			if ((float) DOL_VERSION >= 6.0)
 			{
 				$value = '';
-				$sql = 'SELECT content FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text WHERE rowid = '.GETPOST('rowid');
+				$sql = 'SELECT content FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text WHERE rowid = '.GETPOST('rowid', 'int');
 				$resql = $this->db->query($sql);
 				if ($resql && ($obj = $this->db->fetch_object($resql))) $value = $obj->content;
 			}
@@ -144,7 +144,7 @@ class ActionsSubtotal
 					$level = GETPOST('level', 'int'); //New avec SUBTOTAL_USE_NEW_FORMAT
 
 					if($action=='add_title_line') {
-						$title = GETPOST('title');
+						$title = GETPOST('title', 'none');
 						if(empty($title)) $title = $langs->trans('title');
 						$qty = $level<1 ? 1 : $level ;
 					}
@@ -164,7 +164,7 @@ class ActionsSubtotal
 						$qty = 50;
 					}
 					else if($action=='add_subtitle_line') {
-						$title = GETPOST('title');
+						$title = GETPOST('title', 'none');
 						if(empty($title)) $title = $langs->trans('subtitle');
 						$qty = 2;
 					}
@@ -173,7 +173,7 @@ class ActionsSubtotal
 						$qty = 98;
 					}
 					else {
-						$title = GETPOST('title') ? GETPOST('title') : $langs->trans('SubTotal');
+						$title = GETPOST('title', 'none') ? GETPOST('title', 'none') : $langs->trans('SubTotal');
 						$qty = $level ? 100-$level : 99;
 					}
 					dol_include_once('/subtotal/class/subtotal.class.php');
@@ -400,7 +400,7 @@ class ActionsSubtotal
 
 		global $conf, $langs, $bc;
 
-		$action = GETPOST('action');
+		$action = GETPOST('action', 'none');
 		$TContext = explode(':',$parameters['context']);
 		if (
 				in_array('invoicecard',$TContext)
@@ -457,7 +457,7 @@ class ActionsSubtotal
 						<tr '.$bc[$var].'>
 							<td colspan="4" align="right">
 								<label for="subtotal_add_recap">'.$langs->trans('subtotal_add_recap').'</label>
-								<input type="checkbox" id="subtotal_add_recap" name="subtotal_add_recap" value="1" '.( GETPOST('subtotal_add_recap') ? 'checked="checked"' : '' ).' />
+								<input type="checkbox" id="subtotal_add_recap" name="subtotal_add_recap" value="1" '.( GETPOST('subtotal_add_recap', 'none') ? 'checked="checked"' : '' ).' />
 							</td>
 						</tr>';
 				}
@@ -584,7 +584,7 @@ class ActionsSubtotal
 		dol_include_once('/subtotal/lib/subtotal.lib.php');
 		require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 
-		$showBlockExtrafields = GETPOST('showBlockExtrafields');
+		$showBlockExtrafields = GETPOST('showBlockExtrafields', 'none');
 
 		if($object->element=='facture') $idvar = 'facid';
 		else $idvar = 'id';
@@ -667,15 +667,15 @@ class ActionsSubtotal
 
 				global $hideprices;
 
-				$hideInnerLines = (int)GETPOST('hideInnerLines');
+				$hideInnerLines = GETPOST('hideInnerLines', 'int');
 				if(empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname][$object->id]) ) $_SESSION[$sessname] = array(); // prevent old system
 				$_SESSION[$sessname][$object->id] = $hideInnerLines;
 
-				$hidedetails= (int)GETPOST('hidedetails');
+				$hidedetails= GETPOST('hidedetails', 'int');
 				if(empty($_SESSION[$sessname2]) || !is_array($_SESSION[$sessname2][$object->id]) ) $_SESSION[$sessname2] = array(); // prevent old system
 				$_SESSION[$sessname2][$object->id] = $hidedetails;
 
-				$hideprices= (int)GETPOST('hideprices');
+				$hideprices= GETPOST('hideprices', 'int');
 				if(empty($_SESSION[$sessname3]) || !is_array($_SESSION[$sessname3][$object->id]) ) $_SESSION[$sessname3] = array(); // prevent old system
 				$_SESSION[$sessname3][$object->id] = $hideprices;
 
@@ -695,54 +695,65 @@ class ActionsSubtotal
 	        }
 
 		}
-		else if($action === 'confirm_delete_all_lines' && GETPOST('confirm')=='yes') {
+		else if($action === 'confirm_delete_all_lines' && GETPOST('confirm', 'none')=='yes') {
 
-			$Tab = TSubtotal::getLinesFromTitleId($object, GETPOST('lineid'), true);
+			$Tab = TSubtotal::getLinesFromTitleId($object, GETPOST('lineid', 'int'), true);
 			foreach($Tab as $line) {
+                $result = 0;
+
 				$idLine = $line->id;
 				/**
 				 * @var $object Facture
 				 */
-				if($object->element=='facture') $object->deleteline($idLine);
+				if($object->element=='facture') $result = $object->deleteline($idLine);
 				/**
 				 * @var $object Facture fournisseur
 				 */
 				else if($object->element=='invoice_supplier')
 				{
-				    $object->deleteline($idLine);
+					$result = $object->deleteline($idLine);
 				}
 				/**
 				 * @var $object Propal
 				 */
-				else if($object->element=='propal') $object->deleteline($idLine);
+				else if($object->element=='propal') $result = $object->deleteline($idLine);
 				/**
 				 * @var $object Propal Fournisseur
 				 */
-				else if($object->element=='supplier_proposal') $object->deleteline($idLine);
+				else if($object->element=='supplier_proposal') $result = $object->deleteline($idLine);
 				/**
 				 * @var $object Commande
 				 */
 				else if($object->element=='commande')
 				{
-					if ((float) DOL_VERSION >= 5.0) $object->deleteline($user, $idLine);
-					else $object->deleteline($idLine);
+					if ((float) DOL_VERSION >= 5.0) $result = $object->deleteline($user, $idLine);
+					else $result = $object->deleteline($idLine);
 				}
 				/**
 				 * @var $object Commande fournisseur
 				 */
 				else if($object->element=='order_supplier')
 				{
-				    $object->deleteline($idLine);
+                    			$result = $object->deleteline($idLine);
 				}
 				/**
 				 * @var $object Facturerec
 				 */
-				else if($object->element=='facturerec') $object->deleteline($idLine);
+				else if($object->element=='facturerec') $result = $object->deleteline($idLine);
 				/**
 				 * @var $object Expedition
 				 */
-				else if($object->element=='shipping') $object->deleteline($user, $idLine);
+				else if($object->element=='shipping') $result = $object->deleteline($user, $idLine);
+
+                if ($result < 0) $error++;
 			}
+
+            if ($error) {
+                setEventMessages($object->error, $object->errors, 'errors');
+                $db->rollback();
+            } else {
+                $db->commit();
+            }
 
 			header('location:?id='.$object->id);
 			exit;
@@ -796,39 +807,30 @@ class ActionsSubtotal
 	}
 
 	function getArrayOfLineForAGroup(&$object, $lineid) {
-		$rang = $line->rang;
-		$qty_line = $line->qty;
-
 		$qty_line = 0;
-
+        $qty_end_line = 0;
 		$found = false;
-
 		$Tab= array();
 
 		foreach($object->lines as $l) {
-
 		    $lid = (!empty($l->rowid) ? $l->rowid : $l->id);
-			if($lid == $lineid) {
 
+			if($lid == $lineid && $l->qty > 0 && $l->qty < 10) {
 				$found = true;
 				$qty_line = $l->qty;
+                $qty_end_line = 100 - $qty_line;
 			}
 
 			if($found) {
-
-			    $Tab[] = (!empty($l->rowid) ? $l->rowid : $l->id);
-
-				if($l->special_code==$this->module_number && (($l->qty==99 && $qty_line==1) || ($l->qty==98 && $qty_line==2))   ) {
-					break; // end of story
-				}
+                if ($l->special_code == $this->module_number && $lid != $lineid && ($l->qty <= $qty_line || $l->qty >= $qty_end_line)) {
+                    if ($l->qty == $qty_end_line) $Tab[] = $lid;
+                    break;
+                }
+                else $Tab[] = $lid;
 			}
-
-
 		}
 
-
 		return $Tab;
-
 	}
 
 	function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=0) {
@@ -846,10 +848,11 @@ class ActionsSubtotal
 		$total_ttc = 0;
 		$TTotal_tva = array();
 
+
 		$sign=1;
 		if (isset($object->type) && $object->type == 2 && ! empty($conf->global->INVOICE_POSITIVE_CREDIT_NOTE)) $sign=-1;
 
-		if (GETPOST('action') == 'builddoc') $builddoc = true;
+		if (GETPOST('action', 'none') == 'builddoc') $builddoc = true;
 		else $builddoc = false;
 
 		dol_include_once('/subtotal/class/subtotal.class.php');
@@ -913,16 +916,16 @@ class ActionsSubtotal
 	 * @param $h            float               height
 	 */
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
-		global $conf,$subtotal_last_title_posy;
+		global $conf,$subtotal_last_title_posy,$langs;
 
-		$hideInnerLines = (int)GETPOST('hideInnerLines');
+		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 		if (!empty($conf->global->SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES) && $hideInnerLines && !empty($subtotal_last_title_posy))
 		{
 			$posy = $subtotal_last_title_posy;
 			$subtotal_last_title_posy = null;
 		}
 
-		$hidePriceOnSubtotalLines = (int) GETPOST('hide_price_on_subtotal_lines');
+		$hidePriceOnSubtotalLines = GETPOST('hide_price_on_subtotal_lines', 'int');
 
 		if($object->element == 'shipping' || $object->element == 'delivery')
 		{
@@ -963,8 +966,26 @@ class ActionsSubtotal
 
 		//Print background
 		$cell_height = $pdf->getStringHeight($w, $label);
-		$pdf->SetXY($posx, $posy);
-		$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height, '', 0, '', 1);
+
+		if(!empty($object->subtotalPdfModelInfo->cols)){
+			include_once __DIR__ . '/staticPdf.model.php';
+			$staticPdfModel = new ModelePDFStatic($object->db);
+			$staticPdfModel->marge_droite 	= $object->subtotalPdfModelInfo->marge_droite;
+			$staticPdfModel->marge_gauche 	= $object->subtotalPdfModelInfo->marge_gauche;
+			$staticPdfModel->page_largeur 	= $object->subtotalPdfModelInfo->page_largeur;
+			$staticPdfModel->page_hauteur 	= $object->subtotalPdfModelInfo->page_hauteur;
+			$staticPdfModel->cols 			= $object->subtotalPdfModelInfo->cols;
+			$staticPdfModel->defaultTitlesFieldsStyle 	= $object->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
+			$staticPdfModel->defaultContentsFieldsStyle = $object->subtotalPdfModelInfo->defaultContentsFieldsStyle;
+			$staticPdfModel->prepareArrayColumnField($object, $langs);
+
+			$pdf->SetXY($object->subtotalPdfModelInfo->marge_droite, $posy);
+			$pdf->MultiCell($object->subtotalPdfModelInfo->page_largeur - $object->subtotalPdfModelInfo->marge_gauche - $object->subtotalPdfModelInfo->marge_droite, $cell_height, '', 0, '', 1);
+		}
+		else{
+			$pdf->SetXY($posx, $posy);
+			$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height, '', 0, '', 1);
+		}
 
 		if (!$hidePriceOnSubtotalLines) {
 			$total_to_print = price($line->total);
@@ -982,12 +1003,9 @@ class ActionsSubtotal
 				}
 			}
 
-
-
-
 			if($total_to_print !== '') {
 
-				if (GETPOST('hideInnerLines'))
+				if (GETPOST('hideInnerLines', 'int'))
 				{
 					// Dans le cas des lignes cachés, le calcul est déjà fait dans la méthode beforePDFCreation et les lignes de sous-totaux sont déjà renseignés
 //					$line->TTotal_tva
@@ -1013,7 +1031,13 @@ class ActionsSubtotal
 
 			$pdf->SetXY($pdf->postotalht, $posy);
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
-			$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, $total_to_print, 0, 'R', 0);
+
+			if(!empty($object->subtotalPdfModelInfo->cols)){
+				$staticPdfModel->printStdColumnContent($pdf, $posy, 'totalexcltax', $total_to_print);
+			}
+			else{
+				$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, $total_to_print, 0, 'R', 0);
+			}
 		}
 		else{
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
@@ -1043,7 +1067,7 @@ class ActionsSubtotal
 		$subtotal_last_title_posy = $posy;
 		$pdf->SetXY ($posx, $posy);
 
-		$hideInnerLines = (int)GETPOST('hideInnerLines');
+		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 
 
 
@@ -1133,8 +1157,8 @@ class ActionsSubtotal
 		}
 		elseif (!empty($conf->global->SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY))
 		{
-			$hideInnerLines = (int)GETPOST('hideInnerLines');
-			$hidedetails = (int)GETPOST('hidedetails');
+			$hideInnerLines = GETPOST('hideInnerLines', 'int');
+			$hidedetails = GETPOST('hidedetails', 'int');
 			if (empty($hideInnerLines) && !empty($hidedetails))
 			{
 				$this->resprints = $object->lines[$parameters['i']]->qty;
@@ -1200,7 +1224,7 @@ class ActionsSubtotal
 				}
 			}
 		}
-		if ((int)GETPOST('hideInnerLines') && !empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES)){
+		if (GETPOST('hideInnerLines', 'int') && !empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES)){
 		    $this->resprints = price($object->lines[$i]->total_ht);
 		}
 
@@ -1657,7 +1681,7 @@ class ActionsSubtotal
 
 	function setDocTVA(&$pdf, &$object) {
 
-		$hidedetails = (int)GETPOST('hidedetails');
+		$hidedetails = GETPOST('hidedetails', 'int');
 
 		if(empty($hidedetails)) return false;
 
@@ -1673,9 +1697,13 @@ class ActionsSubtotal
 		 */
 		global $pdf,$conf, $langs;
 
+		$object->subtotalPdfModelInfo = new stdClass(); // see defineColumnFiel method in this class
+		$object->subtotalPdfModelInfo->cols = false;
+
 		// var_dump($object->lines);
 		dol_include_once('/subtotal/class/subtotal.class.php');
 
+		$i = $parameters['i'];
 		foreach($parameters as $key=>$value) {
 			${$key} = $value;
 		}
@@ -1702,8 +1730,8 @@ class ActionsSubtotal
 			}
         }
 
-		$hideInnerLines = (int)GETPOST('hideInnerLines');
-		$hidedetails = (int)GETPOST('hidedetails');
+		$hideInnerLines = GETPOST('hideInnerLines', 'int');
+		$hidedetails = GETPOST('hidedetails', 'int');
 
 		if ($hideInnerLines) { // si c une ligne de titre
 	    	$fk_parent_line=0;
@@ -1858,8 +1886,15 @@ class ActionsSubtotal
 			${$key} = $value;
 		}
 
-		$hideInnerLines = (int)GETPOST('hideInnerLines');
-		$hidedetails = (int)GETPOST('hidedetails');
+		// même si le foreach du dessu fait ce qu'il faut, l'IDE n'aime pas
+		$outputlangs = $parameters['outputlangs'];
+		$i = $parameters['i'];
+		$posx = $parameters['posx'];
+		$h = $parameters['h'];
+		$w = $parameters['w'];
+
+		$hideInnerLines = GETPOST('hideInnerLines', 'int');
+		$hidedetails = GETPOST('hidedetails', 'int');
 
 		if($this->isModSubtotalLine($parameters,$object) ){
 
@@ -1934,19 +1969,6 @@ class ActionsSubtotal
 					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 					$pageAfter = $pdf->getPage();
 
-
-					/*if($pageAfter>$pageBefore) {
-						print "T $pageAfter>$pageBefore<br>";
-						$pdf->rollbackTransaction(true);
-						$pdf->addPage('','', true);
-						print 'add T'.$pdf->getPage().' '.$line->rowid.' '.$pdf->GetY().' '.$posy.'<br />';
-
-						$posy = $pdf->GetY();
-						$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-						$posy = $pdf->GetY();
-					}
-				*/
-
 					if($object->element == 'delivery')
 					{
 						$pdf->SetTextColor(255,255,255);
@@ -1955,7 +1977,6 @@ class ActionsSubtotal
 					$posy = $pdf->GetY();
 					return 1;
 				}
-//	if($line->rowid==47) exit;
 
 			return 0;
 		}
@@ -1963,20 +1984,6 @@ class ActionsSubtotal
 		{
 			$this->resprints = -1;
 		}
-
-		/* TODO je desactive parce que je comprends pas PH Style, mais à test
-		else {
-
-			if($hideInnerLines) {
-				$pdf->rollbackTransaction(true);
-			}
-			else {
-				$labelproductservice=pdf_getlinedesc($object, $i, $outputlangs, $hideref, $hidedesc, $issupplierline);
-				$pdf->writeHTMLCell($w, $h, $posx, $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1);
-			}
-
-		}*/
-
 
         return 0;
 	}
@@ -2071,7 +2078,7 @@ class ActionsSubtotal
 		if($line->special_code!=$this->module_number || $line->product_type!=9) {
 			if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_LINE) && $object->element !== 'invoice_supplier')
             {
-                if(!(TSubtotal::isModSubtotalLine($line)) && ( $line->fk_prev_id === null ) && !($action == "editline" && GETPOST('lineid') == $line->id)) {
+                if(!(TSubtotal::isModSubtotalLine($line)) && ( $line->fk_prev_id === null ) && !($action == "editline" && GETPOST('lineid', 'int') == $line->id)) {
                     echo '<a name="duplicate-'.$line->id.'" href="' . $_SERVER['PHP_SELF'] . '?' . $idvar . '=' . $object->id . '&action=duplicate&lineid=' . $line->id . '"><i class="fa fa-clone" aria-hidden="true"></i></a>';
 
                     ?>
@@ -2130,6 +2137,8 @@ class ActionsSubtotal
 			if(!empty($conf->global->DISPLAY_MARK_RATES) && !$margins_hidden_by_module) $colspan++;
 			if($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION) $colspan++;
 			if(!empty($conf->global->PRODUCT_USE_UNITS)) $colspan++;
+			// Compatibility module showprice
+			if(!empty($conf->showprice->enabled)) $colspan++;
 
 			/* Titre */
 			//var_dump($line);
@@ -2168,7 +2177,7 @@ class ActionsSubtotal
 				<?php } ?>
 
 				<td colspan="<?php echo $colspan; ?>" style="<?php TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;'; ?>  <?php echo ($line->qty>90)?'text-align:right':'' ?> "><?php
-					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
+					if($action=='editline' && GETPOST('lineid', 'int') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 
 						$params=array('line'=>$line);
 						$reshook=$hookmanager->executeHooks('formEditProductOptions',$params,$object,$action);
@@ -2374,7 +2383,7 @@ class ActionsSubtotal
 				<?php
 				if ($action != 'selectlines') {
 
-					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
+					if($action=='editline' && GETPOST('lineid', 'int') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 						?>
 						<input id="savelinebutton" class="button" type="submit" name="save" value="<?php echo $langs->trans('Save') ?>" />
 						<br />
@@ -2422,7 +2431,7 @@ class ActionsSubtotal
 							if(TSubtotal::isTitle($line) && ($line->fk_prev_id === null) )
 							{
 								if ((float) DOL_VERSION >= 8.0) {
-									$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' class="pictodelete pictodeleteallline"');
+									$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' style="color:#be3535 !important;" class="pictodelete pictodeleteallline"');
 								} elseif ((float) DOL_VERSION >= 3.8) {
 									$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal',' class="pictodelete" ');
 								} else {
@@ -2430,19 +2439,6 @@ class ActionsSubtotal
 								}
 
 								echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id.'">'.$img_delete.'</a>';
-
-								/* Depuis la 8.0, les icônes "standard" utilisent FontAwesome et sont préconfigurées selon la clé de l'image
-								 * Impossible d'en customiser par exemple la couleur, même en utilisant img_picto() directement
-								 */
-								if((float) DOL_VERSION >= 8.0) {
-								?>
-								<script>
-									$(document).ready(function () {
-										$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline,span.fas.fa-trash.pictodeleteallline").css({"color": "#be3535"});
-									});
-								</script>
-								<?php
-								}
 							}
 						}
 					}
@@ -2483,7 +2479,7 @@ class ActionsSubtotal
 				$extralabelsline = $extrafieldsline->fetch_name_optionals_label($object->table_element_line);
 
 				$colspan+=3; $mode = 'view';
-				if($action === 'editline' && $line->rowid == GETPOST('lineid')) $mode = 'edit';
+				if($action === 'editline' && $line->rowid == GETPOST('lineid', 'int')) $mode = 'edit';
 
 				$ex_element = $line->element;
 				$line->element = 'tr_extrafield_title '.$line->element; // Pour pouvoir manipuler ces tr
@@ -2759,7 +2755,7 @@ class ActionsSubtotal
 				if(TSubtotal::isTitle($line) && ($line->fk_prev_id === null) )
 				{
 					if ((float) DOL_VERSION >= 8.0) {
-						$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' class="pictodelete pictodeleteallline"');
+						$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' style="color:#be3535 !important;" class="pictodelete pictodeleteallline"');
 					} elseif ((float) DOL_VERSION >= 3.8) {
 						$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal',' class="pictodelete" ');
 					} else {
@@ -2767,21 +2763,7 @@ class ActionsSubtotal
 					}
 
 					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=ask_deleteallline&amp;lineid='.$lineid.'">'.$img_delete.'</a>';
-
-					/* Depuis la 8.0, les icônes "standard" utilisent FontAwesome et sont préconfigurées selon la clé de l'image
-					 * Impossible d'en customiser par exemple la couleur, même en utilisant img_picto() directement
-					 */
-					if((float) DOL_VERSION >= 8.0) {
-						?>
-							<script>
-								$(document).ready(function () {
-									$("#row-<?php echo $line->id; ?> td.linecoldelete span.fa.fa-trash.pictodeleteallline,span.fas.fa-trash.pictodeleteallline").css({"color": "#be3535"});
-								});
-							</script>
-							<?php
-					}
 				}
-
 
 				print '</td>';
 			}
@@ -2816,6 +2798,8 @@ class ActionsSubtotal
 
 		if (in_array('ordercard',$contexts) || in_array('invoicecard',$contexts))
 		{
+			/** @var Commande $object */
+
 			if(class_exists('TSubtotal')){ dol_include_once('/subtotal/class/subtotal.class.php'); }
 
 			if (TSubtotal::isModSubtotalLine($line))
@@ -3006,7 +2990,7 @@ class ActionsSubtotal
 
 		if ((!empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP) && $object->element == 'propal') || (!empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP) && $object->element == 'commande') || (!empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP) && $object->element == 'facture'))
 		{
-			if (GETPOST('subtotal_add_recap')) {
+			if (GETPOST('subtotal_add_recap', 'none')) {
 				dol_include_once('/subtotal/class/subtotal.class.php');
 				TSubtotal::addRecapPage($parameters, $pdf);
 			}
@@ -3267,7 +3251,8 @@ class ActionsSubtotal
 
 
 	}
-    /**
+
+/**
      * @param $parameters
      * @param $object
      * @param $action
@@ -3293,4 +3278,30 @@ class ActionsSubtotal
         }
 
     }
+
+	/**
+	 * Overloading the defineColumnField function
+	 *
+	 * @param   array()         $parameters     Hook metadatas (context, etc...)
+	 * @param   CommonDocGenerator object      $pdfDoc         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @param   string          $action         Current action (if set). Generally create or edit or null
+	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
+	 */
+	public function defineColumnField($parameters, &$pdfDoc, &$action, $hookmanager)
+	{
+
+		// If this model is column field compatible it will add info to change subtotal behavior
+		$parameters['object']->subtotalPdfModelInfo->cols = $pdfDoc->cols;
+
+		// HACK Pour passer les paramettres du model dans les hooks sans infos
+		$parameters['object']->subtotalPdfModelInfo->marge_droite 	= $pdfDoc->marge_droite;
+		$parameters['object']->subtotalPdfModelInfo->marge_gauche 	= $pdfDoc->marge_gauche;
+		$parameters['object']->subtotalPdfModelInfo->page_largeur 	= $pdfDoc->page_largeur;
+		$parameters['object']->subtotalPdfModelInfo->page_hauteur 	= $pdfDoc->page_hauteur;
+		$parameters['object']->subtotalPdfModelInfo->format 		= $pdfDoc->format;
+		$parameters['object']->subtotalPdfModelInfo->defaultTitlesFieldsStyle = $pdfDoc->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
+		$parameters['object']->subtotalPdfModelInfo->defaultContentsFieldsStyle = $pdfDoc->subtotalPdfModelInfo->defaultContentsFieldsStyle;
+
+	}
 }

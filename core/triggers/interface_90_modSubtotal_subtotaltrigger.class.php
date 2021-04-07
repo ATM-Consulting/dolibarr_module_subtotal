@@ -46,12 +46,10 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 
         $this->name = preg_replace('/^Interface/i', '', get_class($this));
         $this->family = "demo";
-        $this->description = "Triggers of this module are empty functions."
-            . "They have no effect."
-            . "They are provided for tutorial purpose only.";
+        $this->description = "Triggers of this module are subtotal functions.";
         // 'development', 'experimental', 'dolibarr' or version
         $this->version = 'development';
-        $this->picto = 'titre@titre';
+        $this->picto = 'subtotal@subtotal';
     }
 
     /**
@@ -210,7 +208,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
             }
 		    else
             {
-			    $subtotal_add_title_bloc_from_orderstoinvoice = GETPOST('subtotal_add_title_bloc_from_orderstoinvoice');
+			    $subtotal_add_title_bloc_from_orderstoinvoice = GETPOST('subtotal_add_title_bloc_from_orderstoinvoice', 'none');
 			    if (!empty($subtotal_add_title_bloc_from_orderstoinvoice))
 			    {
 				    global $subtotal_current_rang, $subtotal_bloc_previous_fk_commande, $subtotal_bloc_already_add_title, $subtotal_bloc_already_add_st;
@@ -274,7 +272,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 
 		if ($action == 'LINEBILL_UPDATE')
 		{
-			if (GETPOST('all_progress') && TSubtotal::isModSubtotalLine($object))
+			if (GETPOST('all_progress', 'none') && TSubtotal::isModSubtotalLine($object))
 			{
 				$object->situation_percent = 0;
 				$object->update($user, true); // notrigger pour éviter la boucle infinie
@@ -285,8 +283,8 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 		{
             if(! function_exists('_updateLineNC')) dol_include_once('/subtotal/lib/subtotal.lib.php');
 
-			$doli_action = GETPOST('action');
-			$set = GETPOST('set');
+			$doli_action = GETPOST('action', 'none');
+			$set = GETPOST('set', 'none');
 			if ( (in_array($doli_action, array('updateligne', 'updateline', 'addline', 'add', 'create', 'setstatut', 'save_nomenclature')) || $set == 'defaultTVA') && !TSubtotal::isTitle($object) && !TSubtotal::isSubtotal($object) && in_array($object->element, array('propaldet', 'commandedet', 'facturedet')))
 			{
 				 dol_syslog(
@@ -546,7 +544,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
 
-			$doli_action = GETPOST('action');
+			$doli_action = GETPOST('action', 'none');
 
 			if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($doli_action, array('confirm_clone')))
 			{
