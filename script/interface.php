@@ -1,4 +1,7 @@
 <?php
+
+	if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL', 1);
+
 	require '../config.php';
 
 	dol_include_once('/subtotal/lib/subtotal.lib.php');
