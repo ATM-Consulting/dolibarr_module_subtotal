@@ -1324,9 +1324,10 @@ class ActionsSubtotal
 
 				$line = &$object->lines[$i];
 
-				if($line->info_bits>0) { // PAGE BREAK
+				$margin = $pdf->getMargins();
+				if(!empty($margin) && $line->info_bits>0) {
 					$pdf->addPage();
-					$posy = $pdf->GetY();
+					$posy = $margin['top'];
 				}
 
 				$label = $line->label;
@@ -1336,6 +1337,7 @@ class ActionsSubtotal
 					$label = $description;
 					$description='';
 				}
+
 
 				if($line->qty>90) {
 
@@ -1355,6 +1357,7 @@ class ActionsSubtotal
 
 					$posy = $pdf->GetY();
 					return 1;
+
 				}
 				else if ($line->qty < 10) {
 					$pageBefore = $pdf->getPage();
@@ -1375,6 +1378,15 @@ class ActionsSubtotal
 					}
 				*/
 					$posy = $pdf->GetY();
+					return 1;
+				} else {
+
+					$labelproductservice = pdf_getlinedesc($object, $i, $outputlangs, $parameters['hideref'], $parameters['hidedesc'], $parameters['issupplierline']);
+
+					$labelproductservice = preg_replace('/(<img[^>]*src=")([^"]*)(&amp;)([^"]*")/', '\1\2&\4', $labelproductservice, -1, $nbrep);
+
+					$pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+
 					return 1;
 				}
 //	if($line->rowid==47) exit;
