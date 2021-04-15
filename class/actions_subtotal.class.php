@@ -1379,7 +1379,7 @@ class ActionsSubtotal
 				*/
 					$posy = $pdf->GetY();
 					return 1;
-				} else {
+				} elseif(!empty($margin)) {
 
 					$labelproductservice = pdf_getlinedesc($object, $i, $outputlangs, $parameters['hideref'], $parameters['hidedesc'], $parameters['issupplierline']);
 
