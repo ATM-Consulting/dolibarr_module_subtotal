@@ -1,8 +1,9 @@
-# CHANGELOG FOR XXXXXX MODULE
+# CHANGELOG FOR SUBTOTAL MODULE
 
 ## Not Released
 
 
-## 3.2.1 - 15/04/2021
 
-- FIX : Text or title line break PDF
+## Version 3.2
+
+- FIX : Text or title line break PDF *15/04/2021* - 3.2.1
