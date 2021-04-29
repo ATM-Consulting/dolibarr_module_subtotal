@@ -7,8 +7,13 @@ All notable changes to this project will be documented in this file.
 
 ## Version 3.6
 
-- FIX: dolibarr v13.0 compatibility (token renewal exclusion) *2021-04-13* - 3.6.2
-- FIX: exclude subtotals from the total calculation *2021-04-07* - 3.5.6
+
+- FIX : Fix document line colspan fail if Margin module don't enabled but some conf of this module still actived *21/04/2021* - 3.6.3
+- FIX : Dolibarr v13.0 compatibility (token renewal exclusion) *13/04/2021* - 3.6.2
+- FIX : Exclude subtotals from the total calculation *07/04/2021* - 3.5.6
+- NEW : Ajouter les lignes 'Titre' , 'Total' , 'Libre' aux generations d'expeditions de commandes expédiables (il faudra
+  supprimer les lignes de sous-total à la main si le besoin s'en fait sentir) *03/04/2021* - 3.5.5
+
 
 ## Version 3.5
 
