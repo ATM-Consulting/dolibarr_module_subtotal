@@ -46,21 +46,21 @@ if (! $user->admin) {
 $action = GETPOST('action', 'alpha');
 
 if($action=='save') {
-	
+
 	foreach($_REQUEST['TDivers'] as $name=>$param) {
-		
+
 		dolibarr_set_const($db, $name, $param,'chaine', 0, '', $conf->entity);
-		
+
 	}
-	
+
 }
 
 if (preg_match('/set_(.*)/',$action,$reg))
 {
 	$code=$reg[1];
-	$value = GETPOST($code);
+	$value = GETPOST($code, 'none');
 	if ($code == 'SUBTOTAL_TFIELD_TO_KEEP_WITH_NC') $value = implode(',', $value);
-	
+
 }
 
 
@@ -91,9 +91,9 @@ showParameters();
 
 function showParameters() {
 	global $db,$conf,$langs,$bc;
-	
+
 	$html=new Form($db);
-	
+
 	$var=false;
 	print '<table class="noborder" width="100%">';
 	print '<tr class="liste_titre">';
@@ -101,7 +101,7 @@ function showParameters() {
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
 	print '</tr>';
-	
+
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
 	print '<td>'.$langs->trans("SUBTOTAL_USE_LEVEL").'</td>';
@@ -109,7 +109,7 @@ function showParameters() {
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_USE_LEVEL');
 	print '</td></tr>';
-	
+
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
 	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_ADD_BLOCK").'</td>';
@@ -117,7 +117,7 @@ function showParameters() {
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_ALLOW_ADD_BLOCK');
 	print '</td></tr>';
-	
+
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
 	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_EDIT_BLOCK").'</td>';
@@ -125,7 +125,7 @@ function showParameters() {
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_ALLOW_EDIT_BLOCK');
 	print '</td></tr>';
-	
+
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
 	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_REMOVE_BLOCK").'</td>';
@@ -133,7 +133,7 @@ function showParameters() {
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_ALLOW_REMOVE_BLOCK');
 	print '</td></tr>';
-	
+
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
 	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_DUPLICATE_BLOCK").'</td>';
@@ -141,7 +141,7 @@ function showParameters() {
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_ALLOW_DUPLICATE_BLOCK');
 	print '</td></tr>';
-	
+
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
 	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE").'</td>';
@@ -162,7 +162,7 @@ function showParameters() {
 	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 	print '</form>';
 	print '</td></tr>';
-	
+
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
 	print '<td>'.$langs->trans("SUBTOTAL_TITLE_STYLE").'</td>';
@@ -175,7 +175,7 @@ function showParameters() {
 	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 	print '</form>';
 	print '</td></tr>';
-	
+
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
 	print '<td>'.$langs->trans("SUBTOTAL_SUBTOTAL_STYLE").'</td>';
@@ -188,11 +188,11 @@ function showParameters() {
 	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 	print '</form>';
 	print '</td></tr>';
-	
-	print '</table><br />';
-	
 
-	
+	print '</table><br />';
+
+
+
 
 }
 

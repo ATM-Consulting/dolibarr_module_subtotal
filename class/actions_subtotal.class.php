@@ -23,7 +23,7 @@ class ActionsSubtotal
 			if ((float) DOL_VERSION >= 6.0)
 			{
 				$value = '';
-				$sql = 'SELECT content FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text WHERE rowid = '.GETPOST('rowid');
+				$sql = 'SELECT content FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text WHERE rowid = '.GETPOST('rowid', 'int');
 				$resql = $this->db->query($sql);
 				if ($resql && ($obj = $this->db->fetch_object($resql))) $value = $obj->content;
 			}
@@ -117,12 +117,12 @@ class ActionsSubtotal
 					$level = GETPOST('level', 'int'); //New avec SUBTOTAL_USE_LEVEL
 
 					if($action=='add_title_line') {
-						$title = GETPOST('title');
+						$title = GETPOST('title', 'alpha');
 						if(empty($title)) $title = $langs->trans('title');
 						$qty = $level<1 ? 1 : $level ;
 					}
 					else if($action=='add_free_text') {
-						$title = GETPOST('title');
+						$title = GETPOST('title', 'alpha');
 
 						if (empty($title)) {
 							$free_text = GETPOST('free_text', 'int');
@@ -137,7 +137,7 @@ class ActionsSubtotal
 						$qty = 50;
 					}
 					else if($action=='add_subtitle_line') {
-						$title = GETPOST('title');
+						$title = GETPOST('title', 'alpha');
 						if(empty($title)) $title = $langs->trans('subtitle');
 						$qty = 2;
 					}
@@ -146,7 +146,7 @@ class ActionsSubtotal
 						$qty = 98;
 					}
 					else {
-						$title = GETPOST('title') ? GETPOST('title') : $langs->trans('SubTotal');
+						$title = GETPOST('title', 'alpha') ? GETPOST('title', 'alpha') : $langs->trans('SubTotal');
 						$qty = $level ? 100-$level : 99;
 					}
 					dol_include_once('/subtotal/class/subtotal.class.php');
@@ -158,7 +158,7 @@ class ActionsSubtotal
 				else if($action==='ask_deleteallline') {
 						$form=new Form($db);
 
-						$lineid = GETPOST('lineid','integer');
+						$lineid = GETPOST('lineid','int');
 						$TIdForGroup = $this->getArrayOfLineForAGroup($object, $lineid);
 
 						$nbLines = count($TIdForGroup);
@@ -459,7 +459,7 @@ class ActionsSubtotal
 		dol_include_once('/subtotal/lib/subtotal.lib.php');
 		require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 
-		$showBlockExtrafields = GETPOST('showBlockExtrafields');
+		$showBlockExtrafields = GETPOST('showBlockExtrafields', 'none');
 
 		if($object->element=='facture') $idvar = 'facid';
 		else $idvar = 'id';
@@ -542,13 +542,13 @@ class ActionsSubtotal
 
 				global $hideprices;
 
-				$hideInnerLines = (int)GETPOST('hideInnerLines');
+				$hideInnerLines = GETPOST('hideInnerLines', 'int');
 				$_SESSION[$sessname] = $hideInnerLines;
 
-				$hidedetails= (int)GETPOST('hidedetails');
+				$hidedetails= GETPOST('hidedetails', 'int');
 				$_SESSION[$sessname2] = $hidedetails;
 
-				$hideprices= (int)GETPOST('hideprices');
+				$hideprices= GETPOST('hideprices', 'int');
 				$_SESSION[$sessname3] = $hideprices;
 
 				foreach($object->lines as &$line) {
@@ -567,9 +567,9 @@ class ActionsSubtotal
 	        }
 
 		}
-		else if($action === 'confirm_delete_all_lines' && GETPOST('confirm')=='yes') {
+		else if($action === 'confirm_delete_all_lines' && GETPOST('confirm', 'alpha')=='yes') {
 
-			$Tab = $this->getArrayOfLineForAGroup($object, GETPOST('lineid'));
+			$Tab = $this->getArrayOfLineForAGroup($object, GETPOST('lineid', 'int'));
 
 			foreach($Tab as $idLine) {
 				/**
@@ -765,10 +765,10 @@ class ActionsSubtotal
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		global $conf,$subtotal_last_title_posy;
 
-		$hideInnerLines = (int)GETPOST('hideInnerLines');
+		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 
 
-		$hidePriceOnSubtotalLines = (int) GETPOST('hide_price_on_subtotal_lines');
+		$hidePriceOnSubtotalLines = GETPOST('hide_price_on_subtotal_lines', 'int');
 
 		$set_pagebreak_margin = false;
 		if(method_exists('Closure','bind')) {
@@ -813,7 +813,7 @@ class ActionsSubtotal
 
 			if($total_to_print !== '') {
 
-				if (GETPOST('hideInnerLines'))
+				if (GETPOST('hideInnerLines', 'int'))
 				{
 					// Dans le cas des lignes cachés, le calcul est déjà fait dans la méthode beforePDFCreation et les lignes de sous-totaux sont déjà renseignés
 //					$line->TTotal_tva
@@ -870,7 +870,7 @@ class ActionsSubtotal
 		$subtotal_last_title_posy = $posy;
 		$pdf->SetXY ($posx, $posy);
 
-		$hideInnerLines = (int)GETPOST('hideInnerLines');
+		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 
 
 
@@ -1191,7 +1191,7 @@ class ActionsSubtotal
 
 	function setDocTVA(&$pdf, &$object) {
 
-		$hidedetails = (int)GETPOST('hidedetails');
+		$hidedetails = GETPOST('hidedetails', 'int');
 
 		if(empty($hidedetails)) return false;
 
@@ -1218,8 +1218,8 @@ class ActionsSubtotal
 
 
 
-		$hideInnerLines = (int)GETPOST('hideInnerLines');
-		$hidedetails = (int)GETPOST('hidedetails');
+		$hideInnerLines = GETPOST('hideInnerLines', 'int');
+		$hidedetails = GETPOST('hidedetails', 'int');
 
 		if ($hideInnerLines) { // si c une ligne de titre
 	    	$fk_parent_line=0;
@@ -1309,8 +1309,8 @@ class ActionsSubtotal
 			${$key} = $value;
 		}
 
-		$hideInnerLines = (int)GETPOST('hideInnerLines');
-		$hidedetails = (int)GETPOST('hidedetails');
+		$hideInnerLines = GETPOST('hideInnerLines', 'int');
+		$hidedetails = GETPOST('hidedetails', 'int');
 
 		if($this->isModSubtotalLine($parameters,$object) ){
 
@@ -1540,7 +1540,7 @@ class ActionsSubtotal
 			?>;">
 
 				<td colspan="<?php echo $colspan; ?>" style="<?php TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;'; ?>  <?php echo ($line->qty>90)?'text-align:right':'' ?> "><?php
-					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
+					if($action=='editline' && GETPOST('lineid', 'int') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 
 						$params=array('line'=>$line);
 						$reshook=$hookmanager->executeHooks('formEditProductOptions',$params,$object,$action);
@@ -1702,7 +1702,7 @@ class ActionsSubtotal
 				<?php
 				if ($action != 'selectlines') {
 
-					if($action=='editline' && GETPOST('lineid') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
+					if($action=='editline' && GETPOST('lineid', 'int') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 						?>
 						<input id="savelinebutton" class="button" type="submit" name="save" value="<?php echo $langs->trans('Save') ?>" />
 						<br />
