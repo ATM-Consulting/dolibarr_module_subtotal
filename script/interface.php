@@ -1,4 +1,6 @@
 <?php
+	if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL','1'); // Disables token renewal
+
 	require '../config.php';
 
 	dol_include_once('/subtotal/lib/subtotal.lib.php');
@@ -10,8 +12,10 @@
 	dol_include_once('/supplier_proposal/class/supplier_proposal.class.php');
 	dol_include_once('/fourn/class/fournisseur.facture.class.php');
 
+
 	$get=GETPOST('get', 'alpha');
 	$set=GETPOST('set', 'alpha');
+
 
 	switch ($get) {
 		default:
@@ -20,7 +24,8 @@
 
 	switch ($set) {
 		case 'updateLineNC': // Gestion du Compris/Non Compris via les titres et/ou lignes
-			echo json_encode( _updateLineNC(GETPOST('element', 'none'), GETPOST('elementid', 'int'), GETPOST('lineid', 'int'), GETPOST('subtotal_nc', 'int')) );
+
+		  echo json_encode( _updateLineNC(GETPOST('element', 'none'), GETPOST('elementid', 'int'), GETPOST('lineid', 'int'), GETPOST('subtotal_nc', 'int')) );
 
 			break;
 		default:
