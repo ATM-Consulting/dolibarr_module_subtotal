@@ -49,21 +49,21 @@ function subtotalAdminPrepareHead()
 function getHtmlSelectTitle(&$object, $showLabel=false)
 {
 	global $langs;
-	
+
 	require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
 	dol_include_once('/subtotal/class/subtotal.class.php');
 	$TTitle = TSubtotal::getAllTitleFromDocument($object);
 	$html = '';
 	if ($showLabel) $html.= '<label for="under_title">'.$langs->trans('subtotalLabelForUnderTitle').'</label>';
 	$html.= '<select onChange="$(\'select[name=under_title]\').val(this.value);" name="under_title" class="under_title minwidth200"><option value="-1"></option>';
-	
+
 	$nbsp = '&nbsp;';
 	foreach ($TTitle as &$line)
 	{
 		$str = str_repeat($nbsp, ($line->qty - 1) * 3);
 		$html .= '<option value="'.$line->rang.'">'.$str.(!empty($line->label) ? $line->label : dol_trunc($line->desc, 30)).'</option>';
 	}
-	
+
 	$html .= '</select>';
 	return $html;
 }
@@ -71,12 +71,12 @@ function getHtmlSelectTitle(&$object, $showLabel=false)
 function getTFreeText()
 {
 	global $db,$conf;
-	
+
 	$TFreeText = array();
-	
+
 	$sql = 'SELECT rowid, label, content, active, entity FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text WHERE active = 1 AND entity = '.$conf->entity.' ORDER BY label';
 	$resql = $db->query($sql);
-	
+
 	if ($resql)
 	{
 		while ($row = $db->fetch_object($resql))
@@ -84,14 +84,14 @@ function getTFreeText()
 			$TFreeText[$row->rowid] = $row;
 		}
 	}
-	
+
 	return $TFreeText;
 }
 
 function getHtmlSelectFreeText($withEmpty=true)
 {
 	global $langs;
-	
+
 	$TFreeText = getTFreeText();
 	$html = '<label for="free_text">'.$langs->trans('subtotalLabelForFreeText').'</label>';
 	$html.= '<select onChange="getTFreeText($(this));" name="free_text" class="minwidth200">';
@@ -127,9 +127,9 @@ function getHtmlSelectFreeText($withEmpty=true)
 
 function _updateSubtotalLine(&$object, &$line)
 {
-	$label = GETPOST('line-title');
-	$description = ($line->qty>90) ? '' : GETPOST('line-description');
-	$pagebreak = (int) GETPOST('line-pagebreak');
+	$label = GETPOST('line-title', 'alpha');
+	$description = ($line->qty>90) ? '' : GETPOST('line-description', 'alpha');
+	$pagebreak = GETPOST('line-pagebreak', 'int');
 
 	$level = GETPOST('subtotal_level', 'int');
 	if (!empty($level))
@@ -137,7 +137,7 @@ function _updateSubtotalLine(&$object, &$line)
 		if ($line->qty > 90) $line->qty = 100 - $level; // Si on edit une ligne sous-total
 		else $line->qty = $level;
 	}
-	
+
 	$res = TSubtotal::doUpdateLine($object, $line->id, $description, 0, $line->qty, 0, '', '', 0, 9, 0, 0, 'HT', $pagebreak, 0, 1, null, 0, $label, TSubtotal::$module_number, $line->array_options);
 
 	return $res;
@@ -146,12 +146,12 @@ function _updateSubtotalLine(&$object, &$line)
 function _updateSubtotalBloc($object, $line)
 {
 	global $conf,$langs;
-	
+
 	$subtotal_tva_tx = $subtotal_tva_tx_init = GETPOST('subtotal_tva_tx', 'int');
 	$subtotal_progress = $subtotal_progress_init = GETPOST('subtotal_progress', 'int');
 	$array_options = $line->array_options;
-	$showBlockExtrafields = GETPOST('showBlockExtrafields');
-	
+	$showBlockExtrafields = GETPOST('showBlockExtrafields', 'none');
+
 	if ($subtotal_tva_tx != '' || $subtotal_progress != '' || (!empty($showBlockExtrafields) && !empty($array_options)))
 	{
 		$error_progress = $nb_progress_update = $nb_progress_not_updated = 0;
@@ -161,7 +161,7 @@ function _updateSubtotalBloc($object, $line)
 			if (!TSubtotal::isModSubtotalLine($line))
 			{
 				$subtotal_tva_tx = $subtotal_tva_tx_init; // ré-init car la variable peut évoluer
-					
+
 				if (!empty($showBlockExtrafields)) $line->array_options = $array_options;
 				if ($subtotal_tva_tx == '') $subtotal_tva_tx = $line->tva_tx;
 				if ($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION)
@@ -178,7 +178,7 @@ function _updateSubtotalBloc($object, $line)
 						}
 					}
 				}
-				
+
 				$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $subtotal_tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $subtotal_progress, $line->fk_unit);
 
 				if ($res > 0) $success_updated_line++;
@@ -187,37 +187,37 @@ function _updateSubtotalBloc($object, $line)
 		}
 
 		if ($nb_progress_not_updated > 0) setEventMessage($langs->trans('subtotal_nb_progress_not_updated', $nb_progress_not_updated), 'warnings');
-		
+
 		if ($success_updated_line > 0) setEventMessage($langs->trans('subtotal_success_updated_line', $success_updated_line));
 		if ($error_updated_line > 0)
 		{
 			setEventMessage($langs->trans('subtotal_error_updated_line', $error_updated_line), 'errors');
 			return -$error_updated_line;
 		}
-		
+
 		return $success_updated_line;
 	}
-	
+
 	return 0;
 }
 
 
 
 
-	
+
 /**
  * Maj du bloc pour forcer le total_tva et total_ht à 0 et recalculer le total du document
- * 
+ *
  * @param	$lineid			= title lineid
- * @param	$subtotal_nc	0 = "Compris" prise en compte des totaux des lignes; 1 = "Non compris" non prise en compte des totaux du bloc; null = update de toutes les lignes 
+ * @param	$subtotal_nc	0 = "Compris" prise en compte des totaux des lignes; 1 = "Non compris" non prise en compte des totaux du bloc; null = update de toutes les lignes
  */
 function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 {
 	global $db,$langs,$tmp_object_nc;
-	
+
 	$error = 0;
 	if (empty($element)) $error++;
-	
+
 	if (!$error)
 	{
 		if (!empty($tmp_object_nc) && $tmp_object_nc->element == $element && $tmp_object_nc->id == $elementid)
@@ -227,28 +227,28 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 		else
 		{
 			$classname = ucfirst($element);
-			
+
 			switch ($element) {
 			    case 'supplier_proposal':
 			        $classname = 'SupplierProposal';
 			        break;
-			        
+
 			    case 'order_supplier':
 			        $classname = 'CommandeFournisseur';
 			        break;
-			        
+
 			    case 'invoice_supplier':
 			        $classname = 'FactureFournisseur';
 			        break;
 			}
-			
+
 			$object = new $classname($db); // Propal | Commande | Facture
 			$res = $object->fetch($elementid);
 			if ($res < 0) $error++;
 			else $tmp_object_nc = $object;
 		}
 	}
-	
+
 	if (!$error)
 	{
 		foreach ($object->lines as &$l)
@@ -258,11 +258,11 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 				break;
 			}
 		}
-		
+
 		if (!empty($line))
 		{
 			$db->begin();
-			
+
 			if(TSubtotal::isModSubtotalLine($line))
 			{
 				if(TSubtotal::isTitle($line)) {
@@ -278,10 +278,10 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 			{
 				$res = doUpdate($object, $line, $subtotal_nc);
 			}
-			
+
 			$res = $object->update_price(1);
 			if ($res <= 0) $error++;
-			
+
 			if (!$error)
 			{
 				setEventMessage($langs->trans('subtotal_update_nc_success'));
@@ -299,11 +299,11 @@ function _updateLineNC($element, $elementid, $lineid, $subtotal_nc=null)
 function doUpdate(&$object, &$line, $subtotal_nc)
 {
 	global $user;
-	
+
 	if (TSubtotal::isFreeText($line) || TSubtotal::isSubtotal($line)) return 1;
 	// Update extrafield et total
 	if(! empty($subtotal_nc)) {
-		$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 = 
+		$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 =
 			$line->multicurrency_total_ht = $line->multicurrency_total_tva = $line->multicurrency_total_ttc = 0;
 
 		$line->array_options['options_subtotal_nc'] = 1;
@@ -314,7 +314,7 @@ function doUpdate(&$object, &$line, $subtotal_nc)
 	else {
 	    if(in_array($object->element, array('invoice_supplier', 'order_supplier', 'supplier_proposal'))) {
 	        if(empty($line->label)) $line->label = $line->description; // supplier lines don't have the field label
-	        
+
 	        require_once(DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php');
 	        $extrafields=new ExtraFields($object->db);
 	        $extralabels=$extrafields->fetch_name_optionals_label($object->table_element_line,true);
@@ -324,7 +324,7 @@ function doUpdate(&$object, &$line, $subtotal_nc)
 		if($object->element == 'order_supplier') $line->update($user);
 		$res = TSubtotal::doUpdateLine($object, $line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $line->tva_tx, $line->product_type, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $line->situation_percent, $line->fk_unit);
 	}
-	
+
 	return $res;
 }
 
