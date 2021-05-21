@@ -12,8 +12,10 @@
 	dol_include_once('/supplier_proposal/class/supplier_proposal.class.php');
 	dol_include_once('/fourn/class/fournisseur.facture.class.php');
 
-	$get=GETPOST('get');
-	$set=GETPOST('set');
+
+	$get=GETPOST('get', 'alpha');
+	$set=GETPOST('set', 'alpha');
+
 
 	switch ($get) {
 		default:
@@ -22,7 +24,8 @@
 
 	switch ($set) {
 		case 'updateLineNC': // Gestion du Compris/Non Compris via les titres et/ou lignes
-			echo json_encode( _updateLineNC(GETPOST('element'), GETPOST('elementid'), GETPOST('lineid'), GETPOST('subtotal_nc')) );
+
+		  echo json_encode( _updateLineNC(GETPOST('element', 'none'), GETPOST('elementid', 'int'), GETPOST('lineid', 'int'), GETPOST('subtotal_nc', 'int')) );
 
 			break;
 		default:
