@@ -1,4 +1,7 @@
 <?php
+
+dol_include_once('/subtotal/class/subtotal.class.php');
+
 class ActionsSubtotal
 {
 
