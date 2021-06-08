@@ -3,7 +3,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- 3.5.6: FIX: exclude subtotals from the total calculation *2021-04-07*
+- FIX: FIX : Uniformize module descriptor's editor, editor_url and family fields *2021-06-08* - 3.5.7
+- FIX: exclude subtotals from the total calculation *2021-04-07* - 3.5.6
 
 ## Version 3.5
 
