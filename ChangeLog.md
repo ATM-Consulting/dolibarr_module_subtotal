@@ -3,11 +3,11 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
-- FIX : Clone icon compatibility *08/06/2021* - 3.6.6
-- FIX : Uniformize module descriptor's editor, editor_url and family fields *2021-06-08* - 3.6.5
 
 ## Version 3.6
 
+- FIX : Clone icon compatibility *08/06/2021* - 3.6.6
+- FIX : Uniformize module descriptor's editor, editor_url and family fields *2021-06-08* - 3.6.5
 - FIX : Ajout include de la classe dans actions_subtotal pour éviter des erreurs *21/05/2021* - 3.6.4
 - FIX : Fix document line colspan fail if Margin module don't enabled but some conf of this module still actived *21/04/2021* - 3.6.3
 - FIX : Dolibarr v13.0 compatibility (token renewal exclusion) *13/04/2021* - 3.6.2
