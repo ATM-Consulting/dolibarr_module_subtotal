@@ -2416,12 +2416,20 @@ class ActionsSubtotal
 					else{
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) && $object->element !== 'invoice_supplier')
 						{
-							if(TSubtotal::isTitle($line) && ( $line->fk_prev_id === null )) echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'">'. img_picto($langs->trans('Duplicate'), 'duplicate@subtotal').'</a>';
+							if(TSubtotal::isTitle($line) && ( $line->fk_prev_id === null )) {
+								echo '<a class="subtotal-line-action-btn" title="'.$langs->trans('CloneLSubtotalBlock').'" href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'" >';
+								if(intval(DOL_VERSION) < 8) {
+									echo img_picto($langs->trans('Duplicate'), 'duplicate@subtotal');
+								} else {
+									echo '<i class="fa fa-clone" aria-hidden="true"></i>';
+								}
+								echo '</a>';
+							}
 						}
 
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK))
 						{
-							echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=editline&lineid='.$line->id.'#row-'.$line->id.'">'.img_edit().'</a>';
+							echo '<a class="subtotal-line-action-btn"  href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=editline&lineid='.$line->id.'#row-'.$line->id.'">'.img_edit().'</a>';
 						}
 					}
 
@@ -2439,7 +2447,7 @@ class ActionsSubtotal
 
 							if ($line->fk_prev_id === null)
 							{
-								echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id.'">'.img_delete().'</a>';
+								echo '<a class="subtotal-line-action-btn"  href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id.'">'.img_delete().'</a>';
 							}
 
 							if(TSubtotal::isTitle($line) && ($line->fk_prev_id === null) )
@@ -2452,7 +2460,7 @@ class ActionsSubtotal
 									$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal');
 								}
 
-								echo '<a href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id.'">'.$img_delete.'</a>';
+								echo '<a class="subtotal-line-action-btn"  href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id.'">'.$img_delete.'</a>';
 							}
 						}
 					}
@@ -3257,7 +3265,11 @@ class ActionsSubtotal
             	background: #fffa90;
             	color: #777620;
             }
-            </style>
+
+			.subtotal-line-action-btn {
+				margin-right: 5px;
+			}
+			</style>
 		<?php
 
 		}
