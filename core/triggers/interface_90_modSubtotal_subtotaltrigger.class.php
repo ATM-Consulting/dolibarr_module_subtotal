@@ -351,13 +351,23 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 		if ($action == 'SHIPPING_CREATE') {
 			$object->fetch_lines(); // Obligé de fetch les lines car au retour de la création, les lignes n'ont pas leur id...
 
-			// Parcours des lignes et lorsque un tire et un sous-total de même niveau, ou 2 titres de même niveau sont à la suite, on les supprime
+
 			foreach ($object->lines as &$line) {
-				$orderline = new OrderLine($this->db);
-				$orderline->fetch($line->origin_line_id);
+				// si la conf pas d'affichage des titres  et consorts (sous total )
+				//on supprime la ligne de sous total
+				if ($conf->global->NO_TITLE_SHOW_ON_EXPED_GENERATION){
+					$line->special_code = TSubtotal::$module_number;
+						if(TSubtotal::isModSubtotalLine($line)) {
+							$resdelete = $line->delete($user);
+							if ($resdelete < 0){
+								setEventMessage($langs->trans('Error_subtotal_delete_line'),'errors');
+							}
+						}
+				}
 
 				if(TSubtotal::isTitle($orderline) || TSubtotal::isSubtotal($orderline)) { // Nous sommes sur une ligne titre, si la ligne précédente est un titre de même niveau, on supprime la ligne précédente
 					$line->special_code = TSubtotal::$module_number;
+
 				}
 			}
 			$TLinesToDelete = array();
@@ -367,20 +377,21 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 					$TBlocks = array();
 					$isThereProduct = false;
 					foreach($TLines as $lineInBlock) {
-						if(TSubtotal::isTitle($lineInBlock) || TSubtotal::isSubtotal($lineInBlock)) $TBlocks[$lineInBlock->id] = $lineInBlock;
-						else $isThereProduct = true;
+							if(TSubtotal::isTitle($lineInBlock) || TSubtotal::isSubtotal($lineInBlock)) $TBlocks[$lineInBlock->id] = $lineInBlock;
+							else $isThereProduct = true;
 					}
 					if(!$isThereProduct) {
 						$TLinesToDelete = array_merge($TLinesToDelete, $TBlocks);
 					}
 				}
 			}
+
 			if (!empty($TLinesToDelete)) {
 				foreach ($TLinesToDelete as $lineToDelete) {
 					$lineToDelete->delete($user);
 				}
 			}
-			//exit;
+
 		}
 
         if ($action == 'USER_LOGIN') {
@@ -852,7 +863,10 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
-        }
+        }elseif ($action == 'LINESHIPPING_INSERT') {
+
+				dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
+		}
 
         // File
         elseif ($action == 'FILE_UPLOAD') {
@@ -864,7 +878,8 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
         }
-
+$orderline = new OrderLine($this->db);
+				$orderline->fetch($line->origin_line_id);
         return 0;
     }
 }
