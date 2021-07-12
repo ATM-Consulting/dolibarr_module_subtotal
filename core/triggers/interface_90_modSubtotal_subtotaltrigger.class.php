@@ -878,8 +878,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
         }
-$orderline = new OrderLine($this->db);
-				$orderline->fetch($line->origin_line_id);
+
         return 0;
     }
 }
