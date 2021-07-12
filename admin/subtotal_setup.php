@@ -508,15 +508,7 @@ function showParameters() {
 
 dol_fiche_end(-1);
 
-// Put here content of your page
-// ...
-$var=false;
-	print '<table class="noborder" width="100%">';
-	print '<tr class="liste_titre">';
-	print '<td>'.$langs->trans("Parameters").'</td>'."\n";
-	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
-	print '</tr>';
+
 /***************************************************
 * LINKED OBJECT BLOCK
 *
