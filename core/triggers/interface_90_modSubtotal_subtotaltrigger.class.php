@@ -351,12 +351,43 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 		if ($action == 'SHIPPING_CREATE') {
 			$object->fetch_lines(); // Obligé de fetch les lines car au retour de la création, les lignes n'ont pas leur id...
 
+			// on recupere la commande
+			$object->fetchObjectLinked();
 
 			foreach ($object->lines as &$line) {
+
 				// si la conf pas d'affichage des titres  et consorts (sous total )
 				//on supprime la ligne de sous total
 				if ($conf->global->NO_TITLE_SHOW_ON_EXPED_GENERATION){
-					$line->special_code = TSubtotal::$module_number;
+					// le special code n'est pas tranmit dans l'expedition
+					// @todo voir plus tard pourquoi nous n'avons pas cette information dans la ligne d'expedition
+					if (empty($line->special_code)){
+						//  récuperation  de la facture generé par Trigger
+
+						if (count($object->linkedObjectsIds['commande']) == 1) {
+							$cmd = new Commande($this->db);
+							$res = $cmd->fetch(array_pop($object->linkedObjectsIds['commande']));
+							if ($res > 0  ){
+								$resLines = $cmd->fetch_lines();
+								if ($resLines > 0 ) {
+									foreach ($cmd->lines as $cmdLine){
+										if ($cmdLine->id == $line->origin_line_id){
+											$line->special_code = $cmdLine->special_code;
+											break;
+										}
+									}
+								} else{
+									//error
+									setEventMessage($langs->trans("ErrorLoadingLinesFromLinkedOrder"),'errors');
+								}
+							} else{
+								//error
+								setEventMessage($langs->trans("ErrorLoadingLinkedOrder"),'errors');
+							}
+						}
+
+					}
+
 						if(TSubtotal::isModSubtotalLine($line)) {
 							$resdelete = $line->delete($user);
 							if ($resdelete < 0){

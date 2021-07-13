@@ -89,3 +89,6 @@ CloneLSubtotalBlock = Cloner le bloc titre/sous-total
 
 NO_TITLE_SHOW_ON_EXPED_GENERATION=Ne pas reporter les lignes de titre lors de la génération d’expédition
 Error_subtotal_delete_line=Erreur lors de la suppression d'une ligne du module sous total
+ErrorLoadingLinesFromLinkedOrder=Erreur lors du chargement des lignes de commande associées à l'expedition
+ErrorLoadingLinkedOrder=Erreur lors du chargement de la commande associées à l'expedition
+ErrorNoLinkedOrder=pas de commande associée
