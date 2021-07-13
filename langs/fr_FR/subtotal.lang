@@ -84,4 +84,11 @@ SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT=La gestion des non-compris vide aussi le prix d
 SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT_info=Attention, si vous rendez de nouveau la ligne comprise, il faudra de nouveau saisir le prix de revient
 addLineTitle_in_order_shippable=Ajouter les lignes Titre , total , libre aux commandes expédiables (il faudra supprimer les lignes de sous-total à la main si le besoin s'en fait sentir )
 addLineTitle_in_order_shippable_TITLE=Paramétrage de l'option gestion des lignes  du module subTotal pour les commandes expédiables
+
 CloneLSubtotalBlock = Cloner le bloc titre/sous-total
+
+NO_TITLE_SHOW_ON_EXPED_GENERATION=Ne pas reporter les lignes de titre lors de la génération d’expédition
+Error_subtotal_delete_line=Erreur lors de la suppression d'une ligne du module sous total
+ErrorLoadingLinesFromLinkedOrder=Erreur lors du chargement des lignes de commande associées à l'expedition
+ErrorLoadingLinkedOrder=Erreur lors du chargement de la commande associées à l'expedition
+ErrorNoLinkedOrder=pas de commande associée
