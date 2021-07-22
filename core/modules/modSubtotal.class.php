@@ -64,7 +64,7 @@ class modSubtotal extends DolibarrModules
         $this->description = "Module permettant l'ajout de sous-totaux et sous-totaux intermédiaires et le déplacement d'une ligne aisée de l'un dans l'autre";
         // Possible values for version are: 'development', 'experimental' or version
 
-        $this->version = '3.2.4';
+        $this->version = '3.2.5';
 
         // Key used in llx_const table to save module status enabled/disabled
         // (where MYMODULE is value of property name of module in uppercase)
