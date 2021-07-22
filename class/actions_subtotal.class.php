@@ -122,7 +122,7 @@ class ActionsSubtotal
 						$qty = $level<1 ? 1 : $level ;
 					}
 					else if($action=='add_free_text') {
-						$title = GETPOST('title', 'alpha');
+						$title = GETPOST('title', 'alphahtml');
 
 						if (empty($title)) {
 							$free_text = GETPOST('free_text', 'int');
