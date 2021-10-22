@@ -36,6 +36,7 @@ subtotal_add_title_bloc_from_orderstoinvoice=Ajouter un bloc titre et sous-total
 SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK=L'ajout sous un titre se fera en fin de section 
 SUBTOTAL_TITLE_STYLE=Style des titres (B = gras, U = souligné, I = italique)
 SUBTOTAL_SUBTOTAL_STYLE=Style des sous-totaux (B = gras, U = souligné, I = italique)
+SUBTOTAL_SUBTOTAL_HIDE_BACKGROUND=Désactiver l'utilisation d'une couleur de fond (surlignage) pour les sous-totaux
 SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES=Avoir une seule ligne de titre + total si l'option "%s" est utilisée (expérimental)
 SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES=Remplacer par le détail des TVA si l'option "%s" est utilisée (expérimental)
 SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED=Par defaut, cocher la case "Cacher le prix des lignes des ensembles" lors de la génération des PDF

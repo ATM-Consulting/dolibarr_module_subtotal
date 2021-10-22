@@ -14,3 +14,4 @@ YourTitleLabel=Ingrese su título
 deleteWithAllLines=Eliminar todas las líneas con contenido
 ConfirmDeleteAllThisLines=¿Confirma usted la supresión de líneas% s?
 AddBreakPageBeforeAñadir salto de página delante.
+SUBTOTAL_SUBTOTAL_HIDE_BACKGROUND=Deshabilite el uso de un color de fondo (resaltado) para subtotales

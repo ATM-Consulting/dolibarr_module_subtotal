@@ -118,8 +118,8 @@ function showParameters() {
 	print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
 	print '</tr>';
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$langs->trans("SUBTOTAL_USE_NEW_FORMAT").'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
@@ -128,8 +128,8 @@ function showParameters() {
 
 	if((float)DOL_VERSION>=3.8)
 	{
-		$var=!$var;
-		print '<tr '.$bc[$var].'>';
+	//	$var=!$var;	// InfraS change
+		print '<tr class = "oddeven">';	// InfraS change
 		print '<td>'.$langs->trans("SUBTOTAL_USE_NUMEROTATION").'</td>';
 		print '<td align="center" width="20">&nbsp;</td>';
 		print '<td align="center" width="300">';
@@ -137,32 +137,32 @@ function showParameters() {
 		print '</td></tr>';
 	}
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_ADD_BLOCK").'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_ALLOW_ADD_BLOCK');
 	print '</td></tr>';
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_EDIT_BLOCK").'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_ALLOW_EDIT_BLOCK');
 	print '</td></tr>';
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_REMOVE_BLOCK").'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_ALLOW_REMOVE_BLOCK');
 	print '</td></tr>';
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_DUPLICATE_BLOCK").'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
@@ -170,31 +170,31 @@ function showParameters() {
 	print '</td></tr>';
 
     $var=!$var;
-    print '<tr '.$bc[$var].'>';
+    print '<tr class = "oddeven">';	// InfraS change
     print '<td>'.$langs->trans("SUBTOTAL_ALLOW_DUPLICATE_LINE").'</td>';
     print '<td align="center" width="20">&nbsp;</td>';
     print '<td align="center" width="300">';
     print ajax_constantonoff('SUBTOTAL_ALLOW_DUPLICATE_LINE');
     print '</td></tr>';
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE").'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE');
 	print '</td></tr>';
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$langs->trans("SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK").'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK');
 	print '</td></tr>';
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$html->textwithpicto($langs->trans("SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE"), $langs->trans("SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info")).'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="right" width="300">';
@@ -206,8 +206,8 @@ function showParameters() {
 	print '</form>';
 	print '</td></tr>';
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$langs->trans("SUBTOTAL_TITLE_STYLE").'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="right" width="300">';
@@ -219,8 +219,8 @@ function showParameters() {
 	print '</form>';
 	print '</td></tr>';
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$langs->trans("SUBTOTAL_SUBTOTAL_STYLE").'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="right" width="300">';
@@ -232,133 +232,20 @@ function showParameters() {
 	print '</form>';
 	print '</td></tr>';
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES", $langs->transnoentitiesnoconv('HideInnerLines')).'</td>';
-	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="center" width="300">';
-	print ajax_constantonoff('SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES');
-	print '</td></tr>';
-
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES", $langs->transnoentitiesnoconv('HideInnerLines')).'</td>';
-	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="center" width="300">';
-	print ajax_constantonoff('SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES');
-	print '</td></tr>';
-
-	if ((double) DOL_VERSION >= 4.0)
-	{
-		$var=!$var;
-		print '<tr '.$bc[$var].'>';
-		print '<td>'.$langs->trans("SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS").'</td>';
-		print '<td align="center" width="20">&nbsp;</td>';
-		print '<td align="right" width="300">';
-		print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
-		print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-		print '<input type="hidden" name="action" value="set_SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS">';
-		print $html->selectyesno("SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS",$conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS,1);
-		print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
-		print '</form>';
-		print '</td></tr>';
-
-		$var=!$var;
-		print '<tr '.$bc[$var].'>';
-		print '<td>'.$langs->trans("SUBTOTAL_TFIELD_TO_KEEP_WITH_NC").'</td>';
-		print '<td align="center" width="20">&nbsp;</td>';
-		print '<td align="right" width="300">';
-		print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
-		print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-		print '<input type="hidden" name="action" value="set_SUBTOTAL_TFIELD_TO_KEEP_WITH_NC">';
-		$TField = array(
-		    'pdf_getlineqty' => $langs->trans('Qty'),
-		    'pdf_getlinevatrate' => $langs->trans('VAT'),
-		    'pdf_getlineupexcltax' => $langs->trans('PriceUHT'),
-		    'pdf_getlinetotalexcltax' => $langs->trans('TotalHT'),
-		    'pdf_getlineunit' => $langs->trans('Unit'),
-		    'pdf_getlineremisepercent' => $langs->trans('Discount')
-		);
-		print $html->multiselectarray('SUBTOTAL_TFIELD_TO_KEEP_WITH_NC', $TField, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC), 0, 0, '', 0, 0, 'style="min-width:100px"');
-		print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
-		print '</form>';
-		print '</td></tr>';
-	}
-
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
-	print '<td>'.$html->textwithpicto($langs->trans("SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT"), $langs->trans("SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT_info")).'</td>';
-	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="center" width="300">';
-	print ajax_constantonoff('SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT');
-	print '</td></tr>';
-
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$langs->trans('SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE').'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE');
 	print '</td></tr>';
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans('SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE').'</td>';
-	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="center" width="300">';
-	print ajax_constantonoff('SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE');
-	print '</td></tr>';
-
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET").'</td>';
-	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="right" width="300">';
-	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
-	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-	print '<input type="hidden" name="action" value="set_SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET">';
-	$extrafields = new ExtraFields($db);
-	$extralabels = $extrafields->fetch_name_optionals_label('propaldet');
-	print Form::multiselectarray("SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET", $extralabels, explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET));
-	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
-	print '</form>';
-	print '</td></tr>';
-
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET").'</td>';
-	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="right" width="300">';
-	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
-	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-	print '<input type="hidden" name="action" value="set_SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET">';
-	$extrafields = new ExtraFields($db);
-	$extralabels = $extrafields->fetch_name_optionals_label('commandedet');
-	print Form::multiselectarray("SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET", $extralabels, explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET));
-	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
-	print '</form>';
-	print '</td></tr>';
-
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET").'</td>';
-	print '<td align="center" width="20">&nbsp;</td>';
-	print '<td align="right" width="300">';
-	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
-	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-	print '<input type="hidden" name="action" value="set_SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET">';
-	$extrafields = new ExtraFields($db);
-	$extralabels = $extrafields->fetch_name_optionals_label('facturedet');
-	print Form::multiselectarray("SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET", $extralabels, explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET));
-	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
-	print '</form>';
-	print '</td></tr>';
 
 	// TODO ajouter ici la partie fournisseur en ce basant sur les 3 conf du dessus
 
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$langs->trans('NO_TITLE_SHOW_ON_EXPED_GENERATION').'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
@@ -376,24 +263,24 @@ function showParameters() {
 	print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
 	print '</tr>';
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$langs->trans('SUBTOTAL_KEEP_RECAP_FILE').'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_KEEP_RECAP_FILE');
 	print '</td></tr>';
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$langs->trans('SUBTOTAL_PROPAL_ADD_RECAP').'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_PROPAL_ADD_RECAP');
 	print '</td></tr>';
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$langs->trans('SUBTOTAL_COMMANDE_ADD_RECAP').'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
@@ -401,8 +288,8 @@ function showParameters() {
 	print '</td></tr>';
 
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+//	$var=!$var;	// InfraS change
+	print '<tr class = "oddeven">';	// InfraS change
 	print '<td>'.$langs->trans('SUBTOTAL_INVOICE_ADD_RECAP').'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
@@ -411,103 +298,35 @@ function showParameters() {
 
 	print '</table>';
 
-?>
-	<br />
 
-	<table width="100%" class="noborder" style="background-color: #fff;">
-		<tr class="liste_titre">
-			<td colspan="2">Paramètrage de l'option "Cacher le prix des lignes des ensembles"</td>
-		</tr>
+    if ($conf->shippableorder->enabled) {
+    print '<br />';
 
-<?php
-	print '<tr class="oddeven" >';
-	print '<td>'.$langs->trans('SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED').'</td>';
-	print '<td align="center" >';
-	print ajax_constantonoff('SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED');
-	print '</td></tr>';
-?>
+    print '<table width="100%" class="noborder" style="background-color: #fff;">';
+    print '    <tr class="liste_titre">';
+    print '        <td colspan="2">'.$langs->trans("addLineTitle_in_order_shippable_TITLE").'</td>';
+    print '    </tr>';
+    print '    <tr>';
+    print '        <td>'.$langs->trans("addLineTitle_in_order_shippable").'</td>';
 
-		<tr>
-			<td>Afficher la quantité sur les lignes de produit</td>
-			<td style="text-align: right;">
-				<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
-					<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
-					<input type="hidden" name="action" value="set_SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY" />
-					<?php echo $html->selectyesno("SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY",$conf->global->SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY,1); ?>
-					<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
-				</form>
-			</td>
-		</tr>
+    print '        <td style="text-align: right;">';
+    print '            <form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+    print '                <input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';	// InfraS change
+    print '                <input type="hidden" name="action" value="set_SUBTOTAL_SHIPPABLE_ORDER" />';
+    echo $html->selectyesno("SUBTOTAL_SHIPPABLE_ORDER",$conf->global->SUBTOTAL_SHIPPABLE_ORDER,1);
+	print '					<input type="submit" class="button" value="'.$langs->trans("Modify").'">';	// InfraS change
+	print '				</form>';
+	print '			</td>';
+	print '		</tr>';
+	}
+	print '</table>';
 
-		<tr class="pair">
-			<td>Masquer les totaux</td>
-			<td style="text-align: right;">
-				<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
-					<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
-					<input type="hidden" name="action" value="set_SUBTOTAL_HIDE_DOCUMENT_TOTAL" />
-					<?php echo $html->selectyesno("SUBTOTAL_HIDE_DOCUMENT_TOTAL",$conf->global->SUBTOTAL_HIDE_DOCUMENT_TOTAL,1); ?>
-					<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
-				</form>
-			</td>
-		</tr>
-
-		<?php if ($conf->clilacevenements->enabled) { ?>
-			<tr>
-				<td>Afficher la quantité sur les lignes de sous-total (uniquement dans le cas d'un produit virtuel ajouté)</td>
-				<td style="text-align: right;">
-					<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
-						<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
-						<input type="hidden" name="action" value="set_SUBTOTAL_SHOW_QTY_ON_TITLES" />
-						<?php echo $html->selectyesno("SUBTOTAL_SHOW_QTY_ON_TITLES",$conf->global->SUBTOTAL_SHOW_QTY_ON_TITLES,1); ?>
-						<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
-					</form>
-				</td>
-			</tr>
-
-			<tr class="pair">
-				<td>Masquer uniquement les prix pour les produits se trouvant dans un ensemble</td>
-				<td style="text-align: right;">
-					<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
-						<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
-						<input type="hidden" name="action" value="set_SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES" />
-						<?php echo $html->selectyesno("SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES",$conf->global->SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES,1); ?>
-						<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
-					</form>
-				</td>
-			</tr>
-		<?php } ?>
-    </table>
-
-
-
-    <?php if ($conf->shippableorder->enabled) { ?>
-    <br />
-
-    <table width="100%" class="noborder" style="background-color: #fff;">
-        <tr class="liste_titre">
-            <td colspan="2"><?= $langs->trans("addLineTitle_in_order_shippable_TITLE") ?> </td>
-        </tr>
-        <tr>
-            <td> <?php echo $langs->trans("addLineTitle_in_order_shippable") ?> </td>
-
-            <td style="text-align: right;">
-                <form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
-                    <input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
-                    <input type="hidden" name="action" value="set_SUBTOTAL_SHIPPABLE_ORDER" />
-                    <?php echo $html->selectyesno("SUBTOTAL_SHIPPABLE_ORDER",$conf->global->SUBTOTAL_SHIPPABLE_ORDER,1); ?>
-						<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
-					</form>
-				</td>
-			</tr>
-		<?php } ?>
-	</table>
-
-	<br /><br />
-	<?php
 }
 
 dol_fiche_end(-1);
 
+// Put here content of your page
+// ...
 
 /***************************************************
 * LINKED OBJECT BLOCK
@@ -519,3 +338,4 @@ dol_fiche_end(-1);
 // End of page
 llxFooter('$Date: 2011/07/31 22:21:57 $ - $Revision: 1.19 $');
 $db->close();
+?>

@@ -65,7 +65,7 @@ dol_fiche_head(
 print '<div style="float: left;"><img src="../img/Dolibarr_Preferred_Partner_logo.png" /></div>';
 print '<div>'.$langs->trans('ATMAbout').'</div>';
 
-dol_fiche_end();
+print dol_get_fiche_end();
 
 print '<br><center>';
 print '<a href="http://www.atm-consulting.fr" target="_blank"><img src="../img/ATM_logo.jpg" /></a>';
