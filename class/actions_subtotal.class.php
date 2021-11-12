@@ -209,6 +209,10 @@ class ActionsSubtotal
 				}
 			}
 		}
+		elseif ((!empty($parameters['currentcontext']) && $parameters['currentcontext'] == 'orderstoinvoice') || in_array('orderstoinvoice',$contexts) || in_array('orderstoinvoicesupplier',$contexts))
+		{
+			$this->_billOrdersAddCheckBoxForTitleBlocks();
+		}
 
 		return 0;
 	}
@@ -777,26 +781,7 @@ class ActionsSubtotal
 				|| in_array('orderstoinvoicesupplier',$TContext)
 				|| in_array('orderlist',$TContext)
 		) {
-			global $delayedhtmlcontent;
-			ob_start();
-			?>
-			<script type="text/javascript">
-				$(function() {
-					var tr = $("<tr><td><?php echo $langs->trans('subtotal_add_title_bloc_from_orderstoinvoice'); ?></td><td><input type='checkbox' value='1' name='subtotal_add_title_bloc_from_orderstoinvoice' checked='checked' /></td></tr>");
-					var $noteTextArea = $("textarea[name=note]");
-					if ($noteTextArea.length === 1) {
-						$noteTextArea.closest('tr').after(tr);
-						return;
-					}
-					var $inpCreateBills = $("#validate_invoices");
-					if ($inpCreateBills.length === 1) {
-						$inpCreateBills.closest('tr').after(tr);
-					}
-
-				});
-			</script>
-			<?php
-			$delayedhtmlcontent .= ob_get_clean();
+			$this->_billOrdersAddCheckBoxForTitleBlocks();
 		}
 		return 0;
 	}
@@ -3352,5 +3337,32 @@ class ActionsSubtotal
 		$parameters['object']->subtotalPdfModelInfo->defaultTitlesFieldsStyle = $pdfDoc->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
 		$parameters['object']->subtotalPdfModelInfo->defaultContentsFieldsStyle = $pdfDoc->subtotalPdfModelInfo->defaultContentsFieldsStyle;
 
+	}
+
+	/**
+	 * Add a checkbox on the bill orders forms (either the old orderstoinvoice or the new mass
+	 * action) to create a title block per invoiced order when creating one invoice per client.
+	 */
+	private function _billOrdersAddCheckBoxForTitleBlocks()
+	{
+		global $delayedhtmlcontent, $langs;
+		ob_start();
+		?>
+			<script type="text/javascript">
+				$(function() {
+					var tr = $("<tr><td><?php echo $langs->trans('subtotal_add_title_bloc_from_orderstoinvoice'); ?></td><td><input type='checkbox' value='1' name='subtotal_add_title_bloc_from_orderstoinvoice' checked='checked' /></td></tr>");
+					var $noteTextArea = $("textarea[name=note]");
+					if ($noteTextArea.length === 1) {
+						$noteTextArea.closest('tr').after(tr);
+						return;
+					}
+					var $inpCreateBills = $("#validate_invoices");
+					if ($inpCreateBills.length === 1) {
+						$inpCreateBills.closest('tr').after(tr);
+					}
+				});
+			</script>
+		<?php
+		$delayedhtmlcontent .= ob_get_clean();
 	}
 }
