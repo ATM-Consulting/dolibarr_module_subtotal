@@ -99,7 +99,7 @@ class ActionsSubtotal
 		return 0;
 	}
 
-	/** Overloading the doActions function : replacing the parent's function with the one below
+	/** Overloading the formObjectOptions function : replacing the parent's function with the one below
 	 * @param      $parameters  array           meta datas of the hook (context, etc...)
 	 * @param      $object      CommonObject    the object you want to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
 	 * @param      $action      string          current action (if set). Generally create or edit or null
@@ -211,15 +211,7 @@ class ActionsSubtotal
 		}
 		elseif ((!empty($parameters['currentcontext']) && $parameters['currentcontext'] == 'orderstoinvoice') || in_array('orderstoinvoice',$contexts) || in_array('orderstoinvoicesupplier',$contexts))
 		{
-			?>
-			<script type="text/javascript">
-				$(function() {
-					var tr = $("<tr><td><?php echo $langs->trans('subtotal_add_title_bloc_from_orderstoinvoice'); ?></td><td><input type='checkbox' value='1' name='subtotal_add_title_bloc_from_orderstoinvoice' checked='checked' /></td></tr>")
-					$("textarea[name=note]").closest('tr').after(tr);
-				});
-			</script>
-			<?php
-
+			$this->_billOrdersAddCheckBoxForTitleBlocks();
 		}
 
 		return 0;
@@ -579,9 +571,18 @@ class ActionsSubtotal
 		return 0;
 	}
 
+	/**
+	 * @param array $parameters
+	 * @param CommonObject $object
+	 * @param string $action
+	 * @param HookManager $hookmanager
+	 * @return int|void
+	 */
 	function doActions($parameters, &$object, $action, $hookmanager)
 	{
 		global $db, $conf, $langs,$user;
+		$TContext = array();
+		if (isset($parameters['context'])) $TContext = explode(':', $parameters['context']);
 
 		dol_include_once('/subtotal/class/subtotal.class.php');
 		dol_include_once('/subtotal/lib/subtotal.lib.php');
@@ -775,6 +776,13 @@ class ActionsSubtotal
 			exit;
 		}
 
+		elseif ((!empty($parameters['currentcontext']) && $parameters['currentcontext'] == 'orderstoinvoice')
+				|| in_array('orderstoinvoice',$TContext)
+				|| in_array('orderstoinvoicesupplier',$TContext)
+				|| in_array('orderlist',$TContext)
+		) {
+			$this->_billOrdersAddCheckBoxForTitleBlocks();
+		}
 		return 0;
 	}
 
@@ -3329,5 +3337,32 @@ class ActionsSubtotal
 		$parameters['object']->subtotalPdfModelInfo->defaultTitlesFieldsStyle = $pdfDoc->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
 		$parameters['object']->subtotalPdfModelInfo->defaultContentsFieldsStyle = $pdfDoc->subtotalPdfModelInfo->defaultContentsFieldsStyle;
 
+	}
+
+	/**
+	 * Add a checkbox on the bill orders forms (either the old orderstoinvoice or the new mass
+	 * action) to create a title block per invoiced order when creating one invoice per client.
+	 */
+	private function _billOrdersAddCheckBoxForTitleBlocks()
+	{
+		global $delayedhtmlcontent, $langs;
+		ob_start();
+		?>
+			<script type="text/javascript">
+				$(function() {
+					var tr = $("<tr><td><?php echo $langs->trans('subtotal_add_title_bloc_from_orderstoinvoice'); ?></td><td><input type='checkbox' value='1' name='subtotal_add_title_bloc_from_orderstoinvoice' checked='checked' /></td></tr>");
+					var $noteTextArea = $("textarea[name=note]");
+					if ($noteTextArea.length === 1) {
+						$noteTextArea.closest('tr').after(tr);
+						return;
+					}
+					var $inpCreateBills = $("#validate_invoices");
+					if ($inpCreateBills.length === 1) {
+						$inpCreateBills.closest('tr').after(tr);
+					}
+				});
+			</script>
+		<?php
+		$delayedhtmlcontent .= ob_get_clean();
 	}
 }
