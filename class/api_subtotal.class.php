@@ -34,17 +34,7 @@ require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
  */
 class Subtotal extends DolibarrApi
 {
-	/**
-	 * @var array   $FIELDS     Mandatory fields, checked when create and update object
-	 */
-	static $FIELDS = array(
-		'socid'
-	);
 
-	/**
-	 * @var Propal $propal {@type Propal}
-	 */
-	public $propal;
 
 	/**
 	 * Constructor
@@ -53,7 +43,6 @@ class Subtotal extends DolibarrApi
 	{
 		global $db, $conf;
 		$this->db = $db;
-		$this->propal = new Propal($this->db);
 	}
 
 
