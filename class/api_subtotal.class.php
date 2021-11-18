@@ -141,13 +141,17 @@ class Subtotal extends DolibarrApi
 					 * the fetch function does not return the field rang
 					 * we have to do this until fixed in core
 					 */
-					$sql = 'SELECT rang FROM '.MAIN_DB_PREFIX.'commande_fournisseurdet WHERE rowid = '.$idline;
-					$resql = $db->query($sql);
-					if ($resql) {
+					if (empty($objDet->rang)){
+
+						$sql = 'SELECT rang FROM '.MAIN_DB_PREFIX.'commande_fournisseurdet WHERE rowid = '.$idline;
+						$resql = $db->query($sql);
+						if ($resql) {
 							$objp = $this->db->fetch_object($resql);
 							$objDet->rang = $objp->rang;
-					}
-					$this->db->free($resql);
+						}
+						$this->db->free($resql);
+				    }
+
 					//*********************************************************************************************
 
 					if ($res  >  0) {
