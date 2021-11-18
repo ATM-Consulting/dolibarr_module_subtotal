@@ -84,7 +84,7 @@ class Subtotal extends DolibarrApi
 	 *<br>
 	 *  Return float
 	 *
-	 * @param       string		$elementtype			Ref object Propale, Order, OrderSupplier, Invoice or InvoiceSupplier
+	 * @param       string		$elementtype			Ref object propal, order, ordsup, invoice, invsup
 	 * @param       int         $id_line  				id line
 	 * @return 	array|mixed     data without useless information
 	 *
