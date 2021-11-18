@@ -129,29 +129,6 @@ class Subtotal extends DolibarrApi
 
 	}
 
-
-	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.PublicUnderscore
-	/**
-	 * Clean sensible object datas
-	 *
-	 * @param   object  $object    Object to clean
-	 * @return    array    Array of cleaned object properties
-	 */
-	protected function _cleanObjectDatas($object)
-	{
-		// phpcs:enable
-		$object = parent::_cleanObjectDatas($object);
-
-		unset($object->note);
-		unset($object->name);
-		unset($object->lastname);
-		unset($object->firstname);
-		unset($object->civility_id);
-		unset($object->address);
-
-		return $object;
-	}
-
 	/**
 	 * @param DoliDB $db
 	 * @param $idline
