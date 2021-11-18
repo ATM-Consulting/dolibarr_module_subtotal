@@ -36,6 +36,29 @@ class Subtotal extends DolibarrApi
 {
 
 
+	const TYPE_PROPAL = 'propal';
+	const TYPE_ORDER ='order';
+	const TYPE_ORDER_SUPPLIER ='ordsup';
+	const TYPE_INVOICE ='invoice';
+	const TYPE_INVOICE_SUPPLIER ='invsup';
+
+	const OBJ_PROPAL = 'Propal';
+	const OBJ_ORDER ='Commande';
+	const OBJ_ORDER_SUPPLIER ='CommandeFournisseur';
+	const OBJ_INVOICE ='Facture';
+	const OBJ_INVOICE_SUPPLIER ='FactureFournisseur';
+
+	const PROPAL_LINE = 'PropaleLigne';
+	const ORDER_LINE = 'OrderLine';
+	const ORDER_SUPPLIER_LINE = 'CommandeFournisseurLigne';
+	const INVOICE_LINE = 'FactureLigne';
+	const INVOICE_SUPPLIER_LINE = 'SupplierInvoiceLine';
+
+	const FK_PROPAL ="fk_propal";
+	const FK_ORDER ="fk_commande";
+	const FK_INVOICE ="fk_facture";
+	const FK_INVOICE_SUPPLIER ='fk_facture_fourn';
+
 	/**
 	 * Constructor
 	 */
@@ -50,7 +73,12 @@ class Subtotal extends DolibarrApi
 	 * Get Total for a subtotal line
 	 *
 	 *  Valid values for elementtype<br>
-	 * 	elementtype : [Propale, Order, OrderSupplier, Invoice, InvoiceSupplier] <br>
+	 * 	elementtype : [propal, order, ordsup, invoice, invsup] <br>
+	 *  propal : propale <br>
+	 *  order  : order<br>
+	 *  invsup : invoice supplier<br>
+	 *  ordsup : order supplier <br>
+	 *  invoice: invoice<br>
 	 *  <hr><br>
 	 *  idline : any valid line owned by elementtype<br>
 	 *<br>
@@ -71,167 +99,26 @@ class Subtotal extends DolibarrApi
 		if ($conf->subtotal->enabled){
 
 			dol_include_once('/custom/subtotal/class/subtotal.class.php');
-
 			dol_include_once('/custom/subtotal/lib/subtotal.lib.php');
+
 			$total = 0;
-
-
 			switch ($elementtype){
 
-				case "Propale" :
-					$objDet = new PropaleLigne($db);
-					$res = $objDet->fetch($idline);
+				case self::TYPE_PROPAL :
+					return $this->_getTotal($db, $idline,self::PROPAL_LINE,self::OBJ_PROPAL);
 
-					if ($res  >  0) {
+				case self::TYPE_ORDER :
+					return $this->_getTotal($db, $idline,self::ORDER_LINE,self::OBJ_ORDER);
 
-						$obj = new Propal($db);
-						$resProp = $obj->fetch($objDet->fk_propal);
-						if ($resProp > 0 ) {
+				case self::TYPE_ORDER_SUPPLIER:
+					return $this->_getTotal($db, $idline,self::ORDER_SUPPLIER_LINE,self::OBJ_ORDER_SUPPLIER);
 
-							// la ligne est elle une ligne de Total ?
-							if (TSubtotal::isSubtotal($objDet)){
-								// lib  return SUM for this Total
-								return   getTotalLineFromObject($obj,$objDet);
-							}else{
-								throw new RestException(500, "line is not a Sum");
-							}
+				case self::TYPE_INVOICE :
+					return $this->_getTotal($db, $idline,self::INVOICE_LINE, self::OBJ_INVOICE);
 
+				case self::TYPE_INVOICE_SUPPLIER :
+					return $this->_getTotal($db, $idline,self::INVOICE_SUPPLIER_LINE,self::OBJ_INVOICE_SUPPLIER);
 
-						}else{
-							throw new RestException(500, "propal  '$objDet->fk_propal' not exist");
-						}
-
-					}else{
-						throw new RestException(500, "propal line  '$idline' not exist");
-					}
-
-					break;
-				case "Order" :
-
-					$objDet = new OrderLine($db);
-					$res = $objDet->fetch($idline);
-
-					if ($res  >  0) {
-
-						$obj = new Commande($db);
-						$resProp = $obj->fetch($objDet->fk_commande);
-						if ($resProp > 0 ) {
-
-							// la ligne est elle une ligne de Total ?
-							if (TSubtotal::isSubtotal($objDet)){
-								// lib  return SUM for this Total
-								return   getTotalLineFromObject($obj,$objDet);
-							}else{
-								throw new RestException(500, "line is not a Sum");
-							}
-						}else{
-							throw new RestException(500, "order  '$objDet->fk_commande' not exist");
-						}
-					}else{
-						throw new RestException(500, "order line  '$idline' not exist");
-					}
-					break;
-				case "OrderSupplier" :
-
-					$objDet = new CommandeFournisseurLigne($db);
-					$res = $objDet->fetch($idline);
-
-					//**************** fetch function *****************************************************************************
-					/**
-					 * the fetch function does not return the field rang
-					 * we have to do this until fixed in core
-					 */
-					if (empty($objDet->rang)){
-
-						$sql = 'SELECT rang FROM '.MAIN_DB_PREFIX.'commande_fournisseurdet WHERE rowid = '.$idline;
-						$resql = $db->query($sql);
-						if ($resql) {
-							$objp = $this->db->fetch_object($resql);
-							$objDet->rang = $objp->rang;
-						}
-						$this->db->free($resql);
-				    }
-
-					//*********************************************************************************************
-
-					if ($res  >  0) {
-
-						$obj = new CommandeFournisseur($db);
-						$resProp = $obj->fetch($objDet->fk_commande);
-						if ($resProp > 0 ) {
-
-							// la ligne est elle une ligne de Total ?
-							if (TSubtotal::isSubtotal($objDet)){
-								// lib  return SUM for this Total
-								return   getTotalLineFromObject($obj,$objDet);
-							}else{
-								throw new RestException(500, "line is not a Sum");
-							}
-
-
-						}else{
-							throw new RestException(500, "order supplier  '$objDet->fk_commande' not exist");
-						}
-
-					}else{
-						throw new RestException(500, "order supplier  line  '$idline' not exist");
-					}
-					break;
-				case "Invoice" :
-
-					$objDet = new FactureLigne($db);
-					$res = $objDet->fetch($idline);
-
-					if ($res  >  0) {
-
-						$obj = new Facture($db);
-						$resProp = $obj->fetch($objDet->fk_facture);
-						if ($resProp > 0 ) {
-
-							// la ligne est elle une ligne de Total ?
-							if (TSubtotal::isSubtotal($objDet)){
-								// lib  return SUM for this Total
-								return   getTotalLineFromObject($obj,$objDet);
-							}else{
-								throw new RestException(500, "line is not a Sum");
-							}
-
-
-						}else{
-							throw new RestException(500, "facture  '$objDet->fk_facture' not exist");
-						}
-
-					}else{
-						throw new RestException(500, "facture line  '$idline' not exist");
-					}
-					break;
-				case "InvoiceSupplier" :
-					$objDet = new SupplierInvoiceLine($db);
-					$res = $objDet->fetch($idline);
-
-					if ($res  >  0) {
-
-						$obj = new FactureFournisseur($db);
-						$resProp = $obj->fetch($objDet->fk_facture_fourn);
-						if ($resProp > 0 ) {
-
-							// la ligne est elle une ligne de Total ?
-							if (TSubtotal::isSubtotal($objDet)){
-								// lib  return SUM for this Total
-								return   getTotalLineFromObject($obj,$objDet);
-							}else{
-								throw new RestException(500, "line is not a Sum");
-							}
-
-
-						}else{
-							throw new RestException(500, "invoice supplier  '$objDet->fk_facture' not exist");
-						}
-
-					}else{
-						throw new RestException(500, "invoice supplier line  '$idline' not exist");
-					}
-					break;
 				default :
 					throw new RestException(500, "elementType '$elementtype' not supported");
 			}
@@ -263,5 +150,88 @@ class Subtotal extends DolibarrApi
 		unset($object->address);
 
 		return $object;
+	}
+
+	/**
+	 * @param DoliDB $db
+	 * @param $idline
+	 * @return array|float|int
+	 * @throws RestException
+	 */
+	protected function _getTotal(DoliDB $db, $idline,$objectLine,$objectMaster)
+	{
+		$objDet = new $objectLine($db);
+
+		$res = $objDet->fetch($idline);
+
+		if ($objectMaster == self::OBJ_ORDER_SUPPLIER) {
+
+			//**************** fetch function *****************************************************************************
+			/**
+			 * the fetch function does not return the field rang
+			 * we have to do this until fixed in core
+			 */
+			if (empty($objDet->rang)) {
+
+				$sql = 'SELECT rang FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet WHERE rowid = ' . $idline;
+				$resql = $db->query($sql);
+				if ($resql) {
+					$objp = $this->db->fetch_object($resql);
+					$objDet->rang = $objp->rang;
+				}
+				$this->db->free($resql);
+			}
+
+			//*********************************************************************************************
+		}
+
+		if ($res > 0) {
+
+			$obj = new $objectMaster($db);
+			$resMaster = $obj->fetch($objDet->{$this->_getFkFieldName($objectLine)});
+			if ($resMaster > 0) {
+
+				// la ligne est elle une ligne de Total ?
+				if (TSubtotal::isSubtotal($objDet)) {
+					// lib  return SUM for this Total
+					return getTotalLineFromObject($obj, $objDet);
+				} else {
+					throw new RestException(500, "line is not a Sum");
+				}
+
+			} else {
+				throw new RestException(500, " '$objectMaster'  '$objDet->fk_propal' not exist");
+			}
+
+		} else {
+			throw new RestException(500, " '$objectLine' line  '$idline' not exist");
+		}
+		return 0;
+	}
+
+	/**
+	 * @param $objectLine
+	 * @return string|void
+	 */
+	protected function _getFkFieldName($objectLine){
+
+		switch ($objectLine){
+
+			case self::PROPAL_LINE  :
+				return self::FK_PROPAL;
+
+			case self::ORDER_LINE  :
+				return self::FK_ORDER;
+
+			case self::ORDER_SUPPLIER_LINE  :
+				return self::FK_ORDER;
+
+			case self::INVOICE_LINE  :
+				return self::FK_INVOICE;
+
+			case self::INVOICE_SUPPLIER_LINE  :
+				return self::FK_INVOICE_SUPPLIER;
+		}
+
 	}
 }
