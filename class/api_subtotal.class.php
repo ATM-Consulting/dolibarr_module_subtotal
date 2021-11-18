@@ -48,11 +48,11 @@ class Subtotal extends DolibarrApi
 	const OBJ_INVOICE ='Facture';
 	const OBJ_INVOICE_SUPPLIER ='FactureFournisseur';
 
-	const PROPAL_LINE = 'PropaleLigne';
-	const ORDER_LINE = 'OrderLine';
-	const ORDER_SUPPLIER_LINE = 'CommandeFournisseurLigne';
-	const INVOICE_LINE = 'FactureLigne';
-	const INVOICE_SUPPLIER_LINE = 'SupplierInvoiceLine';
+	const OBJ_PROPAL_LINE = 'PropaleLigne';
+	const OBJ_ORDER_LINE = 'OrderLine';
+	const OBJ_ORDER_SUPPLIER_LINE = 'CommandeFournisseurLigne';
+	const OBJ_INVOICE_LINE = 'FactureLigne';
+	const OBJ_INVOICE_SUPPLIER_LINE = 'SupplierInvoiceLine';
 
 	const FK_PROPAL ="fk_propal";
 	const FK_ORDER ="fk_commande";
@@ -105,19 +105,19 @@ class Subtotal extends DolibarrApi
 			switch ($elementtype){
 
 				case self::TYPE_PROPAL :
-					return $this->_getTotal($db, $idline,self::PROPAL_LINE,self::OBJ_PROPAL);
+					return $this->_getTotal($db, $idline,self::OBJ_PROPAL_LINE,self::OBJ_PROPAL);
 
 				case self::TYPE_ORDER :
-					return $this->_getTotal($db, $idline,self::ORDER_LINE,self::OBJ_ORDER);
+					return $this->_getTotal($db, $idline,self::OBJ_ORDER_LINE,self::OBJ_ORDER);
 
 				case self::TYPE_ORDER_SUPPLIER:
-					return $this->_getTotal($db, $idline,self::ORDER_SUPPLIER_LINE,self::OBJ_ORDER_SUPPLIER);
+					return $this->_getTotal($db, $idline,self::OBJ_ORDER_SUPPLIER_LINE,self::OBJ_ORDER_SUPPLIER);
 
 				case self::TYPE_INVOICE :
-					return $this->_getTotal($db, $idline,self::INVOICE_LINE, self::OBJ_INVOICE);
+					return $this->_getTotal($db, $idline,self::OBJ_INVOICE_LINE, self::OBJ_INVOICE);
 
 				case self::TYPE_INVOICE_SUPPLIER :
-					return $this->_getTotal($db, $idline,self::INVOICE_SUPPLIER_LINE,self::OBJ_INVOICE_SUPPLIER);
+					return $this->_getTotal($db, $idline,self::OBJ_INVOICE_SUPPLIER_LINE,self::OBJ_INVOICE_SUPPLIER);
 
 				default :
 					throw new RestException(500, "elementType '$elementtype' not supported");
@@ -217,19 +217,19 @@ class Subtotal extends DolibarrApi
 
 		switch ($objectLine){
 
-			case self::PROPAL_LINE  :
+			case self::OBJ_PROPAL_LINE  :
 				return self::FK_PROPAL;
 
-			case self::ORDER_LINE  :
+			case self::OBJ_ORDER_LINE  :
 				return self::FK_ORDER;
 
-			case self::ORDER_SUPPLIER_LINE  :
+			case self::OBJ_ORDER_SUPPLIER_LINE  :
 				return self::FK_ORDER;
 
-			case self::INVOICE_LINE  :
+			case self::OBJ_INVOICE_LINE  :
 				return self::FK_INVOICE;
 
-			case self::INVOICE_SUPPLIER_LINE  :
+			case self::OBJ_INVOICE_SUPPLIER_LINE  :
 				return self::FK_INVOICE_SUPPLIER;
 		}
 
