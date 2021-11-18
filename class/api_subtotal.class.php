@@ -132,6 +132,8 @@ class Subtotal extends DolibarrApi
 	/**
 	 * @param DoliDB $db
 	 * @param $idline
+	 * @param $objectLine
+	 * @param $objectMaster
 	 * @return array|float|int
 	 * @throws RestException
 	 */
