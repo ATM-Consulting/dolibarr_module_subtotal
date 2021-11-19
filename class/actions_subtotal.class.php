@@ -844,6 +844,15 @@ class ActionsSubtotal
 		return $Tab;
 	}
 
+
+    //@TODO change all call to this method with the method in lib !!!!
+	/**
+	 * @param $object
+	 * @param $line
+	 * @param false $use_level
+	 * @param int $return_all
+	 * @return array|float|int
+	 */
 	function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=0) {
 		global $conf;
 
