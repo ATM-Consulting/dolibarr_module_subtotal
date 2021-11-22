@@ -1653,13 +1653,25 @@ class ActionsSubtotal
 		return $resArray;
 	}
 
-	// TODO ne gère pas encore la numération des lignes "Totaux"
+	/**
+	 * TODO ne gère pas encore la numération des lignes "Totaux"
+	 * @param CommonObjectLine[] $TLineTitle
+	 * @param string             $line_reference
+	 * @param int                $level
+	 * @param int                $prefix_num
+	 * @return array
+	 */
 	private function formatNumerotation(&$TLineTitle, $line_reference='', $level=1, $prefix_num=0)
 	{
 		$TTitle = array();
 
 		$i=1;
 		$j=0;
+		$TLineElementsWithoutLabel = array(
+			// liste de lignes n'utilisant pas le champ `label` mais le champ `description` (`desc`)
+			'facture_fourn_det',
+			'commande_fournisseurdet',
+		);
 		foreach ($TLineTitle as $k => &$line)
 		{
 			if (!empty($line_reference) && $line->rang <= $line_reference->rang) continue;
@@ -1669,8 +1681,10 @@ class ActionsSubtotal
 			{
 				$TTitle[$j]['numerotation'] = ($prefix_num == 0) ? $i : $prefix_num.'.'.$i;
 				//var_dump('Prefix == '.$prefix_num.' // '.$line->desc.' ==> numerotation == '.$TTitle[$j]['numerotation'].'   ###    '.$line->qty .'=='. $level);
-				if (empty($line->label) && (float)DOL_VERSION < 6)
-				{
+				if (empty($line->label) && (
+					(float)DOL_VERSION < 6 || in_array($line->element, $TLineElementsWithoutLabel)
+					)
+				) {
 					$line->label = !empty($line->desc) ? $line->desc : $line->description;
 					$line->desc = $line->description = '';
 				}

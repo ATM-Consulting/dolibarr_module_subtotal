@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 
 
 ## Version 3.6
+- FIX : Title lines broken on PDF for documents whose lines use the `desc` field instead of the `label` field (such as
+        supplier orders and invoices) *22/11/2021* - 3.6.9
 - FIX : checkbox to add a subtotal title block per order on invoices using the "Bill orders" feature was broken by
         core changes in Dolibarr *12/11/2021* - 3.6.8
 - FIX : addition of a conf allowing to add the subtotal line or not when creating an expedition from an order *12/07/2021* - 3.6.7 
