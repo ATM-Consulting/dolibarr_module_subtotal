@@ -3,7 +3,9 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
-- NEW : add api subtotal to module. add entryPoint getTotalLine  *17/11/2021* - 3.7
+## Version 3.7
+
+- NEW : add api subtotal to module. add entryPoint getTotalLine  *17/11/2021* - 3.7.0
     
 
 ## Version 3.6
