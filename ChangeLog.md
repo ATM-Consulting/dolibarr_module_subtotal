@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 # [Unreleased]
 
 
-- NEW can select sub-total lines in supplier order and invoice  *10/12/2021* - 3.8.0 [OpenDsi]
+- NEW can select sub-total lines in supplier order and invoice  *10/12/2021* - 3.8.0 [PR #222 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/226)
 
 ## Version 3.7
 
