@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+
+- NEW can select sub-total lines in supplier order and invoice  *10/12/2021* - 3.8.0 [OpenDsi]
+
 ## Version 3.7
 
 - NEW : add api subtotal to module. add entryPoint getTotalLine  *17/11/2021* - 3.7.0
