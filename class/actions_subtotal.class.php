@@ -2850,7 +2850,11 @@ class ActionsSubtotal
 
 		$contexts = explode(':',$parameters['context']);
 
-		if (in_array('ordercard',$contexts) || in_array('invoicecard',$contexts))
+        if (in_array('ordercard',$contexts)
+            || in_array('invoicecard',$contexts)
+            || in_array('ordersuppliercard',$contexts)
+            || in_array('invoicesuppliercard',$contexts)
+        )
 		{
 			/** @var Commande $object */
 
