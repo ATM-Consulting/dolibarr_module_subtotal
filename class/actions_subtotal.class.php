@@ -4,6 +4,21 @@ dol_include_once('/subtotal/class/subtotal.class.php');
 
 class ActionsSubtotal
 {
+    /**
+     * @var int Subtotal current level
+     */
+    protected $subtotal_level_cur = 0;
+
+    /**
+     * @var bool Show subtotal qty by default
+     */
+    protected $subtotal_show_qty_by_default = false;
+
+    /**
+     * @var bool Determine if sum on subtotal qty is enabled
+     */
+    protected $subtotal_sum_qty_enabled = false;
+
 
 	function __construct($db)
 	{
@@ -1163,30 +1178,70 @@ class ActionsSubtotal
 	function pdf_getlineqty($parameters=array(), &$object, &$action='') {
 		global $conf,$hideprices;
 
+        $i = intval($parameters['i']);
+        $line = $object->lines[$i];
+
 		if($this->isModSubtotalLine($parameters,$object) ){
-			$this->resprints = ' ';
+            if ($this->subtotal_sum_qty_enabled === true) {
+                $line_qty = intval($line->qty);
 
-			if((float)DOL_VERSION<=3.6) {
-				return '';
-			}
-			else if((float)DOL_VERSION>=3.8) {
-				return 1;
-			}
+                if ($line_qty < 50) {
+                    // it's a title level (init level qty)
+                    $subtotal_level = $line_qty;
+                    $this->subtotal_level_cur = $subtotal_level;
+                    TSubtotal::setSubtotalQtyForObject($object, $subtotal_level, 0);
 
-		}
-		elseif(!empty($hideprices)) {
-			$this->resprints = $object->lines[$parameters['i']]->qty;
-			return 1;
-		}
-		elseif (!empty($conf->global->SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY))
-		{
-			$hideInnerLines = GETPOST('hideInnerLines', 'int');
-			$hidedetails = GETPOST('hidedetails', 'int');
-			if (empty($hideInnerLines) && !empty($hidedetails))
-			{
-				$this->resprints = $object->lines[$parameters['i']]->qty;
-			}
-		}
+                    // not show qty for title lines
+                    $this->resprints = '';
+
+                    return 1;
+                } elseif ($line_qty > 50) {
+                    // it's a subtotal level (show level qty and reset)
+                    $subtotal_level = 100 - $line_qty;
+                    $level_qty_total = $object->TSubtotalQty[$subtotal_level];
+                    TSubtotal::setSubtotalQtyForObject($object, $subtotal_level, 0);
+
+                    // show quantity sum only if it's a subtotal line (level)
+                    $line_show_qty = TSubtotal::showQtyForObjectLine($line, $this->subtotal_show_qty_by_default);
+                    if ($line_show_qty === false) {
+                        $this->resprints = '';
+                    } else {
+                        $this->resprints = $level_qty_total;
+                    }
+
+                    return 1;
+                } else {
+                    // not show qty for text line
+                    $this->resprints = '';
+                    return 1;
+                }
+            }
+            else {
+                $this->resprints = ' ';
+
+                    return 1;
+            }
+		} else {
+            if ($this->subtotal_sum_qty_enabled === true) {
+                // sum quantities by subtotal level
+                if ($this->subtotal_level_cur >= 1) {
+                    for ($subtotal_level = 1; $subtotal_level <= $this->subtotal_level_cur; $subtotal_level++) {
+                        TSubtotal::addSubtotalQtyForObject($object, $subtotal_level, $line->qty);
+                    }
+                }
+            }
+
+            if (!empty($hideprices)) {
+                $this->resprints = $object->lines[$parameters['i']]->qty;
+                return 1;
+            } elseif (!empty($conf->global->SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY)) {
+                $hideInnerLines = GETPOST('hideInnerLines', 'int');
+                $hidedetails = GETPOST('hidedetails', 'int');
+                if (empty($hideInnerLines) && !empty($hidedetails)) {
+                    $this->resprints = $object->lines[$parameters['i']]->qty;
+                }
+            }
+        }
 
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
@@ -1733,6 +1788,11 @@ class ActionsSubtotal
 		 * @var $pdf    TCPDF
 		 */
 		global $pdf,$conf, $langs;
+
+        if (TSubtotal::showQtyForObject($object) === true) {
+            $this->subtotal_sum_qty_enabled = true;
+            $this->subtotal_show_qty_by_default = true;
+        }
 
 		$object->subtotalPdfModelInfo = new stdClass(); // see defineColumnFiel method in this class
 		$object->subtotalPdfModelInfo->cols = false;
@@ -2319,6 +2379,16 @@ class ActionsSubtotal
                             echo '</div>';
                         }
                         else if ($isFreeText) echo TSubtotal::getFreeTextHtml($line, (bool) $readonlyForSituation);
+
+                        if (TSubtotal::isSubtotal($line) && $show_qty_bu_deault = TSubtotal::showQtyForObject($object)) {
+                            $line_show_qty = TSubtotal::showQtyForObjectLine($line, $show_qty_bu_deault);
+
+                            echo '<div>';
+                            echo '<input style="vertical-align:sub;"  type="checkbox" name="line-showQty" id="subtotal-showQty" value="1" ' . ($line_show_qty ? 'checked="checked"' : '') . ' />&nbsp;';
+                            echo '<label for="subtotal-showQty">' . $langs->trans('SubtotalLineShowQty') . '</label>';
+                            echo '</div>';
+                        }
+
 						echo '</div>';
 
 						if (TSubtotal::isTitle($line))
