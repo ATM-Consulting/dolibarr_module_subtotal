@@ -1218,11 +1218,7 @@ class ActionsSubtotal
             else {
                 $this->resprints = ' ';
 
-                if ((float)DOL_VERSION <= 3.6) {
-                    return '';
-                } else if ((float)DOL_VERSION >= 3.8) {
                     return 1;
-                }
             }
 		} else {
             if ($this->subtotal_sum_qty_enabled === true) {
