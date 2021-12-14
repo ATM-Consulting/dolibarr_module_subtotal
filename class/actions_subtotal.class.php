@@ -2839,7 +2839,8 @@ class ActionsSubtotal
 
 	}
 
-	function printOriginObjectLine($parameters, &$object, &$action, $hookmanager)
+
+	function printOriginObjectSubLine($parameters, &$object, &$action, $hookmanager)
 	{
 		global $conf,$langs,$user,$db,$bc, $restrictlist, $selectedLines;
 
@@ -2856,8 +2857,10 @@ class ActionsSubtotal
 
 			if(class_exists('TSubtotal')){ dol_include_once('/subtotal/class/subtotal.class.php'); }
 
+
 			if (TSubtotal::isModSubtotalLine($line))
 			{
+
 				$object->tpl['subtotal'] = $line->id;
 				if (TSubtotal::isTitle($line)) $object->tpl['sub-type'] = 'title';
 				else if (TSubtotal::isSubtotal($line)) $object->tpl['sub-type'] = 'total';
@@ -2884,6 +2887,7 @@ class ActionsSubtotal
 					else $object->tpl['sub-tr-style'].= 'background:#eeffee;' ;
 				}
 
+
 				$object->tpl['sub-td-style'] = '';
 				if ($line->qty>90) $object->tpl['sub-td-style'] = 'style="text-align:right"';
 
@@ -2904,7 +2908,6 @@ class ActionsSubtotal
 					if($line->qty<=1) $object->tpl["sublabel"] = img_picto('', 'subtotal@subtotal');
 					else if($line->qty==2) $object->tpl["sublabel"] = img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 				}
-
 				// Get display styles and apply them
 				$titleStyleItalic = strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'I') === false ? '' : ' font-style: italic;';
 				$titleStyleBold =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'B') === false ? '' : ' font-weight:bold;';
@@ -2930,8 +2933,6 @@ class ActionsSubtotal
 					$object->tpl["sublabel"].= ' : <b>'.$total.'</b>';
 				}
 
-
-
 			}
 
 			$object->printOriginLine($line, '', $restrictlist, '/core/tpl', $selectedLines);
@@ -2943,9 +2944,12 @@ class ActionsSubtotal
 			unset($object->tpl['subtotal']);
 		}
 
-		return 0;
+        return 1;
 	}
 
+    function printOriginLinesList($parameters, &$object, &$action, $hookmanager) {
+        $this->printOriginObjectSubLine($parameters, $object, $action, $hookmanager);
+    }
 
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
 		global $conf,$langs;
