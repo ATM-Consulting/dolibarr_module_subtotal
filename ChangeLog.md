@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 # [Unreleased]
 
 ## Version 3.7
-
+- FIX : Compatibility with version 15 *14/12/2021* - 3.7.1
 - NEW : add api subtotal to module. add entryPoint getTotalLine  *17/11/2021* - 3.7.0
     
 
