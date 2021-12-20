@@ -2947,6 +2947,20 @@ class ActionsSubtotal
         return 1;
 	}
 
+    /**
+     * For compatibility with dolibarr <= v14
+     *
+     * @param array $parameters
+     * @param CommonObject $object
+     * @param string $action
+     * @param HookManager $hookmanager
+     * @return int
+     */
+    public function printOriginObjectLine($parameters, $object, &$action, $hookmanager)
+    {
+        return $this->printOriginObjectSubLine($parameters, $object, $action, $hookmanager);
+    }
+
     function printOriginLinesList($parameters, &$object, &$action, $hookmanager) {
         $this->printOriginObjectSubLine($parameters, $object, $action, $hookmanager);
     }
