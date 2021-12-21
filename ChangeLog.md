@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - NEW : Can select sub-total lines in supplier order and invoice  *10/12/2021* - 3.8.0 [PR #226 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/226)
 
 ## Version 3.7
+- FIX : Compatibility with version 14 and lower *20/12/2021* - 3.7.2 @jyhere #229
 - FIX : Compatibility with version 15 *14/12/2021* - 3.7.1
 - NEW : add api subtotal to module. add entryPoint getTotalLine  *17/11/2021* - 3.7.0
     

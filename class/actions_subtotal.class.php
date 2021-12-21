@@ -3030,13 +3030,8 @@ class ActionsSubtotal
      * @param HookManager $hookmanager
      * @return int
      */
-    public function printOriginObjectLine($parameters, $object, &$action, $hookmanager)
-    {
+    public function printOriginObjectLine($parameters, $object, &$action, $hookmanager){
         return $this->printOriginObjectSubLine($parameters, $object, $action, $hookmanager);
-    }
-
-    function printOriginLinesList($parameters, &$object, &$action, $hookmanager) {
-        $this->printOriginObjectSubLine($parameters, $object, $action, $hookmanager);
     }
 
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
