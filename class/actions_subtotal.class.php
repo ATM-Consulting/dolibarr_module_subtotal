@@ -990,7 +990,7 @@ class ActionsSubtotal
 		//Print background
 		$cell_height = $pdf->getStringHeight($w, $label);
 
-		if(!empty($object->subtotalPdfModelInfo->cols)){
+		if(!empty($object->subtotalPdfModelInfo->cols) && version_compare('11.0.0', DOL_VERSION, '>')){
 			include_once __DIR__ . '/staticPdf.model.php';
 			$staticPdfModel = new ModelePDFStatic($object->db);
 			$staticPdfModel->marge_droite 	= $object->subtotalPdfModelInfo->marge_droite;
@@ -1055,7 +1055,7 @@ class ActionsSubtotal
 			$pdf->SetXY($pdf->postotalht, $posy);
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
 
-			if(!empty($object->subtotalPdfModelInfo->cols)){
+			if(!empty($object->subtotalPdfModelInfo->cols) && version_compare('11.0.0', DOL_VERSION, '>')){
 				$staticPdfModel->printStdColumnContent($pdf, $posy, 'totalexcltax', $total_to_print);
 			}
 			else{
