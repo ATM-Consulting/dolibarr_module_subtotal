@@ -64,6 +64,7 @@ if (preg_match('/set_(.*)/',$action,$reg))
 		, 'SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET'
 		, 'SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET'
 		, 'SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET'
+        , 'SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS'
 	))) $value = implode(',', $value);
 
 	if (dolibarr_set_const($db, $code, $value, 'chaine', 0, '', $conf->entity) > 0)
@@ -353,6 +354,31 @@ function showParameters() {
 	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 	print '</form>';
 	print '</td></tr>';
+
+    $langs->loadLangs(array('propal', 'orders', 'bills', 'supplier', 'supplier_proposal'));
+    $TElementType = array(
+        'propal' => $langs->trans('Proposal'),
+        'commande' => $langs->trans('Order'),
+        'facture' => $langs->trans('Invoice'),
+        'supplier_proposal' => $langs->trans('SupplierProposal'),
+        'order_supplier' => $langs->trans('SupplierOrder'),
+        'invoice_supplier' => $langs->trans('SupplierInvoice'),
+    );
+    $TSubtotalDefaultQtyOnElements = array();
+    if (!empty($conf->global->SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS)) {
+        $TSubtotalDefaultQtyOnElements = explode(',', $conf->global->SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS);
+    }
+    print '<tr class = "oddeven">';
+    print '<td>'.$html->textwithpicto($langs->trans("SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS"), $langs->trans("SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS_info")).'</td>';
+    print '<td align="center" width="20">&nbsp;</td>';
+    print '<td align="right" width="300">';
+    print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+    print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+    print '<input type="hidden" name="action" value="set_SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS">';
+    print Form::multiselectarray('SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS', $TElementType, $TSubtotalDefaultQtyOnElements);
+    print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+    print '</form>';
+    print '</td></tr>';
 
 	// TODO ajouter ici la partie fournisseur en ce basant sur les 3 conf du dessus
 

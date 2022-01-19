@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+- NEW : Sum qty in each subtotal line  *10/12/2021* - 3.9.0 [PR #222 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/222)  
+  
+  Apport de possibilité du choix du modèle de docuement dans la configuration du module.
+  Les options sur les sous-totaux ont été mises sur les lignes de sous-totaux pour simplification du code et éviter de parcourir toutes les lignes afin de retrouver le titre parent.
+- NEW : Can select sub-total lines in supplier order and invoice  *10/12/2021* - 3.8.0 [PR #226 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/226)
+
 ## Version 3.7
 - FIX : Fix compatibility 11.0 pdfEvolution *19/01/2022* - 3.7.3
 - FIX : Compatibility with version 14 and lower *20/12/2021* - 3.7.2 @jyhere #229
