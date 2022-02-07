@@ -405,7 +405,8 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 			$object->fetchObjectLinked();
 
 			foreach ($object->lines as &$line) {
-
+				$orderline = new OrderLine($this->db);
+				$orderline->fetch($line->origin_line_id);
 				// si la conf pas d'affichage des titres  et consorts (sous total )
 				//on supprime la ligne de sous total
 				if ($conf->global->NO_TITLE_SHOW_ON_EXPED_GENERATION){
@@ -466,7 +467,6 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 					}
 				}
 			}
-
 			if (!empty($TLinesToDelete)) {
 				foreach ($TLinesToDelete as $lineToDelete) {
 					$lineToDelete->delete($user);
