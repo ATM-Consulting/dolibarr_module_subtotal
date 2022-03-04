@@ -1573,13 +1573,14 @@ class ActionsSubtotal
 
             // Affichage de la remise
             if(TSubtotal::isSubtotal($line)) {
-                $parentTitle = TSubtotal::getParentTitleOfLine($object, $line->rang);
+                if ($parentTitle = TSubtotal::getParentTitleOfLine($object, $line->rang)) {
 
-                if(empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
-                if(! empty($parentTitle->array_options['options_show_reduc'])) {
-                    $TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
-                    $this->resprints = price((1-$TTotal['total_ht'] / $TTotal['total_subprice'])*100, 0, '', 1, 2, 2).'%';
-                }
+					if(empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
+					if(! empty($parentTitle->array_options['options_show_reduc'])) {
+						$TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
+						$this->resprints = price((1-$TTotal['total_ht'] / $TTotal['total_subprice'])*100, 0, '', 1, 2, 2).'%';
+					}
+				}
             }
 
 			if((float)DOL_VERSION<=3.6) {
