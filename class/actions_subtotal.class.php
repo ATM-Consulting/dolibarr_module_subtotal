@@ -1022,7 +1022,20 @@ class ActionsSubtotal
 		}
 		else{
 			$pdf->SetXY($posx, $posy);
-			$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height, '', 0, '', 1);
+			//background color
+			if (! empty($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)) {
+				$backgroundColor = explode(',',$conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR);
+				$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
+				$cell_height = $pdf->getStringHeight($w, $label);
+				$pdf->SetXY($posx, $posy-1); //-1 to take into account the entire height of the row
+				$pdf->SetFont('', '', 9); //remove UBI for the background
+				$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height+2, '', 0, '', 1); //+2 same of SetXY()
+				$pdf->SetXY($posx, $posy); //reset position
+				$pdf->SetFont('', $style, 9); //reset style
+			}
+			else {
+				$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height, '', 0, '', 1);
+			}
 		}
 
 		if (!$hidePriceOnSubtotalLines) {
@@ -1137,6 +1150,19 @@ class ActionsSubtotal
 
 			$pdf->writeHTMLCell($w, $h, $posx, $posy, $description, 0, 1, false, true, 'J',true);
 
+		}
+
+		//background color
+		if (! empty($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)) {
+			$backgroundColor = explode(',',$conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR);
+			$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
+			$cell_height = $pdf->getStringHeight($w, $label);
+			$pdf->SetXY($posx, $posy-1); //-1 to take into account  the entire height of the row
+			$pdf->SetFont('', '', 9); //remove UBI for the background
+			$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height+2, '', 0, '', 1); //+2 same of SetXY()
+			$posy = $posy + $cell_height;
+			$pdf->SetXY($posx, $posy); //reset position
+			$pdf->SetFont('', $style, 9); //reset style
 		}
 
 	}
