@@ -335,6 +335,7 @@ class ActionsSubtotal
 										url: url_ajax
 										,type: 'POST'
 										,data: params
+										,dataType: "html"
 									}).done(function(response) {
 										<?php if ($conf->global->MAIN_VIEW_LINE_NUMBER == 1) {?>
 										newlineid = $($.parseHTML(response)).find("#newlineid").text();
