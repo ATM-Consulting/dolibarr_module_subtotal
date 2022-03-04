@@ -95,3 +95,6 @@ Error_subtotal_delete_line=Erreur lors de la suppression d'une ligne du module s
 ErrorLoadingLinesFromLinkedOrder=Erreur lors du chargement des lignes de commande associées à l'expedition
 ErrorLoadingLinkedOrder=Erreur lors du chargement de la commande associées à l'expedition
 ErrorNoLinkedOrder=pas de commande associée
+
+SUBTOTAL_TITLE_BACKGROUNDCOLOR = Couleur de fond utilisée sur les PDF pour les titres
+SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR = Couleur de fond utilisée sur les PDF pour les sous-totaux

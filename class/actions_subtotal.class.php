@@ -1,6 +1,8 @@
 <?php
 
 dol_include_once('/subtotal/class/subtotal.class.php');
+require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
 
 class ActionsSubtotal
 {
@@ -956,6 +958,18 @@ class ActionsSubtotal
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		global $conf,$subtotal_last_title_posy,$langs;
 
+		//background color
+		if (!empty($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
+			&& function_exists('colorValidateHex')
+			&& colorValidateHex($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
+			&& function_exists('colorStringToArray')
+			&& !colorIsLight($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
+		)
+		{
+			$pdf->setColor('text', 255,255,255);
+		}
+
+
 		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 		if (!empty($conf->global->SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES) && $hideInnerLines && !empty($subtotal_last_title_posy))
 		{
@@ -1023,8 +1037,12 @@ class ActionsSubtotal
 		else{
 			$pdf->SetXY($posx, $posy);
 			//background color
-			if (! empty($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)) {
-				$backgroundColor = explode(',',$conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR);
+			if (! empty($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
+				&& function_exists('colorValidateHex')
+				&& colorValidateHex($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
+				&& function_exists('colorStringToArray'))
+			{
+				$backgroundColor = colorStringToArray($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR,array(233, 233, 233));
 				$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
 				$cell_height = $pdf->getStringHeight($w, $label);
 				$pdf->SetXY($posx, $posy-1); //-1 to take into account the entire height of the row
@@ -1032,6 +1050,8 @@ class ActionsSubtotal
 				$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height+2, '', 0, '', 1); //+2 same of SetXY()
 				$pdf->SetXY($posx, $posy); //reset position
 				$pdf->SetFont('', $style, 9); //reset style
+
+				$pdf->setColor('text', 0,0,0);
 			}
 			else {
 				$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height, '', 0, '', 1);
@@ -1120,6 +1140,16 @@ class ActionsSubtotal
 
 		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 
+		//background color
+		if (!empty($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
+			&& function_exists('colorValidateHex')
+			&& colorValidateHex($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
+			&& function_exists('colorStringToArray')
+			&& !colorIsLight($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
+		)
+		{
+			$pdf->setColor('text', 255,255,255);
+		}
 
 
 		$style = ($line->qty==1) ? 'BU' : 'BUI';
@@ -1153,8 +1183,12 @@ class ActionsSubtotal
 		}
 
 		//background color
-		if (! empty($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)) {
-			$backgroundColor = explode(',',$conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR);
+		if (!empty($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
+			&& function_exists('colorValidateHex')
+			&& colorValidateHex($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
+			&& function_exists('colorStringToArray'))
+		{
+			$backgroundColor = colorStringToArray($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR);
 			$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
 			$cell_height = $pdf->getStringHeight($w, $label);
 			$pdf->SetXY($posx, $posy-1); //-1 to take into account  the entire height of the row
@@ -1163,6 +1197,8 @@ class ActionsSubtotal
 			$posy = $posy + $cell_height;
 			$pdf->SetXY($posx, $posy); //reset position
 			$pdf->SetFont('', $style, 9); //reset style
+
+			$pdf->SetTextColor('text', 0, 0, 0); // restore default text color;
 		}
 
 	}
