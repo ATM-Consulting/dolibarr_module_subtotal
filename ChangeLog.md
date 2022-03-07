@@ -3,8 +3,12 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+- FIX : Advanced setup option not used correctly *07/03/2022* - 3.7.5
+- NEW : Add new conf to remove strange behavior on PDF subtotal line. Subtotal label always contain title label, it's possible to disable this behavior. *07/03/2022* - 3.7.5
+
 ## Version 3.7
-- FIX : object was never fetch *07/02/2022* - 3.7.4
+
+- FIX : object was never fetch *07/02/2022* - 3.7.4  
 - FIX : Fix compatibility 11.0 pdfEvolution *19/01/2022* - 3.7.3
 - FIX : Compatibility with version 14 and lower *20/12/2021* - 3.7.2 @jyhere #229
 - FIX : Compatibility with version 15 *14/12/2021* - 3.7.1

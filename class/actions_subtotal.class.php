@@ -221,9 +221,22 @@ class ActionsSubtotal
 	{
 		if (empty($conf->global->SUBTOTAL_ALLOW_ADD_BLOCK)) return false;
 		if ($line->fk_prev_id != null && !empty($line->fk_prev_id)) return false; // Si facture de situation
+
+		$jsData = array(
+			'conf' => array(
+				'SUBTOTAL_USE_NEW_FORMAT' => !empty($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+			),
+			'langs' => array(
+				'Level' => $langs->trans('Level')
+			)
+		);
+
 		?>
+			<!-- SubTotal action printNewFormat -->
 		 	<script type="text/javascript">
 				$(document).ready(function() {
+					let jsSubTotalData = <?php print json_encode($jsData); ?>;
+
 					$('div.fiche div.tabsAction').append('<br />');
 
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" rel="add_title_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddTitle' )?></a></div>');
@@ -265,12 +278,17 @@ class ActionsSubtotal
 						{
 							if (action == 'addSubtotal') dialog_html += '<input id="sub-total-title" size="30" value="" placeholder="'+label+'" />';
 
-							dialog_html += "&nbsp;<select name='subtotal_line_level'>";
-							for (var i=1;i<10;i++)
-							{
-								dialog_html += "<option value="+i+"><?php echo $langs->trans('Level'); ?> "+i+"</option>";
+							if(jsSubTotalData.conf.SUBTOTAL_USE_NEW_FORMAT){
+								dialog_html += '&nbsp;<select name="subtotal_line_level">';
+								for (var i=1;i<10;i++)
+								{
+									dialog_html += '<option value="'+i+'">'+ jsSubTotalData.langs.Level +' '+i+'</option>';
+								}
+								dialog_html += "</select>";
 							}
-							dialog_html += "</select>";
+							else{
+								dialog_html += '<input type="hidden" name="subtotal_line_level" value="'+i+'" />';
+							}
 						}
 
 						 dialog_html += '</div>';
@@ -1962,7 +1980,7 @@ class ActionsSubtotal
 				}
 
 				if($line->qty>90) {
-					if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)	$label .= ' '.$this->getTitle($object, $line);
+					if ($conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL)	$label .= ' '.$this->getTitle($object, $line);
 
 					$pageBefore = $pdf->getPage();
 					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
@@ -2387,7 +2405,7 @@ class ActionsSubtotal
 						 $titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
 
 						 if (empty($line->label)) {
-							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) print  $line->description.' '.$this->getTitle($object, $line);
+							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description.' '.$this->getTitle($object, $line);
 							else print  $line->description;
 						 }
 						 else {
@@ -2650,7 +2668,7 @@ class ActionsSubtotal
 						 $titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
 
 						 if (empty($line->label)) {
-							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) print  $line->description.' '.$this->getTitle($object, $line);
+							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description.' '.$this->getTitle($object, $line);
 							else print  $line->description;
 						 }
 						 else {
@@ -2771,7 +2789,7 @@ class ActionsSubtotal
 			$titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
 
 			if (empty($line->label)) {
-				if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) print  $line->description.' '.$this->getTitle($object, $line);
+				if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description.' '.$this->getTitle($object, $line);
 				else print  $line->description;
 			}
 			else {
@@ -2914,7 +2932,7 @@ class ActionsSubtotal
 				$titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
 
 				if (empty($line->label)) {
-					if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) $object->tpl["sublabel"].=  $line->description.' '.$this->getTitle($object, $line);
+					if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) $object->tpl["sublabel"].=  $line->description.' '.$this->getTitle($object, $line);
 					else $object->tpl["sublabel"].=  $line->description;
 				}
 				else {

@@ -120,10 +120,21 @@ function showParameters() {
 
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("SUBTOTAL_USE_NEW_FORMAT").'</td>';
+	print '<td>';
+	print $html->textwithtooltip( $langs->trans("SUBTOTAL_USE_NEW_FORMAT") , $langs->trans("SUBTOTAL_USE_NEW_FORMAT_HELP"),2,1,img_help(1,''));
+	print '</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
 	print ajax_constantonoff('SUBTOTAL_USE_NEW_FORMAT');
+	print '</td></tr>';
+
+	print '<tr '.$bc[$var].'>';
+	print '<td>';
+	print $langs->trans("CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL");
+	print '</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL');
 	print '</td></tr>';
 
 	if((float)DOL_VERSION>=3.8)
