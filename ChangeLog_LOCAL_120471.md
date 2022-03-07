@@ -5,15 +5,10 @@ All notable changes to this project will be documented in this file.
 
 - FIX : Advanced setup option not used correctly *07/03/2022* - 3.7.5
 - NEW : Add new conf to remove strange behavior on PDF subtotal line. Subtotal label always contain title label, it's possible to disable this behavior. *07/03/2022* - 3.7.5
-- NEW : Option to set background color of title and subtotal *04/03/2022* - 3.10.0 [PR #216 gdesnoues](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/216)
-- NEW : Sum qty in each subtotal line  *10/12/2021* - 3.9.0 [PR #222 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/222)  
-  
-  Apport de possibilité du choix du modèle de docuement dans la configuration du module.
-  Les options sur les sous-totaux ont été mises sur les lignes de sous-totaux pour simplification du code et éviter de parcourir toutes les lignes afin de retrouver le titre parent.
-- NEW : Can select sub-total lines in supplier order and invoice  *10/12/2021* - 3.8.0 [PR #226 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/226)
 
 ## Version 3.7
-- FIX : object was never fetch *07/02/2022* - 3.7.4
+
+- FIX : object was never fetch *07/02/2022* - 3.7.4  
 - FIX : Fix compatibility 11.0 pdfEvolution *19/01/2022* - 3.7.3
 - FIX : Compatibility with version 14 and lower *20/12/2021* - 3.7.2 @jyhere #229
 - FIX : Compatibility with version 15 *14/12/2021* - 3.7.1

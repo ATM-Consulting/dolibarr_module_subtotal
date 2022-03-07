@@ -98,8 +98,3 @@ ErrorNoLinkedOrder=pas de commande associée
 
 SUBTOTAL_TITLE_BACKGROUNDCOLOR = Couleur de fond utilisée sur les PDF pour les titres
 SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR = Couleur de fond utilisée sur les PDF pour les sous-totaux
-SUBTOTAL_USE_NEW_FORMAT_HELP = En activant cette option, de nouvelles fonctionnalités et comportements apparaissent.<br/>Parmi les nouveaux comportement : <ul><li>Ajoute la notion de niveau de titre est de sous total</li></ul>
-SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET = Champs complémentaires disponible sur les titres dans les propositions commerciales clients
-SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET = Champs complémentaires disponible sur les titres dans les commandes clients
-SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET = Champs complémentaires disponible sur les titres dans les factures clients
-CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL = Sur les lignes de sous total des PDF, ajouter le libellé du titre auquel cette dernière est rattaché.

@@ -115,24 +115,217 @@ print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
 print '</tr>';
 
+<<<<<<< HEAD
+	$var=false;
+	print '<table class="noborder" width="100%">';
+	print '<tr class="liste_titre">';
+	print '<td>'.$langs->trans("Parameters").'</td>'."\n";
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
+	print '</tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>';
+	print $html->textwithtooltip( $langs->trans("SUBTOTAL_USE_NEW_FORMAT") , $langs->trans("SUBTOTAL_USE_NEW_FORMAT_HELP"),2,1,img_help(1,''));
+	print '</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_USE_NEW_FORMAT');
+	print '</td></tr>';
+
+	print '<tr '.$bc[$var].'>';
+	print '<td>';
+	print $langs->trans("CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL");
+	print '</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL');
+	print '</td></tr>';
+
+	if((float)DOL_VERSION>=3.8)
+	{
+		$var=!$var;
+		print '<tr '.$bc[$var].'>';
+		print '<td>'.$langs->trans("SUBTOTAL_USE_NUMEROTATION").'</td>';
+		print '<td align="center" width="20">&nbsp;</td>';
+		print '<td align="center" width="300">';
+		print ajax_constantonoff('SUBTOTAL_USE_NUMEROTATION');
+		print '</td></tr>';
+	}
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_ADD_BLOCK").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ALLOW_ADD_BLOCK');
+	print '</td></tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_EDIT_BLOCK").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ALLOW_EDIT_BLOCK');
+	print '</td></tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_REMOVE_BLOCK").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ALLOW_REMOVE_BLOCK');
+	print '</td></tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_DUPLICATE_BLOCK").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ALLOW_DUPLICATE_BLOCK');
+	print '</td></tr>';
+
+    $var=!$var;
+    print '<tr '.$bc[$var].'>';
+    print '<td>'.$langs->trans("SUBTOTAL_ALLOW_DUPLICATE_LINE").'</td>';
+    print '<td align="center" width="20">&nbsp;</td>';
+    print '<td align="center" width="300">';
+    print ajax_constantonoff('SUBTOTAL_ALLOW_DUPLICATE_LINE');
+    print '</td></tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE');
+	print '</td></tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK');
+	print '</td></tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$html->textwithpicto($langs->trans("SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE"), $langs->trans("SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info")).'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="right" width="300">';
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<input type="hidden" name="action" value="set_SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE">';
+	print '<input type="text" name="SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE" value="'.$conf->global->SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE.'" />';
+	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+	print '</form>';
+	print '</td></tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_TITLE_STYLE").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="right" width="300">';
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<input type="hidden" name="action" value="set_SUBTOTAL_TITLE_STYLE">';
+	print '<input type="text" placeholder="BU" name="SUBTOTAL_TITLE_STYLE" value="'.$conf->global->SUBTOTAL_TITLE_STYLE.'" />';
+	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+	print '</form>';
+	print '</td></tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_SUBTOTAL_STYLE").'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="right" width="300">';
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<input type="hidden" name="action" value="set_SUBTOTAL_SUBTOTAL_STYLE">';
+	print '<input type="text" placeholder="B" name="SUBTOTAL_SUBTOTAL_STYLE" value="'.$conf->global->SUBTOTAL_SUBTOTAL_STYLE.'" />';
+	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+	print '</form>';
+	print '</td></tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES", $langs->transnoentitiesnoconv('HideInnerLines')).'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES');
+	print '</td></tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans("SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES", $langs->transnoentitiesnoconv('HideInnerLines')).'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES');
+	print '</td></tr>';
+
+	if ((double) DOL_VERSION >= 4.0)
+	{
+		$var=!$var;
+		print '<tr '.$bc[$var].'>';
+		print '<td>'.$langs->trans("SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS").'</td>';
+		print '<td align="center" width="20">&nbsp;</td>';
+		print '<td align="right" width="300">';
+		print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+		print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+		print '<input type="hidden" name="action" value="set_SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS">';
+		print $html->selectyesno("SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS",$conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS,1);
+		print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+		print '</form>';
+		print '</td></tr>';
+
+		$var=!$var;
+		print '<tr '.$bc[$var].'>';
+		print '<td>'.$langs->trans("SUBTOTAL_TFIELD_TO_KEEP_WITH_NC").'</td>';
+		print '<td align="center" width="20">&nbsp;</td>';
+		print '<td align="right" width="300">';
+		print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+		print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+		print '<input type="hidden" name="action" value="set_SUBTOTAL_TFIELD_TO_KEEP_WITH_NC">';
+		$TField = array(
+		    'pdf_getlineqty' => $langs->trans('Qty'),
+		    'pdf_getlinevatrate' => $langs->trans('VAT'),
+		    'pdf_getlineupexcltax' => $langs->trans('PriceUHT'),
+		    'pdf_getlinetotalexcltax' => $langs->trans('TotalHT'),
+		    'pdf_getlineunit' => $langs->trans('Unit'),
+		    'pdf_getlineremisepercent' => $langs->trans('Discount')
+		);
+		print $html->multiselectarray('SUBTOTAL_TFIELD_TO_KEEP_WITH_NC', $TField, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC), 0, 0, '', 0, 0, 'style="min-width:100px"');
+		print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+		print '</form>';
+		print '</td></tr>';
+	}
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$html->textwithpicto($langs->trans("SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT"), $langs->trans("SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT_info")).'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT');
+	print '</td></tr>';
+
+	$var=!$var;
+	print '<tr '.$bc[$var].'>';
+	print '<td>'.$langs->trans('SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE').'</td>';
+	print '<td align="center" width="20">&nbsp;</td>';
+	print '<td align="center" width="300">';
+	print ajax_constantonoff('SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE');
+	print '</td></tr>';
+=======
 $var=!$var;
 print '<tr '.$bc[$var].'>';
-print '<td>';
-print $html->textwithtooltip( $langs->trans("SUBTOTAL_USE_NEW_FORMAT") , $langs->trans("SUBTOTAL_USE_NEW_FORMAT_HELP"),2,1,img_help(1,''));
-print '</td>';
+print '<td>'.$langs->trans("SUBTOTAL_USE_NEW_FORMAT").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_USE_NEW_FORMAT');
 print '</td></tr>';
-
-print '<tr '.$bc[$var].'>';
-print '<td>';
-print $langs->trans("CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL");
-print '</td>';
-print '<td align="center" width="20">&nbsp;</td>';
-print '<td align="center" width="300">';
-print ajax_constantonoff('CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL');
-print '</td></tr>';
+>>>>>>> b4541eeddb3702d3d2502273438003d4a6b645b7
 
 if((float)DOL_VERSION>=3.8)
 {
