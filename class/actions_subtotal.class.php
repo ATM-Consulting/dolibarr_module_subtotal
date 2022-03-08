@@ -244,9 +244,22 @@ class ActionsSubtotal
 	{
 		if (empty($conf->global->SUBTOTAL_ALLOW_ADD_BLOCK)) return false;
 		if ($line->fk_prev_id != null && !empty($line->fk_prev_id)) return false; // Si facture de situation
+
+		$jsData = array(
+			'conf' => array(
+				'SUBTOTAL_USE_NEW_FORMAT' => !empty($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+			),
+			'langs' => array(
+				'Level' => $langs->trans('Level')
+			)
+		);
+
 		?>
+			<!-- SubTotal action printNewFormat -->
 		 	<script type="text/javascript">
 				$(document).ready(function() {
+					let jsSubTotalData = <?php print json_encode($jsData); ?>;
+
 					$('div.fiche div.tabsAction').append('<br />');
 
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" rel="add_title_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddTitle' )?></a></div>');
@@ -289,12 +302,17 @@ class ActionsSubtotal
 						{
 							if (action == 'addSubtotal') dialog_html += '<input id="sub-total-title" size="30" value="" placeholder="'+label+'" />';
 
-							dialog_html += "&emsp;<select name='subtotal_line_level'>";
-							for (var i=1;i<10;i++)
-							{
+							if(jsSubTotalData.conf.SUBTOTAL_USE_NEW_FORMAT){
+  							dialog_html += "&emsp;<select name='subtotal_line_level'>";
+	  						for (var i=1;i<10;i++)
+		  					{
 								dialog_html += "<option value="+i+"><?php echo $langs->trans('Level'); ?> "+i+"</option>";
+								}
+								dialog_html += "</select>";
 							}
-							dialog_html += "</select>";
+							else{
+								dialog_html += '<input type="hidden" name="subtotal_line_level" value="'+i+'" />';
+							}
 						}
 
 						 dialog_html += '</div>';
@@ -445,23 +463,21 @@ class ActionsSubtotal
 
 				$var=false;
 				$out = '';
-		     	$out.= '<tr '.$bc[$var].'>
+		     	$out.= '<tr class="oddeven">
 		     			<td colspan="4" align="right">
 		     				<label for="hideInnerLines">'.$langs->trans('HideInnerLines').'</label>
 		     				<input type="checkbox" onclick="if($(this).is(\':checked\')) { $(\'#hidedetails\').prop(\'checked\', \'checked\')  }" id="hideInnerLines" name="hideInnerLines" value="1" '.(( $hideInnerLines ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
 
-		     	$var=!$var;
-		     	$out.= '<tr '.$bc[$var].'>
+		     	$out.= '<tr class="oddeven">
 		     			<td colspan="4" align="right">
 		     				<label for="hidedetails">'.$langs->trans('SubTotalhidedetails').'</label>
 		     				<input type="checkbox" id="hidedetails" name="hidedetails" value="1" '.(( $hidedetails ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
 
-		     	$var=!$var;
-		     	$out.= '<tr '.$bc[$var].'>
+		     	$out.= '<tr class="oddeven">
 		     			<td colspan="4" align="right">
 		     				<label for="hideprices">'.$langs->trans('SubTotalhidePrice').'</label>
 		     				<input type="checkbox" id="hideprices" name="hideprices" value="1" '.(( $hideprices ) ? 'checked="checked"' : '' ).' />
@@ -479,9 +495,8 @@ class ActionsSubtotal
 					|| (in_array('invoicereccard',      $contextArray) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP ))
 				)
 				{
-					$var=!$var;
 					$out.= '
-						<tr '.$bc[$var].'>
+						<tr class="oddeven">
 							<td colspan="4" align="right">
 								<label for="subtotal_add_recap">'.$langs->trans('subtotal_add_recap').'</label>
 								<input type="checkbox" id="subtotal_add_recap" name="subtotal_add_recap" value="1" '.( GETPOST('subtotal_add_recap', 'none') ? 'checked="checked"' : '' ).' />
@@ -1588,13 +1603,14 @@ class ActionsSubtotal
 
             // Affichage de la remise
             if(TSubtotal::isSubtotal($line)) {
-                $parentTitle = TSubtotal::getParentTitleOfLine($object, $line->rang);
+                if ($parentTitle = TSubtotal::getParentTitleOfLine($object, $line->rang)) {
 
-                if(empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
-                if(! empty($parentTitle->array_options['options_show_reduc'])) {
-                    $TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
-                    $this->resprints = price((1-$TTotal['total_ht'] / $TTotal['total_subprice'])*100, 0, '', 1, 2, 2).'%';
-                }
+					if(empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
+					if(! empty($parentTitle->array_options['options_show_reduc'])) {
+						$TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
+						$this->resprints = price((1-$TTotal['total_ht'] / $TTotal['total_subprice'])*100, 0, '', 1, 2, 2).'%';
+					}
+				}
             }
 
 			if((float)DOL_VERSION<=3.6) {
@@ -2099,7 +2115,7 @@ class ActionsSubtotal
 				}
 
 				if($line->qty>90) {
-					if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)	$label .= ' '.$this->getTitle($object, $line);
+					if ($conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL)	$label .= ' '.$this->getTitle($object, $line);
 
 					$pageBefore = $pdf->getPage();
 					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
@@ -2331,7 +2347,7 @@ class ActionsSubtotal
 
 
 			?>
-			<tr <?php echo $bc[$var]; $var=!$var; echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
+			<tr class="oddeven" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
 						if($line->qty==99) print 'background:#adadcf';
@@ -2534,7 +2550,7 @@ class ActionsSubtotal
 						 $titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
 
 						 if (empty($line->label)) {
-							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) print  $line->description.' '.$this->getTitle($object, $line);
+							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description.' '.$this->getTitle($object, $line);
 							else print  $line->description;
 						 }
 						 else {
@@ -2747,7 +2763,7 @@ class ActionsSubtotal
 			// HTML 5 data for js
 			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
 ?>
-			<tr <?php echo $bc[$var]; $var=!$var; echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
+			<tr class="oddeven" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
 						if($line->qty==99) print 'background:#adadcf';
@@ -2797,7 +2813,7 @@ class ActionsSubtotal
 						 $titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
 
 						 if (empty($line->label)) {
-							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) print  $line->description.' '.$this->getTitle($object, $line);
+							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description.' '.$this->getTitle($object, $line);
 							else print  $line->description;
 						 }
 						 else {
@@ -2860,7 +2876,7 @@ class ActionsSubtotal
 			// HTML 5 data for js
 			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
 			?>
-			<tr <?php echo $bc[$var]; $var=!$var; echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
+			<tr class="oddeven" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
 						if($line->qty==99) print 'background:#adadcf';
@@ -2918,7 +2934,7 @@ class ActionsSubtotal
 			$titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
 
 			if (empty($line->label)) {
-				if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) print  $line->description.' '.$this->getTitle($object, $line);
+				if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description.' '.$this->getTitle($object, $line);
 				else print  $line->description;
 			}
 			else {
@@ -3065,7 +3081,7 @@ class ActionsSubtotal
 				$titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
 
 				if (empty($line->label)) {
-					if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) $object->tpl["sublabel"].=  $line->description.' '.$this->getTitle($object, $line);
+					if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) $object->tpl["sublabel"].=  $line->description.' '.$this->getTitle($object, $line);
 					else $object->tpl["sublabel"].=  $line->description;
 				}
 				else {

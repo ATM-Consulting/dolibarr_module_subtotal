@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+
+## Version 3.11
+- FIX : remove useless retrocompatibility file and change module min compatibility version to Dolibarr 7.0 and PHP 5.4  *08/03/2022* - 3.11.4
+- FIX : all table class oddeven *08/03/2022* - 3.11.3
+- FIX : Module logo and setup table class *07/03/2022* - 3.11.2
+- FIX : Advanced setup option not used correctly *07/03/2022* - 3.11.1
+- NEW : Add new conf to remove strange behavior on PDF subtotal line. Subtotal label always contain title label, it's possible to disable this behavior. *07/03/2022* - 3.11.0
 - NEW : Option to set background color of title and subtotal *04/03/2022* - 3.10.0 [PR #216 gdesnoues](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/216)
 - NEW : Sum qty in each subtotal line  *10/12/2021* - 3.9.0 [PR #222 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/222)  
   
