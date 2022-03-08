@@ -64,7 +64,7 @@ class modSubtotal extends DolibarrModules
         $this->description = "Module permettant l'ajout de sous-totaux et sous-totaux intermédiaires et le déplacement d'une ligne aisée de l'un dans l'autre";
         // Possible values for version are: 'development', 'experimental' or version
 
-        $this->version = '3.10.0';
+        $this->version = '3.11.2';
 
         // Key used in llx_const table to save module status enabled/disabled
         // (where MYMODULE is value of property name of module in uppercase)
@@ -77,7 +77,7 @@ class modSubtotal extends DolibarrModules
         // use this->picto='pictovalue'
         // If file is in module/img directory under name object_pictovalue.png
         // use this->picto='pictovalue@module'
-        $this->picto = 'subtotal@subtotal'; // mypicto@titre
+        $this->picto = 'modsubtotal@subtotal'; // mypicto@titre
         // Defined all module parts (triggers, login, substitutions, menus, css, etc...)
         // for default path (eg: /titre/core/xxxxx) (0=disable, 1=enable)
         // for specific path of parts (eg: /titre/core/modules/barcode)

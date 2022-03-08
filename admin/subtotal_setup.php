@@ -104,7 +104,6 @@ dol_fiche_head(
     "subtotal@subtotal"
 );
 
-
 $html=new Form($db);
 
 $var=false;
@@ -115,8 +114,7 @@ print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
 print '</tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>';
 print $html->textwithtooltip( $langs->trans("SUBTOTAL_USE_NEW_FORMAT") , $langs->trans("SUBTOTAL_USE_NEW_FORMAT_HELP"),2,1,img_help(1,''));
 print '</td>';
@@ -125,7 +123,7 @@ print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_USE_NEW_FORMAT');
 print '</td></tr>';
 
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>';
 print $langs->trans("CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL");
 print '</td>';
@@ -136,8 +134,7 @@ print '</td></tr>';
 
 if((float)DOL_VERSION>=3.8)
 {
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+	print '<tr class = "oddeven">';
 	print '<td>'.$langs->trans("SUBTOTAL_USE_NUMEROTATION").'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="center" width="300">';
@@ -145,64 +142,57 @@ if((float)DOL_VERSION>=3.8)
 	print '</td></tr>';
 }
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_ALLOW_ADD_BLOCK").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_ALLOW_ADD_BLOCK');
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_ALLOW_EDIT_BLOCK").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_ALLOW_EDIT_BLOCK');
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_ALLOW_REMOVE_BLOCK").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_ALLOW_REMOVE_BLOCK');
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_ALLOW_DUPLICATE_BLOCK").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_ALLOW_DUPLICATE_BLOCK');
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_ALLOW_DUPLICATE_LINE").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_ALLOW_DUPLICATE_LINE');
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE');
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK');
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$html->textwithpicto($langs->trans("SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE"), $langs->trans("SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info")).'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="right" width="300">';
@@ -214,8 +204,7 @@ print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">'
 print '</form>';
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_TITLE_STYLE").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="right" width="300">';
@@ -227,8 +216,7 @@ print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">'
 print '</form>';
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_SUBTOTAL_STYLE").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="right" width="300">';
@@ -240,8 +228,7 @@ print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">'
 print '</form>';
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_TITLE_BACKGROUNDCOLOR").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="right" width="300">';
@@ -253,8 +240,7 @@ print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">'
 print '</form>';
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="right" width="300">';
@@ -266,16 +252,14 @@ print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">'
 print '</form>';
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES", $langs->transnoentitiesnoconv('HideInnerLines')).'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES');
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES", $langs->transnoentitiesnoconv('HideInnerLines')).'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
@@ -284,8 +268,7 @@ print '</td></tr>';
 
 if ((double) DOL_VERSION >= 4.0)
 {
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+	print '<tr class = "oddeven">';
 	print '<td>'.$langs->trans("SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS").'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="right" width="300">';
@@ -297,8 +280,7 @@ if ((double) DOL_VERSION >= 4.0)
 	print '</form>';
 	print '</td></tr>';
 
-	$var=!$var;
-	print '<tr '.$bc[$var].'>';
+	print '<tr class = "oddeven">';
 	print '<td>'.$langs->trans("SUBTOTAL_TFIELD_TO_KEEP_WITH_NC").'</td>';
 	print '<td align="center" width="20">&nbsp;</td>';
 	print '<td align="right" width="300">';
@@ -319,32 +301,28 @@ if ((double) DOL_VERSION >= 4.0)
 	print '</td></tr>';
 }
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$html->textwithpicto($langs->trans("SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT"), $langs->trans("SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT_info")).'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT');
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans('SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE').'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE');
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans('SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE').'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE');
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="right" width="300">';
@@ -358,8 +336,7 @@ print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">'
 print '</form>';
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="right" width="300">';
@@ -373,8 +350,7 @@ print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">'
 print '</form>';
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="right" width="300">';
@@ -416,8 +392,8 @@ print '</td></tr>';
 // TODO ajouter ici la partie fournisseur en ce basant sur les 3 conf du dessus
 
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans('NO_TITLE_SHOW_ON_EXPED_GENERATION').'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
@@ -435,24 +411,24 @@ print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
 print '</tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans('SUBTOTAL_KEEP_RECAP_FILE').'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_KEEP_RECAP_FILE');
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans('SUBTOTAL_PROPAL_ADD_RECAP').'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_PROPAL_ADD_RECAP');
 print '</td></tr>';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans('SUBTOTAL_COMMANDE_ADD_RECAP').'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
@@ -460,8 +436,7 @@ print ajax_constantonoff('SUBTOTAL_COMMANDE_ADD_RECAP');
 print '</td></tr>';
 
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
+print '<tr class = "oddeven">';
 print '<td>'.$langs->trans('SUBTOTAL_INVOICE_ADD_RECAP').'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
