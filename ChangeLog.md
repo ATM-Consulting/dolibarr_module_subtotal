@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 
 ## Version 3.11
+- FIX : background Color position *17/03/2022* - 3.11.5
 - FIX : remove useless retrocompatibility file and change module min compatibility version to Dolibarr 7.0 and PHP 5.4  *08/03/2022* - 3.11.4
 - FIX : all table class oddeven *08/03/2022* - 3.11.3
 - FIX : Module logo and setup table class *07/03/2022* - 3.11.2
