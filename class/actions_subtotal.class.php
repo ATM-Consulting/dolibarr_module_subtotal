@@ -1131,7 +1131,7 @@ class ActionsSubtotal
 
 		$posy = $posy + $cell_height;
 		$pdf->SetXY($posx, $posy);
-
+		$pdf->setColor('text', 0,0,0);
 
 	}
 
