@@ -974,16 +974,16 @@ class ActionsSubtotal
 		global $conf,$subtotal_last_title_posy,$langs;
 
 		//background color
-		if (!empty($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
+		if (!empty($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
 			&& function_exists('colorValidateHex')
-			&& colorValidateHex($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
+			&& colorValidateHex($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
 			&& function_exists('colorStringToArray')
-			&& !colorIsLight($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
+			&& !colorIsLight($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
+			&& function_exists('colorIsLight') && !colorIsLight($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
 		)
 		{
 			$pdf->setColor('text', 255,255,255);
 		}
-
 
 		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 		if (!empty($conf->global->SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES) && $hideInnerLines && !empty($subtotal_last_title_posy))
@@ -1066,7 +1066,7 @@ class ActionsSubtotal
 				$pdf->SetXY($posx, $posy); //reset position
 				$pdf->SetFont('', $style, 9); //reset style
 
-				$pdf->setColor('text', 0,0,0);
+
 			}
 			else {
 				$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height, '', 0, '', 1);
@@ -1131,7 +1131,7 @@ class ActionsSubtotal
 
 		$posy = $posy + $cell_height;
 		$pdf->SetXY($posx, $posy);
-
+		$pdf->setColor('text', 0,0,0);
 
 	}
 
@@ -1150,11 +1150,13 @@ class ActionsSubtotal
 
 		global $db,$conf,$subtotal_last_title_posy;
 
+//		$pdf->SetTextColor('text', 0, 0, 0);
 		$subtotal_last_title_posy = $posy;
 		$pdf->SetXY ($posx, $posy);
 
 		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 
+		$fillDescBloc = false;
 		//background color
 		if (!empty($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
 			&& function_exists('colorValidateHex')
@@ -1163,7 +1165,12 @@ class ActionsSubtotal
 			&& !colorIsLight($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
 		)
 		{
-			$pdf->setColor('text', 255,255,255);
+			$backgroundColor = colorStringToArray($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR,array(233, 233, 233));
+			$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
+			if(function_exists('colorIsLight') && !colorIsLight($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)){
+				$pdf->setColor('text', 255,255,255);
+			}
+
 		}
 
 
@@ -1171,30 +1178,27 @@ class ActionsSubtotal
 		if (!empty($conf->global->SUBTOTAL_TITLE_STYLE)) $style = $conf->global->SUBTOTAL_TITLE_STYLE;
 
 		if($hideInnerLines) {
-			if($line->qty==1)$pdf->SetFont('', $style, 9);
-			else
-			{
+			if($line->qty==1){
+				$pdf->SetFont('', $style, 9);
+			}else{
 				if (!empty($conf->global->SUBTOTAL_STYLE_TITRES_SI_LIGNES_CACHEES)) $style = $conf->global->SUBTOTAL_STYLE_TITRES_SI_LIGNES_CACHEES;
 				$pdf->SetFont('', $style, 9);
 			}
 		}
 		else {
-
 			if($line->qty==1)$pdf->SetFont('', $style, 9); //TODO if super utile
 			else $pdf->SetFont('', $style, 9);
-
 		}
 
-		if ($label === strip_tags($label) && $label === dol_html_entity_decode($label, ENT_QUOTES)) $pdf->MultiCell($w, $h, $label, 0, 'L'); // Pas de HTML dans la chaine
-		else $pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'J',true); // et maintenant avec du HTML
+		$posYBeforeTile = $pdf->GetY();
+		if ($label === strip_tags($label) && $label === dol_html_entity_decode($label, ENT_QUOTES)) $pdf->MultiCell($w, $h, $label, 0, 'L', $fillDescBloc); // Pas de HTML dans la chaine
+		else $pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, $fillDescBloc, true, 'J',true); // et maintenant avec du HTML
 
+		$posYBeforeDesc = $pdf->GetY();
 		if($description && !$hidedesc) {
-			$posy = $pdf->GetY();
-
+			$pdf->setColor('text', 0,0,0);
 			$pdf->SetFont('', '', 8);
-
-			$pdf->writeHTMLCell($w, $h, $posx, $posy, $description, 0, 1, false, true, 'J',true);
-
+			$pdf->writeHTMLCell($w, $h, $posx, $posYBeforeDesc+1, $description, 0, 1, $fillDescBloc, true, 'J',true);
 		}
 
 		//background color
@@ -1203,16 +1207,17 @@ class ActionsSubtotal
 			&& colorValidateHex($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
 			&& function_exists('colorStringToArray'))
 		{
+			$posYAfterDesc = $pdf->GetY();
 			$backgroundColor = colorStringToArray($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR);
 			$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
 			$cell_height = $pdf->getStringHeight($w, $label);
-			$pdf->SetXY($posx, $posy-1); //-1 to take into account  the entire height of the row
+
+			$pdf->SetXY($posx, $posy-2); //-2 to take into account  the entire height of the row
 			$pdf->SetFont('', '', 9); //remove UBI for the background
-			$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height+2, '', 0, '', 1); //+2 same of SetXY()
-			$posy = $posy + $cell_height;
+			$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height+3.5, '', 0, '', 1, 1,'','',true,0, true); //+2 same of SetXY()
+			$posy = $posYAfterDesc + $cell_height;
 			$pdf->SetXY($posx, $posy); //reset position
 			$pdf->SetFont('', $style, 9); //reset style
-
 			$pdf->SetTextColor('text', 0, 0, 0); // restore default text color;
 		}
 
