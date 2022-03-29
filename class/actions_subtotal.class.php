@@ -1212,10 +1212,10 @@ class ActionsSubtotal
 			$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
 			$cell_height = $pdf->getStringHeight($w, $label);
 
-			$pdf->SetXY($posx, $posy-2); //-2 to take into account  the entire height of the row
+			$pdf->SetXY($posx, $posy-1); //-2 to take into account  the entire height of the row
 			$pdf->SetFont('', '', 9); //remove UBI for the background
-			$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height+3.5, '', 0, '', 1, 1,'','',true,0, true); //+2 same of SetXY()
-			$posy = $posYAfterDesc + $cell_height;
+			$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height+1.9, '', 0, '', 1, 1,'','',true,0, true); //+2 same of SetXY()
+			$posy = $posYAfterDesc;
 			$pdf->SetXY($posx, $posy); //reset position
 			$pdf->SetFont('', $style, 9); //reset style
 			$pdf->SetTextColor('text', 0, 0, 0); // restore default text color;
