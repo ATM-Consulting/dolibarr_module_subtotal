@@ -1075,8 +1075,9 @@ class ActionsSubtotal
 			$staticPdfModel->defaultTitlesFieldsStyle 	= $object->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
 			$staticPdfModel->defaultContentsFieldsStyle = $object->subtotalPdfModelInfo->defaultContentsFieldsStyle;
 			$staticPdfModel->prepareArrayColumnField($object, $langs);
-
-			$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
+			if ($fillBackground) {
+				$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
+			}
 			$pdf->SetXY($object->subtotalPdfModelInfo->marge_droite, $posy);
 			$pdf->MultiCell($object->subtotalPdfModelInfo->page_largeur - $object->subtotalPdfModelInfo->marge_gauche - $object->subtotalPdfModelInfo->marge_droite, $cell_height, '', 0, '', 1);
 		}
