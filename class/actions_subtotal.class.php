@@ -973,15 +973,36 @@ class ActionsSubtotal
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		global $conf,$subtotal_last_title_posy,$langs;
 
-		//background color
-		if (!empty($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
+		$fillBackground = false;
+		if(!empty($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
 			&& function_exists('colorValidateHex')
 			&& colorValidateHex($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
 			&& function_exists('colorStringToArray')
+			&& function_exists('colorIsLight')
 			&& !colorIsLight($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
-			&& function_exists('colorIsLight') && !colorIsLight($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
-		)
-		{
+		){
+			$fillBackground = true;
+
+			$backgroundCellHeightOffset = 0;
+			$backgroundCellPosYOffset = 0;
+
+			// add here special PDF compatibility modifications
+			// mais avant d'ajouter une exeption ici verifier si il ne faut pas plutôt effectuer un fix sur le PDF
+			// ex : les "Anciens PDF n'utilisent pas le padding pour les texts contrairement au "nouveaux PDF" c'est pourquoi les nouveaux PDF disposent d'un affichage mieux positionné
+
+			if(!empty($conf->global->SUBTOTAL_BACKGROUND_CELL_HEIGHT_OFFSET)){
+				$backgroundCellHeightOffset = doubleval($conf->global->SUBTOTAL_BACKGROUND_CELL_HEIGHT_OFFSET);
+			}
+			if(!empty($conf->global->SUBTOTAL_BACKGROUND_CELL_POS_Y_OFFSET)){
+				$backgroundCellPosYOffset = doubleval($conf->global->SUBTOTAL_BACKGROUND_CELL_POS_Y_OFFSET);
+			}
+
+			$backgroundColor = colorStringToArray($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR,array(233, 233, 233));
+		}
+
+
+		//background color
+		if ($fillBackground && !colorIsLight($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)) {
 			$pdf->setColor('text', 255,255,255);
 		}
 
@@ -1027,6 +1048,14 @@ class ActionsSubtotal
 
 		$pdf->SetFont('', $style, 9);
 
+
+		// save curent cell padding
+		$curentCellPaddinds = $pdf->getCellPaddings();
+		if(empty($object->subtotalPdfModelInfo->cols)) {
+			// set cell padding with column content definition for old PDF
+			$pdf->setCellPaddings($curentCellPaddinds['L'],1, $curentCellPaddinds['R'],1);
+		}
+
 		$pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'R',true);
 //		var_dump($bMargin);
 		$pageAfter = $pdf->getPage();
@@ -1034,7 +1063,8 @@ class ActionsSubtotal
 		//Print background
 		$cell_height = $pdf->getStringHeight($w, $label);
 
-		if(!empty($object->subtotalPdfModelInfo->cols) && version_compare('11.0.0', DOL_VERSION, '>')){
+		// POUR LES PDF DE TYPE PDF_EVOLUTION (ceux avec les colonnes configurables)
+		if(!empty($object->subtotalPdfModelInfo->cols) && version_compare('11.0.0', DOL_VERSION, '<')){
 			include_once __DIR__ . '/staticPdf.model.php';
 			$staticPdfModel = new ModelePDFStatic($object->db);
 			$staticPdfModel->marge_droite 	= $object->subtotalPdfModelInfo->marge_droite;
@@ -1046,27 +1076,22 @@ class ActionsSubtotal
 			$staticPdfModel->defaultContentsFieldsStyle = $object->subtotalPdfModelInfo->defaultContentsFieldsStyle;
 			$staticPdfModel->prepareArrayColumnField($object, $langs);
 
+			$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
 			$pdf->SetXY($object->subtotalPdfModelInfo->marge_droite, $posy);
 			$pdf->MultiCell($object->subtotalPdfModelInfo->page_largeur - $object->subtotalPdfModelInfo->marge_gauche - $object->subtotalPdfModelInfo->marge_droite, $cell_height, '', 0, '', 1);
 		}
 		else{
 			$pdf->SetXY($posx, $posy);
 			//background color
-			if (! empty($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
-				&& function_exists('colorValidateHex')
-				&& colorValidateHex($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
-				&& function_exists('colorStringToArray'))
+			if ($fillBackground)
 			{
-				$backgroundColor = colorStringToArray($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR,array(233, 233, 233));
 				$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
 				$cell_height = $pdf->getStringHeight($w, $label);
-				$pdf->SetXY($posx, $posy-1); //-1 to take into account the entire height of the row
+				$pdf->SetXY($posx, $posy+$backgroundCellPosYOffset); //-1 to take into account the entire height of the row
 				$pdf->SetFont('', '', 9); //remove UBI for the background
-				$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height+2, '', 0, '', 1); //+2 same of SetXY()
+				$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height+$backgroundCellHeightOffset, '', 0, '', 1); //+2 same of SetXY()
 				$pdf->SetXY($posx, $posy); //reset position
 				$pdf->SetFont('', $style, 9); //reset style
-
-
 			}
 			else {
 				$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height, '', 0, '', 1);
@@ -1118,7 +1143,7 @@ class ActionsSubtotal
 			$pdf->SetXY($pdf->postotalht, $posy);
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
 
-			if(!empty($object->subtotalPdfModelInfo->cols) && version_compare('11.0.0', DOL_VERSION, '>')){
+			if(!empty($object->subtotalPdfModelInfo->cols) && version_compare('11.0.0', DOL_VERSION, '<')){
 				$staticPdfModel->printStdColumnContent($pdf, $posy, 'totalexcltax', $total_to_print);
 			}
 			else{
@@ -1128,6 +1153,10 @@ class ActionsSubtotal
 		else{
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
 		}
+
+
+		// restore cell padding
+		$pdf->setCellPaddings($curentCellPaddinds['L'], $curentCellPaddinds['T'], $curentCellPaddinds['R'], $curentCellPaddinds['B']);
 
 		$posy = $posy + $cell_height;
 		$pdf->SetXY($posx, $posy);
@@ -1150,29 +1179,44 @@ class ActionsSubtotal
 
 		global $db,$conf,$subtotal_last_title_posy;
 
+		// Manage background color
+		$fillDescBloc = false;
+		$fillBackground = false;
+		if(!empty($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
+			&& function_exists('colorValidateHex')
+			&& colorValidateHex($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
+			&& function_exists('colorStringToArray')
+		) {
+			$fillBackground = true;
+			$backgroundColor = colorStringToArray($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR,array(233, 233, 233));
+
+			if(function_exists('colorIsLight') && !colorIsLight($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)){
+				$pdf->setColor('text', 255,255,255);
+			}
+
+			$backgroundCellHeightOffset = 0;
+			$backgroundCellPosYOffset = 0;
+
+			// add here special PDF compatibility modifications
+			// mais avant d'ajouter une exeption ici verifier si il ne faut pas plutôt effectuer un fix sur le PDF
+			// ex : les "Anciens PDF n'utilisent pas le padding pour les texts contrairement au "nouveaux PDF" c'est pourquoi les nouveaux PDF disposent d'un affichage mieux positionné
+
+
+			if(!empty($conf->global->SUBTOTAL_TITLE_BACKGROUND_CELL_HEIGHT_OFFSET)){
+				$backgroundCellHeightOffset = doubleval($conf->global->SUBTOTAL_TITLE_BACKGROUND_CELL_HEIGHT_OFFSET);
+			}
+
+			if(!empty($conf->global->SUBTOTAL_TITLE_BACKGROUND_CELL_POS_Y_OFFSET)){
+				$backgroundCellPosYOffset = doubleval($conf->global->SUBTOTAL_TITLE_BACKGROUND_CELL_POS_Y_OFFSET);
+			}
+		}
+
+
 //		$pdf->SetTextColor('text', 0, 0, 0);
 		$subtotal_last_title_posy = $posy;
 		$pdf->SetXY ($posx, $posy);
 
 		$hideInnerLines = GETPOST('hideInnerLines', 'int');
-
-		$fillDescBloc = false;
-		//background color
-		if (!empty($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
-			&& function_exists('colorValidateHex')
-			&& colorValidateHex($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
-			&& function_exists('colorStringToArray')
-			&& !colorIsLight($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
-		)
-		{
-			$backgroundColor = colorStringToArray($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR,array(233, 233, 233));
-			$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
-			if(function_exists('colorIsLight') && !colorIsLight($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)){
-				$pdf->setColor('text', 255,255,255);
-			}
-
-		}
-
 
 		$style = ($line->qty==1) ? 'BU' : 'BUI';
 		if (!empty($conf->global->SUBTOTAL_TITLE_STYLE)) $style = $conf->global->SUBTOTAL_TITLE_STYLE;
@@ -1190,9 +1234,17 @@ class ActionsSubtotal
 			else $pdf->SetFont('', $style, 9);
 		}
 
+		// save curent cell padding
+		$curentCellPaddinds = $pdf->getCellPaddings();
+		if(empty($object->subtotalPdfModelInfo->cols)) {
+			// set cell padding with column content definition for old PDF
+			$pdf->setCellPaddings($curentCellPaddinds['L'],1, $curentCellPaddinds['R'],1);
+		}
+
 		$posYBeforeTile = $pdf->GetY();
 		if ($label === strip_tags($label) && $label === dol_html_entity_decode($label, ENT_QUOTES)) $pdf->MultiCell($w, $h, $label, 0, 'L', $fillDescBloc); // Pas de HTML dans la chaine
 		else $pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, $fillDescBloc, true, 'J',true); // et maintenant avec du HTML
+
 
 		$posYBeforeDesc = $pdf->GetY();
 		if($description && !$hidedesc) {
@@ -1202,25 +1254,30 @@ class ActionsSubtotal
 		}
 
 		//background color
-		if (!empty($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
-			&& function_exists('colorValidateHex')
-			&& colorValidateHex($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
-			&& function_exists('colorStringToArray'))
+		if ($fillBackground)
 		{
 			$posYAfterDesc = $pdf->GetY();
-			$backgroundColor = colorStringToArray($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR);
-			$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
-			$cell_height = $pdf->getStringHeight($w, $label);
+			$cell_height = $pdf->getStringHeight($w, $label) + $backgroundCellHeightOffset;
+			$bgStartX = $posx;
+			$bgW = $pdf->page_largeur - $pdf->marge_droite;// historiquement ce sont ces valeurs, mais elles sont la plupart du temps vide
 
-			$pdf->SetXY($posx, $posy-1); //-2 to take into account  the entire height of the row
-			$pdf->SetFont('', '', 9); //remove UBI for the background
-			$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height+1.9, '', 0, '', 1, 1,'','',true,0, true); //+2 same of SetXY()
+			// POUR LES PDF DE TYPE PDF_EVOLUTION (ceux avec les colonnes configurables)
+			if(!empty($object->subtotalPdfModelInfo->cols) && version_compare('11.0.0', DOL_VERSION, '<')){
+				$bgStartX = $object->subtotalPdfModelInfo->marge_droite;
+				$bgW = $object->subtotalPdfModelInfo->page_largeur - $object->subtotalPdfModelInfo->marge_gauche - $object->subtotalPdfModelInfo->marge_droite;
+			}
+
+			$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
+			$pdf->SetXY($bgStartX, $posy + $backgroundCellPosYOffset); //-2 to take into account  the entire height of the row
+			$pdf->MultiCell($bgW, $cell_height, '', 0, '', 1, 1,'','',true,0, true); //+2 same of SetXY()
 			$posy = $posYAfterDesc;
 			$pdf->SetXY($posx, $posy); //reset position
 			$pdf->SetFont('', $style, 9); //reset style
 			$pdf->SetTextColor('text', 0, 0, 0); // restore default text color;
 		}
 
+		// restore cell padding
+		$pdf->setCellPaddings($curentCellPaddinds['L'], $curentCellPaddinds['T'], $curentCellPaddinds['R'], $curentCellPaddinds['B']);
 	}
 
 	function pdf_writelinedesc_ref($parameters=array(), &$object, &$action='') {
