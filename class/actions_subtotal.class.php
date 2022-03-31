@@ -973,13 +973,17 @@ class ActionsSubtotal
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		global $conf,$subtotal_last_title_posy,$langs;
 
+		$subtotalDefaultTopPadding = 1;
+		$subtotalDefaultBottomPadding = 1;
+		$subtotalDefaultLeftPadding = 0.5;
+		$subtotalDefaultRightPadding = 0.5;
+
 		$fillBackground = false;
 		if(!empty($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
 			&& function_exists('colorValidateHex')
 			&& colorValidateHex($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
 			&& function_exists('colorStringToArray')
 			&& function_exists('colorIsLight')
-			&& !colorIsLight($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
 		){
 			$fillBackground = true;
 
@@ -998,13 +1002,36 @@ class ActionsSubtotal
 			}
 
 			$backgroundColor = colorStringToArray($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR,array(233, 233, 233));
+
+			//background color
+			if (!colorIsLight($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)) {
+				$pdf->setColor('text', 255,255,255);
+			}
 		}
 
+		// POUR LES PDF DE TYPE PDF_EVOLUTION (ceux avec les colonnes configurables)
+		$pdfModelUseColSystem = !empty($object->subtotalPdfModelInfo->cols); // justilise une variable au cas ou le test evolue
+		if($pdfModelUseColSystem){
 
-		//background color
-		if ($fillBackground && !colorIsLight($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)) {
-			$pdf->setColor('text', 255,255,255);
+			include_once __DIR__ . '/staticPdf.model.php';
+			$staticPdfModel = new ModelePDFStatic($object->db);
+			$staticPdfModel->marge_droite 	= $object->subtotalPdfModelInfo->marge_droite;
+			$staticPdfModel->marge_gauche 	= $object->subtotalPdfModelInfo->marge_gauche;
+			$staticPdfModel->page_largeur 	= $object->subtotalPdfModelInfo->page_largeur;
+			$staticPdfModel->page_hauteur 	= $object->subtotalPdfModelInfo->page_hauteur;
+			$staticPdfModel->cols 			= $object->subtotalPdfModelInfo->cols;
+			$staticPdfModel->defaultTitlesFieldsStyle 	= $object->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
+			$staticPdfModel->defaultContentsFieldsStyle = $object->subtotalPdfModelInfo->defaultContentsFieldsStyle;
+			$staticPdfModel->prepareArrayColumnField($object, $langs);
+
+			if(isset($staticPdfModel->cols['totalexcltax']['content']['padding'][0])){
+				$subtotalDefaultTopPadding = $staticPdfModel->cols['totalexcltax']['content']['padding'][0];
+			}
+			if(isset($staticPdfModel->cols['totalexcltax']['content']['padding'][2])){
+				$subtotalDefaultBottomPadding = $staticPdfModel->cols['totalexcltax']['content']['padding'][0];
+			}
 		}
+
 
 		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 		if (!empty($conf->global->SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES) && $hideInnerLines && !empty($subtotal_last_title_posy))
@@ -1051,12 +1078,11 @@ class ActionsSubtotal
 
 		// save curent cell padding
 		$curentCellPaddinds = $pdf->getCellPaddings();
-		if(empty($object->subtotalPdfModelInfo->cols)) {
-			// set cell padding with column content definition for old PDF
-			$pdf->setCellPaddings($curentCellPaddinds['L'],1, $curentCellPaddinds['R'],1);
-		}
+		// set cell padding with column content definition for old PDF compatibility
+		$pdf->setCellPaddings($curentCellPaddinds['L'],$subtotalDefaultTopPadding, $curentCellPaddinds['R'],$subtotalDefaultBottomPadding);
 
-		$pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'R',true);
+		$pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'R', true);
+
 //		var_dump($bMargin);
 		$pageAfter = $pdf->getPage();
 
@@ -1064,31 +1090,20 @@ class ActionsSubtotal
 		$cell_height = $pdf->getStringHeight($w, $label);
 
 		// POUR LES PDF DE TYPE PDF_EVOLUTION (ceux avec les colonnes configurables)
-		if(!empty($object->subtotalPdfModelInfo->cols) && version_compare('11.0.0', DOL_VERSION, '<')){
-			include_once __DIR__ . '/staticPdf.model.php';
-			$staticPdfModel = new ModelePDFStatic($object->db);
-			$staticPdfModel->marge_droite 	= $object->subtotalPdfModelInfo->marge_droite;
-			$staticPdfModel->marge_gauche 	= $object->subtotalPdfModelInfo->marge_gauche;
-			$staticPdfModel->page_largeur 	= $object->subtotalPdfModelInfo->page_largeur;
-			$staticPdfModel->page_hauteur 	= $object->subtotalPdfModelInfo->page_hauteur;
-			$staticPdfModel->cols 			= $object->subtotalPdfModelInfo->cols;
-			$staticPdfModel->defaultTitlesFieldsStyle 	= $object->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
-			$staticPdfModel->defaultContentsFieldsStyle = $object->subtotalPdfModelInfo->defaultContentsFieldsStyle;
-			$staticPdfModel->prepareArrayColumnField($object, $langs);
+		if($pdfModelUseColSystem){
 			if ($fillBackground) {
 				$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
 			}
-			$pdf->SetXY($object->subtotalPdfModelInfo->marge_droite, $posy);
+			$pdf->SetXY($object->subtotalPdfModelInfo->marge_droite, $posy+$backgroundCellPosYOffset);
 			$pdf->MultiCell($object->subtotalPdfModelInfo->page_largeur - $object->subtotalPdfModelInfo->marge_gauche - $object->subtotalPdfModelInfo->marge_droite, $cell_height, '', 0, '', 1);
 		}
 		else{
-			$pdf->SetXY($posx, $posy);
+			$pdf->SetXY($posx, $posy+$backgroundCellPosYOffset); //-1 to take into account the entire height of the row
+
 			//background color
 			if ($fillBackground)
 			{
 				$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
-				$cell_height = $pdf->getStringHeight($w, $label);
-				$pdf->SetXY($posx, $posy+$backgroundCellPosYOffset); //-1 to take into account the entire height of the row
 				$pdf->SetFont('', '', 9); //remove UBI for the background
 				$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height+$backgroundCellHeightOffset, '', 0, '', 1); //+2 same of SetXY()
 				$pdf->SetXY($posx, $posy); //reset position
@@ -1144,7 +1159,7 @@ class ActionsSubtotal
 			$pdf->SetXY($pdf->postotalht, $posy);
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
 
-			if(!empty($object->subtotalPdfModelInfo->cols) && version_compare('11.0.0', DOL_VERSION, '<')){
+			if($pdfModelUseColSystem){
 				$staticPdfModel->printStdColumnContent($pdf, $posy, 'totalexcltax', $total_to_print);
 			}
 			else{
@@ -1237,10 +1252,10 @@ class ActionsSubtotal
 
 		// save curent cell padding
 		$curentCellPaddinds = $pdf->getCellPaddings();
-		if(empty($object->subtotalPdfModelInfo->cols)) {
-			// set cell padding with column content definition for old PDF
-			$pdf->setCellPaddings($curentCellPaddinds['L'],1, $curentCellPaddinds['R'],1);
-		}
+
+		// set cell padding with column content definition PDF
+		$pdf->setCellPaddings($curentCellPaddinds['L'],1, $curentCellPaddinds['R'],1);
+
 
 		$posYBeforeTile = $pdf->GetY();
 		if ($label === strip_tags($label) && $label === dol_html_entity_decode($label, ENT_QUOTES)) $pdf->MultiCell($w, $h, $label, 0, 'L', $fillDescBloc); // Pas de HTML dans la chaine
