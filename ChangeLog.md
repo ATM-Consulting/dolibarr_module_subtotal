@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 3.11
 
+- FIX : colspan 4 to 5 to fix view of propal and bill *07/04/2022* - 3.11.8
 - FIX : title and subtotal padding *30/03/2022* - 3.11.7
 - FIX : title and text offset position *29/03/2022* - 3.11.6
 - FIX : background Color position *17/03/2022* - 3.11.5
