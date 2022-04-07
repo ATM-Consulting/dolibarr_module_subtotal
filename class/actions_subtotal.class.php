@@ -449,21 +449,21 @@ class ActionsSubtotal
 				$var=false;
 				$out = '';
 		     	$out.= '<tr class="oddeven">
-		     			<td colspan="4" align="right">
+		     			<td colspan="5" align="right">
 		     				<label for="hideInnerLines">'.$langs->trans('HideInnerLines').'</label>
 		     				<input type="checkbox" onclick="if($(this).is(\':checked\')) { $(\'#hidedetails\').prop(\'checked\', \'checked\')  }" id="hideInnerLines" name="hideInnerLines" value="1" '.(( $hideInnerLines ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
 
 		     	$out.= '<tr class="oddeven">
-		     			<td colspan="4" align="right">
+		     			<td colspan="5" align="right">
 		     				<label for="hidedetails">'.$langs->trans('SubTotalhidedetails').'</label>
 		     				<input type="checkbox" id="hidedetails" name="hidedetails" value="1" '.(( $hidedetails ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
 
 		     	$out.= '<tr class="oddeven">
-		     			<td colspan="4" align="right">
+		     			<td colspan="5" align="right">
 		     				<label for="hideprices">'.$langs->trans('SubTotalhidePrice').'</label>
 		     				<input type="checkbox" id="hideprices" name="hideprices" value="1" '.(( $hideprices ) ? 'checked="checked"' : '' ).' />
 		     			</td>
