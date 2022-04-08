@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 # [Unreleased]
 
 
+## Version 3.12
+- NEW : Add total_ht on originproductline tpl if available + add class td identification + add data-id tr identification *07/04/2022* - 3.12.0
+
 ## Version 3.11
 
 - FIX : colspan 4 to 5 to fix view of propal and bill *07/04/2022* - 3.11.8
