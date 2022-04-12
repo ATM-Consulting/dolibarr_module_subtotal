@@ -227,7 +227,7 @@ print '<input type="text" placeholder="B" name="SUBTOTAL_SUBTOTAL_STYLE" value="
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
-
+if (!$conf->global->MAIN_MODULE_INFRASPACKPLUS) {	// InfraS add
 print '<tr class="oddeven">';
 print '<td>'.$langs->trans("SUBTOTAL_TITLE_BACKGROUNDCOLOR").'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
@@ -307,7 +307,7 @@ print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="300">';
 print ajax_constantonoff('SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT');
 print '</td></tr>';
-
+}	// InfraS add
 print '<tr class="oddeven">';
 print '<td>'.$langs->trans('SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE').'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
@@ -472,7 +472,7 @@ print '</td></tr>';
 			</form>
 		</td>
 	</tr>
-
+<?php if (!$conf->global->MAIN_MODULE_INFRASPACKPLUS) {	?>	<!-- InfraS add -->
 	<tr class="pair">
 		<td>Masquer les totaux</td>
 		<td style="text-align: right;">
@@ -484,7 +484,7 @@ print '</td></tr>';
 			</form>
 		</td>
 	</tr>
-
+<?php }	?>	<!-- InfraS add -->
 	<?php if ($conf->clilacevenements->enabled) { ?>
 		<tr>
 			<td>Afficher la quantité sur les lignes de sous-total (uniquement dans le cas d'un produit virtuel ajouté)</td>

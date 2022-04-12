@@ -56,7 +56,7 @@ class ActionsSubtotal
 
 	function createDictionaryFieldlist($parameters, &$object, &$action, $hookmanager)
 	{
-		global $conf;
+		global $conf, $langs;
 
 		if ($parameters['tabname'] == MAIN_DB_PREFIX.'c_subtotal_free_text')
 		{
@@ -69,7 +69,27 @@ class ActionsSubtotal
 				if ($resql && ($obj = $this->db->fetch_object($resql))) $value = $obj->content;
 			}
 
-			?>
+            // Editor wysiwyg
+            $toolbarname = 'dolibarr_notes';
+            $disallowAnyContent = true;
+            if (isset($conf->global->FCKEDITOR_ALLOW_ANY_CONTENT)) {
+                $disallowAnyContent = empty($conf->global->FCKEDITOR_ALLOW_ANY_CONTENT); // Only predefined list of html tags are allowed or all
+            }
+            if (!empty($conf->global->FCKEDITOR_SKIN)) {
+                $skin = $conf->global->FCKEDITOR_SKIN;
+            } else {
+                $skin = 'moono-lisa'; // default with ckeditor 4.6 : moono-lisa
+            }
+            if (!empty($conf->global->FCKEDITOR_ENABLE_SCAYT_AUTOSTARTUP)) {
+                $scaytautostartup = 'scayt_autoStartup: true,';
+            } else {
+                $scaytautostartup = '/*scayt is disable*/'; // Disable by default
+            }
+            $htmlencode_force = preg_match('/_encoded$/', $toolbarname) ? 'true' : 'false';
+            $editor_height = empty($conf->global->MAIN_DOLEDITOR_HEIGHT) ? 100 : $conf->global->MAIN_DOLEDITOR_HEIGHT;
+            $editor_allowContent = $disallowAnyContent ? 'false' : 'true';
+
+            ?>
 			<script type="text/javascript">
 				$(function() {
 
@@ -84,11 +104,50 @@ class ActionsSubtotal
 								});
 
 								<?php if (!empty($conf->fckeditor->enabled) && !empty($conf->global->FCKEDITOR_ENABLE_DETAILS)) { ?>
+
+                                var ckeditor_params = {
+                                    customConfig: ckeditorConfig,
+                                    readOnly: false,
+                                    htmlEncodeOutput: <?php print $htmlencode_force; ?>,
+                                    allowedContent: <?php print $editor_allowContent; ?>,
+                                    extraAllowedContent: 'a[target];div{float,display}',
+                                    disallowedContent : '',
+                                    fullPage : false,
+                                    toolbar: '<?php print $toolbarname; ?>',
+                                    toolbarStartupExpanded: false,
+                                    width: '',
+                                    height: '<?php print $editor_height; ?>',
+                                    skin: '<?php print $skin; ?>',
+                                    <?php print $scaytautostartup; ?>
+                                    scayt_sLang: '<?php print $langs->getDefaultLang(); ?>',
+                                    language: '<?php print $langs->defaultlang; ?>',
+                                    textDirection: '<?php print $langs->trans('DIRECTION'); ?>',
+                                    on :
+                                        {
+                                            instanceReady : function( ev )
+                                            {
+                                                // Output paragraphs as <p>Text</p>.
+                                                this.dataProcessor.writer.setRules( 'p',
+                                                    {
+                                                        indent : false,
+                                                        breakBeforeOpen : true,
+                                                        breakAfterOpen : false,
+                                                        breakBeforeClose : false,
+                                                        breakAfterClose : true
+                                                    });
+                                            }
+                                        },
+                                    disableNativeSpellChecker: false,
+                                    filebrowserBrowseUrl: ckeditorFilebrowserBrowseUrl,
+                                    filebrowserImageBrowseUrl: ckeditorFilebrowserImageBrowseUrl,
+                                    filebrowserWindowWidth: '900',
+                                    filebrowserWindowHeight: '500',
+                                    filebrowserImageWindowWidth: '900',
+                                    filebrowserImageWindowHeight: '500',
+                                };
+
 								$('textarea[name=content]').each(function(i, item) {
-									CKEDITOR.replace(item, {
-										toolbar: 'dolibarr_notes'
-										,customConfig : ckeditorConfig
-									});
+                                    CKEDITOR.replace(item, ckeditor_params);
 								});
 								<?php } ?>
 							}
@@ -480,6 +539,7 @@ class ActionsSubtotal
 					|| (in_array('invoicereccard',      $contextArray) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP ))
 				)
 				{
+					$out = '';	// InfraS change
 					$out.= '
 						<tr class="oddeven">
 							<td colspan="4" align="right">
@@ -737,7 +797,22 @@ class ActionsSubtotal
 			$Tab = TSubtotal::getLinesFromTitleId($object, GETPOST('lineid', 'int'), true);
 			foreach($Tab as $line) {
                 $result = 0;
-
+				// InfraS add begin
+				if ($conf->global->MAIN_MODULE_OUVRAGE)
+				{
+					dol_include_once('/ouvrage/core/modules/modouvrage.class.php');
+					$objMod	= class_exists('modouvrage') ? new modouvrage($db) : '';
+					if ($line->product_type == 9 && $line->special_code == $objMod->numero)
+					{
+						// Call trigger
+						include_once DOL_DOCUMENT_ROOT.'/core/class/interfaces.class.php';
+						$interface			= new Interfaces($db);
+						$result				= $interface->run_triggers('OUVRAGE_DELETE', $line, $user, $langs, $conf);
+						if ($result < 0)	$error++;
+						// End call triggers
+					}	// if ($line->product_type == 9 && $line->special_code == $objMod->numero)
+				}	// if ($conf->global->MAIN_MODULE_OUVRAGE)
+				// InfraS add end
 				$idLine = $line->id;
 				/**
 				 * @var $object Facture
@@ -887,7 +962,9 @@ class ActionsSubtotal
 	 * @return array|float|int
 	 */
 	function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=0) {
-		global $conf;
+		global $conf, $db;	// InfraS change
+
+		if ($conf->global->MAIN_MODULE_OUVRAGE)	dol_include_once('/ouvrage/core/modules/modouvrage.class.php');	// InfraS add
 
 		$rang = $line->rang;
 		$qty_line = $line->qty;
@@ -916,16 +993,24 @@ class ActionsSubtotal
 		{
 			$l->total_ttc = doubleval($l->total_ttc);
 			$l->total_ht = doubleval($l->total_ht);
+        	// InfraS add begin
+        	if (class_exists('modouvrage'))
+            {
+            	$objMod	= new modouvrage($db);
+            	$isOuvrage	= $l->product_type == 9 && !empty($objMod->numero) && $l->special_code == $objMod->numero ? true : '';
+            }
+        	// InfraS add end
 
 			//print $l->rang.'>='.$rang.' '.$total.'<br/>';
             if ($l->rang>=$rang) continue;
             if (!empty($title_break) && $title_break->id == $l->id) break;
-            elseif (!TSubtotal::isModSubtotalLine($l))
+            elseif (!TSubtotal::isModSubtotalLine($l) && empty($isOuvrage))	// InfraS change
             {
                 // TODO retirer le test avec $builddoc quand Dolibarr affichera le total progression sur la card et pas seulement dans le PDF
                 if ($builddoc && $object->element == 'facture' && $object->type==Facture::TYPE_SITUATION)
                 {
-                    if ($l->situation_percent > 0 && !empty($l->total_ht))
+					$sitFacTotLineAvt	= isset($conf->global->INFRASPLUS_PDF_SITFAC_TOTLINE_AVT) ? $conf->global->INFRASPLUS_PDF_SITFAC_TOTLINE_AVT : 0;	// InfraS add
+                    if ($l->situation_percent > 0 && !empty($l->total_ht) && empty($sitFacTotLineAvt))	// InfraS change
                     {
                         $prev_progress = 0;
                         $progress = 1;
@@ -938,20 +1023,28 @@ class ActionsSubtotal
                         $result = $sign * ($l->total_ht / ($l->situation_percent / 100)) * $progress;
                         $total+= $result;
                         // TODO check si les 3 lignes du dessous sont corrects
-                        $total_tva += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
-                        $TTotal_tva[$l->tva_tx] += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
-                        $total_ttc += $sign * ($l->total_tva / ($l->total_ttc / 100)) * $progress;
+                        if ($l->situation_percent != 0)	$total_tva += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;	// InfraS change
+                        if ($l->situation_percent != 0)	$TTotal_tva[$l->tva_tx] += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;	// InfraS change
+                        if ($l->total_ttc != 0)	$total_ttc += $sign * ($l->total_tva / ($l->total_ttc / 100)) * $progress;	// InfraS change
 
                     }
+					else {	// InfraS add begin
+						if ($l->product_type != 9) {
+										$total += $l->total_ht;
+										$total_tva += $l->total_tva;
+										$TTotal_tva[$l->tva_tx] += $l->total_tva;
+										$total_ttc += $l->total_ttc;
+						}
+					}
+					// InfraS add end
                 }
-                else
-                {
-			if ($l->product_type != 9) {
-                    		$total += $l->total_ht;
-                    		$total_tva += $l->total_tva;
-                    		$TTotal_tva[$l->tva_tx] += $l->total_tva;
-                    		$total_ttc += $l->total_ttc;
-			}
+                else {
+					if ($l->product_type != 9) {
+									$total += $l->total_ht;
+									$total_tva += $l->total_tva;
+									$TTotal_tva[$l->tva_tx] += $l->total_tva;
+									$total_ttc += $l->total_ttc;
+					}
                 }
             }
 		}
@@ -1426,6 +1519,40 @@ class ActionsSubtotal
 
 		if($this->isModSubtotalLine($parameters,$object) ){
 
+			// InfraS add begin
+			if (!empty($parameters['infrasplus'])) {
+				$hidePriceOnSubtotalLines = $object->element == 'shipping' || $object->element == 'delivery' ? 1 : GETPOST('hide_price_on_subtotal_lines', 'int');
+				if (!$hidePriceOnSubtotalLines) {
+					$total_to_print = price($object->lines[$i]->total);
+					if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS)) {
+						$TTitle = TSubtotal::getAllTitleFromLine($object->lines[$i]);
+						foreach ($TTitle as &$line_title) {
+							if (!empty($line_title->array_options['options_subtotal_nc'])) {
+								$total_to_print = ''; // TODO Gestion "Compris/Non compris", voir si on affiche une annotation du genre "NC"
+								break;
+							}
+						}
+					}
+					if($total_to_print !== '') {
+						if (GETPOST('hideInnerLines', 'int')) {
+							// Dans le cas des lignes cachés, le calcul est déjà fait dans la méthode beforePDFCreation et les lignes de sous-totaux sont déjà renseignés
+						}
+						else {
+							dol_include_once('/infraspackplus/core/lib/infraspackplus.pdf.lib.php');
+							$TInfo							= $this->getTotalLineFromObject($object, $object->lines[$i], '', 1);
+							$TTotal_tva						= $TInfo[3];
+							$total_to_print					= pdf_InfraSPlus_price($object, $TInfo[0], $pdf->outputlangs);
+							$object->lines[$i]->total		= $TInfo[0];
+							$object->lines[$i]->total_ht	= $TInfo[0];
+							$object->lines[$i]->total_tva	= !TSubtotal::isModSubtotalLine($line) ? $TInfo[1] : $object->lines[$i]->total_tva;
+							$object->lines[$i]->total_ttc	= $TInfo[2];
+						}
+					}
+					$this->resprints	= !empty($total_to_print) ? $total_to_print : ' ';
+					return 1;
+				}
+			}
+			// InfraS add end
 			$this->resprints = ' ';
 
 			if((float)DOL_VERSION<=3.6) {
@@ -1730,6 +1857,8 @@ class ActionsSubtotal
 	function pdf_getlinevatrate($parameters=array(), &$object, &$action='') {
 	    global $conf,$hideprices,$hookmanager;
 
+		$TContext	= explode(':', $parameters['context']);	// InfraS add
+		if (in_array('expensereportcard', $TContext))	return 0;	// InfraS add
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 
@@ -1826,7 +1955,7 @@ class ActionsSubtotal
 				{
 					$TLineTitle[] = &$line;
 				}
-				else if ($line->id > 0 && TSubtotal::isSubtotal($line))
+				else if ($line->id > 0 && TSubtotal::isSubtotal($line) && !$conf->global->SUBTOTAL_USE_NEW_FORMAT)		// InfraS change
 				{
 					$TLineSubtotal[] = &$line;
 				}
@@ -1949,6 +2078,9 @@ class ActionsSubtotal
             $this->subtotal_sum_qty_enabled = true;
             $this->subtotal_show_qty_by_default = true;
         }
+
+		$TContext	= explode(':', $parameters['context']);	// InfraS add
+		if (in_array('propalcard', $TContext) || in_array('ordercard', $TContext) || in_array('invoicecard', $TContext)) {	// InfraS add
 
 		$object->subtotalPdfModelInfo = new stdClass(); // see defineColumnFiel method in this class
 		$object->subtotalPdfModelInfo->cols = false;
@@ -2124,7 +2256,7 @@ class ActionsSubtotal
 				return 0;
 			}
 	    }
-
+		} 	// InfraS add
 		return 0;
 	}
 
@@ -2284,7 +2416,7 @@ class ActionsSubtotal
 	 */
 	function printObjectLine ($parameters, &$object, &$action, $hookmanager)
 	{
-		global $conf,$langs,$user,$db,$bc;
+		global $conf, $langs, $user, $db, $bc, $inputalsopricewithtax;	// InfraS change
 
 		$num = &$parameters['num'];
 		$line = &$parameters['line'];
@@ -2387,16 +2519,18 @@ class ActionsSubtotal
 			$colspan = 5;
 			if($object->element == 'facturerec' ) $colspan = 3;
 			if($object->element == 'order_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 3 : $colspan = 6;
-			if($object->element == 'invoice_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 4: $colspan = 7;
+			if($object->element == 'invoice_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 4: $colspan = 5;	// InfraS change
 			if($object->element == 'supplier_proposal') (float) DOL_VERSION < 6.0 ? $colspan = 4 : $colspan = 3;
 			if(!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 				$colspan++; // Colonne PU Devise
 			}
+			if($inputalsopricewithtax)	 $colspan++;	// InfraS add
 			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
-			$margins_hidden_by_module = empty($conf->affmarges->enabled) ? false : !($_SESSION['marginsdisplayed']);
-			if(!empty($conf->margin->enabled) && !$margins_hidden_by_module) $colspan++;
-			if(!empty($conf->margin->enabled) && !empty($conf->global->DISPLAY_MARGIN_RATES) && !$margins_hidden_by_module) $colspan++;
-			if(!empty($conf->margin->enabled) && !empty($conf->global->DISPLAY_MARK_RATES) && !$margins_hidden_by_module) $colspan++;
+	//		$margins_hidden_by_module = empty($conf->affmarges->enabled) ? false : !($_SESSION['marginsdisplayed']);	// InfraS change
+	//		if(!empty($conf->margin->enabled) && !$margins_hidden_by_module) $colspan++;	// InfraS change
+			if(!empty($conf->margin->enabled) && !empty($user->rights->margins->creer)) $colspan++;	// InfraS add
+			if(!empty($conf->margin->enabled) && !empty($conf->global->DISPLAY_MARGIN_RATES) && $user->rights->margins->liretous)	$colspan++;	// InfraS change
+			if(!empty($conf->margin->enabled) && !empty($conf->global->DISPLAY_MARK_RATES) && $user->rights->margins->liretous)	$colspan++;	// InfraS change
 			if($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION) $colspan++;
 			if(!empty($conf->global->PRODUCT_USE_UNITS)) $colspan++;
 			// Compatibility module showprice
@@ -2622,7 +2756,7 @@ class ActionsSubtotal
 								print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
 							}
 							else{
-								print '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+								print '<span class="subtotal_label classfortooltip"  style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';	// InfraS change
 							}
 
 						 }
@@ -2885,7 +3019,7 @@ class ActionsSubtotal
 								print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
 							}
 							else{
-								print '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+								print '<span class="subtotal_label classfortooltip" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';	// InfraS change
 							}
 
 						 }
@@ -3005,7 +3139,7 @@ class ActionsSubtotal
 					print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
 				}
 				else{
-					print '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+					print '<span class="subtotal_label classfortooltip" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';	// InfraS change
 				}
 			}
 			//if($line->qty>90) print ' : ';
@@ -3153,7 +3287,7 @@ class ActionsSubtotal
 						$object->tpl["sublabel"].= '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
 					}
 					else{
-						$object->tpl["sublabel"].= '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+						$object->tpl["sublabel"].= '<span class="subtotal_label classfortooltip" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';	// InfraS change
 					}
 
 				}
@@ -3287,7 +3421,7 @@ class ActionsSubtotal
 
 		if ((!empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP) && $object->element == 'propal') || (!empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP) && $object->element == 'commande') || (!empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP) && $object->element == 'facture'))
 		{
-			if (GETPOST('subtotal_add_recap', 'none')) {
+			if (GETPOST('subtotal_add_recap', 'none') && empty($parameters['fromInfraS'])) {	// InfraS change
 				dol_include_once('/subtotal/class/subtotal.class.php');
 				TSubtotal::addRecapPage($parameters, $pdf);
 			}

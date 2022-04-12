@@ -1,3 +1,5 @@
+CHARSET=UTF-8
+easyaFamily=Easya Solutions
 Module104777Name = Sous-Total
 Module104777Desc = Permet l'ajout de titre et de sous-totaux sur les propositions commerciales, commandes et factures
 ATMAbout = Ce module a été développé par <a href="http://www.atm-consulting.fr" target="_blank">ATM Consulting</a><br>Vous pouvez retrouver la documentation sur notre <a href="http://wiki.atm-consulting.fr/index.php/Accueil" target="_blank">wiki</a><br><br>Pour toute question technique ou retour, contactez-nous sur <a href="mailto:support@atm-consulting.fr">support@atm-consulting.fr</a><br><br>Pour toute question commerciale, contactez-nous sur <a href="mailto:contact@atm-consulting.fr">contact@atm-consulting.fr</a> ou au +33 9 77 19 50 70<br><br>Retrouvez nos autres modules sur <a href="http://www.dolistore.com/search.php?orderby=position&orderway=desc&search_query=atm&submit_search=Rechercher" target="_blank">Dolistore</a>
@@ -37,6 +39,7 @@ subtotal_add_title_bloc_from_orderstoinvoice=Ajouter un bloc titre et sous-total
 SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK=L'ajout sous un titre se fera en fin de section 
 SUBTOTAL_TITLE_STYLE=Style des titres (B = gras, U = souligné, I = italique)
 SUBTOTAL_SUBTOTAL_STYLE=Style des sous-totaux (B = gras, U = souligné, I = italique)
+SUBTOTAL_SUBTOTAL_HIDE_BACKGROUND=Désactiver l'utilisation d'une couleur de fond (surlignage) pour les sous-totaux
 SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES=Avoir une seule ligne de titre + total si l'option "%s" est utilisée (expérimental)
 SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES=Remplacer par le détail des TVA si l'option "%s" est utilisée (expérimental)
 SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED=Par defaut, cocher la case "Cacher le prix des lignes des ensembles" lors de la génération des PDF

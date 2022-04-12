@@ -43,7 +43,8 @@ class modSubtotal extends DolibarrModules
 
         $this->db = $db;
 
-		$this->editor_name = 'ATM Consulting';
+        $this->editor_name = '<b>InfraS - sylvain Legrand</b>';
+        $this->editor_url = 'https://www.infras.fr';
         // Id for module (must be unique).
         // Use a free id here
         // (See in Home -> System information -> Dolibarr for list of used modules id).
@@ -53,7 +54,9 @@ class modSubtotal extends DolibarrModules
 
         // Family can be 'crm','financial','hr','projects','products','ecm','technic','other'
         // It is used to group modules in module setup page
-        $this->family = "ATM Consulting - Autre";
+        $family					= !empty($conf->global->EASYA_VERSION) ? 'easya' : 'Modules InfraS';
+        $this->family			= $family;											// used to group modules in module setup page
+        $this->familyinfo		= array($family => array('position' => '001', 'label' => $langs->trans($family)));
         // Module label (no space allowed)
         // used if translation string 'ModuleXXXName' not found
         // (where XXX is value of numeric property 'numero' of module)
@@ -64,7 +67,7 @@ class modSubtotal extends DolibarrModules
         $this->description = "Module permettant l'ajout de sous-totaux et sous-totaux intermédiaires et le déplacement d'une ligne aisée de l'un dans l'autre";
         // Possible values for version are: 'development', 'experimental' or version
 
-        $this->version = '3.12.0';
+        $this->version = '3.12.0 - InfraS';
 
         // Key used in llx_const table to save module status enabled/disabled
         // (where MYMODULE is value of property name of module in uppercase)
@@ -94,7 +97,7 @@ class modSubtotal extends DolibarrModules
             // Set this to 1 if module has its own barcode directory
             //'barcode' => 0,
             // Set this to 1 if module has its own models directory
-            'models' => 1,
+            //'models' => 1,
             // Set this to relative path of css if module has its own css file
             //'css' => '/titre/css/mycss.css.php',
             // Set here all hooks context managed by module

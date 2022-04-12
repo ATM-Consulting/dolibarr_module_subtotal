@@ -948,7 +948,7 @@ class TSubtotal {
 	 * @param array $parameters assoc array; keys: 'object' (CommonObject), 'file' (string), 'outputlangs' (Translate)
 	 * @param null  $origin_pdf unused [lines that used it are commented out]
 	 */
-	public static function addRecapPage(&$parameters, &$origin_pdf)
+	public static function addRecapPage(&$parameters, &$origin_pdf, $fromInfraS = 0)	// InfraS change
 	{
 		global $user,$conf,$langs;
 
@@ -1192,8 +1192,8 @@ class TSubtotal {
 		$pdf->Close();
 		$pdf->Output($file,'F');
 
-		$pagecount = self::concat($outputlangs, array($origin_file, $file), $origin_file);
-
+		if (empty($fromInfraS))		$pagecount = self::concat($outputlangs, array($origin_file, $file), $origin_file);	// InfraS change
+		if (!empty($fromInfraS))	return $file;	// InfraS add
 		if (empty($conf->global->SUBTOTAL_KEEP_RECAP_FILE)) unlink($file);
 	}
 
