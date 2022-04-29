@@ -1659,6 +1659,42 @@ class ActionsSubtotal
 
 		if($this->isModSubtotalLine($parameters,$object) ){
 
+			// InfraS add begin
+			if (!empty($parameters['infrasplus'])) {
+				if(is_array($parameters)) $i = & $parameters['i'];
+				else $i = (int)$parameters;
+				$hidePriceOnSubtotalLines = $object->element == 'shipping' || $object->element == 'delivery' ? 1 : GETPOST('hide_price_on_subtotal_lines', 'int');
+				if (!$hidePriceOnSubtotalLines) {
+					$total_to_print = price($object->lines[$i]->total_ttc);
+					if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS)) {
+						$TTitle = TSubtotal::getAllTitleFromLine($object->lines[$i]);
+						foreach ($TTitle as &$line_title) {
+							if (!empty($line_title->array_options['options_subtotal_nc'])) {
+								$total_to_print = ''; // TODO Gestion "Compris/Non compris", voir si on affiche une annotation du genre "NC"
+								break;
+							}
+						}
+					}
+					if($total_to_print !== '') {
+						if (GETPOST('hideInnerLines', 'int')) {
+							// Dans le cas des lignes cachés, le calcul est déjà fait dans la méthode beforePDFCreation et les lignes de sous-totaux sont déjà renseignés
+						}
+						else {
+							dol_include_once('/infraspackplus/core/lib/infraspackplus.pdf.lib.php');
+							$TInfo							= $this->getTotalLineFromObject($object, $object->lines[$i], '', 1);
+							$TTotal_tva						= $TInfo[3];
+							$total_to_print					= pdf_InfraSPlus_price($object, $TInfo[2], $pdf->outputlangs);
+							$object->lines[$i]->total		= $TInfo[0];
+							$object->lines[$i]->total_ht	= $TInfo[0];
+							$object->lines[$i]->total_tva	= !TSubtotal::isModSubtotalLine($line) ? $TInfo[1] : $object->lines[$i]->total_tva;
+							$object->lines[$i]->total_ttc	= $TInfo[2];
+						}
+					}
+					$this->resprints	= !empty($total_to_print) ? $total_to_print : ' ';
+					return 1;
+				}
+			}
+			// InfraS add end
 			$this->resprints = ' ';
 
 			if((float)DOL_VERSION<=3.6) {
