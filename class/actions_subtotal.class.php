@@ -3460,7 +3460,8 @@ class ActionsSubtotal
 									table_element_line: "<?php echo $table_element_line; ?>",
 									fk_element: "<?php echo $fk_element; ?>",
 									element_id: "<?php echo $id; ?>",
-									filepath: "<?php echo urlencode($filepath); ?>"
+									filepath: "<?php echo urlencode($filepath); ?>",
+									token: "<?php echo currentToken(); ?>"
 								},
 			    	            type: 'POST',
 			    	            url: '<?php echo DOL_URL_ROOT; ?>/core/ajax/row.php',
