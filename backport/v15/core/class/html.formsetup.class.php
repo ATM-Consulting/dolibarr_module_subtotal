@@ -15,7 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-if(versioncompare(explode('.' , DOL_VERSION), array(16)) < 0 && !class_exists('FormSetup')){
+//
+if(!class_exists('FormSetup')){
 
 	/**
 	 * This class help you create setup render

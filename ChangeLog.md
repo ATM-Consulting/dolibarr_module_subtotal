@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 # [Unreleased]
+
+- NEW : Refonte page setup avec class setup de Dolibarr V15 *11/05/2022* 3.14.0
 - NEW : Ajout de la class TechATM pour l'affichage de la page "A propos" *10/05/2022* 3.13.0
 
 ## Version 3.12
