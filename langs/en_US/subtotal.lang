@@ -70,3 +70,6 @@ subtotalLabelForFreeText=Pre-existing text:
 subtotalFreeTextOrDesc=or write a custom description
 AmountBeforeTaxesSubjectToVATX%=Amount before taxes subject to %s (%s %%)
 addLineTitle_in_order_shippable=Add the Title, total, free lines to shippable orders (it will be necessary to remove the subtotal lines by hand if the need arises)
+SubtotalSetup = Setup for sub total
+SubTotalSetupPage = Setup for sub total
+Experimental = Expérimental

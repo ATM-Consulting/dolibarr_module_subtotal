@@ -87,6 +87,7 @@ SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT=La gestion des non-compris vide aussi le prix d
 SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT_info=Attention, si vous rendez de nouveau la ligne comprise, il faudra de nouveau saisir le prix de revient
 addLineTitle_in_order_shippable=Ajouter les lignes Titre , total , libre aux commandes expédiables (il faudra supprimer les lignes de sous-total à la main si le besoin s'en fait sentir )
 addLineTitle_in_order_shippable_TITLE=Paramétrage de l'option gestion des lignes  du module subTotal pour les commandes expédiables
+SUBTOTAL_SHIPPABLE_ORDER = Paramétrage de l'option gestion des lignes  du module subTotal pour les commandes expédiables
 
 CloneLSubtotalBlock = Cloner le bloc titre/sous-total
 
@@ -103,3 +104,17 @@ SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET = Champs complémentaires disponible sur 
 SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET = Champs complémentaires disponible sur les titres dans les commandes clients
 SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET = Champs complémentaires disponible sur les titres dans les factures clients
 CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL = Sur les lignes de sous total des PDF, ajouter le libellé du titre auquel cette dernière est rattaché.
+
+SubtotalSetup = Paramettre module sous total
+SubTotalSetupPage = Paramettre module sous total
+EXPERIMENTAL=EXPERIMENTAL
+ManageNonCompris = Gestion des "Non compris"
+SetupForExtrafields = Paramètres liés aux champs complémentaires
+SetupForSubBlocs = Paramètrage de l'option "Cacher le prix des lignes des ensembles"
+SUBTOTAL_HIDE_DOCUMENT_TOTAL = Masquer les totaux
+SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY = Afficher la quantité sur les lignes de produit
+
+
+# Spé clients à delete
+SUBTOTAL_SHOW_QTY_ON_TITLES = Afficher la quantité sur les lignes de sous-total (uniquement dans le cas d'un produit virtuel ajouté)
+SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES =  Masquer uniquement les prix pour les produits se trouvant dans un ensemble
