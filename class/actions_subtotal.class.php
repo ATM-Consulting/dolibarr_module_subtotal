@@ -2567,7 +2567,7 @@ class ActionsSubtotal
 			if(!empty($conf->margin->enabled) && !empty($user->rights->margins->creer)) $colspan++;	// InfraS add
 			if(!empty($conf->margin->enabled) && !empty($conf->global->DISPLAY_MARGIN_RATES) && $user->rights->margins->liretous)	$colspan++;	// InfraS change
 			if(!empty($conf->margin->enabled) && !empty($conf->global->DISPLAY_MARK_RATES) && $user->rights->margins->liretous)	$colspan++;	// InfraS change
-			if($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION) $colspan++;
+			if($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION) $colspan += 2;	// InfraS change
 			if(!empty($conf->global->PRODUCT_USE_UNITS)) $colspan++;
 			// Compatibility module showprice
 			if(!empty($conf->showprice->enabled)) $colspan++;
@@ -3630,7 +3630,8 @@ class ActionsSubtotal
 									table_element_line: "<?php echo $table_element_line; ?>",
 									fk_element: "<?php echo $fk_element; ?>",
 									element_id: "<?php echo $id; ?>",
-									filepath: "<?php echo urlencode($filepath); ?>"
+									filepath: "<?php echo urlencode($filepath); ?>",
+									token: "<?php echo currentToken(); ?>"
 								},
 			    	            type: 'POST',
 			    	            url: '<?php echo DOL_URL_ROOT; ?>/core/ajax/row.php',
