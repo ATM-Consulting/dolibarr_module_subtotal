@@ -2,9 +2,17 @@
 All notable changes to this project will be documented in this file.
 
 # [Unreleased]
+- NEW : Ajout de la class TechATM pour l'affichage de la page "A propos" *10/05/2022* 3.13.0
 
+## Version 3.12
+- NEW : Add total_ht on originproductline tpl if available + add class td identification + add data-id tr identification *07/04/2022* - 3.12.0
 
 ## Version 3.11
+
+- FIX : colspan 4 to 5 to fix view of propal and bill *07/04/2022* - 3.11.8
+- FIX : title and subtotal padding *30/03/2022* - 3.11.7
+- FIX : title and text offset position *29/03/2022* - 3.11.6
+- FIX : background Color position *17/03/2022* - 3.11.5
 - FIX : remove useless retrocompatibility file and change module min compatibility version to Dolibarr 7.0 and PHP 5.4  *08/03/2022* - 3.11.4
 - FIX : all table class oddeven *08/03/2022* - 3.11.3
 - FIX : Module logo and setup table class *07/03/2022* - 3.11.2
