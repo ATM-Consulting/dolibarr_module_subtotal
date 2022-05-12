@@ -110,7 +110,7 @@ SubTotalSetupPage = Paramettre module sous total
 EXPERIMENTAL=EXPERIMENTAL
 ManageNonCompris = Gestion des "Non compris"
 SetupForExtrafields = Paramètres liés aux champs complémentaires
-SetupForSubBlocs = Paramètrage de l'option "Cacher le prix des lignes des ensembles"
+SetupForSubBlocs = Paramétrage de l'option "Cacher le prix des lignes des ensembles"
 SUBTOTAL_HIDE_DOCUMENT_TOTAL = Masquer les totaux
 SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY = Afficher la quantité sur les lignes de produit
 
