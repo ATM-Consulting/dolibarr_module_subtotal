@@ -257,9 +257,6 @@ $formSetup->newItem('RecapGeneration')->setAsTitle();
 // Conserver le PDF de récapitulation après la fusion
 $formSetup->newItem('SUBTOTAL_KEEP_RECAP_FILE')->setAsYesNo();
 
-// Activer la génération du récapitulatif sur les propositions commerciales
-$formSetup->newItem('SUBTOTAL_PROPAL_ADD_RECAP')->setAsYesNo();
-
 // Activer la génération du récapitulatif sur les commandes
 $formSetup->newItem('SUBTOTAL_COMMANDE_ADD_RECAP')->setAsYesNo();
 
@@ -299,7 +296,7 @@ if ($conf->clilacevenements->enabled) {
  * ZONE EXPERIMENTAL
  */
 
-$formSetup->newItem('Experimental')->setAsTitle();
+$formSetup->newItem('SubtotalExperimentalZone')->setAsTitle();
 
 // Avoir une seule ligne de titre + total si l'option "Cacher le détail des ensembles" est utilisée (expérimental)
 $item = $formSetup->newItem('SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES');
@@ -311,6 +308,8 @@ $item = $formSetup->newItem('SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES');
 $item->setAsYesNo();
 $item->nameText = $langs->trans("SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES", $langs->transnoentitiesnoconv('HideInnerLines'));
 
+// Activer la génération du récapitulatif sur les propositions commerciales
+$formSetup->newItem('SUBTOTAL_PROPAL_ADD_RECAP')->setAsYesNo();
 
 
 
