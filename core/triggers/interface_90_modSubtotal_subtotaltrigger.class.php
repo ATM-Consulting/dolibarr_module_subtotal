@@ -156,7 +156,25 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
      */
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
-        // Put here code you want to execute when a Dolibarr business events occurs.
+
+       #COMPATIBILITÉ V16
+        if ($action == 'LINEBILL_UPDATE'){
+			$action = 'LINEBILL_MODIFY';
+		}
+
+		if ($action == 'LINEORDER_UPDATE'){
+			$action == 'LINEORDER_MODIFY';
+		}
+
+		if ($action == 'LINEBILL_UPDATE'){
+			$action = 'LINEBILL_MODIFY';
+		}
+
+		if ($action == 'LINEBILL_SUPPLIER_UPDATE'){
+			$action = 'LINEBILL_SUPPLIER_MODIFY';
+		}
+
+		// Put here code you want to execute when a Dolibarr business events occurs.
         // Data and type of action are stored into $object and $action
         // Users
         dol_include_once('/subtotal/class/subtotal.class.php');
@@ -320,7 +338,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 
 		}
 
-		if ($action == 'LINEBILL_UPDATE')
+		if ($action == 'LINEBILL_UPDATE' || 'LINEBILL_MODIFY')
 		{
 			if (GETPOST('all_progress', 'none') && TSubtotal::isModSubtotalLine($object))
 			{
@@ -329,7 +347,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 			}
 		}
 
-		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($action, array('LINEPROPAL_INSERT', 'LINEPROPAL_UPDATE', 'LINEORDER_INSERT', 'LINEORDER_UPDATE', 'LINEBILL_INSERT', 'LINEBILL_UPDATE', 'LINEBILL_SUPPLIER_CREATE', 'LINEBILL_SUPPLIER_UPDATE')))
+		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($action, array('LINEPROPAL_INSERT', 'LINEPROPAL_UPDATE','LINEPROPAL_MODIFY', 'LINEORDER_INSERT', 'LINEORDER_UPDATE','LINEORDER_MODIFY', 'LINEBILL_INSERT', 'LINEBILL_UPDATE','LINEBILL_MODIFY', 'LINEBILL_SUPPLIER_CREATE', 'LINEBILL_SUPPLIER_UPDATE','LINEBILL_SUPPLIER_MODIFY')))
 		{
             if(! function_exists('_updateLineNC')) dol_include_once('/subtotal/lib/subtotal.lib.php');
 
