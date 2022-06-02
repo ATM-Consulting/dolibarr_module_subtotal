@@ -35,7 +35,7 @@ if (! $res) {
 require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
 require_once '../lib/subtotal.lib.php';
 // backport
-require_once '../backport/v12/core/lib/fonctions.lib.php';
+
 
 $langs->load("subtotal@subtotal");
 
@@ -105,7 +105,7 @@ dol_fiche_head(
     -1,
     "subtotal@subtotal"
 );
-$nt = newToken();
+$nt = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 $html=new Form($db);
 
 $var=false;
