@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 
 ## Version 3.6
+- FIX : Missing columns in invoice creation page (from order) *10/06/2022* - 3.6.8
 - FIX : addition of a conf allowing to add the subtotal line or not when creating an expedition from an order *12/07/2021* - 3.6.7 
 - FIX : Clone icon compatibility *08/06/2021* - 3.6.6
 - FIX : Uniformize module descriptor's editor, editor_url and family fields *2021-06-08* - 3.6.5
