@@ -57,7 +57,7 @@ else
 {
 
 	print '<tr class="oddeven'.(empty($this->tpl['strike'])?'':' strikefordisabled').'" '.(!empty($this->tpl['sub-tr-style']) ? 'style="'.$this->tpl['sub-tr-style'].'"' : '').'>';
-	print '<td colspan="6" '.$this->tpl['sub-td-style'].'>'.$this->tpl["sublabel"].'</td>';
+	print '<td colspan="8" '.$this->tpl['sub-td-style'].'>'.$this->tpl["sublabel"].'</td>';
 
 	if (!empty($selectedLines) && !in_array($this->tpl['id'], $selectedLines)) $selected=0;
 	print '<td class="center">';
