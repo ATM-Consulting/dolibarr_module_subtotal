@@ -99,7 +99,7 @@ class ActionsSubtotal
 		return 0;
 	}
 
-	/** Overloading the doActions function : replacing the parent's function with the one below
+	/** Overloading the formObjectOptions function : replacing the parent's function with the one below
 	 * @param      $parameters  array           meta datas of the hook (context, etc...)
 	 * @param      $object      CommonObject    the object you want to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
 	 * @param      $action      string          current action (if set). Generally create or edit or null
@@ -211,15 +211,7 @@ class ActionsSubtotal
 		}
 		elseif ((!empty($parameters['currentcontext']) && $parameters['currentcontext'] == 'orderstoinvoice') || in_array('orderstoinvoice',$contexts) || in_array('orderstoinvoicesupplier',$contexts))
 		{
-			?>
-			<script type="text/javascript">
-				$(function() {
-					var tr = $("<tr><td><?php echo $langs->trans('subtotal_add_title_bloc_from_orderstoinvoice'); ?></td><td><input type='checkbox' value='1' name='subtotal_add_title_bloc_from_orderstoinvoice' checked='checked' /></td></tr>")
-					$("textarea[name=note]").closest('tr').after(tr);
-				});
-			</script>
-			<?php
-
+			$this->_billOrdersAddCheckBoxForTitleBlocks();
 		}
 
 		return 0;
@@ -404,14 +396,14 @@ class ActionsSubtotal
 		global $conf, $langs, $bc;
 
 		$action = GETPOST('action', 'none');
-		$TContext = explode(':',$parameters['context']);
+		$contextArray = explode(':',$parameters['context']);
 		if (
-				in_array('invoicecard',$TContext)
-		        || in_array('invoicesuppliercard',$TContext)
-				|| in_array('propalcard',$TContext)
-				|| in_array('ordercard',$TContext)
-		        || in_array('ordersuppliercard',$TContext)
-				|| in_array('invoicereccard',$TContext)
+				in_array('invoicecard',$contextArray)
+		        || in_array('invoicesuppliercard',$contextArray)
+				|| in_array('propalcard',$contextArray)
+				|| in_array('ordercard',$contextArray)
+		        || in_array('ordersuppliercard',$contextArray)
+				|| in_array('invoicereccard',$contextArray)
 			)
 	        {
 	            $hideInnerLines	= isset( $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']][$object->id] ) ?  $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']][$object->id] : 0;
@@ -447,12 +439,12 @@ class ActionsSubtotal
 
 
 				if (
-					(in_array('propalcard',$TContext) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
-					|| (in_array('ordercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
-				    || (in_array('ordersuppliercard',$TContext) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
-					|| (in_array('invoicecard',$TContext) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
-				    || (in_array('invoicesuppliercard',$TContext) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
-					|| (in_array('invoicereccard',$TContext)  && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP ))
+					(in_array('propalcard',             $contextArray) && !empty($conf->global->SUBTOTAL_PROPAL_ADD_RECAP))
+					|| (in_array('ordercard',           $contextArray) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
+				    || (in_array('ordersuppliercard',   $contextArray) && !empty($conf->global->SUBTOTAL_COMMANDE_ADD_RECAP))
+					|| (in_array('invoicecard',         $contextArray) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
+				    || (in_array('invoicesuppliercard', $contextArray) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP))
+					|| (in_array('invoicereccard',      $contextArray) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP ))
 				)
 				{
 					$var=!$var;
@@ -536,15 +528,16 @@ class ActionsSubtotal
 	}
 
 	function createFrom($parameters, &$object, $action, $hookmanager) {
-
+		$contextArray = array();
+		if (!empty($parameters['context'])) $contextArray = explode(':', $parameters['context']);
 		if (
-				in_array('invoicecard',explode(':',$parameters['context']))
-		        || in_array('invoicesuppliercard',explode(':',$parameters['context']))
-				|| in_array('propalcard',explode(':',$parameters['context']))
-		        || in_array('supplier_proposalcard',explode(':',$parameters['context']))
-				|| in_array('ordercard',explode(':',$parameters['context']))
-		        || in_array('ordersuppliercard',explode(':',$parameters['context']))
-				|| in_array('invoicereccard',explode(':',$parameters['context']))
+				in_array('invoicecard',              $contextArray)
+		        || in_array('invoicesuppliercard',   $contextArray)
+				|| in_array('propalcard',            $contextArray)
+		        || in_array('supplier_proposalcard', $contextArray)
+				|| in_array('ordercard',             $contextArray)
+		        || in_array('ordersuppliercard',     $contextArray)
+				|| in_array('invoicereccard',        $contextArray)
 		) {
 
 			global $db;
@@ -579,9 +572,18 @@ class ActionsSubtotal
 		return 0;
 	}
 
+	/**
+	 * @param array $parameters
+	 * @param CommonObject $object
+	 * @param string $action
+	 * @param HookManager $hookmanager
+	 * @return int|void
+	 */
 	function doActions($parameters, &$object, $action, $hookmanager)
 	{
 		global $db, $conf, $langs,$user;
+		$contextArray = array();
+		if (isset($parameters['context'])) $contextArray = explode(':', $parameters['context']);
 
 		dol_include_once('/subtotal/class/subtotal.class.php');
 		dol_include_once('/subtotal/lib/subtotal.lib.php');
@@ -624,40 +626,40 @@ class ActionsSubtotal
 		else if($action === 'builddoc') {
 
 			if (
-				in_array('invoicecard',explode(':',$parameters['context']))
-				|| in_array('propalcard',explode(':',$parameters['context']))
-				|| in_array('ordercard',explode(':',$parameters['context']))
-			    || in_array('ordersuppliercard',explode(':',$parameters['context']))
-			    || in_array('invoicesuppliercard',explode(':',$parameters['context']))
-			    || in_array('supplier_proposalcard',explode(':',$parameters['context']))
+				in_array('invoicecard',              $contextArray)
+				|| in_array('propalcard',            $contextArray)
+				|| in_array('ordercard',             $contextArray)
+			    || in_array('ordersuppliercard',     $contextArray)
+			    || in_array('invoicesuppliercard',   $contextArray)
+			    || in_array('supplier_proposalcard', $contextArray)
 			)
 	        {
-				if(in_array('invoicecard',explode(':',$parameters['context']))) {
+				if(in_array('invoicecard',$contextArray)) {
 					$sessname = 'subtotal_hideInnerLines_facture';
 					$sessname2 = 'subtotal_hidedetails_facture';
 					$sessname3 = 'subtotal_hideprices_facture';
 				}
-				elseif(in_array('invoicesuppliercard',explode(':',$parameters['context']))) {
+				elseif(in_array('invoicesuppliercard',$contextArray)) {
 				    $sessname = 'subtotal_hideInnerLines_facture_fournisseur';
 				    $sessname2 = 'subtotal_hidedetails_facture_fournisseur';
 				    $sessname3 = 'subtotal_hideprices_facture_fournisseur';
 				}
-				elseif(in_array('propalcard',explode(':',$parameters['context']))) {
+				elseif(in_array('propalcard',$contextArray)) {
 					$sessname = 'subtotal_hideInnerLines_propal';
 					$sessname2 = 'subtotal_hidedetails_propal';
 					$sessname3 = 'subtotal_hideprices_propal';
 				}
-				elseif(in_array('supplier_proposalcard',explode(':',$parameters['context']))) {
+				elseif(in_array('supplier_proposalcard',$contextArray)) {
 				    $sessname = 'subtotal_hideInnerLines_supplier_proposal';
 				    $sessname2 = 'subtotal_hidedetails_supplier_proposal';
 				    $sessname3 = 'subtotal_hideprices_supplier_proposal';
 				}
-				elseif(in_array('ordercard',explode(':',$parameters['context']))) {
+				elseif(in_array('ordercard',$contextArray)) {
 					$sessname = 'subtotal_hideInnerLines_commande';
 					$sessname2 = 'subtotal_hidedetails_commande';
 					$sessname3 = 'subtotal_hideprices_commande';
 				}
-				elseif(in_array('ordersuppliercard',explode(':',$parameters['context']))) {
+				elseif(in_array('ordersuppliercard',$contextArray)) {
 				    $sessname = 'subtotal_hideInnerLines_commande_fournisseur';
 				    $sessname2 = 'subtotal_hidedetails_commande_fournisseur';
 				    $sessname3 = 'subtotal_hideprices_commande_fournisseur';
@@ -775,6 +777,13 @@ class ActionsSubtotal
 			exit;
 		}
 
+		elseif ((!empty($parameters['currentcontext']) && $parameters['currentcontext'] == 'orderstoinvoice')
+				|| in_array('orderstoinvoice',         $contextArray)
+				|| in_array('orderstoinvoicesupplier', $contextArray)
+				|| in_array('orderlist',               $contextArray)
+		) {
+			$this->_billOrdersAddCheckBoxForTitleBlocks();
+		}
 		return 0;
 	}
 
@@ -1644,13 +1653,25 @@ class ActionsSubtotal
 		return $resArray;
 	}
 
-	// TODO ne gère pas encore la numération des lignes "Totaux"
+	/**
+	 * TODO ne gère pas encore la numération des lignes "Totaux"
+	 * @param CommonObjectLine[] $TLineTitle
+	 * @param string             $line_reference
+	 * @param int                $level
+	 * @param int                $prefix_num
+	 * @return array
+	 */
 	private function formatNumerotation(&$TLineTitle, $line_reference='', $level=1, $prefix_num=0)
 	{
 		$TTitle = array();
 
 		$i=1;
 		$j=0;
+		$TLineElementsWithoutLabel = array(
+			// liste de lignes n'utilisant pas le champ `label` mais le champ `description` (`desc`)
+			'facture_fourn_det',
+			'commande_fournisseurdet',
+		);
 		foreach ($TLineTitle as $k => &$line)
 		{
 			if (!empty($line_reference) && $line->rang <= $line_reference->rang) continue;
@@ -1660,8 +1681,10 @@ class ActionsSubtotal
 			{
 				$TTitle[$j]['numerotation'] = ($prefix_num == 0) ? $i : $prefix_num.'.'.$i;
 				//var_dump('Prefix == '.$prefix_num.' // '.$line->desc.' ==> numerotation == '.$TTitle[$j]['numerotation'].'   ###    '.$line->qty .'=='. $level);
-				if (empty($line->label) && (float)DOL_VERSION < 6)
-				{
+				if (empty($line->label) && (
+					(float)DOL_VERSION < 6 || in_array($line->element, $TLineElementsWithoutLabel)
+					)
+				) {
 					$line->label = !empty($line->desc) ? $line->desc : $line->description;
 					$line->desc = $line->description = '';
 				}
@@ -3330,5 +3353,32 @@ class ActionsSubtotal
 		$parameters['object']->subtotalPdfModelInfo->defaultTitlesFieldsStyle = $pdfDoc->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
 		$parameters['object']->subtotalPdfModelInfo->defaultContentsFieldsStyle = $pdfDoc->subtotalPdfModelInfo->defaultContentsFieldsStyle;
 
+	}
+
+	/**
+	 * Add a checkbox on the bill orders forms (either the old orderstoinvoice or the new mass
+	 * action) to create a title block per invoiced order when creating one invoice per client.
+	 */
+	private function _billOrdersAddCheckBoxForTitleBlocks()
+	{
+		global $delayedhtmlcontent, $langs;
+		ob_start();
+		?>
+			<script type="text/javascript">
+				$(function() {
+					var tr = $("<tr><td><?php echo $langs->trans('subtotal_add_title_bloc_from_orderstoinvoice'); ?></td><td><input type='checkbox' value='1' name='subtotal_add_title_bloc_from_orderstoinvoice' checked='checked' /></td></tr>");
+					var $noteTextArea = $("textarea[name=note]");
+					if ($noteTextArea.length === 1) {
+						$noteTextArea.closest('tr').after(tr);
+						return;
+					}
+					var $inpCreateBills = $("#validate_invoices");
+					if ($inpCreateBills.length === 1) {
+						$inpCreateBills.closest('tr').after(tr);
+					}
+				});
+			</script>
+		<?php
+		$delayedhtmlcontent .= ob_get_clean();
 	}
 }
