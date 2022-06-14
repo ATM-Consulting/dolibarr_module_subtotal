@@ -2925,6 +2925,7 @@ class ActionsSubtotal
 
 			}
 
+
 			$object->printOriginLine($line, '', $restrictlist, '/core/tpl', $selectedLines);
 
 			unset($object->tpl["sublabel"]);
