@@ -58,8 +58,11 @@ if ($this->tpl['subtotal'] != $this->tpl['id'] || !in_array($this->tpl['sub-type
 else
 {
 
+    $colspan = 6;
+    if($conf->multicurrency->enabled) $colspan++;
+    if($conf->global->PRODUCT_USE_UNITS) $colspan++;
 	print '<tr class="oddeven'.(empty($this->tpl['strike'])?'':' strikefordisabled').'" '.(!empty($this->tpl['sub-tr-style']) ? 'style="'.$this->tpl['sub-tr-style'].'"' : '').'>';
-	print '<td colspan="6" '.$this->tpl['sub-td-style'].'>'.$this->tpl["sublabel"].'</td>';
+	print '<td colspan="'.$colspan.'" '.$this->tpl['sub-td-style'].'>'.$this->tpl["sublabel"].'</td>';
 
 	if (!empty($selectedLines) && !in_array($this->tpl['id'], $selectedLines)) $selected=0;
 	print '<td class="center">';
