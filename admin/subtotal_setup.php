@@ -92,8 +92,8 @@ if (preg_match('/set_(.*)/',$action,$reg))
 
 
 llxHeader('','Gestion de sous-total, à propos','');
-
-$linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToModuleList").'</a>';
+$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
+$linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php?token='.$newToken.'">'.$langs->trans("BackToModuleList").'</a>';
 print_fiche_titre('Gestion de subtotal',$linkback,'setup');
 
 // Configuration header
