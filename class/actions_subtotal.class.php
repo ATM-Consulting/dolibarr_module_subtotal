@@ -2180,6 +2180,7 @@ class ActionsSubtotal
 				if($line->qty>90) {
 					if ($conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL)	$label .= ' '.$this->getTitle($object, $line);
 
+                    $pdf->startTransaction();
 					$pageBefore = $pdf->getPage();
 					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 					$pageAfter = $pdf->getPage();
@@ -2193,6 +2194,10 @@ class ActionsSubtotal
 						$posy = $pdf->GetY();
 						//print 'add ST'.$pdf->getPage().'<br />';
 					}
+                    else	// No pagebreak
+                    {
+                        $pdf->commitTransaction();
+                    }
 
 					// On delivery PDF, we don't want quantities to appear and there are no hooks => setting text color to background color;
 					if($object->element == 'delivery')
@@ -3164,6 +3169,7 @@ class ActionsSubtotal
 				}
 
 			}
+
 
 			$object->printOriginLine($line, '', $restrictlist, '/core/tpl', $selectedLines);
 
