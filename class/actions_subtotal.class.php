@@ -2223,10 +2223,26 @@ class ActionsSubtotal
 					return 1;
 				}
 				else if ($line->qty < 10) {
-					$pageBefore = $pdf->getPage();
 
+                    $pdf->startTransaction();
+					$pageBefore = $pdf->getPage();
 					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 					$pageAfter = $pdf->getPage();
+
+                    if($pageAfter>$pageBefore) {
+                        //print "ST $pageAfter>$pageBefore<br>";
+                        $pdf->rollbackTransaction(true);
+                        $pdf->addPage('', '', true);
+                        $posy = $pdf->GetY();
+                        $this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
+                        $posy = $pdf->GetY();
+                        //print 'add ST'.$pdf->getPage().'<br />';
+                    }
+                    else    // No pagebreak
+                    {
+                        $pdf->commitTransaction();
+                    }
+
 
 					if($object->element == 'delivery')
 					{
@@ -2241,7 +2257,25 @@ class ActionsSubtotal
 
 					$labelproductservice = preg_replace('/(<img[^>]*src=")([^"]*)(&amp;)([^"]*")/', '\1\2&\4', $labelproductservice, -1, $nbrep);
 
-					$pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+                    $pdf->startTransaction();
+                    $pageBefore = $pdf->getPage();
+                    $pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+                    $pageAfter = $pdf->getPage();
+
+                    if($pageAfter>$pageBefore) {
+                        //print "ST $pageAfter>$pageBefore<br>";
+                        $pdf->rollbackTransaction(true);
+                        $pdf->addPage('', '', true);
+                        $posy = $pdf->GetY();
+                        $pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+                        $posy = $pdf->GetY();
+                        //print 'add ST'.$pdf->getPage().'<br />';
+
+                    }
+                    else    // No pagebreak
+                    {
+                        $pdf->commitTransaction();
+                    }
 
 					return 1;
 				}
