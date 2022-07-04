@@ -32,19 +32,21 @@ $selected=1;
 
 if ($this->tpl['subtotal'] != $this->tpl['id'] || !in_array($this->tpl['sub-type'], array('title', 'total')))
 {
-	print '<tr class="oddeven'.(empty($this->tpl['strike'])?'':' strikefordisabled').'">';
-	print '<td>'.$this->tpl['label'].'</td>';
-	print '<td>'.$this->tpl['description'].'</td>';
-	print '<td class="right">'.$this->tpl['vat_rate'].'</td>';
-	print '<td class="right">'.$this->tpl['price'].'</td>';
+	print '<tr data-id="'.$this->tpl['id'].'" class="oddeven'.(empty($this->tpl['strike'])?'':' strikefordisabled').'">';
+	print '<td class="linecolref">'.$this->tpl['label'].'</td>';
+	print '<td class="linecoldescription">'.$this->tpl['description'].'</td>';
+	print '<td class="linecolvat right">'.$this->tpl['vat_rate'].'</td>';
+	print '<td class="linecoluht right">'.$this->tpl['price'].'</td>';
 	if (!empty($conf->multicurrency->enabled))
-		print '<td class="right">'.$this->tpl['multicurrency_price'].'</td>';
+		print '<td class="linecoluht_currency right">'.$this->tpl['multicurrency_price'].'</td>';
 
-	print '<td class="right">'.$this->tpl['qty'].'</td>';
+	print '<td class="linecolqty right">'.$this->tpl['qty'].'</td>';
 	if($conf->global->PRODUCT_USE_UNITS)
-		print '<td class="left">'.$langs->trans($this->tpl['unit']).'</td>';
+		print '<td class="linecoluseunit left">'.$langs->trans($this->tpl['unit']).'</td>';
 
-	print '<td class="right">'.$this->tpl['remise_percent'].'</td>';
+	print '<td class="linecoldiscount right">'.$this->tpl['remise_percent'].'</td>';
+	// La colonne Total HT ne sera disponible qu'en 16.0, du coup tant qu'il n'y a pas de données, inutile d'afficher la td car elle n'aura pas de titre de colonne ni de valeur
+	if(!empty($this->tpl['total_ht'])) print '<td class="right">'.$this->tpl['total_ht'].'</td>';
 
 
 	if (!empty($selectedLines) && !in_array($this->tpl['id'], $selectedLines)) $selected=0;
@@ -56,8 +58,11 @@ if ($this->tpl['subtotal'] != $this->tpl['id'] || !in_array($this->tpl['sub-type
 else
 {
 
+    $colspan = 6;
+    if($conf->multicurrency->enabled) $colspan++;
+    if($conf->global->PRODUCT_USE_UNITS) $colspan++;
 	print '<tr class="oddeven'.(empty($this->tpl['strike'])?'':' strikefordisabled').'" '.(!empty($this->tpl['sub-tr-style']) ? 'style="'.$this->tpl['sub-tr-style'].'"' : '').'>';
-	print '<td colspan="6" '.$this->tpl['sub-td-style'].'>'.$this->tpl["sublabel"].'</td>';
+	print '<td colspan="'.$colspan.'" '.$this->tpl['sub-td-style'].'>'.$this->tpl["sublabel"].'</td>';
 
 	if (!empty($selectedLines) && !in_array($this->tpl['id'], $selectedLines)) $selected=0;
 	print '<td class="center">';

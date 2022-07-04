@@ -1,6 +1,8 @@
 <?php
 
 dol_include_once('/subtotal/class/subtotal.class.php');
+require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
 
 class ActionsSubtotal
 {
@@ -236,9 +238,22 @@ class ActionsSubtotal
 	{
 		if (empty($conf->global->SUBTOTAL_ALLOW_ADD_BLOCK)) return false;
 		if ($line->fk_prev_id != null && !empty($line->fk_prev_id)) return false; // Si facture de situation
+
+		$jsData = array(
+			'conf' => array(
+				'SUBTOTAL_USE_NEW_FORMAT' => !empty($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+			),
+			'langs' => array(
+				'Level' => $langs->trans('Level')
+			)
+		);
+
 		?>
+			<!-- SubTotal action printNewFormat -->
 		 	<script type="text/javascript">
 				$(document).ready(function() {
+					let jsSubTotalData = <?php print json_encode($jsData); ?>;
+
 					$('div.fiche div.tabsAction').append('<br />');
 
 					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" rel="add_title_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddTitle' )?></a></div>');
@@ -280,12 +295,17 @@ class ActionsSubtotal
 						{
 							if (action == 'addSubtotal') dialog_html += '<input id="sub-total-title" size="30" value="" placeholder="'+label+'" />';
 
-							dialog_html += "&nbsp;<select name='subtotal_line_level'>";
-							for (var i=1;i<10;i++)
-							{
-								dialog_html += "<option value="+i+"><?php echo $langs->trans('Level'); ?> "+i+"</option>";
+							if(jsSubTotalData.conf.SUBTOTAL_USE_NEW_FORMAT){
+								dialog_html += '&nbsp;<select name="subtotal_line_level">';
+								for (var i=1;i<10;i++)
+								{
+									dialog_html += '<option value="'+i+'">'+ jsSubTotalData.langs.Level +' '+i+'</option>';
+								}
+								dialog_html += "</select>";
 							}
-							dialog_html += "</select>";
+							else{
+								dialog_html += '<input type="hidden" name="subtotal_line_level" value="'+i+'" />';
+							}
 						}
 
 						 dialog_html += '</div>';
@@ -428,24 +448,22 @@ class ActionsSubtotal
 
 				$var=false;
 				$out = '';
-		     	$out.= '<tr '.$bc[$var].'>
-		     			<td colspan="4" align="right">
+		     	$out.= '<tr class="oddeven">
+		     			<td colspan="5" align="right">
 		     				<label for="hideInnerLines">'.$langs->trans('HideInnerLines').'</label>
 		     				<input type="checkbox" onclick="if($(this).is(\':checked\')) { $(\'#hidedetails\').prop(\'checked\', \'checked\')  }" id="hideInnerLines" name="hideInnerLines" value="1" '.(( $hideInnerLines ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
 
-		     	$var=!$var;
-		     	$out.= '<tr '.$bc[$var].'>
-		     			<td colspan="4" align="right">
+		     	$out.= '<tr class="oddeven">
+		     			<td colspan="5" align="right">
 		     				<label for="hidedetails">'.$langs->trans('SubTotalhidedetails').'</label>
 		     				<input type="checkbox" id="hidedetails" name="hidedetails" value="1" '.(( $hidedetails ) ? 'checked="checked"' : '' ).' />
 		     			</td>
 		     			</tr>';
 
-		     	$var=!$var;
-		     	$out.= '<tr '.$bc[$var].'>
-		     			<td colspan="4" align="right">
+		     	$out.= '<tr class="oddeven">
+		     			<td colspan="5" align="right">
 		     				<label for="hideprices">'.$langs->trans('SubTotalhidePrice').'</label>
 		     				<input type="checkbox" id="hideprices" name="hideprices" value="1" '.(( $hideprices ) ? 'checked="checked"' : '' ).' />
 		     			</td>
@@ -462,9 +480,8 @@ class ActionsSubtotal
 					|| (in_array('invoicereccard',      $contextArray) && !empty($conf->global->SUBTOTAL_INVOICE_ADD_RECAP ))
 				)
 				{
-					$var=!$var;
 					$out.= '
-						<tr '.$bc[$var].'>
+						<tr class="oddeven">
 							<td colspan="4" align="right">
 								<label for="subtotal_add_recap">'.$langs->trans('subtotal_add_recap').'</label>
 								<input type="checkbox" id="subtotal_add_recap" name="subtotal_add_recap" value="1" '.( GETPOST('subtotal_add_recap', 'none') ? 'checked="checked"' : '' ).' />
@@ -956,6 +973,66 @@ class ActionsSubtotal
 	function pdf_add_total(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 		global $conf,$subtotal_last_title_posy,$langs;
 
+		$subtotalDefaultTopPadding = 1;
+		$subtotalDefaultBottomPadding = 1;
+		$subtotalDefaultLeftPadding = 0.5;
+		$subtotalDefaultRightPadding = 0.5;
+
+		$fillBackground = false;
+		if(!empty($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
+			&& function_exists('colorValidateHex')
+			&& colorValidateHex($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
+			&& function_exists('colorStringToArray')
+			&& function_exists('colorIsLight')
+		){
+			$fillBackground = true;
+
+			$backgroundCellHeightOffset = 0;
+			$backgroundCellPosYOffset = 0;
+
+			// add here special PDF compatibility modifications
+			// mais avant d'ajouter une exeption ici verifier si il ne faut pas plutôt effectuer un fix sur le PDF
+			// ex : les "Anciens PDF n'utilisent pas le padding pour les texts contrairement au "nouveaux PDF" c'est pourquoi les nouveaux PDF disposent d'un affichage mieux positionné
+
+			if(!empty($conf->global->SUBTOTAL_BACKGROUND_CELL_HEIGHT_OFFSET)){
+				$backgroundCellHeightOffset = doubleval($conf->global->SUBTOTAL_BACKGROUND_CELL_HEIGHT_OFFSET);
+			}
+			if(!empty($conf->global->SUBTOTAL_BACKGROUND_CELL_POS_Y_OFFSET)){
+				$backgroundCellPosYOffset = doubleval($conf->global->SUBTOTAL_BACKGROUND_CELL_POS_Y_OFFSET);
+			}
+
+			$backgroundColor = colorStringToArray($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR,array(233, 233, 233));
+
+			//background color
+			if (!colorIsLight($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)) {
+				$pdf->setColor('text', 255,255,255);
+			}
+		}
+
+		// POUR LES PDF DE TYPE PDF_EVOLUTION (ceux avec les colonnes configurables)
+		$pdfModelUseColSystem = !empty($object->subtotalPdfModelInfo->cols); // justilise une variable au cas ou le test evolue
+		if($pdfModelUseColSystem){
+
+			include_once __DIR__ . '/staticPdf.model.php';
+			$staticPdfModel = new ModelePDFStatic($object->db);
+			$staticPdfModel->marge_droite 	= $object->subtotalPdfModelInfo->marge_droite;
+			$staticPdfModel->marge_gauche 	= $object->subtotalPdfModelInfo->marge_gauche;
+			$staticPdfModel->page_largeur 	= $object->subtotalPdfModelInfo->page_largeur;
+			$staticPdfModel->page_hauteur 	= $object->subtotalPdfModelInfo->page_hauteur;
+			$staticPdfModel->cols 			= $object->subtotalPdfModelInfo->cols;
+			$staticPdfModel->defaultTitlesFieldsStyle 	= $object->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
+			$staticPdfModel->defaultContentsFieldsStyle = $object->subtotalPdfModelInfo->defaultContentsFieldsStyle;
+			$staticPdfModel->prepareArrayColumnField($object, $langs);
+
+			if(isset($staticPdfModel->cols['totalexcltax']['content']['padding'][0])){
+				$subtotalDefaultTopPadding = $staticPdfModel->cols['totalexcltax']['content']['padding'][0];
+			}
+			if(isset($staticPdfModel->cols['totalexcltax']['content']['padding'][2])){
+				$subtotalDefaultBottomPadding = $staticPdfModel->cols['totalexcltax']['content']['padding'][0];
+			}
+		}
+
+
 		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 		if (!empty($conf->global->SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES) && $hideInnerLines && !empty($subtotal_last_title_posy))
 		{
@@ -998,31 +1075,43 @@ class ActionsSubtotal
 
 		$pdf->SetFont('', $style, 9);
 
-		$pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'R',true);
+
+		// save curent cell padding
+		$curentCellPaddinds = $pdf->getCellPaddings();
+		// set cell padding with column content definition for old PDF compatibility
+		$pdf->setCellPaddings($curentCellPaddinds['L'],$subtotalDefaultTopPadding, $curentCellPaddinds['R'],$subtotalDefaultBottomPadding);
+
+		$pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'R', true);
+
 //		var_dump($bMargin);
 		$pageAfter = $pdf->getPage();
 
 		//Print background
 		$cell_height = $pdf->getStringHeight($w, $label);
 
-		if(!empty($object->subtotalPdfModelInfo->cols) && version_compare('11.0.0', DOL_VERSION, '>')){
-			include_once __DIR__ . '/staticPdf.model.php';
-			$staticPdfModel = new ModelePDFStatic($object->db);
-			$staticPdfModel->marge_droite 	= $object->subtotalPdfModelInfo->marge_droite;
-			$staticPdfModel->marge_gauche 	= $object->subtotalPdfModelInfo->marge_gauche;
-			$staticPdfModel->page_largeur 	= $object->subtotalPdfModelInfo->page_largeur;
-			$staticPdfModel->page_hauteur 	= $object->subtotalPdfModelInfo->page_hauteur;
-			$staticPdfModel->cols 			= $object->subtotalPdfModelInfo->cols;
-			$staticPdfModel->defaultTitlesFieldsStyle 	= $object->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
-			$staticPdfModel->defaultContentsFieldsStyle = $object->subtotalPdfModelInfo->defaultContentsFieldsStyle;
-			$staticPdfModel->prepareArrayColumnField($object, $langs);
-
-			$pdf->SetXY($object->subtotalPdfModelInfo->marge_droite, $posy);
+		// POUR LES PDF DE TYPE PDF_EVOLUTION (ceux avec les colonnes configurables)
+		if($pdfModelUseColSystem){
+			if ($fillBackground) {
+				$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
+			}
+			$pdf->SetXY($object->subtotalPdfModelInfo->marge_droite, $posy+$backgroundCellPosYOffset);
 			$pdf->MultiCell($object->subtotalPdfModelInfo->page_largeur - $object->subtotalPdfModelInfo->marge_gauche - $object->subtotalPdfModelInfo->marge_droite, $cell_height, '', 0, '', 1);
 		}
 		else{
-			$pdf->SetXY($posx, $posy);
-			$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height, '', 0, '', 1);
+			$pdf->SetXY($posx, $posy+$backgroundCellPosYOffset); //-1 to take into account the entire height of the row
+
+			//background color
+			if ($fillBackground)
+			{
+				$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
+				$pdf->SetFont('', '', 9); //remove UBI for the background
+				$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height+$backgroundCellHeightOffset, '', 0, '', 1); //+2 same of SetXY()
+				$pdf->SetXY($posx, $posy); //reset position
+				$pdf->SetFont('', $style, 9); //reset style
+			}
+			else {
+				$pdf->MultiCell($pdf->page_largeur - $pdf->marge_droite, $cell_height, '', 0, '', 1);
+			}
 		}
 
 		if (!$hidePriceOnSubtotalLines) {
@@ -1070,7 +1159,7 @@ class ActionsSubtotal
 			$pdf->SetXY($pdf->postotalht, $posy);
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
 
-			if(!empty($object->subtotalPdfModelInfo->cols) && version_compare('11.0.0', DOL_VERSION, '>')){
+			if($pdfModelUseColSystem){
 				$staticPdfModel->printStdColumnContent($pdf, $posy, 'totalexcltax', $total_to_print);
 			}
 			else{
@@ -1081,9 +1170,13 @@ class ActionsSubtotal
 			if($set_pagebreak_margin) $pdf->SetAutoPageBreak( $pageBreakOriginalValue , $bMargin);
 		}
 
+
+		// restore cell padding
+		$pdf->setCellPaddings($curentCellPaddinds['L'], $curentCellPaddinds['T'], $curentCellPaddinds['R'], $curentCellPaddinds['B']);
+
 		$posy = $posy + $cell_height;
 		$pdf->SetXY($posx, $posy);
-
+		$pdf->setColor('text', 0,0,0);
 
 	}
 
@@ -1102,43 +1195,105 @@ class ActionsSubtotal
 
 		global $db,$conf,$subtotal_last_title_posy;
 
+		// Manage background color
+		$fillDescBloc = false;
+		$fillBackground = false;
+		if(!empty($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
+			&& function_exists('colorValidateHex')
+			&& colorValidateHex($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)
+			&& function_exists('colorStringToArray')
+		) {
+			$fillBackground = true;
+			$backgroundColor = colorStringToArray($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR,array(233, 233, 233));
+
+			if(function_exists('colorIsLight') && !colorIsLight($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)){
+				$pdf->setColor('text', 255,255,255);
+			}
+
+			$backgroundCellHeightOffset = 0;
+			$backgroundCellPosYOffset = 0;
+
+			// add here special PDF compatibility modifications
+			// mais avant d'ajouter une exeption ici verifier si il ne faut pas plutôt effectuer un fix sur le PDF
+			// ex : les "Anciens PDF n'utilisent pas le padding pour les texts contrairement au "nouveaux PDF" c'est pourquoi les nouveaux PDF disposent d'un affichage mieux positionné
+
+
+			if(!empty($conf->global->SUBTOTAL_TITLE_BACKGROUND_CELL_HEIGHT_OFFSET)){
+				$backgroundCellHeightOffset = doubleval($conf->global->SUBTOTAL_TITLE_BACKGROUND_CELL_HEIGHT_OFFSET);
+			}
+
+			if(!empty($conf->global->SUBTOTAL_TITLE_BACKGROUND_CELL_POS_Y_OFFSET)){
+				$backgroundCellPosYOffset = doubleval($conf->global->SUBTOTAL_TITLE_BACKGROUND_CELL_POS_Y_OFFSET);
+			}
+		}
+
+
+//		$pdf->SetTextColor('text', 0, 0, 0);
 		$subtotal_last_title_posy = $posy;
 		$pdf->SetXY ($posx, $posy);
 
 		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 
-
-
 		$style = ($line->qty==1) ? 'BU' : 'BUI';
 		if (!empty($conf->global->SUBTOTAL_TITLE_STYLE)) $style = $conf->global->SUBTOTAL_TITLE_STYLE;
 
 		if($hideInnerLines) {
-			if($line->qty==1)$pdf->SetFont('', $style, 9);
-			else
-			{
+			if($line->qty==1){
+				$pdf->SetFont('', $style, 9);
+			}else{
 				if (!empty($conf->global->SUBTOTAL_STYLE_TITRES_SI_LIGNES_CACHEES)) $style = $conf->global->SUBTOTAL_STYLE_TITRES_SI_LIGNES_CACHEES;
 				$pdf->SetFont('', $style, 9);
 			}
 		}
 		else {
-
 			if($line->qty==1)$pdf->SetFont('', $style, 9); //TODO if super utile
 			else $pdf->SetFont('', $style, 9);
-
 		}
 
-		if ($label === strip_tags($label) && $label === dol_html_entity_decode($label, ENT_QUOTES)) $pdf->MultiCell($w, $h, $label, 0, 'L'); // Pas de HTML dans la chaine
-		else $pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, false, true, 'J',true); // et maintenant avec du HTML
+		// save curent cell padding
+		$curentCellPaddinds = $pdf->getCellPaddings();
 
+		// set cell padding with column content definition PDF
+		$pdf->setCellPaddings($curentCellPaddinds['L'],1, $curentCellPaddinds['R'],1);
+
+
+		$posYBeforeTile = $pdf->GetY();
+		if ($label === strip_tags($label) && $label === dol_html_entity_decode($label, ENT_QUOTES)) $pdf->MultiCell($w, $h, $label, 0, 'L', $fillDescBloc); // Pas de HTML dans la chaine
+		else $pdf->writeHTMLCell($w, $h, $posx, $posy, $label, 0, 1, $fillDescBloc, true, 'J',true); // et maintenant avec du HTML
+
+
+		$posYBeforeDesc = $pdf->GetY();
 		if($description && !$hidedesc) {
-			$posy = $pdf->GetY();
-
+			$pdf->setColor('text', 0,0,0);
 			$pdf->SetFont('', '', 8);
-
-			$pdf->writeHTMLCell($w, $h, $posx, $posy, $description, 0, 1, false, true, 'J',true);
-
+			$pdf->writeHTMLCell($w, $h, $posx, $posYBeforeDesc+1, $description, 0, 1, $fillDescBloc, true, 'J',true);
 		}
 
+		//background color
+		if ($fillBackground)
+		{
+			$posYAfterDesc = $pdf->GetY();
+			$cell_height = $pdf->getStringHeight($w, $label) + $backgroundCellHeightOffset;
+			$bgStartX = $posx;
+			$bgW = $pdf->page_largeur - $pdf->marge_droite;// historiquement ce sont ces valeurs, mais elles sont la plupart du temps vide
+
+			// POUR LES PDF DE TYPE PDF_EVOLUTION (ceux avec les colonnes configurables)
+			if(!empty($object->subtotalPdfModelInfo->cols) && version_compare('11.0.0', DOL_VERSION, '<')){
+				$bgStartX = $object->subtotalPdfModelInfo->marge_droite;
+				$bgW = $object->subtotalPdfModelInfo->page_largeur - $object->subtotalPdfModelInfo->marge_gauche - $object->subtotalPdfModelInfo->marge_droite;
+			}
+
+			$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
+			$pdf->SetXY($bgStartX, $posy + $backgroundCellPosYOffset); //-2 to take into account  the entire height of the row
+			$pdf->MultiCell($bgW, $cell_height, '', 0, '', 1, 1,'','',true,0, true); //+2 same of SetXY()
+			$posy = $posYAfterDesc;
+			$pdf->SetXY($posx, $posy); //reset position
+			$pdf->SetFont('', $style, 9); //reset style
+			$pdf->SetTextColor('text', 0, 0, 0); // restore default text color;
+		}
+
+		// restore cell padding
+		$pdf->setCellPaddings($curentCellPaddinds['L'], $curentCellPaddinds['T'], $curentCellPaddinds['R'], $curentCellPaddinds['B']);
 	}
 
 	function pdf_writelinedesc_ref($parameters=array(), &$object, &$action='') {
@@ -1511,13 +1666,14 @@ class ActionsSubtotal
 
             // Affichage de la remise
             if(TSubtotal::isSubtotal($line)) {
-                $parentTitle = TSubtotal::getParentTitleOfLine($object, $line->rang);
+                if ($parentTitle = TSubtotal::getParentTitleOfLine($object, $line->rang)) {
 
-                if(empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
-                if(! empty($parentTitle->array_options['options_show_reduc'])) {
-                    $TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
-                    $this->resprints = price((1-$TTotal['total_ht'] / $TTotal['total_subprice'])*100, 0, '', 1, 2, 2).'%';
-                }
+					if(empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
+					if(! empty($parentTitle->array_options['options_show_reduc'])) {
+						$TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
+						$this->resprints = price((1-$TTotal['total_ht'] / $TTotal['total_subprice'])*100, 0, '', 1, 2, 2).'%';
+					}
+				}
             }
 
 			if((float)DOL_VERSION<=3.6) {
@@ -2022,8 +2178,9 @@ class ActionsSubtotal
 				}
 
 				if($line->qty>90) {
-					if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)	$label .= ' '.$this->getTitle($object, $line);
+					if ($conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL)	$label .= ' '.$this->getTitle($object, $line);
 
+                    $pdf->startTransaction();
 					$pageBefore = $pdf->getPage();
 					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 					$pageAfter = $pdf->getPage();
@@ -2037,6 +2194,10 @@ class ActionsSubtotal
 						$posy = $pdf->GetY();
 						//print 'add ST'.$pdf->getPage().'<br />';
 					}
+                    else	// No pagebreak
+                    {
+                        $pdf->commitTransaction();
+                    }
 
 					// On delivery PDF, we don't want quantities to appear and there are no hooks => setting text color to background color;
 					if($object->element == 'delivery')
@@ -2062,10 +2223,26 @@ class ActionsSubtotal
 					return 1;
 				}
 				else if ($line->qty < 10) {
-					$pageBefore = $pdf->getPage();
 
+                    $pdf->startTransaction();
+					$pageBefore = $pdf->getPage();
 					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 					$pageAfter = $pdf->getPage();
+
+                    if($pageAfter>$pageBefore) {
+                        //print "ST $pageAfter>$pageBefore<br>";
+                        $pdf->rollbackTransaction(true);
+                        $pdf->addPage('', '', true);
+                        $posy = $pdf->GetY();
+                        $this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
+                        $posy = $pdf->GetY();
+                        //print 'add ST'.$pdf->getPage().'<br />';
+                    }
+                    else    // No pagebreak
+                    {
+                        $pdf->commitTransaction();
+                    }
+
 
 					if($object->element == 'delivery')
 					{
@@ -2080,7 +2257,25 @@ class ActionsSubtotal
 
 					$labelproductservice = preg_replace('/(<img[^>]*src=")([^"]*)(&amp;)([^"]*")/', '\1\2&\4', $labelproductservice, -1, $nbrep);
 
-					$pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+                    $pdf->startTransaction();
+                    $pageBefore = $pdf->getPage();
+                    $pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+                    $pageAfter = $pdf->getPage();
+
+                    if($pageAfter>$pageBefore) {
+                        //print "ST $pageAfter>$pageBefore<br>";
+                        $pdf->rollbackTransaction(true);
+                        $pdf->addPage('', '', true);
+                        $posy = $pdf->GetY();
+                        $pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+                        $posy = $pdf->GetY();
+                        //print 'add ST'.$pdf->getPage().'<br />';
+
+                    }
+                    else    // No pagebreak
+                    {
+                        $pdf->commitTransaction();
+                    }
 
 					return 1;
 				}
@@ -2254,7 +2449,7 @@ class ActionsSubtotal
 
 
 			?>
-			<tr <?php echo $bc[$var]; $var=!$var; echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
+			<tr class="oddeven" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
 						if($line->qty==99) print 'background:#adadcf';
@@ -2457,7 +2652,7 @@ class ActionsSubtotal
 						 $titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
 
 						 if (empty($line->label)) {
-							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) print  $line->description.' '.$this->getTitle($object, $line);
+							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description.' '.$this->getTitle($object, $line);
 							else print  $line->description;
 						 }
 						 else {
@@ -2670,7 +2865,7 @@ class ActionsSubtotal
 			// HTML 5 data for js
 			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
 ?>
-			<tr <?php echo $bc[$var]; $var=!$var; echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
+			<tr class="oddeven" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
 						if($line->qty==99) print 'background:#adadcf';
@@ -2720,7 +2915,7 @@ class ActionsSubtotal
 						 $titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
 
 						 if (empty($line->label)) {
-							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) print  $line->description.' '.$this->getTitle($object, $line);
+							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description.' '.$this->getTitle($object, $line);
 							else print  $line->description;
 						 }
 						 else {
@@ -2783,7 +2978,7 @@ class ActionsSubtotal
 			// HTML 5 data for js
 			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
 			?>
-			<tr <?php echo $bc[$var]; $var=!$var; echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
+			<tr class="oddeven" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
 						if($line->qty==99) print 'background:#adadcf';
@@ -2841,7 +3036,7 @@ class ActionsSubtotal
 			$titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
 
 			if (empty($line->label)) {
-				if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) print  $line->description.' '.$this->getTitle($object, $line);
+				if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description.' '.$this->getTitle($object, $line);
 				else print  $line->description;
 			}
 			else {
@@ -2988,7 +3183,7 @@ class ActionsSubtotal
 				$titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
 
 				if (empty($line->label)) {
-					if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->SUBTOTAL_USE_NEW_FORMAT) $object->tpl["sublabel"].=  $line->description.' '.$this->getTitle($object, $line);
+					if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) $object->tpl["sublabel"].=  $line->description.' '.$this->getTitle($object, $line);
 					else $object->tpl["sublabel"].=  $line->description;
 				}
 				else {
@@ -3008,6 +3203,7 @@ class ActionsSubtotal
 				}
 
 			}
+
 
 			$object->printOriginLine($line, '', $restrictlist, '/core/tpl', $selectedLines);
 
@@ -3304,7 +3500,8 @@ class ActionsSubtotal
 									table_element_line: "<?php echo $table_element_line; ?>",
 									fk_element: "<?php echo $fk_element; ?>",
 									element_id: "<?php echo $id; ?>",
-									filepath: "<?php echo urlencode($filepath); ?>"
+									filepath: "<?php echo urlencode($filepath); ?>",
+									token: "<?php echo currentToken(); ?>"
 								},
 			    	            type: 'POST',
 			    	            url: '<?php echo DOL_URL_ROOT; ?>/core/ajax/row.php',
