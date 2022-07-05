@@ -3107,12 +3107,9 @@ class ActionsSubtotal
 
 	function printOriginObjectSubLine($parameters, &$object, &$action, $hookmanager)
 	{
-		global $conf,$langs,$user,$db,$bc, $restrictlist, $selectedLines;
+        global $conf, $restrictlist, $selectedLines;
 
 		$line = &$parameters['line'];
-		$i = &$parameters['i'];
-
-		$var = &$parameters['var'];
 
 		$contexts = explode(':',$parameters['context']);
 
@@ -3202,19 +3199,19 @@ class ActionsSubtotal
 					$object->tpl["sublabel"].= ' : <b>'.$total.'</b>';
 				}
 
+                $object->printOriginLine($line, '', $restrictlist, '/core/tpl', $selectedLines);
+
+                unset($object->tpl["sublabel"]);
+                unset($object->tpl['sub-td-style']);
+                unset($object->tpl['sub-tr-style']);
+                unset($object->tpl['sub-type']);
+                unset($object->tpl['subtotal']);
+
+                return 1;
 			}
-
-
-			$object->printOriginLine($line, '', $restrictlist, '/core/tpl', $selectedLines);
-
-			unset($object->tpl["sublabel"]);
-			unset($object->tpl['sub-td-style']);
-			unset($object->tpl['sub-tr-style']);
-			unset($object->tpl['sub-type']);
-			unset($object->tpl['subtotal']);
 		}
 
-        return 1;
+        return 0;
 	}
 
     /**
