@@ -118,3 +118,5 @@ SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY = Afficher la quantité sur les lignes de produ
 # Spé clients à delete
 SUBTOTAL_SHOW_QTY_ON_TITLES = Afficher la quantité sur les lignes de sous-total (uniquement dans le cas d'un produit virtuel ajouté)
 SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES =  Masquer uniquement les prix pour les produits se trouvant dans un ensemble
+
+SubtotalExperimentalZone = Configurations expérimentales ou dépréciées
