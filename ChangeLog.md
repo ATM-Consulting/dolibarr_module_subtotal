@@ -3,14 +3,23 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+
+
+## Version 3.14
+
+- FIX duplicate origin lines on create from proposal *11/07/2022* 3.14.2 [PR #273 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/273)
+  when you create an invoice or order from a proposal you got duplicate lines if there are "Ouvrage" (or other external modules with product type "9") lines in proposal
+- FIX : Compatibility V16 Dictionnaries *14/06/2022* - 3.14.1
 - NEW : Refonte page setup avec class setup de Dolibarr V15 *11/05/2022* 3.14.0
 - NEW : Ajout de la class TechATM pour l'affichage de la page "A propos" *10/05/2022* 3.13.0
-
-## Version 3.12
 - NEW : Add total_ht on originproductline tpl if available + add class td identification + add data-id tr identification *07/04/2022* - 3.12.0
 
 ## Version 3.11
 
+- FIX : COMPAT V16 family - *02/06/2022)* - 3.11.12  
+- FIX : TRIGGER UPDATE AND MODIFY - *02/06/2022)* - 3.11.11 
+- FIX : description - *02/06/2022)* - 3.11.10  
+- FIX : $pdf->rollbackTransaction without start *29/06/2022* - 3.11.9
 - FIX : colspan 4 to 5 to fix view of propal and bill *07/04/2022* - 3.11.8
 - FIX : title and subtotal padding *30/03/2022* - 3.11.7
 - FIX : title and text offset position *29/03/2022* - 3.11.6
@@ -37,9 +46,10 @@ All notable changes to this project will be documented in this file.
 
 ## Version 3.6
 - FIX : Title lines broken on PDF for documents whose lines use the `desc` field instead of the `label` field (such as
-        supplier orders and invoices) *22/11/2021* - 3.6.9
+        supplier orders and invoices) *22/11/2021* - 3.6.10
 - FIX : checkbox to add a subtotal title block per order on invoices using the "Bill orders" feature was broken by
-        core changes in Dolibarr *12/11/2021* - 3.6.8
+        core changes in Dolibarr *12/11/2021* - 3.6.9
+- FIX : Missing columns in invoice creation page (from order) *10/06/2022* - 3.6.8
 - FIX : addition of a conf allowing to add the subtotal line or not when creating an expedition from an order *12/07/2021* - 3.6.7 
 - FIX : Clone icon compatibility *08/06/2021* - 3.6.6
 - FIX : Uniformize module descriptor's editor, editor_url and family fields *2021-06-08* - 3.6.5

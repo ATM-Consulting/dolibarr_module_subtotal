@@ -17,9 +17,9 @@
  */
 
 /**
- * \file    usernavhistory/admin/setup.php
- * \ingroup usernavhistory
- * \brief   UserNavHistory setup page.
+ * \file    subtotal/admin/setup.php
+ * \ingroup subtotal
+ * \brief   subtotal setup page.
  */
 
 // Load Dolibarr environment
@@ -215,6 +215,7 @@ $item = $formSetup->newItem('SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET');
 $extrafields = new ExtraFields($db);
 $extralabels = $extrafields->fetch_name_optionals_label('propaldet');
 $item->setAsMultiSelect($extralabels);
+
 
 // Champs complémentaires disponible sur les titres dans les commandes clients
 $item = $formSetup->newItem('SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET');
