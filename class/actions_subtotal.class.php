@@ -58,7 +58,10 @@ class ActionsSubtotal
 	{
 		global $conf;
 
-		if ($parameters['tabname'] == MAIN_DB_PREFIX.'c_subtotal_free_text')
+		$dictionnariesTablePrefix = '';
+		if (intval(DOL_VERSION)< 16) $dictionnariesTablePrefix =  MAIN_DB_PREFIX;
+
+		if ($parameters['tabname'] == $dictionnariesTablePrefix.'c_subtotal_free_text')
 		{
 			// Merci Dolibarr de remplacer les textarea par un input text
 			if ((float) DOL_VERSION >= 6.0)
