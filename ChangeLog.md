@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 ## Version 3.14
 
 - FIX : Admin déplacement de l'option de récap en zone expérimentale *11/07/2022* 3.14.4
-- FIX : Vérification du context pour l'affichage des lignes de notes de frais *11/07/2022* 3.14.3
+- FIX : html tag missing for style *11/07/2022* 3.14.3
 - FIX duplicate origin lines on create from proposal *11/07/2022* 3.14.2 [PR #273 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/273)
   when you create an invoice or order from a proposal you got duplicate lines if there are "Ouvrage" (or other external modules with product type "9") lines in proposal
 - FIX : Compatibility V16 Dictionnaries *14/06/2022* - 3.14.1
