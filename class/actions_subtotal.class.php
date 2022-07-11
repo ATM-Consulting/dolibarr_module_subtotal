@@ -1733,10 +1733,10 @@ class ActionsSubtotal
 	function pdf_getlinevatrate($parameters=array(), &$object, &$action='') {
 	    global $conf,$hideprices,$hookmanager;
 
-		// Dans le cas des notes de frais report ne pas traiter
-		// TODO : peut être faire l'inverse : limiter à certains elements plutot que le faire pour tous ... à voir si un autre PB du genre apparait.
-		$TContext	= explode(':', $parameters['context']);
-		if (in_array('expensereportcard', $TContext))	return 0;
+//		// Dans le cas des notes de frais report ne pas traiter
+//		// TODO : peut être faire l'inverse : limiter à certains elements plutot que le faire pour tous ... à voir si un autre PB du genre apparait.
+//		$TContext	= explode(':', $parameters['context']);
+//		if (in_array('expensereportcard', $TContext))	return 0;
 
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
@@ -1953,17 +1953,9 @@ class ActionsSubtotal
 		 */
 		global $pdf,$conf, $langs;
 
-		$TContext	= explode(':', $parameters['context']);
-		$Tallowed = array('propalcard', 'ordercard', 'invoicecard'); // TODO ajouter suppliers et les autre modules compatibles
-		if(!array_intersect($Tallowed, $TContext)){
-			return 0;
-		}
-
-
-			if (TSubtotal::showQtyForObject($object) === true) {
-            $this->subtotal_sum_qty_enabled = true;
-            $this->subtotal_show_qty_by_default = true;
-        }
+		if (TSubtotal::showQtyForObject($object) === true) {
+		$this->subtotal_sum_qty_enabled = true;
+		$this->subtotal_show_qty_by_default = true;
 
 		$object->subtotalPdfModelInfo = new stdClass(); // see defineColumnFiel method in this class
 		$object->subtotalPdfModelInfo->cols = false;
