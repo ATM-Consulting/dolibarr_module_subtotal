@@ -209,6 +209,11 @@ class modSubtotal extends DolibarrModules
         // 'contact'			to add a tab in contact view
         // 'categories_x'		to add a tab in category view
         // (replace 'x' by type of category (0=product, 1=supplier, 2=customer, 3=member)
+
+		//Compatibility V16
+		$dictionnariesTablePrefix = '';
+		if (intval(DOL_VERSION)< 16) $dictionnariesTablePrefix =  MAIN_DB_PREFIX;
+
         // Dictionnaries
         if (! isset($conf->subtotal->enabled)) {
             $conf->subtotal=new stdClass();
@@ -216,7 +221,7 @@ class modSubtotal extends DolibarrModules
         }
         $this->dictionaries = array(
 			'langs'=>'subtotal@subtotal',
-            'tabname'=>array(MAIN_DB_PREFIX.'c_subtotal_free_text'),		// List of tables we want to see into dictonnary editor
+            'tabname'=>array($dictionnariesTablePrefix.'c_subtotal_free_text'),		// List of tables we want to see into dictonnary editor
             'tablib'=>array($langs->trans('subtotalFreeLineDictionary')),													// Label of tables
             'tabsql'=>array('SELECT f.rowid as rowid, f.label, f.content, f.entity, f.active FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text as f WHERE f.entity='.$conf->entity),	// Request to select fields
             'tabsqlsort'=>array('label ASC'),																					// Sort order
