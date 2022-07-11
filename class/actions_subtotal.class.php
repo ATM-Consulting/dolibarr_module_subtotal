@@ -1733,7 +1733,8 @@ class ActionsSubtotal
 	function pdf_getlinevatrate($parameters=array(), &$object, &$action='') {
 	    global $conf,$hideprices,$hookmanager;
 
-		// il faut vérifier le context et la compatibilité
+		// Dans le cas des notes de frais report ne pas traiter
+		// TODO : peut être faire l'inverse : limiter à certains elements plutot que le faire pour tous ... à voir si un autre PB du genre apparait.
 		$TContext	= explode(':', $parameters['context']);
 		if (in_array('expensereportcard', $TContext))	return 0;
 
