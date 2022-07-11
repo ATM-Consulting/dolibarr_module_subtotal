@@ -344,7 +344,7 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
 
 // Configuration header
 $head = subtotalAdminPrepareHead();
-print dol_get_fiche_head($head, 'settings', $langs->trans($page_name), -1, "usernavhistory@usernavhistory");
+print dol_get_fiche_head($head, 'settings', $langs->trans($page_name), -1, "subtotal@subtotal");
 
 // Setup page goes here
 echo '<span class="opacitymedium">'.$langs->trans("SubTotalSetupPage").'</span><br><br>';
