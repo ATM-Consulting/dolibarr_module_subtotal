@@ -3,15 +3,17 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+- FIX : Compatibility V16 Dictionnaries *14/06/2022* - 3.14.1
 - NEW : Refonte page setup avec class setup de Dolibarr V15 *11/05/2022* 3.14.0
 - NEW : Ajout de la class TechATM pour l'affichage de la page "A propos" *10/05/2022* 3.13.0
-
-## Version 3.12
 - NEW : Add total_ht on originproductline tpl if available + add class td identification + add data-id tr identification *07/04/2022* - 3.12.0
 
 ## Version 3.11
 
-- FIX : Compatibility V16 Dictionnaries *14/06/2022* - 3.11.9
+- FIX : COMPAT V16 family - *02/06/2022)* - 3.11.12  
+- FIX : TRIGGER UPDATE AND MODIFY - *02/06/2022)* - 3.11.11 
+- FIX : description - *02/06/2022)* - 3.11.10  
+- FIX : $pdf->rollbackTransaction without start *29/06/2022* - 3.11.9
 - FIX : colspan 4 to 5 to fix view of propal and bill *07/04/2022* - 3.11.8
 - FIX : title and subtotal padding *30/03/2022* - 3.11.7
 - FIX : title and text offset position *29/03/2022* - 3.11.6

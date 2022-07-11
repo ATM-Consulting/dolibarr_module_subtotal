@@ -2183,6 +2183,7 @@ class ActionsSubtotal
 				if($line->qty>90) {
 					if ($conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL)	$label .= ' '.$this->getTitle($object, $line);
 
+                    $pdf->startTransaction();
 					$pageBefore = $pdf->getPage();
 					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 					$pageAfter = $pdf->getPage();
@@ -2196,6 +2197,10 @@ class ActionsSubtotal
 						$posy = $pdf->GetY();
 						//print 'add ST'.$pdf->getPage().'<br />';
 					}
+                    else	// No pagebreak
+                    {
+                        $pdf->commitTransaction();
+                    }
 
 					// On delivery PDF, we don't want quantities to appear and there are no hooks => setting text color to background color;
 					if($object->element == 'delivery')
@@ -2221,10 +2226,26 @@ class ActionsSubtotal
 					return 1;
 				}
 				else if ($line->qty < 10) {
-					$pageBefore = $pdf->getPage();
 
+                    $pdf->startTransaction();
+					$pageBefore = $pdf->getPage();
 					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 					$pageAfter = $pdf->getPage();
+
+                    if($pageAfter>$pageBefore) {
+                        //print "ST $pageAfter>$pageBefore<br>";
+                        $pdf->rollbackTransaction(true);
+                        $pdf->addPage('', '', true);
+                        $posy = $pdf->GetY();
+                        $this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
+                        $posy = $pdf->GetY();
+                        //print 'add ST'.$pdf->getPage().'<br />';
+                    }
+                    else    // No pagebreak
+                    {
+                        $pdf->commitTransaction();
+                    }
+
 
 					if($object->element == 'delivery')
 					{
@@ -2239,7 +2260,25 @@ class ActionsSubtotal
 
 					$labelproductservice = preg_replace('/(<img[^>]*src=")([^"]*)(&amp;)([^"]*")/', '\1\2&\4', $labelproductservice, -1, $nbrep);
 
-					$pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+                    $pdf->startTransaction();
+                    $pageBefore = $pdf->getPage();
+                    $pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+                    $pageAfter = $pdf->getPage();
+
+                    if($pageAfter>$pageBefore) {
+                        //print "ST $pageAfter>$pageBefore<br>";
+                        $pdf->rollbackTransaction(true);
+                        $pdf->addPage('', '', true);
+                        $posy = $pdf->GetY();
+                        $pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+                        $posy = $pdf->GetY();
+                        //print 'add ST'.$pdf->getPage().'<br />';
+
+                    }
+                    else    // No pagebreak
+                    {
+                        $pdf->commitTransaction();
+                    }
 
 					return 1;
 				}
@@ -2345,7 +2384,7 @@ class ActionsSubtotal
 			if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_LINE) && $object->element !== 'invoice_supplier')
             {
                 if(!(TSubtotal::isModSubtotalLine($line)) && ( $line->fk_prev_id === null ) && !($action == "editline" && GETPOST('lineid', 'int') == $line->id)) {
-                    echo '<a name="duplicate-'.$line->id.'" href="' . $_SERVER['PHP_SELF'] . '?' . $idvar . '=' . $object->id . '&action=duplicate&lineid=' . $line->id . '"><i class="fa fa-clone" aria-hidden="true"></i></a>';
+                    echo '<a name="duplicate-'.$line->id.'" href="' . $_SERVER['PHP_SELF'] . '?' . $idvar . '=' . $object->id . '&action=duplicate&lineid=' . $line->id . '&token='.$newToken.'"><i class="fa fa-clone" aria-hidden="true"></i></a>';
 
                     ?>
                         <script type="text/javascript">
@@ -2678,7 +2717,7 @@ class ActionsSubtotal
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) && $object->element !== 'invoice_supplier')
 						{
 							if(TSubtotal::isTitle($line) && ( $line->fk_prev_id === null )) {
-								echo '<a class="subtotal-line-action-btn" title="'.$langs->trans('CloneLSubtotalBlock').'" href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'" >';
+								echo '<a class="subtotal-line-action-btn" title="'.$langs->trans('CloneLSubtotalBlock').'" href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'&token='.$newToken.'" >';
 								if(intval(DOL_VERSION) < 8) {
 									echo img_picto($langs->trans('Duplicate'), 'duplicate@subtotal');
 								} else {
@@ -2690,7 +2729,7 @@ class ActionsSubtotal
 
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_EDIT_BLOCK))
 						{
-							echo '<a class="subtotal-line-action-btn"  href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=editline&lineid='.$line->id.'#row-'.$line->id.'">'.img_edit().'</a>';
+							echo '<a class="subtotal-line-action-btn"  href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=editline&token='.$newToken.'&lineid='.$line->id.'#row-'.$line->id.'">'.img_edit().'</a>';
 						}
 					}
 
@@ -2708,7 +2747,7 @@ class ActionsSubtotal
 
 							if ($line->fk_prev_id === null)
 							{
-								echo '<a class="subtotal-line-action-btn"  href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id.'">'.img_delete().'</a>';
+								echo '<a class="subtotal-line-action-btn"  href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id.'&token='.$newToken.'">'.img_delete().'</a>';
 							}
 
 							if(TSubtotal::isTitle($line) && ($line->fk_prev_id === null) )
@@ -2721,7 +2760,7 @@ class ActionsSubtotal
 									$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal');
 								}
 
-								echo '<a class="subtotal-line-action-btn"  href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id.'">'.$img_delete.'</a>';
+								echo '<a class="subtotal-line-action-btn"  href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id.'&token='.$newToken.'">'.$img_delete.'</a>';
 							}
 						}
 					}
@@ -3032,7 +3071,7 @@ class ActionsSubtotal
 				}
 				if ($line->fk_prev_id === null)
 				{
-					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=deleteline&amp;lineid='.$lineid.'">'.img_delete().'</a>';
+					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=deleteline&amp;lineid='.$lineid.'&token='.$newToken.'">'.img_delete().'</a>';
 				}
 
 				if(TSubtotal::isTitle($line) && ($line->fk_prev_id === null) )
@@ -3045,7 +3084,7 @@ class ActionsSubtotal
 						$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal');
 					}
 
-					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=ask_deleteallline&amp;lineid='.$lineid.'">'.$img_delete.'</a>';
+					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=ask_deleteallline&amp;lineid='.$lineid.'&token='.$newToken.'">'.$img_delete.'</a>';
 				}
 
 				print '</td>';
