@@ -1954,8 +1954,9 @@ class ActionsSubtotal
 		global $pdf,$conf, $langs;
 
 		if (TSubtotal::showQtyForObject($object) === true) {
-		$this->subtotal_sum_qty_enabled = true;
-		$this->subtotal_show_qty_by_default = true;
+			$this->subtotal_sum_qty_enabled = true;
+			$this->subtotal_show_qty_by_default = true;
+		}
 
 		$object->subtotalPdfModelInfo = new stdClass(); // see defineColumnFiel method in this class
 		$object->subtotalPdfModelInfo->cols = false;
