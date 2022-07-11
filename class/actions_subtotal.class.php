@@ -1733,6 +1733,11 @@ class ActionsSubtotal
 	function pdf_getlinevatrate($parameters=array(), &$object, &$action='') {
 	    global $conf,$hideprices,$hookmanager;
 
+//		// Dans le cas des notes de frais report ne pas traiter
+//		// TODO : peut être faire l'inverse : limiter à certains elements plutot que le faire pour tous ... à voir si un autre PB du genre apparait.
+//		$TContext	= explode(':', $parameters['context']);
+//		if (in_array('expensereportcard', $TContext))	return 0;
+
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 
@@ -1948,13 +1953,15 @@ class ActionsSubtotal
 		 */
 		global $pdf,$conf, $langs;
 
-        if (TSubtotal::showQtyForObject($object) === true) {
-            $this->subtotal_sum_qty_enabled = true;
-            $this->subtotal_show_qty_by_default = true;
-        }
+		if (TSubtotal::showQtyForObject($object) === true) {
+			$this->subtotal_sum_qty_enabled = true;
+			$this->subtotal_show_qty_by_default = true;
+		}
 
 		$object->subtotalPdfModelInfo = new stdClass(); // see defineColumnFiel method in this class
 		$object->subtotalPdfModelInfo->cols = false;
+
+
 
 		// var_dump($object->lines);
 		dol_include_once('/subtotal/class/subtotal.class.php');
@@ -2664,7 +2671,7 @@ class ActionsSubtotal
 								print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
 							}
 							else{
-								print '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+								print '<span class="subtotal_label classfortooltip" style=" '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
 							}
 
 						 }
@@ -2927,7 +2934,7 @@ class ActionsSubtotal
 								print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
 							}
 							else{
-								print '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+								print '<span class="subtotal_label classfortooltip" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
 							}
 
 						 }
@@ -3047,7 +3054,7 @@ class ActionsSubtotal
 					print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
 				}
 				else{
-					print '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+					print '<span class="subtotal_label classfortooltip " style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
 				}
 			}
 			//if($line->qty>90) print ' : ';
