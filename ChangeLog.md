@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 3.11
 
+- FIX : COMPAT V16 family - *02/06/2022)* - 3.11.12  
 - FIX : TRIGGER UPDATE AND MODIFY - *02/06/2022)* - 3.11.11 
 - FIX : description - *02/06/2022)* - 3.11.10  
 - FIX : $pdf->rollbackTransaction without start *29/06/2022* - 3.11.9
