@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+- FIX duplicate origin lines on create from proposal *11/07/2022* 3.14.1 [PR #273 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/273)
+  when you create an invoice or order from a proposal you got duplicate lines if there are "Ouvrage" (or other external modules with product type "9") lines in proposal
 - NEW : Refonte page setup avec class setup de Dolibarr V15 *11/05/2022* 3.14.0
 - NEW : Ajout de la class TechATM pour l'affichage de la page "A propos" *10/05/2022* 3.13.0
 - NEW : Add total_ht on originproductline tpl if available + add class td identification + add data-id tr identification *07/04/2022* - 3.12.0
