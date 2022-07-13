@@ -240,7 +240,6 @@ class ActionsSubtotal
 	function printNewFormat(&$object, &$conf, &$langs, $idvar)
 	{
 		if (empty($conf->global->SUBTOTAL_ALLOW_ADD_BLOCK)) return false;
-		if ($line->fk_prev_id != null && !empty($line->fk_prev_id)) return false; // Si facture de situation
 
 		$jsData = array(
 			'conf' => array(
@@ -626,7 +625,7 @@ class ActionsSubtotal
 
 		$showBlockExtrafields = GETPOST('showBlockExtrafields', 'none');
 
-		if($object->element=='facture') $idvar = 'facid';
+		if(isset($object->element) && $object->element=='facture') $idvar = 'facid';
 		else $idvar = 'id';
 
 		if ($action == 'updateligne' || $action == 'updateline')
@@ -952,7 +951,12 @@ class ActionsSubtotal
 			if ($l->product_type != 9) {
                     		$total += $l->total_ht;
                     		$total_tva += $l->total_tva;
+
+                            if(! isset($TTotal_tva[$l->tva_tx])) {
+                                $TTotal_tva[$l->tva_tx] = 0;
+                            }
                     		$TTotal_tva[$l->tva_tx] += $l->total_tva;
+
                     		$total_ttc += $l->total_ttc;
 			}
                 }
@@ -980,6 +984,8 @@ class ActionsSubtotal
 		$subtotalDefaultBottomPadding = 1;
 		$subtotalDefaultLeftPadding = 0.5;
 		$subtotalDefaultRightPadding = 0.5;
+        $backgroundCellHeightOffset = 0;
+        $backgroundCellPosYOffset = 0;
 
 		$fillBackground = false;
 		if(!empty($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
@@ -990,8 +996,6 @@ class ActionsSubtotal
 		){
 			$fillBackground = true;
 
-			$backgroundCellHeightOffset = 0;
-			$backgroundCellPosYOffset = 0;
 
 			// add here special PDF compatibility modifications
 			// mais avant d'ajouter une exeption ici verifier si il ne faut pas plutôt effectuer un fix sur le PDF
@@ -1966,7 +1970,11 @@ class ActionsSubtotal
 		// var_dump($object->lines);
 		dol_include_once('/subtotal/class/subtotal.class.php');
 
-		$i = $parameters['i'];
+        $i = 0;
+        if(isset($parameters['i'])) {
+            $i = $parameters['i'];
+        }
+
 		foreach($parameters as $key=>$value) {
 			${$key} = $value;
 		}
@@ -2188,7 +2196,9 @@ class ActionsSubtotal
 				}
 
 				if($line->qty>90) {
-					if ($conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL)	$label .= ' '.$this->getTitle($object, $line);
+					if (!empty($conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL)) {
+                        $label .= ' '.$this->getTitle($object, $line);
+                    }
 
                     $pdf->startTransaction();
 					$pageBefore = $pdf->getPage();
@@ -2344,6 +2354,8 @@ class ActionsSubtotal
 		$contexts = explode(':',$parameters['context']);
 		if($parameters['currentcontext'] === 'paiementcard') return 0;
 		$originline = null;
+
+        $newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 
 		$createRight = $user->rights->{$object->element}->creer;
 		if($object->element == 'facturerec' )
@@ -2639,7 +2651,7 @@ class ActionsSubtotal
 					}
 					else {
 
-						 if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+						 if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 						 {
 							if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
 							{

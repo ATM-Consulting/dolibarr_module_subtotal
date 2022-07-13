@@ -41,7 +41,7 @@ function subtotalAdminPrepareHead()
     $head[$h][2] = 'about';
     $h++;
 
-    complete_head_from_modules($conf, $langs, $object, $head, $h, 'subtotal', $showLabel=false);
+    complete_head_from_modules($conf, $langs, null, $head, $h, 'subtotal', $showLabel=false);
 
     return $head;
 }
