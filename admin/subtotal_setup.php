@@ -279,11 +279,11 @@ $formSetup->newItem('SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY')->setAsYesNo();
 $formSetup->newItem('SUBTOTAL_HIDE_DOCUMENT_TOTAL')->setAsYesNo();
 
 
-if ($conf->shippableorder->enabled) {
+if (!empty($conf->shippableorder->enabled)) {
 	$formSetup->newItem('SUBTOTAL_SHIPPABLE_ORDER')->setAsYesNo();
 }
 
-if ($conf->clilacevenements->enabled) {
+if (!empty($conf->clilacevenements->enabled)) {
 	// Afficher la quantité sur les lignes de sous-total (uniquement dans le cas d'un produit virtuel ajouté)
 	$formSetup->newItem('SUBTOTAL_SHOW_QTY_ON_TITLES')->setAsYesNo();
 
@@ -344,7 +344,7 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
 
 // Configuration header
 $head = subtotalAdminPrepareHead();
-print dol_get_fiche_head($head, 'settings', $langs->trans($page_name), -1, "usernavhistory@usernavhistory");
+print dol_get_fiche_head($head, 'settings', $langs->trans($page_name), -1, "subtotal@subtotal");
 
 // Setup page goes here
 echo '<span class="opacitymedium">'.$langs->trans("SubTotalSetupPage").'</span><br><br>';
