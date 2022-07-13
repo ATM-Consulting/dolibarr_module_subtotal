@@ -66,7 +66,7 @@ class modSubtotal extends DolibarrModules
         $this->description = "Module permettant l'ajout de sous-totaux et sous-totaux intermédiaires et le déplacement d'une ligne aisée de l'un dans l'autre";
         // Possible values for version are: 'development', 'experimental' or version
 
-        $this->version = '3.14.3';
+        $this->version = '3.14.5';
 		// Url to the file with your last numberversion of this module
 		require_once __DIR__ . '/../../class/techatm.class.php';
 		$this->url_last_version = \subtotal\TechATM::getLastModuleVersionUrl($this);
