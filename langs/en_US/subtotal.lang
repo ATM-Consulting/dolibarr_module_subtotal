@@ -2,7 +2,9 @@
 
 Module104777Name = SubTotal
 Module104777Desc = Allows to add titles and subtotals in proposal, orders and invoices
-ATMAbout = This module has been developed by <a href="http://www.atm-consulting.fr" target="_blank">ATM Consulting</a><br>You can find the documentation on our <a href="http://wiki.atm-consulting.fr/index.php/Accueil" target="_blank">wiki</a><br><br>For any question or feedback, contact us on <a href="mailto:support@atm-consulting.fr">support@atm-consulting.fr</a><br><br>For any commercial question, contact us on <a href="mailto:contact@atm-consulting.fr">contact@atm-consulting.fr</a> or at +33 9 77 19 50 70<br><br>Find our other modules on <a href="http://www.dolistore.com/search.php?orderby=position&orderway=desc&search_query=atm&submit_search=Rechercher" target="_blank">Dolistore</a>
+
+ATMAbout = This module has been developed by <a href="https://www.atm-consulting.fr" target="_blank">ATM Consulting</a><br>You can find the documentation on our <a href="https://wiki.atm-consulting.fr/index.php/Accueil" target="_blank">wiki</a><br><br>For any question or feedback, contact us on <a href="mailto:support@atm-consulting.fr">support@atm-consulting.fr</a><br><br>For any commercial question, contact us on <a href="mailto:contact@atm-consulting.fr">contact@atm-consulting.fr</a> or at +33 9 77 19 50 70<br><br>Find our other modules on <a href="https://www.dolistore.com/search.php?orderby=position&orderway=desc&search_query=atm&submit_search=Rechercher" target="_blank">Dolistore</a>
+
 title = Title
 subtotalAddLineDescription = Description...
 subtitle = Subtitle
@@ -20,6 +22,7 @@ ConfirmDeleteAllThisLines = Delete %s lines ?
 AddBreakPageBefore = Add pagebreak before this item.
 Level = Level
 SubtotalLabel = <b>Subtotal: </b>
+
 SUBTOTAL_USE_NEW_FORMAT = Enable the advanced functionality
 SUBTOTAL_USE_NUMEROTATION = Enable the auto numbering on PDF
 SUBTOTAL_ALLOW_ADD_BLOCK = Allow add title and subtotal
@@ -37,39 +40,39 @@ SUBTOTAL_TITLE_STYLE = Title style (B = bold, U = underline, I = italic)
 SUBTOTAL_SUBTOTAL_STYLE = Subtotals style (B = bold, U = underline, I = italic)
 SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES = Get one line with title and subtotal if "%s" is enabled (experimental)
 Duplicate = Duplicate
-subtotal_duplicate_success= %d lines copied
-subtotal_duplicate_lineid_not_found=Clone block fails the title's identifier not found
-subtotal_duplicate_error=Failure about clone
-subtotal_apply_default_tva=Apply a default TVA to the block
-subtotal_apply_default_tva_help=Allows to define a default TVA on each line's block
-subtotal_apply_progress=Apply a progress to the block
-subtotal_success_updated_line=Lines updated: %d
-subtotal_error_updated_line=Error: %d lines not updated
-subtotal_nb_progress_not_updated=Warning: progress not updated for %d lines (previous progress is inferior as new rate)
-subtotal_update_nc_success=Total updated
-subtotal_update_nc_error=Error: total not updated
-subtotal_nc_title=NI
-subtotal_nc_title_help=Management of blocks No Included in the total
-SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS=Enable the management of "Not Included" blocks to exclude the amount
-subtotalRecap=Recapitulation
-subtotalPropalTitle=Proposal %s %s
-subtotalCommandeTitle=Order %s %s
-subtotalInvoiceTitle=Invoice %s %s
-subtotalRecapLot=Recapitulation of lots
-RecapGeneration=Generate a summary by title
-SUBTOTAL_KEEP_RECAP_FILE=Keep the summary PDF after fusion
-SUBTOTAL_PROPAL_ADD_RECAP=Enable the generation of summary on proposals
-SUBTOTAL_COMMANDE_ADD_RECAP=Enable the generation of summary on orders
-SUBTOTAL_INVOICE_ADD_RECAP=Enable the generation of summary on invoices
-warning_subtotal_recap_object_element_unknown=Can't generate the summary by title, unknown element: %s
-subtotal_add_recap=Add the summary by title
-SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE=Add a new title will add above the missing subtotals
-subtotalFreeLineDictionary=Pre-existing text line
-subtotalLabelForUnderTitle=Add into bloc:
-subtotalLabelForFreeText=Pre-existing text:
-subtotalFreeTextOrDesc=or write a custom description
-AmountBeforeTaxesSubjectToVATX%=Amount before taxes subject to %s (%s %%)
-addLineTitle_in_order_shippable=Add the Title, total, free lines to shippable orders (it will be necessary to remove the subtotal lines by hand if the need arises)
+subtotal_duplicate_success = %d lines copied
+subtotal_duplicate_lineid_not_found = Clone block fails the title's identifier not found
+subtotal_duplicate_error = Failure about clone
+subtotal_apply_default_tva = Apply a default TVA to the block
+subtotal_apply_default_tva_help = Allows to define a default TVA on each line's block
+subtotal_apply_progress = Apply a progress to the block
+subtotal_success_updated_line = Lines updated: %d
+subtotal_error_updated_line = Error: %d lines not updated
+subtotal_nb_progress_not_updated = Warning: progress not updated for %d lines (previous progress is inferior as new rate)
+subtotal_update_nc_success = Total updated
+subtotal_update_nc_error = Error: total not updated
+subtotal_nc_title = NI
+subtotal_nc_title_help = Management of blocks No Included in the total
+SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS = Enable the management of "Not Included" blocks to exclude the amount
+subtotalRecap = Recapitulation
+subtotalPropalTitle = Proposal %s %s
+subtotalCommandeTitle = Order %s %s
+subtotalInvoiceTitle = Invoice %s %s
+subtotalRecapLot = Recapitulation of lots
+RecapGeneration = Generate a summary by title
+SUBTOTAL_KEEP_RECAP_FILE = Keep the summary PDF after fusion
+SUBTOTAL_PROPAL_ADD_RECAP = Enable the generation of summary on proposals
+SUBTOTAL_COMMANDE_ADD_RECAP = Enable the generation of summary on orders
+SUBTOTAL_INVOICE_ADD_RECAP = Enable the generation of summary on invoices
+warning_subtotal_recap_object_element_unknown = Can't generate the summary by title, unknown element: %s
+subtotal_add_recap = Add the summary by title
+SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE = Add a new title will add above the missing subtotals
+subtotalFreeLineDictionary = Pre-existing text line
+subtotalLabelForUnderTitle = Add into bloc:
+subtotalLabelForFreeText = Pre-existing text:
+subtotalFreeTextOrDesc = or write a custom description
+AmountBeforeTaxesSubjectToVATX% = Amount before taxes subject to %s (%s %%)
+addLineTitle_in_order_shippable = Add the Title, total, free lines to shippable orders (it will be necessary to remove the subtotal lines by hand if the need arises)
 SubtotalSetup = Setup for sub total
 SubTotalSetupPage = Setup for sub total
 Experimental = Experimental
