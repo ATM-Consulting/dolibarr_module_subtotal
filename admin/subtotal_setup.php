@@ -258,9 +258,6 @@ $formSetup->newItem('RecapGeneration')->setAsTitle();
 // Conserver le PDF de récapitulation après la fusion
 $formSetup->newItem('SUBTOTAL_KEEP_RECAP_FILE')->setAsYesNo();
 
-// Activer la génération du récapitulatif sur les propositions commerciales
-$formSetup->newItem('SUBTOTAL_PROPAL_ADD_RECAP')->setAsYesNo();
-
 // Activer la génération du récapitulatif sur les commandes
 $formSetup->newItem('SUBTOTAL_COMMANDE_ADD_RECAP')->setAsYesNo();
 
@@ -282,11 +279,11 @@ $formSetup->newItem('SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY')->setAsYesNo();
 $formSetup->newItem('SUBTOTAL_HIDE_DOCUMENT_TOTAL')->setAsYesNo();
 
 
-if ($conf->shippableorder->enabled) {
+if (!empty($conf->shippableorder->enabled)) {
 	$formSetup->newItem('SUBTOTAL_SHIPPABLE_ORDER')->setAsYesNo();
 }
 
-if ($conf->clilacevenements->enabled) {
+if (!empty($conf->clilacevenements->enabled)) {
 	// Afficher la quantité sur les lignes de sous-total (uniquement dans le cas d'un produit virtuel ajouté)
 	$formSetup->newItem('SUBTOTAL_SHOW_QTY_ON_TITLES')->setAsYesNo();
 
@@ -300,7 +297,7 @@ if ($conf->clilacevenements->enabled) {
  * ZONE EXPERIMENTAL
  */
 
-$formSetup->newItem('Experimental')->setAsTitle();
+$formSetup->newItem('SubtotalExperimentalZone')->setAsTitle();
 
 // Avoir une seule ligne de titre + total si l'option "Cacher le détail des ensembles" est utilisée (expérimental)
 $item = $formSetup->newItem('SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES');
@@ -312,6 +309,8 @@ $item = $formSetup->newItem('SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES');
 $item->setAsYesNo();
 $item->nameText = $langs->trans("SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES", $langs->transnoentitiesnoconv('HideInnerLines'));
 
+// Activer la génération du récapitulatif sur les propositions commerciales
+$formSetup->newItem('SUBTOTAL_PROPAL_ADD_RECAP')->setAsYesNo();
 
 
 
@@ -345,7 +344,7 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
 
 // Configuration header
 $head = subtotalAdminPrepareHead();
-print dol_get_fiche_head($head, 'settings', $langs->trans($page_name), -1, "usernavhistory@usernavhistory");
+print dol_get_fiche_head($head, 'settings', $langs->trans($page_name), -1, "subtotal@subtotal");
 
 // Setup page goes here
 echo '<span class="opacitymedium">'.$langs->trans("SubTotalSetupPage").'</span><br><br>';

@@ -53,7 +53,9 @@ class modSubtotal extends DolibarrModules
 
         // Family can be 'crm','financial','hr','projects','products','ecm','technic','other'
         // It is used to group modules in module setup page
-        $this->family = "ATM Consulting - Autres";
+
+        $this->family = "ATM Consulting - CRM";
+
         // Module label (no space allowed)
         // used if translation string 'ModuleXXXName' not found
         // (where XXX is value of numeric property 'numero' of module)
@@ -64,7 +66,7 @@ class modSubtotal extends DolibarrModules
         $this->description = "Module permettant l'ajout de sous-totaux et sous-totaux intermédiaires et le déplacement d'une ligne aisée de l'un dans l'autre";
         // Possible values for version are: 'development', 'experimental' or version
 
-        $this->version = '3.14.0';
+        $this->version = '3.14.5';
 		// Url to the file with your last numberversion of this module
 		require_once __DIR__ . '/../../class/techatm.class.php';
 		$this->url_last_version = \subtotal\TechATM::getLastModuleVersionUrl($this);
@@ -207,6 +209,11 @@ class modSubtotal extends DolibarrModules
         // 'contact'			to add a tab in contact view
         // 'categories_x'		to add a tab in category view
         // (replace 'x' by type of category (0=product, 1=supplier, 2=customer, 3=member)
+
+		//Compatibility V16
+		$dictionnariesTablePrefix = '';
+		if (intval(DOL_VERSION)< 16) $dictionnariesTablePrefix =  MAIN_DB_PREFIX;
+
         // Dictionnaries
         if (! isset($conf->subtotal->enabled)) {
             $conf->subtotal=new stdClass();
@@ -214,7 +221,7 @@ class modSubtotal extends DolibarrModules
         }
         $this->dictionaries = array(
 			'langs'=>'subtotal@subtotal',
-            'tabname'=>array(MAIN_DB_PREFIX.'c_subtotal_free_text'),		// List of tables we want to see into dictonnary editor
+            'tabname'=>array($dictionnariesTablePrefix.'c_subtotal_free_text'),		// List of tables we want to see into dictonnary editor
             'tablib'=>array($langs->trans('subtotalFreeLineDictionary')),													// Label of tables
             'tabsql'=>array('SELECT f.rowid as rowid, f.label, f.content, f.entity, f.active FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text as f WHERE f.entity='.$conf->entity),	// Request to select fields
             'tabsqlsort'=>array('label ASC'),																					// Sort order
