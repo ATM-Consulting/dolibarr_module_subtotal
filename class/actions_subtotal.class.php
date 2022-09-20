@@ -2200,24 +2200,30 @@ class ActionsSubtotal
                         $label .= ' '.$this->getTitle($object, $line);
                     }
 
-                    $pdf->startTransaction();
-					$pageBefore = $pdf->getPage();
-					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-					$pageAfter = $pdf->getPage();
-
-					if($pageAfter>$pageBefore) {
-						//print "ST $pageAfter>$pageBefore<br>";
-						$pdf->rollbackTransaction(true);
-						$pdf->addPage('', '', true);
-						$posy = $pdf->GetY();
+					//seulement si ce n'est pas une ligne définie avec un saut de page avant
+					if(empty($line->info_bits)) {
+						$pdf->startTransaction();
+						$pageBefore = $pdf->getPage();
 						$this->pdf_add_total($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
-						$posy = $pdf->GetY();
-						//print 'add ST'.$pdf->getPage().'<br />';
+						$pageAfter = $pdf->getPage();
+
+						if ($pageAfter > $pageBefore) {
+							//print "ST $pageAfter>$pageBefore<br>";
+							$pdf->rollbackTransaction(true);
+							$pdf->addPage('', '', true);
+							$posy = $pdf->GetY();
+							$this->pdf_add_total($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
+							$posy = $pdf->GetY();
+							//print 'add ST'.$pdf->getPage().'<br />';
+						} else    // No pagebreak
+						{
+							$pdf->commitTransaction();
+						}
+					} else {
+						$pageBefore = $pdf->getPage();
+						$this->pdf_add_title($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
+						$pageAfter = $pdf->getPage();
 					}
-                    else	// No pagebreak
-                    {
-                        $pdf->commitTransaction();
-                    }
 
 					// On delivery PDF, we don't want quantities to appear and there are no hooks => setting text color to background color;
 					if($object->element == 'delivery')
@@ -2244,24 +2250,30 @@ class ActionsSubtotal
 				}
 				else if ($line->qty < 10) {
 
-                    $pdf->startTransaction();
-					$pageBefore = $pdf->getPage();
-					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-					$pageAfter = $pdf->getPage();
+					//seulement si ce n'est pas une ligne définie avec un saut de page avant
+					if(empty($line->info_bits)) {
+						$pdf->startTransaction();
+						$pageBefore = $pdf->getPage();
+						$this->pdf_add_title($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
+						$pageAfter = $pdf->getPage();
 
-                    if($pageAfter>$pageBefore) {
-                        //print "ST $pageAfter>$pageBefore<br>";
-                        $pdf->rollbackTransaction(true);
-                        $pdf->addPage('', '', true);
-                        $posy = $pdf->GetY();
-                        $this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-                        $posy = $pdf->GetY();
-                        //print 'add ST'.$pdf->getPage().'<br />';
-                    }
-                    else    // No pagebreak
-                    {
-                        $pdf->commitTransaction();
-                    }
+						if ($pageAfter > $pageBefore) {
+							//print "ST $pageAfter>$pageBefore<br>";
+							$pdf->rollbackTransaction(true);
+							$pdf->addPage('', '', true);
+							$posy = $pdf->GetY();
+							$this->pdf_add_title($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
+							$posy = $pdf->GetY();
+							//print 'add ST'.$pdf->getPage().'<br />';
+						} else    // No pagebreak
+						{
+							$pdf->commitTransaction();
+						}
+					} else {
+						$pageBefore = $pdf->getPage();
+						$this->pdf_add_title($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
+						$pageAfter = $pdf->getPage();
+					}
 
 
 					if($object->element == 'delivery')
@@ -2277,25 +2289,31 @@ class ActionsSubtotal
 
 					$labelproductservice = preg_replace('/(<img[^>]*src=")([^"]*)(&amp;)([^"]*")/', '\1\2&\4', $labelproductservice, -1, $nbrep);
 
-                    $pdf->startTransaction();
-                    $pageBefore = $pdf->getPage();
-                    $pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
-                    $pageAfter = $pdf->getPage();
+					//seulement si ce n'est pas une ligne définie avec un saut de page avant
+					if(empty($line->info_bits)) {
+						$pdf->startTransaction();
+						$pageBefore = $pdf->getPage();
+						$pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+						$pageAfter = $pdf->getPage();
 
-                    if($pageAfter>$pageBefore) {
-                        //print "ST $pageAfter>$pageBefore<br>";
-                        $pdf->rollbackTransaction(true);
-                        $pdf->addPage('', '', true);
-                        $posy = $pdf->GetY();
-                        $pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
-                        $posy = $pdf->GetY();
-                        //print 'add ST'.$pdf->getPage().'<br />';
+						if ($pageAfter > $pageBefore) {
+							//print "ST $pageAfter>$pageBefore<br>";
+							$pdf->rollbackTransaction(true);
+							$pdf->addPage('', '', true);
+							$posy = $pdf->GetY();
+							$pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+							$posy = $pdf->GetY();
+							//print 'add ST'.$pdf->getPage().'<br />';
 
-                    }
-                    else    // No pagebreak
-                    {
-                        $pdf->commitTransaction();
-                    }
+						} else    // No pagebreak
+						{
+							$pdf->commitTransaction();
+						}
+					} else {
+						$pageBefore = $pdf->getPage();
+						$this->pdf_add_title($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
+						$pageAfter = $pdf->getPage();
+					}
 
 					return 1;
 				}
