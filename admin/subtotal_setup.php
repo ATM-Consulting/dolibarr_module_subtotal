@@ -75,9 +75,9 @@ $modulepart = GETPOST('modulepart', 'aZ09');	// Used by actions_setmoduleoptions
 $value = GETPOST('value', 'alpha');
 $label = GETPOST('label', 'alpha');
 
-if(!class_exists('FormSetup')){
+if (!class_exists('FormSetup')) {
 	// une Pr est en cour pour fixer certains elements de la class en V16 (car c'est des fix/new)
-	if (versioncompare(explode('.' , DOL_VERSION), array(16)) < 0 && !class_exists('FormSetup')){
+	if (versioncompare(explode('.', DOL_VERSION), array(16)) < 0 && !class_exists('FormSetup')) {
 		require_once __DIR__.'/../backport/v16/core/class/html.formsetup.class.php';
 	} else {
 		require_once DOL_DOCUMENT_ROOT.'/core/class/html.formsetup.class.php';
@@ -234,6 +234,10 @@ $formSetup->newItem('Setup')->setAsTitle();
 
 // Activer l'affichage de la somme des quantités sur les lignes de sous-totaux pour les modèles de documents :
 $item = $formSetup->newItem('SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS');
+
+// Ne pas afficher les options génération PDF
+$formSetup->newItem('SUBTOTAL_DISABLE_BUILD_DOC_OPTIONS')->setAsYesNo();
+
 $langs->loadLangs(array('propal', 'orders', 'bills', 'supplier', 'supplier_proposal'));
 $TField = array(
 	'propal' => $langs->trans('Proposal'),
@@ -351,7 +355,6 @@ echo '<span class="opacitymedium">'.$langs->trans("SubTotalSetupPage").'</span><
 
 
 if ($action == 'edit') {
-
 	print $formSetup->generateOutput(true);
 	print '<br>';
 } else {
@@ -361,8 +364,7 @@ if ($action == 'edit') {
 		print '<div class="tabsAction">';
 		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?action=edit&token='.newToken().'">'.$langs->trans("Modify").'</a>';
 		print '</div>';
-	}
-	else {
+	} else {
 		print '<br>'.$langs->trans("NothingToSetup");
 	}
 }

@@ -75,6 +75,7 @@ AddFreeText = Ajouter une ligne de texte
 SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE=Ajouter un titre, ajoutera au-dessus les sous-totaux manquants
 SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS=Activer l'affichage de la somme des quantités sur les lignes de sous-totaux pour les modèles de documents :
 SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS_info=Activer l'affichage de la somme des quantités sur les lignes de sous-totaux pour les modèles de documents sélectionnés
+SUBTOTAL_DISABLE_BUILD_DOC_OPTIONS=Ne pas afficher les options génération PDF
 SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE=Autoriser l'affichage des extrafields sur les titres (les données enregistrées seront alors peuplées sur les lignes du bloc)
 subtotalFreeLineDictionary=Ligne de texte prédéfini
 subtotalLabelForUnderTitle=Ajouter dans le bloc :

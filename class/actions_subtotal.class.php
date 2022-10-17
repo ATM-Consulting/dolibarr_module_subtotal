@@ -414,6 +414,10 @@ class ActionsSubtotal
 
 		global $conf, $langs, $bc;
 
+		if ($conf->global->SUBTOTAL_DISABLE_BUILD_DOC_OPTIONS) {
+			return 1;
+		}
+
 		$action = GETPOST('action', 'none');
 		$contextArray = explode(':', $parameters['context']);
 		if (
