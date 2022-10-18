@@ -563,7 +563,7 @@ class ActionsSubtotal
 
 	function createFrom($parameters, &$object, $action, $hookmanager) {
 
-        if (version_compare(DOL_VERSION, '10.0.0') >= 0) {
+        if (version_compare(DOL_VERSION, '10.0.0', '>=')) {
             return 0;
         }
 
