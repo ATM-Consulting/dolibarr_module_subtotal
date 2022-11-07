@@ -247,7 +247,8 @@ class ActionsSubtotal
 
 		$jsData = array(
 			'conf' => array(
-				'SUBTOTAL_USE_NEW_FORMAT' => !empty($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+				'SUBTOTAL_USE_NEW_FORMAT' => !empty($conf->global->SUBTOTAL_USE_NEW_FORMAT),
+				'MAIN_VIEW_LINE_NUMBER' => !empty($conf->global->MAIN_VIEW_LINE_NUMBER)
 			),
 			'langs' => array(
 				'Level' => $langs->trans('Level')
@@ -306,7 +307,7 @@ class ActionsSubtotal
   							dialog_html += "&emsp;<select name='subtotal_line_level'>";
 	  						for (var i=1;i<10;i++)
 		  					{
-								dialog_html += "<option value="+i+"><?php echo $langs->trans('Level'); ?> "+i+"</option>";
+								dialog_html += '<option value="'+i+'">'+ jsSubTotalData.langs.Level +' '+i+'</option>';
 								}
 								dialog_html += "</select>";
 							}
@@ -355,13 +356,14 @@ class ActionsSubtotal
 										,data: params
 										,dataType: "html"
 									}).done(function(response) {
-										<?php if ($conf->global->MAIN_VIEW_LINE_NUMBER == 1) {?>
-										newlineid = $($.parseHTML(response)).find("#newlineid").text();
-										url_to=url_to+"&gotoline="+params.rank+"#row-"+newlineid;
-										<?php } else { ?>
-										url_to=url_to+"&gotoline="+params.rank+"#tableaddline";
-										<?php } ?>
-										document.location.href=url_to;
+										if(jsSubTotalData.conf.MAIN_VIEW_LINE_NUMBER == 1) {
+											newlineid = $($.parseHTML(response)).find("#newlineid").text();
+											url_to = url_to + "&gotoline=" + params.rank + "#row-" + newlineid;
+										}
+										else {
+											url_to = url_to + "&gotoline=" + params.rank + "#tableaddline";
+										}
+										document.location.href = url_to;
 									});
 
                                     $( this ).dialog( "close" );
