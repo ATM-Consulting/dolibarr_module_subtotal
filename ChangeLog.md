@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 
 ## Version 3.14 PI 
-
+- FIX : Remove transaction in  pdf_writelinedesc *10/11/2022* - 3.14.6 
 - FIX : PHP 8 Compatibility - *13/07/2022* - 3.14.5
 - FIX : Admin déplacement de l'option de récap en zone expérimentale *11/07/2022* 3.14.4
 - FIX : html tag missing for style *11/07/2022* 3.14.3
