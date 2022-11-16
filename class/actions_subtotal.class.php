@@ -2410,7 +2410,7 @@ class ActionsSubtotal
 	 */
 	function printObjectLine ($parameters, &$object, &$action, $hookmanager)
 	{
-		global $conf, $langs, $user, $db, $bc, $inputalsopricewithtax, $usercandelete, $toselect;
+		global $conf, $langs, $user, $db, $bc, $usercandelete, $toselect;
 
 		$num = &$parameters['num'];
 		$line = &$parameters['line'];
@@ -2881,10 +2881,9 @@ class ActionsSubtotal
 				<?php
 				$Telement = array('propal','commande','facture','supplier_proposal','order_supplier','invoice_supplier');
 
-				if ($conf->global->MASSACTION_CARD_ENABLE_SELECTLINES && $object->status == $object::STATUS_DRAFT && $usercandelete && in_array($object->element,$Telement)|| $action == 'selectlines' ) { // dolibarr 8
+				if (!empty($conf->global->MASSACTION_CARD_ENABLE_SELECTLINES) && $object->status == $object::STATUS_DRAFT && $usercandelete && in_array($object->element,$Telement)|| $action == 'selectlines' ) { // dolibarr 8
 
-					if ($action == 'editline' && GETPOST('lineid', 'int') == $line->id) {
-					} else {
+					if ($action !== 'editline' && GETPOST('lineid', 'int') !== $line->id) {
 						$checked = '';
 
 						if (in_array($line->id,$toselect)){
