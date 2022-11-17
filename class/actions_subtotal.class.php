@@ -2410,7 +2410,7 @@ class ActionsSubtotal
 	 */
 	function printObjectLine ($parameters, &$object, &$action, $hookmanager)
 	{
-		global $conf,$langs,$user,$db,$bc;
+		global $conf, $langs, $user, $db, $bc, $usercandelete, $toselect;
 
 		$num = &$parameters['num'];
 		$line = &$parameters['line'];
@@ -2565,6 +2565,18 @@ class ActionsSubtotal
 				<?php if(! empty($conf->global->MAIN_VIEW_LINE_NUMBER)) { ?>
 				<td class="linecolnum"><?php echo $i + 1; ?></td>
 				<?php } ?>
+
+				<?php
+				if ($object->element == 'order_supplier') {
+					$colspan--;
+				}
+				if ($object->element == 'supplier_proposal') {
+					$colspan += 2;
+				}
+				if ($object->element == 'invoice_supplier') {
+					$colspan -= 2;
+				}
+				?>
 
 				<td colspan="<?php echo $colspan; ?>" style="<?php TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;'; ?>  <?php echo ($line->qty>90)?'text-align:right':'' ?> "><?php
 					if($action=='editline' && GETPOST('lineid', 'int') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
@@ -2869,9 +2881,26 @@ class ActionsSubtotal
 			<?php } ?>
 
 
-			<?php  if($action == 'selectlines'){ // dolibarr 8 ?>
-			<td class="linecolcheck" align="center"><input type="checkbox" class="linecheckbox" name="line_checkbox[<?php echo $i+1; ?>]" value="<?php echo $line->id; ?>" ></td>
-			<?php } ?>
+				<?php
+				$Telement = array('propal','commande','facture','supplier_proposal','order_supplier','invoice_supplier');
+
+				if (!empty($conf->global->MASSACTION_CARD_ENABLE_SELECTLINES) && $object->status == $object::STATUS_DRAFT && $usercandelete && in_array($object->element,$Telement)|| $action == 'selectlines' ) { // dolibarr 8
+
+					if ($action !== 'editline' && GETPOST('lineid', 'int') !== $line->id) {
+						$checked = '';
+
+						if (in_array($line->id,$toselect)){
+							$checked = 'checked';
+						}
+
+						if ($action != 'editline') {
+							?>
+							<td class='linecolcheck center'><input type='checkbox' class='linecheckbox' <?php print $checked; ?> name="line_checkbox[<?php print $i + 1; ?>]" value="<?php print $line->id; ?>"></td>
+							<?php
+						}
+					}
+				}
+				?>
 
 			</tr>
 			<?php
