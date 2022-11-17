@@ -2573,6 +2573,9 @@ class ActionsSubtotal
 				if ($object->element == 'supplier_proposal') {
 					$colspan += 2;
 				}
+				if ($object->element == 'invoice_supplier') {
+					$colspan -= 2;
+				}
 				?>
 
 				<td colspan="<?php echo $colspan; ?>" style="<?php TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;'; ?>  <?php echo ($line->qty>90)?'text-align:right':'' ?> "><?php
