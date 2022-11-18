@@ -9,8 +9,7 @@ All notable changes to this project will be documented in this file.
 
 - NEW : Ajout de massaction de suppression de ligne sur les card *16/11/2022* 3.15.0
 
-## Version 3.14 PI 
-
+## Version 3.14 PI
 
 - FIX : Update info bits on create from hook - *18/11/2022* - 3.14.8 ```PR #273 OpenDsi```  
   le code permettant de mettre à jour l'info bit semble être obsolète depuis la version 10 de Dolibarr (le mieux serait de remonter sur les versions précédentes et retrouver à partir de quelle version de Dolibarr ce code n'est plus utile)
