@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 3.14 PI 
 
-- FIX : Update info bits on create from hook - *18/11/2022* - 3.14.6
+- FIX : Update info bits on create from hook - *18/11/2022* - 3.14.6  
   le code permettant de mettre à jour l'info bit semble être obsolète depuis la version 10 de Dolibarr (le mieux serait de remonter sur les versions précédentes et retrouver à partir de quelle version de Dolibarr ce code n'est plus utile)
   De plus, il ajoute des sauts de lignes lorsque l'objet copié et l'objet source ne possèdent pas le même nombre de lignes. En effet un autre module peut ajouter une ligne et on a alors un saut de ligne supplémentaire.
 - FIX : PHP 8 Compatibility - *13/07/2022* - 3.14.5
