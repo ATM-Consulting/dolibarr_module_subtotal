@@ -2,8 +2,12 @@
 All notable changes to this project will be documented in this file.
 
 # [Unreleased]
-- NEW : Ajout de massaction de suppression de ligne sur les card *16/11/2022* 3.15.0
 
+
+
+## Version 3.15
+
+- NEW : Ajout de massaction de suppression de ligne sur les card *16/11/2022* 3.15.0
 
 ## Version 3.14 PI 
 
