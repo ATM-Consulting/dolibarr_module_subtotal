@@ -957,13 +957,13 @@ class ActionsSubtotal
 		if ($pdfModelUseColSystem) {
 			include_once __DIR__ . '/staticPdf.model.php';
 			$staticPdfModel = new ModelePDFStatic($object->db);
-			$staticPdfModel->marge_droite 	= $object->subtotalPdfModelInfo->marge_droite;
-			$staticPdfModel->marge_gauche 	= $object->subtotalPdfModelInfo->marge_gauche;
-			$staticPdfModel->page_largeur 	= $object->subtotalPdfModelInfo->page_largeur;
-			$staticPdfModel->page_hauteur 	= $object->subtotalPdfModelInfo->page_hauteur;
-			$staticPdfModel->cols 			= $object->subtotalPdfModelInfo->cols;
-			$staticPdfModel->defaultTitlesFieldsStyle 	= $object->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
-			$staticPdfModel->defaultContentsFieldsStyle = $object->subtotalPdfModelInfo->defaultContentsFieldsStyle;
+			$staticPdfModel->marge_droite 	= $object->context['subtotalPdfModelInfo']->marge_droite;
+			$staticPdfModel->marge_gauche 	= $object->context['subtotalPdfModelInfo']->marge_gauche;
+			$staticPdfModel->page_largeur 	= $object->context['subtotalPdfModelInfo']->page_largeur;
+			$staticPdfModel->page_hauteur 	= $object->context['subtotalPdfModelInfo']->page_hauteur;
+			$staticPdfModel->cols 			= $object->context['subtotalPdfModelInfo']->cols;
+			$staticPdfModel->defaultTitlesFieldsStyle 	= $object->context['subtotalPdfModelInfo']->defaultTitlesFieldsStyle;
+			$staticPdfModel->defaultContentsFieldsStyle = $object->context['subtotalPdfModelInfo']->defaultContentsFieldsStyle;
 			$staticPdfModel->prepareArrayColumnField($object, $langs);
 
 			if (isset($staticPdfModel->cols['totalexcltax']['content']['padding'][0])) {
@@ -1816,8 +1816,10 @@ class ActionsSubtotal
 			$this->subtotal_show_qty_by_default = true;
 		}
 
-		$object->subtotalPdfModelInfo = new stdClass(); // see defineColumnFiel method in this class
-		$object->subtotalPdfModelInfo->cols = false;
+		// for compatibility dolibarr < 15
+		if(!empty($object->context)){ $object->context = array(); }
+		$object->context['subtotalPdfModelInfo'] = new stdClass(); // see defineColumnFiel method in this class
+		$object->context['subtotalPdfModelInfo']->cols = false;
 
 
 
@@ -2163,7 +2165,7 @@ class ActionsSubtotal
 	 */
 	function printObjectLine($parameters, &$object, &$action, $hookmanager)
 	{
-		global $conf,$langs,$user,$db,$bc;
+		global $conf, $langs, $user, $db, $bc, $usercandelete, $toselect;
 
 		$num = &$parameters['num'];
 		$line = &$parameters['line'];
@@ -2296,6 +2298,18 @@ class ActionsSubtotal
 				<?php if (! empty($conf->global->MAIN_VIEW_LINE_NUMBER)) { ?>
 				<td class="linecolnum"><?php echo $i + 1; ?></td>
 				<?php } ?>
+
+				<?php
+				if ($object->element == 'order_supplier') {
+					$colspan--;
+				}
+				if ($object->element == 'supplier_proposal') {
+					$colspan += 2;
+				}
+				if ($object->element == 'invoice_supplier') {
+					$colspan -= 2;
+				}
+				?>
 
 				<td colspan="<?php echo $colspan; ?>" style="<?php TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;'; ?>  <?php echo ($line->qty>90)?'text-align:right':'' ?> "><?php
 				if ($action=='editline' && GETPOST('lineid', 'int') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
@@ -3342,7 +3356,7 @@ class ActionsSubtotal
 	{
 
 		// If this model is column field compatible it will add info to change subtotal behavior
-		$parameters['object']->subtotalPdfModelInfo->cols = $pdfDoc->cols;
+		$parameters['object']->context['subtotalPdfModelInfo']->cols = $pdfDoc->cols;
 
 		// HACK Pour passer les paramettres du model dans les hooks sans infos
 		$parameters['object']->subtotalPdfModelInfo->marge_droite 	= $pdfDoc->marge_droite;
