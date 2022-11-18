@@ -1017,18 +1017,18 @@ class ActionsSubtotal
 		}
 
 		// POUR LES PDF DE TYPE PDF_EVOLUTION (ceux avec les colonnes configurables)
-		$pdfModelUseColSystem = !empty($object->subtotalPdfModelInfo->cols); // justilise une variable au cas ou le test evolue
+		$pdfModelUseColSystem = !empty($object->context['subtotalPdfModelInfo']->cols); // justilise une variable au cas ou le test evolue
 		if($pdfModelUseColSystem){
 
 			include_once __DIR__ . '/staticPdf.model.php';
 			$staticPdfModel = new ModelePDFStatic($object->db);
-			$staticPdfModel->marge_droite 	= $object->subtotalPdfModelInfo->marge_droite;
-			$staticPdfModel->marge_gauche 	= $object->subtotalPdfModelInfo->marge_gauche;
-			$staticPdfModel->page_largeur 	= $object->subtotalPdfModelInfo->page_largeur;
-			$staticPdfModel->page_hauteur 	= $object->subtotalPdfModelInfo->page_hauteur;
-			$staticPdfModel->cols 			= $object->subtotalPdfModelInfo->cols;
-			$staticPdfModel->defaultTitlesFieldsStyle 	= $object->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
-			$staticPdfModel->defaultContentsFieldsStyle = $object->subtotalPdfModelInfo->defaultContentsFieldsStyle;
+			$staticPdfModel->marge_droite 	= $object->context['subtotalPdfModelInfo']->marge_droite;
+			$staticPdfModel->marge_gauche 	= $object->context['subtotalPdfModelInfo']->marge_gauche;
+			$staticPdfModel->page_largeur 	= $object->context['subtotalPdfModelInfo']->page_largeur;
+			$staticPdfModel->page_hauteur 	= $object->context['subtotalPdfModelInfo']->page_hauteur;
+			$staticPdfModel->cols 			= $object->context['subtotalPdfModelInfo']->cols;
+			$staticPdfModel->defaultTitlesFieldsStyle 	= $object->context['subtotalPdfModelInfo']->defaultTitlesFieldsStyle;
+			$staticPdfModel->defaultContentsFieldsStyle = $object->context['subtotalPdfModelInfo']->defaultContentsFieldsStyle;
 			$staticPdfModel->prepareArrayColumnField($object, $langs);
 
 			if(isset($staticPdfModel->cols['totalexcltax']['content']['padding'][0])){
@@ -1101,8 +1101,8 @@ class ActionsSubtotal
 			if ($fillBackground) {
 				$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
 			}
-			$pdf->SetXY($object->subtotalPdfModelInfo->marge_droite, $posy+$backgroundCellPosYOffset);
-			$pdf->MultiCell($object->subtotalPdfModelInfo->page_largeur - $object->subtotalPdfModelInfo->marge_gauche - $object->subtotalPdfModelInfo->marge_droite, $cell_height, '', 0, '', 1);
+			$pdf->SetXY($object->context['subtotalPdfModelInfo']->marge_droite, $posy+$backgroundCellPosYOffset);
+			$pdf->MultiCell($object->context['subtotalPdfModelInfo']->page_largeur - $object->context['subtotalPdfModelInfo']->marge_gauche - $object->context['subtotalPdfModelInfo']->marge_droite, $cell_height, '', 0, '', 1);
 		}
 		else{
 			$pdf->SetXY($posx, $posy+$backgroundCellPosYOffset); //-1 to take into account the entire height of the row
@@ -1285,9 +1285,9 @@ class ActionsSubtotal
 			$bgW = $pdf->page_largeur - $pdf->marge_droite;// historiquement ce sont ces valeurs, mais elles sont la plupart du temps vide
 
 			// POUR LES PDF DE TYPE PDF_EVOLUTION (ceux avec les colonnes configurables)
-			if(!empty($object->subtotalPdfModelInfo->cols) && version_compare('11.0.0', DOL_VERSION, '<')){
-				$bgStartX = $object->subtotalPdfModelInfo->marge_droite;
-				$bgW = $object->subtotalPdfModelInfo->page_largeur - $object->subtotalPdfModelInfo->marge_gauche - $object->subtotalPdfModelInfo->marge_droite;
+			if(!empty($object->context['subtotalPdfModelInfo']->cols) && version_compare('11.0.0', DOL_VERSION, '<')){
+				$bgStartX = $object->context['subtotalPdfModelInfo']->marge_droite;
+				$bgW = $object->context['subtotalPdfModelInfo']->page_largeur - $object->context['subtotalPdfModelInfo']->marge_gauche - $object->context['subtotalPdfModelInfo']->marge_droite;
 			}
 
 			$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
@@ -1962,8 +1962,10 @@ class ActionsSubtotal
 			$this->subtotal_show_qty_by_default = true;
 		}
 
-		$object->subtotalPdfModelInfo = new stdClass(); // see defineColumnFiel method in this class
-		$object->subtotalPdfModelInfo->cols = false;
+		// for compatibility dolibarr < 15
+		if(!empty($object->context)){ $object->context = array(); }
+		$object->context['subtotalPdfModelInfo'] = new stdClass(); // see defineColumnFiel method in this class
+		$object->context['subtotalPdfModelInfo']->cols = false;
 
 
 
@@ -3720,16 +3722,16 @@ class ActionsSubtotal
 	{
 
 		// If this model is column field compatible it will add info to change subtotal behavior
-		$parameters['object']->subtotalPdfModelInfo->cols = $pdfDoc->cols;
+		$parameters['object']->context['subtotalPdfModelInfo']->cols = $pdfDoc->cols;
 
 		// HACK Pour passer les paramettres du model dans les hooks sans infos
-		$parameters['object']->subtotalPdfModelInfo->marge_droite 	= $pdfDoc->marge_droite;
-		$parameters['object']->subtotalPdfModelInfo->marge_gauche 	= $pdfDoc->marge_gauche;
-		$parameters['object']->subtotalPdfModelInfo->page_largeur 	= $pdfDoc->page_largeur;
-		$parameters['object']->subtotalPdfModelInfo->page_hauteur 	= $pdfDoc->page_hauteur;
-		$parameters['object']->subtotalPdfModelInfo->format 		= $pdfDoc->format;
-		$parameters['object']->subtotalPdfModelInfo->defaultTitlesFieldsStyle = $pdfDoc->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
-		$parameters['object']->subtotalPdfModelInfo->defaultContentsFieldsStyle = $pdfDoc->subtotalPdfModelInfo->defaultContentsFieldsStyle;
+		$parameters['object']->context['subtotalPdfModelInfo']->marge_droite 	= $pdfDoc->marge_droite;
+		$parameters['object']->context['subtotalPdfModelInfo']->marge_gauche 	= $pdfDoc->marge_gauche;
+		$parameters['object']->context['subtotalPdfModelInfo']->page_largeur 	= $pdfDoc->page_largeur;
+		$parameters['object']->context['subtotalPdfModelInfo']->page_hauteur 	= $pdfDoc->page_hauteur;
+		$parameters['object']->context['subtotalPdfModelInfo']->format 		= $pdfDoc->format;
+		$parameters['object']->context['subtotalPdfModelInfo']->defaultTitlesFieldsStyle = $pdfDoc->context['subtotalPdfModelInfo']->defaultTitlesFieldsStyle;
+		$parameters['object']->context['subtotalPdfModelInfo']->defaultContentsFieldsStyle = $pdfDoc->context['subtotalPdfModelInfo']->defaultContentsFieldsStyle;
 
 	}
 
