@@ -57,6 +57,7 @@ All notable changes to this project will be documented in this file.
     
 
 ## Version 3.6
+- FIX : Substitutions ODT ne se font pas pour toutes les actions sur les factures *15/12/2022* 3.6.11
 - FIX : Title lines broken on PDF for documents whose lines use the `desc` field instead of the `label` field (such as
         supplier orders and invoices) *22/11/2021* - 3.6.10
 - FIX : checkbox to add a subtotal title block per order on invoices using the "Bill orders" feature was broken by
