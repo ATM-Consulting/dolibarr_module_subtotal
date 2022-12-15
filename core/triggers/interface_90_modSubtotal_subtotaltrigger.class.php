@@ -162,6 +162,56 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
         dol_include_once('/subtotal/class/subtotal.class.php');
         $langs->load('subtotal@subtotal');
 
+        // If we inserted an invoice line and it came from a shipment or a delivery, we have a problem, Houston.
+        // The lines of those objects don't have a special_code, it is therefore not copied from them.
+        // Nevertheless, they refer their origin order line => Get the order line, and if it belongs to our
+        // module, update the invoice line accordingly
+        if (
+            $action === 'LINEBILL_INSERT'
+            && isset($object->origin)
+            && in_array($object->origin, array('shipping', 'delivery'))
+            && ! empty($object->origin_id)
+        ) {
+            if ($object->element === 'delivery') {
+                require_once DOL_DOCUMENT_ROOT . '/delivery/class/delivery.class.php';
+                $originSendingLine = new DeliveryLine($this->db);
+            } else {
+                require_once DOL_DOCUMENT_ROOT . '/expedition/class/expedition.class.php';
+                $originSendingLine = new ExpeditionLigne($this->db);
+            }
+
+            $originSendingLineFetchReturn = $originSendingLine->fetch($object->origin_id);
+
+            if ($originSendingLineFetchReturn < 0) {
+                $this->error = $originSendingLine->error;
+                $this->errors = $originSendingLine->errors;
+                return $originSendingLineFetchReturn;
+            }
+
+            require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
+            $originOrderLine = new OrderLine($this->db);
+
+            $originOrderLineFetchReturn = $originOrderLine->fetch($originSendingLine->fk_origin_line);
+
+            if ($originOrderLineFetchReturn < 0) {
+                $this->error = $originOrderLine->error;
+                $this->errors = $originOrderLine->errors;
+                return $originOrderLineFetchReturn;
+            }
+
+            if ($originOrderLine->special_code == TSubtotal::$module_number) {
+                $object->special_code = TSubtotal::$module_number;
+
+                $updateReturn = $object->update($user, 1); // No trigger to prevent loops
+
+                if ($updateReturn < 0) {
+                    $this->error = $object->error;
+                    $this->errors = $object->errors;
+                    return $updateReturn;
+                }
+            }
+        }
+
         if (!empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) && in_array($action, array('LINEPROPAL_INSERT', 'LINEORDER_INSERT', 'LINEBILL_INSERT')))
 		{
 			$rang = GETPOST('under_title', 'int'); // Rang du titre
