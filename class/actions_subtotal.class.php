@@ -511,7 +511,7 @@ class ActionsSubtotal
 	function ODTSubstitutionLine(&$parameters, &$object, $action, $hookmanager) {
 		global $conf;
 
-		if($action === 'builddoc') {
+		if($action === 'builddoc' || $action === 'addline' || $action === 'confirm_valid' || $action === 'confirm_paiement')) {
 
 			$line = &$parameters['line'];
 			$object = &$parameters['object'];
