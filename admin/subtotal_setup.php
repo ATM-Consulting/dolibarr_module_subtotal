@@ -179,7 +179,12 @@ $item->fieldOutputOverride ='<input type="color" value="'.$item->fieldValue .'" 
 // Activer la gestion des blocs "Non Compris" pour exclusion du total
 $formSetup->newItem('ManageNonCompris')->setAsTitle();
 
-$formSetup->newItem('SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS')->setAsYesNo();
+$itemNC = $formSetup->newItem('SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS')->setAsSelect(array(0 => $langs->transnoentities('No'), 1 => $langs->transnoentities('Yes')));
+$itemNC->setSaveCallBack(function ($itemNC){
+	if((int) $itemNC->fieldValue > 0) {
+		_createExtraComprisNonCompris();
+	}
+});
 
 
 // Colonnes à afficher sur lignes marquées "Non Compris"
@@ -321,6 +326,7 @@ $formSetup->newItem('SUBTOTAL_PROPAL_ADD_RECAP')->setAsYesNo();
 
 if ($action == 'update' && !empty($formSetup) && is_object($formSetup) && !empty($user->admin)) {
 	$formSetup->saveConfFromPost();
+	$result = dolibarr_set_const($itemNC->db, $itemNC->confKey, $itemNC->fieldValue, 'chaine', 0, '', $itemNC->entity);
 	header('Location:'.$_SERVER['PHP_SELF']);
 	exit;
 }
