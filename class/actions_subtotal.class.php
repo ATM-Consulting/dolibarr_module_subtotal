@@ -823,7 +823,84 @@ class ActionsSubtotal
 		) {
 			$this->_billOrdersAddCheckBoxForTitleBlocks();
 		}
-		return 0;
+        else {
+            // when automatic generate is enabled : keep last selected options from last "builddoc" action (ganerate document manually)
+            if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
+                if (in_array('invoicecard', $contextArray)
+                    || in_array('propalcard', $contextArray)
+                    || in_array('ordercard', $contextArray)
+                    || in_array('ordersuppliercard', $contextArray)
+                    || in_array('invoicesuppliercard', $contextArray)
+                    || in_array('supplier_proposalcard', $contextArray)
+                ) {
+                    $confirm = GETPOST('confirm', 'alpha');
+
+                    if ($action == 'modif'
+                        || ($action == 'confirm_modif' && $confirm == 'yes')
+                        || ($action == 'confirm_edit' && $confirm == 'yes')
+                        || $action == 'reopen'
+                        || (($action == 'confirm_validate' || $action == 'confirm_valid') && $confirm == 'yes')
+                    ) {
+                        if (in_array('invoicecard', $contextArray)) {
+                            $sessname = 'subtotal_hideInnerLines_facture';
+                            $sessname2 = 'subtotal_hidedetails_facture';
+                            $sessname3 = 'subtotal_hideprices_facture';
+                        } elseif (in_array('invoicesuppliercard', $contextArray)) {
+                            $sessname = 'subtotal_hideInnerLines_facture_fournisseur';
+                            $sessname2 = 'subtotal_hidedetails_facture_fournisseur';
+                            $sessname3 = 'subtotal_hideprices_facture_fournisseur';
+                        } elseif (in_array('propalcard', $contextArray)) {
+                            $sessname = 'subtotal_hideInnerLines_propal';
+                            $sessname2 = 'subtotal_hidedetails_propal';
+                            $sessname3 = 'subtotal_hideprices_propal';
+                        } elseif (in_array('supplier_proposalcard', $contextArray)) {
+                            $sessname = 'subtotal_hideInnerLines_supplier_proposal';
+                            $sessname2 = 'subtotal_hidedetails_supplier_proposal';
+                            $sessname3 = 'subtotal_hideprices_supplier_proposal';
+                        } elseif (in_array('ordercard', $contextArray)) {
+                            $sessname = 'subtotal_hideInnerLines_commande';
+                            $sessname2 = 'subtotal_hidedetails_commande';
+                            $sessname3 = 'subtotal_hideprices_commande';
+                        } elseif (in_array('ordersuppliercard', $contextArray)) {
+                            $sessname = 'subtotal_hideInnerLines_commande_fournisseur';
+                            $sessname2 = 'subtotal_hidedetails_commande_fournisseur';
+                            $sessname3 = 'subtotal_hideprices_commande_fournisseur';
+                        } else {
+                            $sessname = 'subtotal_hideInnerLines_unknown';
+                            $sessname2 = 'subtotal_hidedetails_unknown';
+                            $sessname3 = 'subtotal_hideprices_unknown';
+                        }
+
+                        global $hidedetails; // same name as in global card (proposal, order, invoice, ...)
+                        global $hideprices; // used as global value in this module
+
+                        if (GETPOSTISSET('hideInnerLines')) {
+                            $hideInnerLines = GETPOST('hideInnerLines', 'int');
+                        } else {
+                            $hideInnerLines = isset($_SESSION[$sessname][$object->id]) ? $_SESSION[$sessname][$object->id] : 0;
+                        }
+                        $_POST['hideInnerLines'] = $hideInnerLines;
+
+                        if (GETPOSTISSET('hidedetails')) {
+                            $hidedetails = GETPOST('hidedetails', 'int');
+                        } else {
+                            $hidedetails = isset($_SESSION[$sessname2][$object->id]) ? $_SESSION[$sessname2][$object->id] : (!empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS) ? 1 : 0);
+                        }
+                        // no need to set POST value (it's a global value used in global card)
+
+                        if (GETPOSTISSET('hideprices')) {
+                            $hideprices = GETPOST('hideprices', 'int');
+                        } else {
+                            $hidepricesDefaultConf = !empty($conf->global->SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED) ? $conf->global->SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED : 0;
+                            $hideprices = isset($_SESSION[$sessname3][$object->id]) ? $_SESSION[$sessname3][$object->id] : $hidepricesDefaultConf;
+                        }
+                        // no need to set POST value (it's a global value used in this module)
+                    }
+                }
+            }
+        }
+
+        return 0;
 	}
 
 	function formAddObjectLine ($parameters, &$object, &$action, $hookmanager) {
