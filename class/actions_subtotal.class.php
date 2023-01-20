@@ -2520,6 +2520,7 @@ class ActionsSubtotal
 			}
 			if(empty($line->description)) $line->description = $line->desc;
 			$colspan = 5;
+			if(DOL_VERSION > 16.0) $colspan++; // Ajout de la colonne PU TTC
 			if($object->element == 'facturerec' ) $colspan = 3;
 			if($object->element == 'order_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 3 : $colspan = 6;
 			if($object->element == 'invoice_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 4: $colspan = 7;
@@ -2536,7 +2537,6 @@ class ActionsSubtotal
 			if(!empty($conf->global->PRODUCT_USE_UNITS)) $colspan++;
 			// Compatibility module showprice
 			if(!empty($conf->showprice->enabled)) $colspan++;
-
 			/* Titre */
 			//var_dump($line);
 
