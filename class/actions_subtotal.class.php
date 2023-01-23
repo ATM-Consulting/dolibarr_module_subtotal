@@ -2097,6 +2097,10 @@ class ActionsSubtotal
 
 			foreach($object->lines as $k=>&$line)
 			{
+                // to keep compatibility with supplier order and old versions (rowid was replaced with id in fetch lines method)
+                if ($line->id > 0) {
+                    $line->rowid = $line->id;
+                }
 
 				if($line->product_type==9 && $line->rowid>0)
 				{
