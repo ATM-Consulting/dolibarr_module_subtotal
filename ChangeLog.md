@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
-
+- NEW : add rank input for subtotal lines *24/01/2023* - 3.16.0
 
 ## Version 3.15
 - FIX : Multiples erreurs de colspan qui créaient des décalage sur les tableaux de lignes - *20/01/2023* - 3.15.3
