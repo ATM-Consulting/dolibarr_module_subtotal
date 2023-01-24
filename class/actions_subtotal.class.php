@@ -2599,25 +2599,32 @@ class ActionsSubtotal
 				</script>
 				<?php
 			}
+
 			if(empty($line->description)) $line->description = $line->desc;
+
+            $TNonAffectedByMarge = array('order_supplier', 'invoice_supplier', 'supplier_proposal');
+            $affectedByMarge = in_array($object->element, $TNonAffectedByMarge) ? 0 : 1;
 			$colspan = 5;
-			if($object->element == 'facturerec' ) $colspan = 3;
 			if($object->element == 'order_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 3 : $colspan = 6;
 			if($object->element == 'invoice_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 4: $colspan = 7;
 			if($object->element == 'supplier_proposal') (float) DOL_VERSION < 6.0 ? $colspan = 4 : $colspan = 3;
+
+			if(DOL_VERSION > 16.0) $colspan++; // Ajout de la colonne PU TTC
+
+			if($object->element == 'facturerec' ) $colspan = 5;
+
 			if(!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 				$colspan++; // Colonne PU Devise
 			}
 			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
 			$margins_hidden_by_module = empty($conf->affmarges->enabled) ? false : !($_SESSION['marginsdisplayed']);
 			if(!empty($conf->margin->enabled) && !$margins_hidden_by_module) $colspan++;
-			if(!empty($conf->margin->enabled) && !empty($conf->global->DISPLAY_MARGIN_RATES) && !$margins_hidden_by_module) $colspan++;
-			if(!empty($conf->margin->enabled) && !empty($conf->global->DISPLAY_MARK_RATES) && !$margins_hidden_by_module) $colspan++;
+			if(!empty($conf->margin->enabled) && !empty($conf->global->DISPLAY_MARGIN_RATES) && !$margins_hidden_by_module && $affectedByMarge > 0) $colspan++;
+			if(!empty($conf->margin->enabled) && !empty($conf->global->DISPLAY_MARK_RATES) && !$margins_hidden_by_module && $affectedByMarge > 0) $colspan++;
 			if($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION) $colspan++;
 			if(!empty($conf->global->PRODUCT_USE_UNITS)) $colspan++;
 			// Compatibility module showprice
 			if(!empty($conf->showprice->enabled)) $colspan++;
-
 			/* Titre */
 			//var_dump($line);
 
