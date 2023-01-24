@@ -2705,7 +2705,7 @@ class ActionsSubtotal
 				}
 				?>
 
-				<td id="line_<?php echo $line->id ?>" colspan="<?php echo $colspan; ?>" style="<?php TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;'; ?>  <?php echo ($line->qty>90)?'text-align:right':'' ?> "><?php
+				<td colspan="<?php echo $colspan; ?>" style="<?php TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;'; ?>  <?php echo ($line->qty>90)?'text-align:right':'' ?> "><?php
 					if($action=='editline' && GETPOST('lineid', 'int') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 
 						$params=array('line'=>$line);
