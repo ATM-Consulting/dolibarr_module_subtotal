@@ -250,10 +250,12 @@ class ActionsSubtotal
 		$jsData = array(
 			'conf' => array(
 				'SUBTOTAL_USE_NEW_FORMAT' => !empty($conf->global->SUBTOTAL_USE_NEW_FORMAT),
-				'MAIN_VIEW_LINE_NUMBER' => !empty($conf->global->MAIN_VIEW_LINE_NUMBER)
+				'MAIN_VIEW_LINE_NUMBER' => !empty($conf->global->MAIN_VIEW_LINE_NUMBER),
+				'token' => ((float) DOL_VERSION < 11.0) ?  $_SESSION['newtoken'] : newToken()
 			),
 			'langs' => array(
-				'Level' => $langs->trans('Level')
+				'Level' => $langs->trans('Level'),
+				'Position' => $langs->transnoentities('Position')
 			)
 		);
 
@@ -280,8 +282,8 @@ class ActionsSubtotal
 					     $( "#dialog-prompt-subtotal" ).remove();
 
 						 var dialog_html = '<div id="dialog-prompt-subtotal" '+(action == 'addSubtotal' ? 'class="center"' : '')+' >';
-						 dialog_html += '<input id="token" name="token" type="hidden" value="<?php echo ((float) DOL_VERSION < 11.0) ?  $_SESSION['newtoken'] : newToken(); ?>" />';
-						 dialog_html += '<input id="subtotal_line_position" name="subtotal_line_position" type="text" size="1" text-align="right" placeholder="<?php echo $langs->transnoentities('Position') ?>" />&emsp;';
+						 dialog_html += '<input id="token" name="token" type="hidden" value="' + jsSubTotalData.conf.token + '" />';
+
 
 						 if (typeof show_under_title != 'undefined' && show_under_title)
 						 {
@@ -301,10 +303,16 @@ class ActionsSubtotal
 							else dialog_html += '<input id="sub-total-title" size="30" value="" placeholder="'+label+'" />';
 						}
 
+						if (action == 'addSubtotal'){
+							dialog_html += '<input id="sub-total-title" size="30" value="" placeholder="'+label+'" />';
+						}
+
+						if(jsSubTotalData.conf.MAIN_VIEW_LINE_NUMBER) {
+							dialog_html += '&emsp;<input style="max-width: 80px;" id="subtotal_line_position" name="subtotal_line_position" type="number" min="0" step="1" size="1" text-align="right" placeholder="' + jsSubTotalData.langs.Position + '" />';
+						}
+
 						if (action == 'addTitle' || action == 'addSubtotal')
 						{
-							if (action == 'addSubtotal') dialog_html += '<input id="sub-total-title" size="30" value="" placeholder="'+label+'" />';
-
 							if(jsSubTotalData.conf.SUBTOTAL_USE_NEW_FORMAT){
   								dialog_html += '&emsp;<select name="subtotal_line_level">';
 								for (var i=1;i<10;i++)
@@ -345,12 +353,19 @@ class ActionsSubtotal
 	                        buttons: {
 	                            "Ok": function() {
 	                            	if (typeof use_textarea != 'undefined' && use_textarea && typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" ){ updateAllMessageForms(); }
-									params.rank = $(this).find('#subtotal_line_position').val();
+									params.rank = 0;
+									if($(this).find('#subtotal_line_position').length > 0){
+										params.rank = $(this).find('#subtotal_line_position').val();
+									}
+
 									params.title = (typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" && "sub-total-title" in CKEDITOR.instances ? CKEDITOR.instances["sub-total-title"].getData() : $(this).find('#sub-total-title').val());
 									params.under_title = $(this).find('select[name=under_title]').val();
 									params.free_text = $(this).find('select[name=free_text]').val();
 									params.level = $(this).find('select[name=subtotal_line_level]').val();
 									params.token = $(this).find('input[name=token]').val();
+
+									let microtime = new Date();
+									url_to+="&microtime="+ microtime.getTime(); // to avoid # ancor blocking refresh by adding same rank as curent
 
 									$.ajax({
 										url: url_ajax
