@@ -39,6 +39,8 @@ SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info=Clés de remplacement :<br /><b>__R
 subtotal_add_title_bloc_from_orderstoinvoice=Ajouter un bloc titre et sous-total entre chaque commande
 SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK=L'ajout sous un titre se fera en fin de section 
 SUBTOTAL_TITLE_STYLE=Style des titres (B = gras, U = souligné, I = italique)
+SUBTOTAL_TITLE_SIZE=Taille des titres
+SUBTOTAL_TITLE_SIZE_info=égale à 9 si non renseignée
 SUBTOTAL_SUBTOTAL_STYLE=Style des sous-totaux (B = gras, U = souligné, I = italique)
 SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES=Avoir une seule ligne de titre + total si l'option "%s" est utilisée (expérimental)
 SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES=Remplacer par le détail des TVA si l'option "%s" est utilisée (expérimental)

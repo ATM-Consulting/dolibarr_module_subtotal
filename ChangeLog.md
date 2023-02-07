@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+- NEW : Ajout configuration SUBTOTAL_TITLE_SIZE permettant d'éditer la taille des titres - *07/02/2023* - 3.16.0
 
 
 ## Version 3.15
