@@ -542,9 +542,9 @@ class ActionsSubtotal
 					//list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
                     $TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
 
-					$substitutionarray['line_price_ht'] = price($TInfo[0]);
-					$substitutionarray['line_price_vat'] = price($TInfo[1]);
-					$substitutionarray['line_price_ttc'] = price($TInfo[2]);
+					$substitutionarray['line_price_ht'] = price($TInfo[0],0,'',1,2,1);
+					$substitutionarray['line_price_vat'] = price($TInfo[1],0,'',1,2,1);
+					$substitutionarray['line_price_ttc'] = price($TInfo[2],0,'',1,2,1);
 				} else {
 					$substitutionarray['line_modsubtotal_title'] = true;
 				}
@@ -1204,7 +1204,7 @@ class ActionsSubtotal
 		}
 
 		if (!$hidePriceOnSubtotalLines) {
-			$total_to_print = price($line->total);
+			$total_to_print = price($line->total,0,'',1,2,1);
 
 			if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS))
 			{
@@ -1236,7 +1236,7 @@ class ActionsSubtotal
 
 					$TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
 					$TTotal_tva = $TInfo[3];
-					$total_to_print = price($TInfo[0]);
+					$total_to_print = price($TInfo[0],0,'',1,2,1);
 
                     $line->total_ht = $TInfo[0];
 					$line->total = $TInfo[0];
@@ -1549,7 +1549,7 @@ class ActionsSubtotal
 			}
 		}
 		if (GETPOST('hideInnerLines', 'int') && !empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES)){
-		    $this->resprints = price($object->lines[$i]->total_ht);
+		    $this->resprints = price($object->lines[$i]->total_ht,0,'',1,2,1);
 		}
 
 		// Si la gestion C/NC est active et que je suis sur un ligne dont l'extrafield est coché
@@ -1695,7 +1695,7 @@ class ActionsSubtotal
                 if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->array_options['options_show_total_ht'])) {
                     $TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
-                    $this->resprints = price($TTotal['total_unit_subprice']);
+                    $this->resprints = price($TTotal['total_unit_subprice'],0,'',1,2,1);
                 }
             }
 
