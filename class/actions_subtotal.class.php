@@ -1357,18 +1357,20 @@ class ActionsSubtotal
 
 		$style = ($line->qty==1) ? 'BU' : 'BUI';
 		if (!empty($conf->global->SUBTOTAL_TITLE_STYLE)) $style = $conf->global->SUBTOTAL_TITLE_STYLE;
+		$size_title = 9;
+		if (!empty($conf->global->SUBTOTAL_TITLE_SIZE)) $size_title = $conf->global->SUBTOTAL_TITLE_SIZE;
 
 		if($hideInnerLines) {
 			if($line->qty==1){
-				$pdf->SetFont('', $style, 9);
+				$pdf->SetFont('', $style, $size_title);
 			}else{
 				if (!empty($conf->global->SUBTOTAL_STYLE_TITRES_SI_LIGNES_CACHEES)) $style = $conf->global->SUBTOTAL_STYLE_TITRES_SI_LIGNES_CACHEES;
-				$pdf->SetFont('', $style, 9);
+				$pdf->SetFont('', $style, $size_title);
 			}
 		}
 		else {
-			if($line->qty==1)$pdf->SetFont('', $style, 9); //TODO if super utile
-			else $pdf->SetFont('', $style, 9);
+			if($line->qty==1)$pdf->SetFont('', $style, $size_title); //TODO if super utile
+			else $pdf->SetFont('', $style, $size_title);
 		}
 
 		// save curent cell padding
@@ -1386,7 +1388,7 @@ class ActionsSubtotal
 		$posYBeforeDesc = $pdf->GetY();
 		if($description && !$hidedesc) {
 			$pdf->setColor('text', 0,0,0);
-			$pdf->SetFont('', '', 8);
+			$pdf->SetFont('', '', $size_title-1);
 			$pdf->writeHTMLCell($w, $h, $posx, $posYBeforeDesc+1, $description, 0, 1, $fillDescBloc, true, 'J',true);
 		}
 
@@ -1409,7 +1411,7 @@ class ActionsSubtotal
 			$pdf->MultiCell($bgW, $cell_height, '', 0, '', 1, 1,'','',true,0, true); //+2 same of SetXY()
 			$posy = $posYAfterDesc;
 			$pdf->SetXY($posx, $posy); //reset position
-			$pdf->SetFont('', $style, 9); //reset style
+			$pdf->SetFont('', $style, $size_title); //reset style
 			$pdf->SetTextColor('text', 0, 0, 0); // restore default text color;
 		}
 

@@ -5,8 +5,13 @@ All notable changes to this project will be documented in this file.
 
 - NEW : add rank input for subtotal lines *24/01/2023* - 3.16.0
 
+## Version 3.16
+
+- NEW : Ajout configuration SUBTOTAL_TITLE_SIZE permettant d'éditer la taille des titres - *07/02/2023* - 3.16.0
+
 ## Version 3.15
-- FIX : Multiples erreurs de colspan qui créaient des décalage sur les tableaux de lignes - *20/01/2023* - 3.15.3
+
+- FIX : Multiples erreurs de colspan qui créaient des décalages sur les tableaux de lignes - *20/01/2023* - 3.15.3
 - FIX : DA022658 - Gestion des non-compris non-fonctionnelle - 3.15.2
 - FIX : Fatal error *02/01/2023* - 3.15.1
 - NEW : Ajout de massaction de suppression de ligne sur les card *16/11/2022* 3.15.0

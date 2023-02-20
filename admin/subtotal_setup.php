@@ -159,6 +159,10 @@ $item = $formSetup->newItem('SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE')->helpText
 $item = $formSetup->newItem('SUBTOTAL_TITLE_STYLE');
 $item->fieldAttr['placeholder'] = 'BU';
 
+// Style des titres (B = gras, U = souligné, I = italique)
+$item = $formSetup->newItem('SUBTOTAL_TITLE_SIZE');
+$item->helpText = $langs->transnoentities('SUBTOTAL_TITLE_SIZE_info');
+
 // Style des sous-totaux (B = gras, U = souligné, I = italique)
 $item = $formSetup->newItem('SUBTOTAL_SUBTOTAL_STYLE');
 $item->fieldAttr['placeholder'] = 'BU';
