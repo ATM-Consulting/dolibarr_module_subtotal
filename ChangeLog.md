@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- FIX : La création de factures depuis la liste des commandes créé un décalage titre sous total - *20/02/2023* - 3.x
 
 ## Version 3.16
 
