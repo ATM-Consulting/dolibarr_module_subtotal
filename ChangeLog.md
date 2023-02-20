@@ -1,9 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+# [Unreleased]
 
 - FIX : La création de factures depuis la liste des commandes créé un décalage titre sous total - *20/02/2023* - 3.x
+- NEW : add rank input for subtotal lines *24/01/2023* - 3.16.0
 
 ## Version 3.16
 
