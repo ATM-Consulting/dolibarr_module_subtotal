@@ -1,8 +1,9 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+# [Unreleased]
 
+- NEW : add rank input for subtotal lines *24/01/2023* - 3.16.0
 
 ## Version 3.16
 
