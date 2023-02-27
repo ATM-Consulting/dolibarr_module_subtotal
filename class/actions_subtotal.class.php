@@ -1100,6 +1100,10 @@ class ActionsSubtotal
 		$subtotalDefaultRightPadding = 0.5;
         $backgroundCellHeightOffset = 0;
         $backgroundCellPosYOffset = 0;
+		empty($pdf->page_largeur) ? $pdf->page_largeur = 0 : '';
+		empty($pdf->marge_droite) ? $pdf->marge_droite = 0 : '';
+		empty($line->total) ? $line->total = 0 : '' ;
+		empty($pdf->postotalht) ? $pdf->postotalht = 0 : '' ;
 
 		$fillBackground = false;
 		if(!empty($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
@@ -1315,6 +1319,9 @@ class ActionsSubtotal
 	function pdf_add_title(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 
 		global $db,$conf,$subtotal_last_title_posy;
+
+		empty($pdf->page_largeur) ? $pdf->page_largeur = 0 : '';
+		empty($pdf->marge_droite) ? $pdf->marge_droite = 0 : '';
 
 		// Manage background color
 		$fillDescBloc = false;
@@ -2972,12 +2979,12 @@ class ActionsSubtotal
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
 						{
 
-							if ($line->fk_prev_id === null)
+							if (isset($line->fk_prev_id) && $line->fk_prev_id === null)
 							{
 								echo '<a class="subtotal-line-action-btn"  href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id.'&token='.$newToken.'">'.img_delete().'</a>';
 							}
 
-							if(TSubtotal::isTitle($line) && ($line->fk_prev_id === null) )
+							if(TSubtotal::isTitle($line) && isset($line->fk_prev_id) && ($line->fk_prev_id === null) )
 							{
 								if ((float) DOL_VERSION >= 8.0) {
 									$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' style="color:#be3535 !important;" class="pictodelete pictodeleteallline"');
