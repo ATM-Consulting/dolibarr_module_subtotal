@@ -467,12 +467,13 @@ class ActionsSubtotal
 		$action = GETPOST('action', 'none');
 		$contextArray = explode(':',$parameters['context']);
 		if (
-				in_array('invoicecard',$contextArray)
+				empty($conf->global->SUBTOTAL_HIDE_OPTIONS_BUILD_DOC)
+				&& (in_array('invoicecard',$contextArray)
 		        || in_array('invoicesuppliercard',$contextArray)
 				|| in_array('propalcard',$contextArray)
 				|| in_array('ordercard',$contextArray)
 		        || in_array('ordersuppliercard',$contextArray)
-				|| in_array('invoicereccard',$contextArray)
+				|| in_array('invoicereccard',$contextArray))
 			)
 	        {
 	            $hideInnerLines	= isset( $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']][$object->id] ) ?  $_SESSION['subtotal_hideInnerLines_'.$parameters['modulepart']][$object->id] : 0;
@@ -2779,12 +2780,13 @@ class ActionsSubtotal
 
 
 						echo '<div class="subtotal_underline" style="margin-left:24px; line-height: 25px;">';
-                        echo '<div>';
-                        echo '<input style="vertical-align:sub;"  type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="8" '.(($line->info_bits > 0) ? 'checked="checked"' : '') .' />&nbsp;';
-                        echo '<label for="subtotal-pagebreak">'.$langs->trans('AddBreakPageBefore').'</label>';
-                        echo '</div>';
-
-                        if (TSubtotal::isTitle($line))
+                        if (empty($conf->global->SUBTOTAL_HIDE_OPTIONS_BREAK_PAGE_BEFORE)){
+							echo '<div>';
+							echo '<input style="vertical-align:sub;"  type="checkbox" name="line-pagebreak" id="subtotal-pagebreak" value="8" '.(($line->info_bits > 0) ? 'checked="checked"' : '') .' />&nbsp;';
+							echo '<label for="subtotal-pagebreak">'.$langs->trans('AddBreakPageBefore').'</label>';
+							echo '</div>';
+						}
+                        if (TSubtotal::isTitle($line)&& empty($conf->global->SUBTOTAL_HIDE_OPTIONS_TITLE))
                         {
                             $form = new Form($db);
                             echo '<div>';

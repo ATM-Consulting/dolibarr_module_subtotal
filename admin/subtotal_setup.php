@@ -152,6 +152,15 @@ $formSetup->newItem('SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE')->setAsYesNo();
 // L'ajout sous un titre se fera en fin de section
 $formSetup->newItem('SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK')->setAsYesNo();
 
+// Cacher les options du titre
+$formSetup->newItem('SUBTOTAL_HIDE_OPTIONS_TITLE')->setAsYesNo();
+
+// Cacher l'option ajouter un saut de page avant
+$formSetup->newItem('SUBTOTAL_HIDE_OPTIONS_BREAK_PAGE_BEFORE')->setAsYesNo();
+
+// Cacher les options génération de document
+$formSetup->newItem('SUBTOTAL_HIDE_OPTIONS_BUILD_DOC')->setAsYesNo();
+
 // Texte des titres lors de la facturation via onglet client -> bouton "Facturer commandes"
 $item = $formSetup->newItem('SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE')->helpText = $langs->transnoentities('SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info');
 

@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+- NEW : Ajout option "Cacher les options de titre" 27/02/2023
+- NEW : Ajout option "Cacher l'option du saut de page avant" 27/02/2023
+- NEW : Ajout option "Cache les options génération du documment" 27/02/2023
 - NEW : add rank input for subtotal lines *24/01/2023* - 3.16.0
 
 ## Version 3.16

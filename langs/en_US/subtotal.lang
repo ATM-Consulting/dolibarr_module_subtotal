@@ -36,6 +36,9 @@ SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE = Text of titles when invoicing via cust
 SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info = Replacement keys :<br /><b>__REFORDER__</b> = Order reference<br /><b>__REFCUSTOMER__</b> = Customer reference of the order
 subtotal_add_title_bloc_from_orderstoinvoice = Add subtitle and subtotal block between each order
 SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK = The adding under title will do at end block
+SUBTOTAL_HIDE_OPTIONS_TITLE=Hide title options
+SUBTOTAL_HIDE_OPTIONS_BREAK_PAGE_BEFORE=Hide the front page break option
+SUBTOTAL_HIDE_OPTIONS_BUILD_DOC=Hides document generation options
 SUBTOTAL_TITLE_STYLE = Title style (B = bold, U = underline, I = italic)
 SUBTOTAL_SUBTOTAL_STYLE = Subtotals style (B = bold, U = underline, I = italic)
 SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES = Get one line with title and subtotal if "%s" is enabled (experimental)
