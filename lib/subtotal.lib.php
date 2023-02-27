@@ -149,9 +149,9 @@ function _updateSubtotalLine(&$object, &$line)
 	$res = TSubtotal::doUpdateLine($object, $line->id, $description, 0, $line->qty, 0, '', '', 0, 9, 0, 0, 'HT', $pagebreak, 0, 1, null, 0, $label, TSubtotal::$module_number, $line->array_options);
 
 	$TKey = null;
-	if ($line->element == 'propaldet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET);
-	elseif ($line->element == 'commandedet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET);
-	elseif ($line->element == 'facturedet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET);
+	if ($line->element == 'propaldet' && !empty($conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET)) $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET);
+	elseif ($line->element == 'commandedet' && !empty($conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET)) $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET);
+	elseif ($line->element == 'facturedet' && !empty($conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET)) $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET);
 	// TODO ajouter la partie fournisseur
 
 	// TODO remove "true"
