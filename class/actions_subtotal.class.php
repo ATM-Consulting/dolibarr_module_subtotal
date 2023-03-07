@@ -2673,6 +2673,7 @@ class ActionsSubtotal
 
 
 			?>
+			<!-- actions_subtotal.class.php line <?php echo __LINE__; ?> -->
 			<tr class="oddeven" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
@@ -2978,7 +2979,7 @@ class ActionsSubtotal
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
 						{
 
-							if (isset($line->fk_prev_id) && $line->fk_prev_id === null)
+							if (!isset($line->fk_prev_id) || $line->fk_prev_id === null)
 							{
 								echo '<a class="subtotal-line-action-btn"  href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id.'&token='.$newToken.'">'.img_delete().'</a>';
 							}
@@ -3108,6 +3109,7 @@ class ActionsSubtotal
 
 			}
 
+			print '<!-- END OF actions_subtotal.class.php  -->';
 			return 1;
 
 		}
@@ -3118,6 +3120,8 @@ class ActionsSubtotal
 			// HTML 5 data for js
 			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
 ?>
+
+			<!-- actions_subtotal.class.php line <?php echo __LINE__; ?> -->
 			<tr class="oddeven" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
@@ -3203,6 +3207,7 @@ class ActionsSubtotal
 ?>
 					 </td>
 			</tr>
+			<!-- END OF actions_subtotal.class.php line <?php echo __LINE__; ?> -->
 <?php
 			return 1;
 		}
@@ -3231,6 +3236,7 @@ class ActionsSubtotal
 			// HTML 5 data for js
 			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
 			?>
+			<!-- actions_subtotal.class.php line <?php echo __LINE__; ?> -->
 			<tr class="oddeven" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
@@ -3340,7 +3346,8 @@ class ActionsSubtotal
 				print '</td>';
 			}
 
-			print "</tr>";
+			print "</tr>\r\n";
+			print "<!-- END OF actions_subtotal.class.php -->\r\n";
 
 			// Display lines extrafields
 			if ($object->element == 'shipping' && ! empty($conf->global->SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE) && is_array($extralabelslines) && count($extralabelslines)>0) {
