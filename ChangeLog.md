@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 3.15
 
+- FIX : retrait des constantonoff lorsqu'on est en mode edit dans la page de conf - *09/03/2023* - 3.15.4
 - FIX : Multiples erreurs de colspan qui créaient des décalages sur les tableaux de lignes - *20/01/2023* - 3.15.3
 - FIX : DA022658 - Gestion des non-compris non-fonctionnelle - 3.15.2
 - FIX : Fatal error *02/01/2023* - 3.15.1
