@@ -3,7 +3,10 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+
 - NEW : add es_ES language - *07/03/2023*
+- FIX : Warning on PHP 8 *20/03/2023* - 3.16.4
+- FIX : Display of free line remove button *20/03/2023* - 3.16.3
 - FIX : rounding of subtotal in PDF  - *20/02/2023* - 3.16.2
 - FIX : La création de factures depuis la liste des commandes créé un décalage titre sous total - *20/02/2023* - 3.16.1
 - NEW : add rank input for subtotal lines *24/01/2023* - 3.16.0
@@ -14,6 +17,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 3.15
 
+- FIX : retrait des constantonoff lorsqu'on est en mode edit dans la page de conf - *09/03/2023* - 3.15.4
 - FIX : Multiples erreurs de colspan qui créaient des décalages sur les tableaux de lignes - *20/01/2023* - 3.15.3
 - FIX : DA022658 - Gestion des non-compris non-fonctionnelle - 3.15.2
 - FIX : Fatal error *02/01/2023* - 3.15.1
