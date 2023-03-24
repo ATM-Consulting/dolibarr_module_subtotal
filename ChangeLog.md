@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+
+- NEW : add es_ES language - *07/03/2023*
 - FIX : Warning on PHP 8 *20/03/2023* - 3.16.4
 - FIX : Display of free line remove button *20/03/2023* - 3.16.3
 - FIX : rounding of subtotal in PDF  - *20/02/2023* - 3.16.2
