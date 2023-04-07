@@ -3930,4 +3930,20 @@ class ActionsSubtotal
 		<?php
 		$delayedhtmlcontent .= ob_get_clean();
 	}
+
+	/**
+	 * Re-generate the document after creation of recurring invoice by cron
+	 *
+	 * @param   array()         $parameters     Hook metadatas (context, etc...)
+	 * @param   CommonDocGenerator object      $object         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @param   string          $action         Current action (if set). Generally create or edit or null
+	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
+	 */
+	public function afterCreationOfRecurringInvoice($parameters, &$object, &$action, $hookmanager){
+        require_once DOL_DOCUMENT_ROOT."/custom/subtotal/class/subtotal.class.php";
+        $TSub = new TSubtotal;
+        $TSub->generateDoc($object);
+        return 0;
+    }
 }

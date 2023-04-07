@@ -129,6 +129,7 @@ class modSubtotal extends DolibarrModules
 				,'invoicelist'
 				,'supplierorderlist'
 				,'supplierinvoicelist'
+                ,'cron'
             ),
             // Set here all workflow context managed by module
             //'workflow' => array('order' => array('WORKFLOW_ORDER_AUTOCREATE_INVOICE')),
