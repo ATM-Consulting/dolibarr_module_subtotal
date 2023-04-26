@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+
+
+## Version 3.18 - 26/04/2023
+
 - NEW : Ajout options " *27/02/2023* - 3.18.0
 	- "Cacher les options de titre" 
 	- "Cacher l'option du saut de page avant"
