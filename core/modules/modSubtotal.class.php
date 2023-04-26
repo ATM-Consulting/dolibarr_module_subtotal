@@ -67,7 +67,7 @@ class modSubtotal extends DolibarrModules
         // Possible values for version are: 'development', 'experimental' or version
 
 
-        $this->version = '3.16.4';
+        $this->version = '3.17.0';
 
 		// Url to the file with your last numberversion of this module
 		require_once __DIR__ . '/../../class/techatm.class.php';
@@ -129,6 +129,7 @@ class modSubtotal extends DolibarrModules
 				,'invoicelist'
 				,'supplierorderlist'
 				,'supplierinvoicelist'
+                ,'cron'
             ),
             // Set here all workflow context managed by module
             //'workflow' => array('order' => array('WORKFLOW_ORDER_AUTOCREATE_INVOICE')),
