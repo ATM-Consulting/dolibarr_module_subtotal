@@ -120,37 +120,39 @@ $formSetup->newItem('SUBTOTAL_MYPARAM7')->setAsProduct();
 */
 
 // Activer l'utilisation avancée
-$item = $formSetup->newItem('SUBTOTAL_USE_NEW_FORMAT');
-$item->setAsYesNo();
-$item->helpText = $langs->transnoentities('SUBTOTAL_USE_NEW_FORMAT_HELP');
+if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
+	$item = $formSetup->newItem('SUBTOTAL_USE_NEW_FORMAT');
+	$item->setAsYesNo();
+	$item->helpText = $langs->transnoentities('SUBTOTAL_USE_NEW_FORMAT_HELP');
 
 
-// Sur les lignes de sous total des PDF, ajouter le libellé du titre auquel cette dernière est rattaché.
-$formSetup->newItem('CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL')->setAsYesNo();
+	// Sur les lignes de sous total des PDF, ajouter le libellé du titre auquel cette dernière est rattaché.
+	$formSetup->newItem('CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL')->setAsYesNo();
 
-// Activer la numérotation automatique sur le PDF à partir de Dolibarr 3.8
-$formSetup->newItem('SUBTOTAL_USE_NUMEROTATION')->setAsYesNo();
+	// Activer la numérotation automatique sur le PDF à partir de Dolibarr 3.8
+	$formSetup->newItem('SUBTOTAL_USE_NUMEROTATION')->setAsYesNo();
 
-// Autoriser l'ajout d'un titre et sous-total
-$formSetup->newItem('SUBTOTAL_ALLOW_ADD_BLOCK')->setAsYesNo();
+	// Autoriser l'ajout d'un titre et sous-total
+	$formSetup->newItem('SUBTOTAL_ALLOW_ADD_BLOCK')->setAsYesNo();
 
-// Autoriser la suppression d'un titre ou sous-total
-$formSetup->newItem('SUBTOTAL_ALLOW_EDIT_BLOCK')->setAsYesNo();
+	// Autoriser la suppression d'un titre ou sous-total
+	$formSetup->newItem('SUBTOTAL_ALLOW_EDIT_BLOCK')->setAsYesNo();
 
-// Autoriser la duplication d'un bloc
-$formSetup->newItem('SUBTOTAL_ALLOW_REMOVE_BLOCK')->setAsYesNo();
+	// Autoriser la duplication d'un bloc
+	$formSetup->newItem('SUBTOTAL_ALLOW_REMOVE_BLOCK')->setAsYesNo();
 
-// Autoriser la duplication d'un bloc
-$formSetup->newItem('SUBTOTAL_ALLOW_DUPLICATE_BLOCK')->setAsYesNo();
+	// Autoriser la duplication d'un bloc
+	$formSetup->newItem('SUBTOTAL_ALLOW_DUPLICATE_BLOCK')->setAsYesNo();
 
-// Autoriser la duplication d'une ligne
-$formSetup->newItem('SUBTOTAL_ALLOW_DUPLICATE_LINE')->setAsYesNo();
+	// Autoriser la duplication d'une ligne
+	$formSetup->newItem('SUBTOTAL_ALLOW_DUPLICATE_LINE')->setAsYesNo();
 
-// Permettre l'ajout d'une ligne libre et/ou produit directement sous un titre
-$formSetup->newItem('SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE')->setAsYesNo();
+	// Permettre l'ajout d'une ligne libre et/ou produit directement sous un titre
+	$formSetup->newItem('SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE')->setAsYesNo();
 
-// L'ajout sous un titre se fera en fin de section
-$formSetup->newItem('SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK')->setAsYesNo();
+	// L'ajout sous un titre se fera en fin de section
+	$formSetup->newItem('SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK')->setAsYesNo();
+}
 
 // Cacher les options du titre
 $formSetup->newItem('SUBTOTAL_HIDE_OPTIONS_TITLE')->setAsYesNo();
@@ -214,20 +216,23 @@ $TField = array(
 $item->setAsMultiSelect($TField);
 
 
-// La gestion des non-compris vide aussi le prix de revient
-$item = $formSetup->newItem('SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT');
-$item->setAsYesNo();
-$item->helpText = $langs->transnoentities('SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT_info');
+if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
+	// La gestion des non-compris vide aussi le prix de revient
+	$item = $formSetup->newItem('SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT');
+	$item->setAsYesNo();
+	$item->helpText = $langs->transnoentities('SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT_info');
 
-// Ajouter un titre, ajoutera au-dessus les sous-totaux manquants
-$formSetup->newItem('SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE')->setAsYesNo();
+	// Ajouter un titre, ajoutera au-dessus les sous-totaux manquants
+	$formSetup->newItem('SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE')->setAsYesNo();
+}
 
 
 $formSetup->newItem('SetupForExtrafields')->setAsTitle();
 
-// Autoriser l'affichage des extrafields sur les titres (les données enregistrées seront alors peuplées sur les lignes du bloc)
-$formSetup->newItem('SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE')->setAsYesNo();
-//SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET
+if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
+	// Autoriser l'affichage des extrafields sur les titres (les données enregistrées seront alors peuplées sur les lignes du bloc)
+	$formSetup->newItem('SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE')->setAsYesNo();
+}
 
 // Champs complémentaires disponible sur les titres dans les propositions commerciales clients
 $item = $formSetup->newItem('SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET');
@@ -266,70 +271,79 @@ $item->setAsMultiSelect($TField);
 $item->helpText = $langs->transnoentities('SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS_info');
 
 // Ne pas reporter les lignes de titre lors de la génération d’expédition
-$formSetup->newItem('NO_TITLE_SHOW_ON_EXPED_GENERATION')->setAsYesNo();
+if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
+	$formSetup->newItem('NO_TITLE_SHOW_ON_EXPED_GENERATION')->setAsYesNo();
+}
 
 /*
  * Génération d'un récapitulatif par titre
  */
 
-$formSetup->newItem('RecapGeneration')->setAsTitle();
+if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
+	$formSetup->newItem('RecapGeneration')->setAsTitle();
 
-// Conserver le PDF de récapitulation après la fusion
-$formSetup->newItem('SUBTOTAL_KEEP_RECAP_FILE')->setAsYesNo();
+	// Conserver le PDF de récapitulation après la fusion
+	$formSetup->newItem('SUBTOTAL_KEEP_RECAP_FILE')->setAsYesNo();
 
-// Activer la génération du récapitulatif sur les commandes
-$formSetup->newItem('SUBTOTAL_COMMANDE_ADD_RECAP')->setAsYesNo();
+	// Activer la génération du récapitulatif sur les commandes
+	$formSetup->newItem('SUBTOTAL_COMMANDE_ADD_RECAP')->setAsYesNo();
 
-// Activer la génération du récapitulatif sur les factures
-$formSetup->newItem('SUBTOTAL_INVOICE_ADD_RECAP')->setAsYesNo();
+	// Activer la génération du récapitulatif sur les factures
+	$formSetup->newItem('SUBTOTAL_INVOICE_ADD_RECAP')->setAsYesNo();
+}
 
 /*
  * Paramètrage de l'option "Cacher le prix des lignes des ensembles"
  */
-$formSetup->newItem('SetupForSubBlocs')->setAsTitle();
+if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
+	$formSetup->newItem('SetupForSubBlocs')->setAsTitle();
 
-// Par defaut, cocher la case "Cacher le prix des lignes des ensembles" lors de la génération des PDF
-$formSetup->newItem('SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED')->setAsYesNo();
+	// Par defaut, cocher la case "Cacher le prix des lignes des ensembles" lors de la génération des PDF
+	$formSetup->newItem('SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED')->setAsYesNo();
 
-// Afficher la quantité sur les lignes de produit
-$formSetup->newItem('SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY')->setAsYesNo();
+	// Afficher la quantité sur les lignes de produit
+	$formSetup->newItem('SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY')->setAsYesNo();
 
-// Masquer les totaux
-$formSetup->newItem('SUBTOTAL_HIDE_DOCUMENT_TOTAL')->setAsYesNo();
+	// Masquer les totaux
+	$formSetup->newItem('SUBTOTAL_HIDE_DOCUMENT_TOTAL')->setAsYesNo();
 
 
-if (!empty($conf->shippableorder->enabled)) {
-	$formSetup->newItem('SUBTOTAL_SHIPPABLE_ORDER')->setAsYesNo();
+	if (!empty($conf->shippableorder->enabled)) {
+		$formSetup->newItem('SUBTOTAL_SHIPPABLE_ORDER')->setAsYesNo();
+	}
+
+	if (!empty($conf->clilacevenements->enabled)) {
+		// Afficher la quantité sur les lignes de sous-total (uniquement dans le cas d'un produit virtuel ajouté)
+		$formSetup->newItem('SUBTOTAL_SHOW_QTY_ON_TITLES')->setAsYesNo();
+
+		// Masquer uniquement les prix pour les produits se trouvant dans un ensemble
+		$formSetup->newItem('SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES')->setAsYesNo();
+	}
 }
-
-if (!empty($conf->clilacevenements->enabled)) {
-	// Afficher la quantité sur les lignes de sous-total (uniquement dans le cas d'un produit virtuel ajouté)
-	$formSetup->newItem('SUBTOTAL_SHOW_QTY_ON_TITLES')->setAsYesNo();
-
-	// Masquer uniquement les prix pour les produits se trouvant dans un ensemble
-	$formSetup->newItem('SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES')->setAsYesNo();
-}
-
 
 
 /*
  * ZONE EXPERIMENTAL
  */
 
-$formSetup->newItem('SubtotalExperimentalZone')->setAsTitle();
 
-// Avoir une seule ligne de titre + total si l'option "Cacher le détail des ensembles" est utilisée (expérimental)
-$item = $formSetup->newItem('SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES');
-$item->setAsYesNo();
-$item->nameText = $langs->trans("SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES", $langs->transnoentitiesnoconv('HideInnerLines'));
+if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
+	$formSetup->newItem('SubtotalExperimentalZone')->setAsTitle();
 
-// Remplacer par le détail des TVA si l'option "Cacher le détail des ensembles" est utilisée (expérimental)
-$item = $formSetup->newItem('SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES');
-$item->setAsYesNo();
-$item->nameText = $langs->trans("SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES", $langs->transnoentitiesnoconv('HideInnerLines'));
 
-// Activer la génération du récapitulatif sur les propositions commerciales
-$formSetup->newItem('SUBTOTAL_PROPAL_ADD_RECAP')->setAsYesNo();
+	// Avoir une seule ligne de titre + total si l'option "Cacher le détail des ensembles" est utilisée (expérimental)
+	$item = $formSetup->newItem('SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES');
+	$item->setAsYesNo();
+	$item->nameText = $langs->trans("SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES", $langs->transnoentitiesnoconv('HideInnerLines'));
+
+	// Remplacer par le détail des TVA si l'option "Cacher le détail des ensembles" est utilisée (expérimental)
+	$item = $formSetup->newItem('SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES');
+	$item->setAsYesNo();
+	$item->nameText = $langs->trans("SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES", $langs->transnoentitiesnoconv('HideInnerLines'));
+
+	// Activer la génération du récapitulatif sur les propositions commerciales
+	$formSetup->newItem('SUBTOTAL_PROPAL_ADD_RECAP')->setAsYesNo();
+}
 
 
 

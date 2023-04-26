@@ -573,11 +573,11 @@ class ActionsSubtotal
 					$substitutionarray['line_modsubtotal_total'] = true;
 
 					//list($total, $total_tva, $total_ttc, $TTotal_tva) = $this->getTotalLineFromObject($object, $line, '', 1);
-                    $TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
+					$TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
 
-					$substitutionarray['line_price_ht'] = price($TInfo[0]);
-					$substitutionarray['line_price_vat'] = price($TInfo[1]);
-					$substitutionarray['line_price_ttc'] = price($TInfo[2]);
+					$substitutionarray['line_price_ht'] = price($TInfo[0],0,'',1,$conf->global->MAIN_MAX_DECIMALS_TOT,1);
+					$substitutionarray['line_price_vat'] = price($TInfo[1],0,'',1,$conf->global->MAIN_MAX_DECIMALS_TOT,1);
+					$substitutionarray['line_price_ttc'] = price($TInfo[2],0,'',1,$conf->global->MAIN_MAX_DECIMALS_TOT,1);
 				} else {
 					$substitutionarray['line_modsubtotal_title'] = true;
 				}
@@ -1241,8 +1241,7 @@ class ActionsSubtotal
 		}
 
 		if (!$hidePriceOnSubtotalLines) {
-			$total_to_print = price($line->total);
-
+			$total_to_print = price($line->total,0,'',1,$conf->global->MAIN_MAX_DECIMALS_TOT,1);
 			if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS))
 			{
 				$TTitle = TSubtotal::getAllTitleFromLine($line);
@@ -1273,7 +1272,7 @@ class ActionsSubtotal
 
 					$TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
 					$TTotal_tva = $TInfo[3];
-					$total_to_print = price($TInfo[0]);
+					$total_to_print = price($TInfo[0],0,'',1,$conf->global->MAIN_MAX_DECIMALS_TOT,1);
 
                     $line->total_ht = $TInfo[0];
 					$line->total = $TInfo[0];
@@ -1589,7 +1588,7 @@ class ActionsSubtotal
 			}
 		}
 		if (GETPOST('hideInnerLines', 'int') && !empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES)){
-		    $this->resprints = price($object->lines[$i]->total_ht);
+		    $this->resprints = price($object->lines[$i]->total_ht,0,'',1,$conf->global->MAIN_MAX_DECIMALS_TOT,1);
 		}
 
 		// Si la gestion C/NC est active et que je suis sur un ligne dont l'extrafield est coché
@@ -1735,7 +1734,7 @@ class ActionsSubtotal
                 if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();
                 if(! empty($parentTitle->array_options['options_show_total_ht'])) {
                     $TTotal = TSubtotal::getTotalBlockFromTitle($object, $parentTitle);
-                    $this->resprints = price($TTotal['total_unit_subprice']);
+                    $this->resprints = price($TTotal['total_unit_subprice'],0,'',1,$conf->global->MAIN_MAX_DECIMALS_TOT,1);
                 }
             }
 
@@ -2675,6 +2674,7 @@ class ActionsSubtotal
 
 
 			?>
+			<!-- actions_subtotal.class.php line <?php echo __LINE__; ?> -->
 			<tr class="oddeven" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
@@ -2980,13 +2980,12 @@ class ActionsSubtotal
 				if ($action != 'editline' && $action != 'selectlines') {
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
 						{
-
-							if (isset($line->fk_prev_id) && $line->fk_prev_id === null)
+							if (!isset($line->fk_prev_id) || $line->fk_prev_id === null)
 							{
 								echo '<a class="subtotal-line-action-btn"  href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id.'&token='.$newToken.'">'.img_delete().'</a>';
 							}
 
-							if(TSubtotal::isTitle($line) && isset($line->fk_prev_id) && ($line->fk_prev_id === null) )
+							if(TSubtotal::isTitle($line) && (!isset($line->fk_prev_id) || (isset($line->fk_prev_id) && ($line->fk_prev_id === null))) )
 							{
 								if ((float) DOL_VERSION >= 8.0) {
 									$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' style="color:#be3535 !important;" class="pictodelete pictodeleteallline"');
@@ -3004,7 +3003,7 @@ class ActionsSubtotal
 			</td>
 
 			<?php
-			if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::isTitle($line) && $action != 'editline')
+			if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::isTitle($line) && $action != 'editline' && $action != 'selectlines')
 			{
 				echo '<td class="subtotal_nc">';
 				echo '<input id="subtotal_nc-'.$line->id.'" class="subtotal_nc_chkbx" data-lineid="'.$line->id.'" type="checkbox" name="subtotal_nc" value="1" '.(!empty($line->array_options['options_subtotal_nc']) ? 'checked="checked"' : '').' />';
@@ -3027,13 +3026,13 @@ class ActionsSubtotal
 					if ($action !== 'editline' && GETPOST('lineid', 'int') !== $line->id) {
 						$checked = '';
 
-						if (in_array($line->id,$toselect)){
+						if (!empty($toselect) && in_array($line->id,$toselect)){
 							$checked = 'checked';
 						}
 
 						if ($action != 'editline') {
 							?>
-							<td class='linecolcheck center'><input type='checkbox' class='linecheckbox' <?php print $checked; ?> name="line_checkbox[<?php print $i + 1; ?>]" value="<?php print $line->id; ?>"></td>
+							<td class="linecolcheck center"><input type="checkbox" class="linecheckbox"  name="line_checkbox[<?php print $i + 1; ?>]" value="<?php print $line->id; ?>"></td>
 							<?php
 						}
 					}
@@ -3111,6 +3110,7 @@ class ActionsSubtotal
 
 			}
 
+			print '<!-- END OF actions_subtotal.class.php line '.__LINE__.' -->';
 			return 1;
 
 		}
@@ -3121,6 +3121,8 @@ class ActionsSubtotal
 			// HTML 5 data for js
 			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
 ?>
+
+			<!-- actions_subtotal.class.php line <?php echo __LINE__; ?> -->
 			<tr class="oddeven" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
@@ -3206,6 +3208,7 @@ class ActionsSubtotal
 ?>
 					 </td>
 			</tr>
+			<!-- END OF actions_subtotal.class.php line <?php echo __LINE__; ?> -->
 <?php
 			return 1;
 		}
@@ -3234,6 +3237,7 @@ class ActionsSubtotal
 			// HTML 5 data for js
 			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
 			?>
+			<!-- actions_subtotal.class.php line <?php echo __LINE__; ?> -->
 			<tr class="oddeven" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
@@ -3343,7 +3347,8 @@ class ActionsSubtotal
 				print '</td>';
 			}
 
-			print "</tr>";
+			print "</tr>\r\n";
+			print "<!-- END OF actions_subtotal.class.php -->\r\n";
 
 			// Display lines extrafields
 			if ($object->element == 'shipping' && ! empty($conf->global->SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE) && is_array($extralabelslines) && count($extralabelslines)>0) {
@@ -3927,4 +3932,20 @@ class ActionsSubtotal
 		<?php
 		$delayedhtmlcontent .= ob_get_clean();
 	}
+
+	/**
+	 * Re-generate the document after creation of recurring invoice by cron
+	 *
+	 * @param   array()         $parameters     Hook metadatas (context, etc...)
+	 * @param   CommonDocGenerator object      $object         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @param   string          $action         Current action (if set). Generally create or edit or null
+	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
+	 */
+	public function afterCreationOfRecurringInvoice($parameters, &$object, &$action, $hookmanager){
+        require_once DOL_DOCUMENT_ROOT."/custom/subtotal/class/subtotal.class.php";
+        $TSub = new TSubtotal;
+        $TSub->generateDoc($object);
+        return 0;
+    }
 }
