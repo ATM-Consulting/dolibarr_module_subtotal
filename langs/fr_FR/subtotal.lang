@@ -40,7 +40,7 @@ subtotal_add_title_bloc_from_orderstoinvoice=Ajouter un bloc titre et sous-total
 SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK=L'ajout sous un titre se fera en fin de section 
 SUBTOTAL_HIDE_OPTIONS_TITLE=Cacher les options de titre
 SUBTOTAL_HIDE_OPTIONS_BREAK_PAGE_BEFORE=Cacher l'option du saut de page avant
-SUBTOTAL_HIDE_OPTIONS_BUILD_DOC=Cache les options génération du documment
+SUBTOTAL_HIDE_OPTIONS_BUILD_DOC=Cache les options génération du document
 SUBTOTAL_TITLE_STYLE=Style des titres (B = gras, U = souligné, I = italique)
 SUBTOTAL_TITLE_SIZE=Taille des titres
 SUBTOTAL_TITLE_SIZE_info=égale à 9 si non renseignée

@@ -126,3 +126,8 @@ SUBTOTAL_SHOW_QTY_ON_TITLES = Mostrar cantidades en líneas de subtotal (Solo en
 SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES =  Ocultar solamente los precios de los productos en un grupo
 
 SubtotalExperimentalZone = Configuraciones experimentales u obsoletas
+
+
+SUBTOTAL_HIDE_OPTIONS_TITLE=Ocultar opciones de título
+SUBTOTAL_HIDE_OPTIONS_BREAK_PAGE_BEFORE=Ocultar la opción de salto de página
+SUBTOTAL_HIDE_OPTIONS_BUILD_DOC=Ocultar las opciones de generación de documentos
