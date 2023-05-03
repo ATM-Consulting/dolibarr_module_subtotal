@@ -3943,7 +3943,7 @@ class ActionsSubtotal
 	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
 	 */
 	public function afterCreationOfRecurringInvoice($parameters, &$object, &$action, $hookmanager){
-        require_once DOL_DOCUMENT_ROOT."/custom/subtotal/class/subtotal.class.php";
+        require_once __DIR__ . '/subtotal.class.php';
         $TSub = new TSubtotal;
         $TSub->generateDoc($object);
         return 0;
