@@ -51,7 +51,7 @@ All notable changes to this project will be documented in this file.
 - NEW : Add total_ht on originproductline tpl if available + add class td identification + add data-id tr identification *07/04/2022* - 3.12.0
 
 ## Version 3.11
-
+- FIX : FIX DOUBLE PARENTHESIS - *15/05/2023* - 3.11.13  
 - FIX : COMPAT V16 family - *02/06/2022)* - 3.11.12  
 - FIX : TRIGGER UPDATE AND MODIFY - *02/06/2022)* - 3.11.11 
 - FIX : description - *02/06/2022)* - 3.11.10  
