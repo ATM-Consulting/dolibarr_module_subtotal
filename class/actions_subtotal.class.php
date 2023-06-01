@@ -1272,7 +1272,7 @@ class ActionsSubtotal
 
 					$TInfo = $this->getTotalLineFromObject($object, $line, '', 1);
 					$TTotal_tva = $TInfo[3];
-					$total_to_print = price($TInfo[0],0,'',1,$conf->global->MAIN_MAX_DECIMALS_TOT,1);
+					$total_to_print = price($TInfo[0],0,'',1,$conf->global->MAIN_MAX_DECIMALS_TOT,2);
 
                     $line->total_ht = $TInfo[0];
 					$line->total = $TInfo[0];
