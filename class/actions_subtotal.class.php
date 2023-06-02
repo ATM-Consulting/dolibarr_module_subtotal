@@ -745,15 +745,15 @@ class ActionsSubtotal
 				global $hideprices;
 
 				$hideInnerLines = GETPOST('hideInnerLines', 'int');
-				if(empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname][$object->id]) ) $_SESSION[$sessname] = array(); // prevent old system
+				if(empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname][$object->id]) ) $_SESSION[$sessname] = array($object->id => 0); // prevent old system
 				$_SESSION[$sessname][$object->id] = $hideInnerLines;
 
 				$hidedetails= GETPOST('hidedetails', 'int');
-				if(empty($_SESSION[$sessname2]) || !is_array($_SESSION[$sessname2][$object->id]) ) $_SESSION[$sessname2] = array(); // prevent old system
+				if(empty($_SESSION[$sessname2]) || !is_array($_SESSION[$sessname2][$object->id]) ) $_SESSION[$sessname2] = array($object->id => 0); // prevent old system
 				$_SESSION[$sessname2][$object->id] = $hidedetails;
 
 				$hideprices= GETPOST('hideprices', 'int');
-				if(empty($_SESSION[$sessname3]) || !is_array($_SESSION[$sessname3][$object->id]) ) $_SESSION[$sessname3] = array(); // prevent old system
+				if(empty($_SESSION[$sessname3]) || !is_array($_SESSION[$sessname3][$object->id]) ) $_SESSION[$sessname3] = array($object->id => 0); // prevent old system
 				$_SESSION[$sessname3][$object->id] = $hideprices;
 
 				foreach($object->lines as &$line) {
@@ -2598,6 +2598,7 @@ class ActionsSubtotal
 		if($line->special_code!=$this->module_number || $line->product_type!=9) {
 			if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_LINE) && $object->element !== 'invoice_supplier')
             {
+                if(empty($line->fk_prev_id)) $line->fk_prev_id = null;
                 if(!(TSubtotal::isModSubtotalLine($line)) && ( $line->fk_prev_id === null ) && !($action == "editline" && GETPOST('lineid', 'int') == $line->id)) {
                     echo '<a name="duplicate-'.$line->id.'" href="' . $_SERVER['PHP_SELF'] . '?' . $idvar . '=' . $object->id . '&action=duplicate&lineid=' . $line->id . '&token='.$newToken.'"><i class="fa fa-clone" aria-hidden="true"></i></a>';
 
@@ -2760,6 +2761,7 @@ class ActionsSubtotal
 						}
 
 						$readonlyForSituation = '';
+                        if(empty($line->fk_prev_id)) $line->fk_prev_id = null;
 						if (!empty($line->fk_prev_id) && $line->fk_prev_id != null) $readonlyForSituation = 'readonly';
 
 						if (!$isFreeText) echo '<input type="text" name="line-title" id-line="'.$line->id.'" value="'.$newlabel.'" size="80" '.$readonlyForSituation.'/>&nbsp;';
@@ -2803,12 +2805,12 @@ class ActionsSubtotal
                                 echo '</div>';
                             }
                             echo '<div>';
-                            echo '<input style="vertical-align:sub;"  type="checkbox" name="line-showTotalHT" id="subtotal-showTotalHT" value="9" '.(($line->array_options['options_show_total_ht'] > 0) ? 'checked="checked"' : '') .' />&nbsp;';
+                            echo '<input style="vertical-align:sub;"  type="checkbox" name="line-showTotalHT" id="subtotal-showTotalHT" value="9" '.((!empty($line->array_options['options_show_total_ht']) && $line->array_options['options_show_total_ht'] > 0) ? 'checked="checked"' : '') .' />&nbsp;';
                             echo '<label for="subtotal-showTotalHT">'.$langs->trans('ShowTotalHTOnSubtotalBlock').'</label>';
                             echo '</div>';
 
                             echo '<div>';
-                            echo '<input style="vertical-align:sub;"  type="checkbox" name="line-showReduc" id="subtotal-showReduc" value="1" '.(($line->array_options['options_show_reduc'] > 0) ? 'checked="checked"' : '') .' />&nbsp;';
+                            echo '<input style="vertical-align:sub;"  type="checkbox" name="line-showReduc" id="subtotal-showReduc" value="1" '.((!empty($line->array_options['options_show_reduc']) && $line->array_options['options_show_reduc'] > 0) ? 'checked="checked"' : '') .' />&nbsp;';
                             echo '<label for="subtotal-showReduc">'.$langs->trans('ShowReducOnSubtotalBlock').'</label>';
                             echo '</div>';
                         }
@@ -2843,6 +2845,9 @@ class ActionsSubtotal
 							$doleditor->Create();
 
 							$TKey = null;
+                            if(!empty($conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET)) $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET = '';
+                            if(!empty($conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET)) $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET = '';
+                            if(!empty($conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET)) $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET = '';
 							if ($line->element == 'propaldet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET);
 							elseif ($line->element == 'commandedet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET);
 							elseif ($line->element == 'facturedet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET);
@@ -2852,14 +2857,14 @@ class ActionsSubtotal
 							{
 								$extrafields = new ExtraFields($this->db);
 								$extrafields->fetch_name_optionals_label($object->table_element_line);
-								foreach ($extrafields->attributes[$line->element]['param'] as $code => $val)
-								{
-									if (in_array($code, $TKey) && $extrafields->attributes[$line->element]['list'][$code] > 0)
-									{
-										echo '<div class="sub-'.$code.'">';
-										echo '<label class="">'.$extrafields->attributes[$line->element]['label'][$code].'</label>';
-										echo $extrafields->showInputField($code, $line->array_options['options_'.$code], '', '', 'subtotal_');
-										echo '</div>';
+                                if(!empty($extrafields->attributes[$line->element]['param'])) {
+									foreach($extrafields->attributes[$line->element]['param'] as $code => $val) {
+										if(in_array($code, $TKey) && $extrafields->attributes[$line->element]['list'][$code] > 0) {
+											echo '<div class="sub-'.$code.'">';
+											echo '<label class="">'.$extrafields->attributes[$line->element]['label'][$code].'</label>';
+											echo $extrafields->showInputField($code, $line->array_options['options_'.$code], '', '', 'subtotal_');
+											echo '</div>';
+										}
 									}
 								}
 							}
@@ -2886,9 +2891,11 @@ class ActionsSubtotal
 
 
 						 // Get display styles and apply them
-						 $titleStyleItalic = strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'I') === false ? '' : ' font-style: italic;';
-						 $titleStyleBold =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'B') === false ? '' : ' font-weight:bold;';
-						 $titleStyleUnderline =  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' text-decoration: underline;';
+                        $style = '';
+		                if (!empty($conf->global->SUBTOTAL_TITLE_STYLE)) $style = $conf->global->SUBTOTAL_TITLE_STYLE;
+						 $titleStyleItalic = strpos($style, 'I') === false ? '' : ' font-style: italic;';
+						 $titleStyleBold =  strpos($style, 'B') === false ? '' : ' font-weight:bold;';
+						 $titleStyleUnderline =  strpos($style, 'U') === false ? '' : ' text-decoration: underline;';
 
 						 if (empty($line->label)) {
 							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description.' '.$this->getTitle($object, $line);
@@ -2952,6 +2959,7 @@ class ActionsSubtotal
 					else{
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) && $object->element !== 'invoice_supplier')
 						{
+                            if(empty($line->fk_prev_id)) $line->fk_prev_id = null;
 							if(TSubtotal::isTitle($line) && ( $line->fk_prev_id === null )) {
 								echo '<a class="subtotal-line-action-btn" title="'.$langs->trans('CloneLSubtotalBlock').'" href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'&token='.$newToken.'" >';
 								if(intval(DOL_VERSION) < 8) {
@@ -2980,6 +2988,7 @@ class ActionsSubtotal
 				if ($action != 'editline' && $action != 'selectlines') {
 						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
 						{
+                            if(empty($line->fk_prev_id)) $line->fk_prev_id = null;
 							if (!isset($line->fk_prev_id) || $line->fk_prev_id === null)
 							{
 								echo '<a class="subtotal-line-action-btn"  href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteline&lineid='.$line->id.'&token='.$newToken.'">'.img_delete().'</a>';
@@ -3326,6 +3335,7 @@ class ActionsSubtotal
 						}
 					}
 				}
+                if(empty($line->fk_prev_id)) $line->fk_prev_id = null;
 				if ($line->fk_prev_id === null)
 				{
 					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=deleteline&amp;lineid='.$lineid.'&token='.$newToken.'">'.img_delete().'</a>';
