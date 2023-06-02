@@ -371,9 +371,9 @@ class pdf_azur_subtotal extends ModelePDFPropales
 				// Loop on each lines
 				for ($i = 0 ; $i < $nblignes ; $i++)
 				{
-					$package_qty = $TStack[count($TStack) - 1]['package_qty'];
 					$inPackage = count($TStack) > 0;
-					
+					if($inPackage) $package_qty = $TStack[count($TStack) - 1]['package_qty'];
+
 					// Ligne de titre
 					if ($object->lines[$i]->product_type == 9 && $object->lines[$i]->qty < 97 && $object->lines[$i]->fk_product > 0) {
 						$inPackage = true;
