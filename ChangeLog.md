@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 ## Version 3.18 - 26/04/2023
 
 - FIX : DA023419 - Les arrondis des sous-totaux n'était plus qu'à un chiffre après la virgule - *01/06/2023* - 3.18.3
+- FIX : DA023305 compat php8  *02/06/2023* - 3.18.3
 - FIX : Include path  *03/05/2023* - 3.18.2
 - FIX : Missing translations *26/04/2023* - 3.18.1
 - NEW : Ajout options *27/02/2023* - 3.18.0
