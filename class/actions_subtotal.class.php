@@ -3701,12 +3701,17 @@ class ActionsSubtotal
 	    if (GETPOST('action','aZ09') != 'editline' && $nboflines > 1)
 	    {
 
+			$jsConf = array(
+				'useOldSplittedTrForLine' => intval(DOL_VERSION) < 16 ? 1 : 0,
+			)
+
 	        ?>
 
 
 			<script type="text/javascript">
 			$(document).ready(function(){
 
+				let subTotalConf = <?php print json_encode($jsConf); ?>;
 				// target some elements
 				var titleRow = $('tr[data-issubtotal="title"]');
 				var lastTitleCol = titleRow.find('td:last-child');
@@ -3827,7 +3832,7 @@ class ActionsSubtotal
 							// Add extraffield support for dolibarr > 7
 							var thisId = $(this).attr('data-id');
 							var thisElement = $(this).attr('data-element');
-							if(thisId != undefined && thisElement != undefined )
+							if(thisId != undefined && thisElement != undefined && subTotalConf.useOldSplittedTrForLine )
 							{
 								$('[data-targetid="' + thisId + '"][data-element="extrafield"][data-targetelement="'+ thisElement +'"]').each(function(index){
 									TcurrentChilds.push($(this).attr('id'));
