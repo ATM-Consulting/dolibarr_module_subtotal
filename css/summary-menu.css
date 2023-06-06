@@ -32,8 +32,11 @@ a.subtotal-summary-link{
 	white-space: nowrap;
 	width: 100%;
 	font-size: 11px;
+	line-height: 1.5em;
 
+	color: #666;
 }
 a.subtotal-summary-link.--target-in-viewport{
 	font-weight: bold;
+	color : var(--colortextlink);
 }

@@ -19,7 +19,8 @@ $( document ).ready(function() {
 			if($subTotalLabel.length > 0){
 				summaryLines.push({
 					id: $( this ).attr('data-id'),
-					label: $subTotalLabel.text()
+					label: $subTotalLabel.text(),
+					level: $( this ).attr('data-level')
 				})
 			}
 		});
@@ -37,10 +38,22 @@ $( document ).ready(function() {
 
 		summaryLines.forEach(function(item){
 			let link = document.createElement('a');
-			link.innerText = item.label;
+
+
+			let paddingChars = ''
+			for (let i = 1; i < parseInt(item.level); i++) {
+				paddingChars+= '-';
+			}
+
+			link.innerText = paddingChars + ' ' + item.label;
+
+			// link.style.paddingLeft = ((parseInt(item.level)-1)*5) + 'px';
+
+
 			link.classList.add('subtotal-summary-link');
 			link.href = '#row-'+ item.id;
 			link.setAttribute('data-id', item.id);
+			link.setAttribute('data-level', item.level);
 			link.setAttribute('title', item.label);
 
 			link.addEventListener('click', function(e) {
