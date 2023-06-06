@@ -3584,6 +3584,21 @@ class ActionsSubtotal
 
 		$this->_ajax_block_order_js($object);
 
+
+
+
+		if(empty($conf->global->SUBTOTAL_DISABLE_SUMMARY)){
+			$jsConfig = array(
+				'langs' => array(
+					'SubtotalSummaryTitle' => $langs->trans('QuickSummary')
+				)
+			);
+
+			print '<link rel="stylesheet" type="text/css" href="'.dol_buildpath('subtotal/css/summary-menu.css', 1).'">';
+			print '<script type="text/javascript" src="'.dol_buildpath('subtotal/js/summary-menu.js', 1).'"></script>';
+			print '<script type="text/javascript"> var subtotalSummaryJsConf = '.json_encode($jsConfig).'; </script>';
+		}
+
 		return 0;
 	}
 

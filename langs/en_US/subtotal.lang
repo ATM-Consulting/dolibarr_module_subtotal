@@ -128,3 +128,6 @@ SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY=Display the quantity on the product lines
 SUBTOTAL_SHOW_QTY_ON_TITLES=Display the quantity on the subtotal lines (only in the case of a virtual product added)
 SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES=Hide only prices for products in a set
 SubtotalExperimentalZone=Experimental or depreciated configurations
+
+QuickSummary = Quick summary
+SUBTOTAL_DISABLE_SUMMARY = Disable document "quick summary menu" (appears in left menu when the document has titles)
