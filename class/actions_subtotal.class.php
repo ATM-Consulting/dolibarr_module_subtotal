@@ -3752,8 +3752,7 @@ class ActionsSubtotal
 			    	  axis: "y", // limit y axis
 			    	  placeholder: "ui-state-highlight",
 			    	  start: function( event, ui ) {
-						  //console.log('X:' + e.screenX, 'Y:' + e.screenY);
-						  //console.log(ui.item);
+
 						  let colCount = 0;
 						  let uiChildren = ui.item.children();
 						  colCount = uiChildren.length;
@@ -3767,10 +3766,6 @@ class ActionsSubtotal
 							  });
 						  }
 
-
-
-
-						  console.log(ui.item.children());
    						  ui.placeholder.html('<td colspan="'+colCount+'">&nbsp;</td>');
 
 			    		  var TcurrentChilds = getSubtotalTitleChilds(ui.item);
