@@ -3591,7 +3591,8 @@ class ActionsSubtotal
 			$jsConfig = array(
 				'langs' => array(
 					'SubtotalSummaryTitle' => $langs->trans('QuickSummary')
-				)
+				),
+				'useOldSplittedTrForLine' => intval(DOL_VERSION) < 16 ? 1 : 0
 			);
 
 			print '<link rel="stylesheet" type="text/css" href="'.dol_buildpath('subtotal/css/summary-menu.css', 1).'">';
