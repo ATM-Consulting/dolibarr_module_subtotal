@@ -3,7 +3,7 @@ var subtotalSummaryJsConf = {
 	langs:{
 		'SubtotalSummaryTitle' : 'Quick summary'
 	},
-	subTotalConf : 0
+	useOldSplittedTrForLine : 0
 };
 
 /**
