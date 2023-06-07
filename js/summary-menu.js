@@ -25,7 +25,7 @@ $( document ).ready(function() {
 			}
 		});
 	}
-
+console.log({tablelines : $tablelines.length , summaryLines: summaryLines});
 	if(summaryLines.length>0){
 		let summaryMenu = document.createElement('div');
 		summaryMenu.id = 'subtotal-summary-let-menu-contaner';
