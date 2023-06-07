@@ -36,7 +36,8 @@ a.subtotal-summary-link{
 
 	color: #666;
 }
-a.subtotal-summary-link.--target-in-viewport{
+a.subtotal-summary-link.--target-in-viewport, a.subtotal-summary-link.--child-in-viewport{
 	font-weight: bold;
 	color : var(--colortextlink);
 }
+
