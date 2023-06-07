@@ -190,6 +190,8 @@ $item->fieldValue = (empty($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)?'#e
 $item->fieldAttr['type'] = 'color';
 $item->fieldOutputOverride ='<input type="color" value="'.$item->fieldValue .'" disabled />';
 
+$item = $formSetup->newItem('SUBTOTAL_DISABLE_SUMMARY')->setAsYesNo();
+
 
 // Activer la gestion des blocs "Non Compris" pour exclusion du total
 $formSetup->newItem('ManageNonCompris')->setAsTitle();

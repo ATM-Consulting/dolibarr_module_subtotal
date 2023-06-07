@@ -2898,8 +2898,8 @@ class ActionsSubtotal
 						 $titleStyleUnderline =  strpos($style, 'U') === false ? '' : ' text-decoration: underline;';
 
 						 if (empty($line->label)) {
-							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description.' '.$this->getTitle($object, $line);
-							else print  $line->description;
+							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description.' '.'<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$this->getTitle($object, $line).'</span>';
+							else print  '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->description.'</span>';
 						 }
 						 else {
 
@@ -3584,6 +3584,21 @@ class ActionsSubtotal
 
 		$this->_ajax_block_order_js($object);
 
+
+
+
+		if(empty($conf->global->SUBTOTAL_DISABLE_SUMMARY)){
+			$jsConfig = array(
+				'langs' => array(
+					'SubtotalSummaryTitle' => $langs->trans('QuickSummary')
+				)
+			);
+
+			print '<link rel="stylesheet" type="text/css" href="'.dol_buildpath('subtotal/css/summary-menu.css', 1).'">';
+			print '<script type="text/javascript" src="'.dol_buildpath('subtotal/js/summary-menu.js', 1).'"></script>';
+			print '<script type="text/javascript"> var subtotalSummaryJsConf = '.json_encode($jsConfig).'; </script>';
+		}
+
 		return 0;
 	}
 
@@ -3701,12 +3716,17 @@ class ActionsSubtotal
 	    if (GETPOST('action','aZ09') != 'editline' && $nboflines > 1)
 	    {
 
+			$jsConf = array(
+				'useOldSplittedTrForLine' => intval(DOL_VERSION) < 16 ? 1 : 0,
+			)
+
 	        ?>
 
 
 			<script type="text/javascript">
 			$(document).ready(function(){
 
+				let subTotalConf = <?php print json_encode($jsConf); ?>;
 				// target some elements
 				var titleRow = $('tr[data-issubtotal="title"]');
 				var lastTitleCol = titleRow.find('td:last-child');
@@ -3732,9 +3752,20 @@ class ActionsSubtotal
 			    	  axis: "y", // limit y axis
 			    	  placeholder: "ui-state-highlight",
 			    	  start: function( event, ui ) {
-			    	      //console.log('X:' + e.screenX, 'Y:' + e.screenY);
-			    		  //console.log(ui.item);
-			    		  var colCount = ui.item.children().length;
+
+						  let colCount = 0;
+						  let uiChildren = ui.item.children();
+						  colCount = uiChildren.length;
+
+						  if (uiChildren.length > 0) {
+							  uiChildren.each(function( index ) {
+								  let colspan = $( this ).attr('colspan');
+								  if(colspan != null && colspan != '' &&  parseFloat(colspan) > 1){
+								    colCount+= parseFloat(colspan);
+								  }
+							  });
+						  }
+
    						  ui.placeholder.html('<td colspan="'+colCount+'">&nbsp;</td>');
 
 			    		  var TcurrentChilds = getSubtotalTitleChilds(ui.item);
@@ -3827,7 +3858,7 @@ class ActionsSubtotal
 							// Add extraffield support for dolibarr > 7
 							var thisId = $(this).attr('data-id');
 							var thisElement = $(this).attr('data-element');
-							if(thisId != undefined && thisElement != undefined )
+							if(thisId != undefined && thisElement != undefined && subTotalConf.useOldSplittedTrForLine )
 							{
 								$('[data-targetid="' + thisId + '"][data-element="extrafield"][data-targetelement="'+ thisElement +'"]').each(function(index){
 									TcurrentChilds.push($(this).attr('id'));
