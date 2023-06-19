@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+
+
+## Version 3.19 - 19/06/2023
+
 - FIX : title group lines move placeholder colspan and adapt to V16+ new line dom - *06/06/2023* - 3.19.1
 - NEW : Document summary addition in left menu  - *06/06/2023* - 3.19.0
 
