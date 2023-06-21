@@ -47,6 +47,23 @@
 			echo json_encode( _updateLineNC(GETPOST('element', 'none'), GETPOST('elementid', 'none'), GETPOST('lineid', 'none'), GETPOST('subtotal_nc', 'none')) );
 
 			break;
+
+
+		case 'update_hideblock_data': // Gestion du Compris/Non Compris via les titres et/ou lignes
+
+			global $db;
+
+			$id_line = GETPOST('lineid', 'int');
+			$elementline = GETPOST('elementline', 'alphanohtml');
+			$value = GETPOST('value', 'int');
+
+			$line = new $elementline($db);
+			$res = $line->fetch($id_line);
+			$line->fetch_optionals();
+			$line->array_options['options_hideblock'] = $value;
+			$line->insertExtraFields();
+
+			break;
 		default:
 			break;
 	}

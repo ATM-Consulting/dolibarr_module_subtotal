@@ -2912,11 +2912,12 @@ class ActionsSubtotal
 							}
 
 						 }
-
-						 //Folder for expand
-						 print ' <a class="collapse_bom" id="collapse-'.$line->id.'" href="#">';
-						 print (empty($conf->global->BOM_SHOW_ALL_BOM_BY_DEFAULT) ? img_picto('', 'folder') : img_picto('', 'folder-open'));
-						 print '</a>';
+						if (TSubtotal::isTitle($line)) {
+							//Folder for expand
+							print ' <a class="collapse_bom" id="collapse-' . $line->id . '" href="#">';
+							print (($line->array_options['options_hideblock'] == 1) ? img_picto('', 'folder') : img_picto('', 'folder-open'));
+							print '</a>';
+						}
 
 
 						 if($line->qty>90) print ' : ';
@@ -4000,22 +4001,37 @@ class ActionsSubtotal
 		global $langs, $db;
 
 		$id = GETPOST('id', 'int');
-		if($parameters['currentcontext'] == 'propalcard') $element = 'propal';
+		if($parameters['currentcontext'] == 'propalcard') {
+			$element = 'propal';
+			$elementline = 'PropaleLigne';
+		}
 
-			$object = new $element($db);
-			$object->fetch($id);
+		$object = new $element($db);
+		$object->fetch($id);
+		$TLines = TSubtotal::getAllTitleFromDocument($object);
+		$TBlocksToHide = array();
+		foreach($TLines as $line){
+			if($line->array_options['options_hideblock']) $TBlocksToHide[] = $line->id;
+		}
 
-			$TLines = TSubtotal::getLinesFromTitle($object, 6, 1, '', false, true);
-			foreach($TLines as $key=>$line){
-				$TRes[] = $line->id;
-			}
 
-			var_dump($TRes);
-		?>
+			?>
 				<script type="text/javascript">
 					$(document).ready(function(){
-						function folderManage(element) {
+
+						<?php foreach($TBlocksToHide as $id_linetitle){ ?>
+						var element = $("#collapse-<?php echo $id_linetitle ?>");
+						folderManage(element);
+						<?php } ?>
+
+						// When clicking on collapse
+						$(".collapse_bom").click(function() {
+							folderManage_click($(this));
+						});
+
+						function folderManage(element){
 							var id_line_title = element.attr('id').replace('collapse-', '');
+
 							$.ajax({
 								url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
 								,type: 'POST'
@@ -4030,15 +4046,61 @@ class ActionsSubtotal
 								let TSubLines = [];
 								var data = JSON.parse(data);
 
+								$.each(data, function (key, value) {
+									TSubLines.push('#row-' + value);
+								});
+
+								$.each(TSubLines, function(key, value){
+									$(value).hide();
+								});
+							});
+
+							element.html('<?php echo dol_escape_js(img_picto('', 'folder')); ?>');
+						}
+
+
+						function folderManage_click(element) {
+							console.log(element);
+
+							var id_line_title = element.attr('id').replace('collapse-', '');
+
+							$.ajax({
+								url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+								,type: 'POST'
+								,data: {
+									json:1
+									,get: 'getLinesFromTitle'
+									,element: '<?php echo $element; ?>'
+									,elementid: '<?php echo $id; ?>'
+									,lineid: id_line_title
+								}
+							}).done(function(data) {
+
+								console.log(data);
+								let TSubLines = [];
+								var data = JSON.parse(data);
+
 								$.each(data, function(key, value){
 									TSubLines.push('#row-' + value);
 								});
 
-								console.log(TSubLines);
 								if(element.html().indexOf('folder-open') <= 0) {
-									$.each(TSubLines, function(key, value){
+									$.each(TSubLines, function(key, value) {
 										$(value).show();
 									});
+
+									$.ajax({
+										url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+										,type: 'POST'
+										,data: {
+											json:1
+											,set: 'update_hideblock_data'
+											,lineid: id_line_title
+											,elementline: '<?php echo $elementline ?>'
+											,value: 0
+										}
+									})
+
 									element.html('<?php echo dol_escape_js(img_picto('', 'folder-open')); ?>');
 								}
 								else {
@@ -4046,18 +4108,25 @@ class ActionsSubtotal
 									$.each(TSubLines, function(key, value){
 										$(value).hide();
 									});
-									// TSubLines.hide();
+
+									$.ajax({
+										url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+										,type: 'POST'
+										,data: {
+											json:1
+											,set: 'update_hideblock_data'
+											,lineid: id_line_title
+											,elementline: '<?php echo $elementline ?>'
+											,value: 1
+										}
+									})
+
 									element.html('<?php echo dol_escape_js(img_picto('', 'folder')); ?>');
 								}
 							});
 
 
 						}
-
-						// When clicking on collapse
-						$(".collapse_bom").click(function() {
-							folderManage($(this));
-						});
 					});
 				</script>
 		<?php
