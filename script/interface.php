@@ -18,6 +18,26 @@
 	$set=GETPOST('set', 'none');
 
 	switch ($get) {
+		case 'getLinesFromTitle':
+
+			global $db;
+
+			$element = GETPOST('element', 'none');
+			$element_id = GETPOST('elementid', 'none');
+			$id_line = GETPOST('lineid', 'int');
+
+			$object = new $element($db);
+			$object->fetch($element_id);
+
+			$TLines = TSubtotal::getLinesFromTitle($object, $id_line, 1, '', false, true);
+			$TRes = array();
+			foreach($TLines as $key=>$line){
+				$TRes[] = $line->id;
+			}
+
+			echo json_encode($TRes);
+
+			break;
 		default:
 			break;
 	}

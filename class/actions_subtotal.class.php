@@ -3,6 +3,7 @@
 dol_include_once('/subtotal/class/subtotal.class.php');
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
+include_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
 
 class ActionsSubtotal
 {
@@ -2911,12 +2912,15 @@ class ActionsSubtotal
 							}
 
 						 }
-						if($line->qty>90) print ' : ';
-						if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
+
+						 //Folder for expand
+						 print ' <a class="collapse_bom" id="collapse-'.$line->id.'" href="#">';
+						 print (empty($conf->global->BOM_SHOW_ALL_BOM_BY_DEFAULT) ? img_picto('', 'folder') : img_picto('', 'folder-open'));
+						 print '</a>';
 
 
-
-
+						 if($line->qty>90) print ' : ';
+						 if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
 					}
 			?></td>
 
@@ -3990,4 +3994,72 @@ class ActionsSubtotal
         $TSub->generateDoc($object);
         return 0;
     }
+
+	public function printCommonFooter(&$parameters, &$object, &$action, $hookmanager)
+	{
+		global $langs, $db;
+
+		$id = GETPOST('id', 'int');
+		if($parameters['currentcontext'] == 'propalcard') $element = 'propal';
+
+			$object = new $element($db);
+			$object->fetch($id);
+
+			$TLines = TSubtotal::getLinesFromTitle($object, 6, 1, '', false, true);
+			foreach($TLines as $key=>$line){
+				$TRes[] = $line->id;
+			}
+
+			var_dump($TRes);
+		?>
+				<script type="text/javascript">
+					$(document).ready(function(){
+						function folderManage(element) {
+							var id_line_title = element.attr('id').replace('collapse-', '');
+							$.ajax({
+								url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+								,type: 'POST'
+								,data: {
+									json:1
+									,get: 'getLinesFromTitle'
+									,element: '<?php echo $element; ?>'
+									,elementid: '<?php echo $id; ?>'
+									,lineid: id_line_title
+								}
+							}).done(function(data) {
+								let TSubLines = [];
+								var data = JSON.parse(data);
+
+								$.each(data, function(key, value){
+									TSubLines.push('#row-' + value);
+								});
+
+								console.log(TSubLines);
+								if(element.html().indexOf('folder-open') <= 0) {
+									$.each(TSubLines, function(key, value){
+										$(value).show();
+									});
+									element.html('<?php echo dol_escape_js(img_picto('', 'folder-open')); ?>');
+								}
+								else {
+
+									$.each(TSubLines, function(key, value){
+										$(value).hide();
+									});
+									// TSubLines.hide();
+									element.html('<?php echo dol_escape_js(img_picto('', 'folder')); ?>');
+								}
+							});
+
+
+						}
+
+						// When clicking on collapse
+						$(".collapse_bom").click(function() {
+							folderManage($(this));
+						});
+					});
+				</script>
+		<?php
+	}
 }

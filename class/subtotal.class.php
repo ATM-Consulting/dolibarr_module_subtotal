@@ -727,14 +727,17 @@ class TSubtotal {
 
 		foreach ($object->lines as $key => &$line)
 		{
+			;
 			if (!$under_title_found && !empty($TTitle_under_search))
 			{
 				if ($line->product_type == 9 && (in_array($line->desc, $TTitle_under_search) || in_array($line->label, $TTitle_under_search)) ) $under_title_found = true;
 			}
 			else
 			{
+
 				if ( ($key_is_id && $line->id == $key_trad) || (!$key_is_id && $line->product_type == 9 && $line->qty == $level && (in_array($line->desc, $TTitle_search) || in_array($line->label, $TTitle_search) )))
 				{
+
 					if ($key_is_id) $level = $line->qty;
 
 					$add_line = true;
@@ -743,12 +746,14 @@ class TSubtotal {
 				}
 				elseif ($add_line && TSubtotal::isModSubtotalLine($line) && TSubtotal::getNiveau($line) == $level) // Si on tombe sur un sous-total, il faut que ce soit un du même niveau que le titre
 				{
+
 					if ($withBlockLine) $TLine[] = $line;
 					break;
 				}
 
 				if ($add_line)
 				{
+
 					if (!$withBlockLine && (self::isTitle($line) || self::isSubtotal($line)) ) continue;
 					else $TLine[] = $line;
 				}
