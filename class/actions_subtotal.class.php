@@ -4043,6 +4043,8 @@ class ActionsSubtotal
 									,lineid: id_line_title
 								}
 							}).done(function(data) {
+
+								console.log(data);
 								let TSubLines = [];
 								var data = JSON.parse(data);
 
@@ -4076,7 +4078,7 @@ class ActionsSubtotal
 								}
 							}).done(function(data) {
 
-								console.log(data);
+
 								let TSubLines = [];
 								var data = JSON.parse(data);
 

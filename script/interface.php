@@ -29,11 +29,15 @@
 			$object = new $element($db);
 			$object->fetch($element_id);
 
-			$TLines = TSubtotal::getLinesFromTitle($object, $id_line, 1, '', false, true);
-			$TRes = array();
-			foreach($TLines as $key=>$line){
-				$TRes[] = $line->id;
+			$TStructure = array();
+			foreach($object->lines as $line){
+				$line_title= TSubtotal::getParentTitleOfLine($object, $line->rang, 0);
+				if(!empty($line_title)){
+					$TStructure[$line_title->id][] = $line->id;
+				}
 			}
+
+			$TRes = $TStructure[$id_line];
 
 			echo json_encode($TRes);
 
