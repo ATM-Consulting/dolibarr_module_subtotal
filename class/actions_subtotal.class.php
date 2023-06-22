@@ -4014,8 +4014,14 @@ class ActionsSubtotal
 			{
 				//On récupère les informations de l'objet actuel
 				$id = GETPOST('id', 'int');
+				if(empty($id)) $id = GETPOST('facid', 'int');
+
 				$TCurrentContexts = explode('card', $parameters['currentcontext']);
+
 				if($TCurrentContexts[0] == 'order') $element = 'Commande';
+				if($TCurrentContexts[0] == 'invoice') $element = 'Facture';
+				if($TCurrentContexts[0] == 'invoicesupplier') $element = 'FactureFournisseur';
+				if($TCurrentContexts[0] == 'ordersupplier') $element = 'CommandeFournisseur';
 				else $element = $TCurrentContexts[0];
 				$object = new $element($db);
 				$object->fetch($id);
@@ -4035,10 +4041,10 @@ class ActionsSubtotal
 							$(document).ready(function(){
 
 								//A chaque chargement de la page, on cache toutes les lignes qui font parties des blocs à cacher (sauf les titres et sous-totaux)
-								<?php foreach($TBlocksToHide as $id_linetitle){ ?>
+								<?php if(!empty($TBlocksToHide)) { foreach($TBlocksToHide as $id_linetitle){ ?>
 								var element = $("#collapse-<?php echo $id_linetitle ?>");
 								folderManage(element);
-								<?php } ?>
+								<?php }} ?>
 
 								//ALors du clic sur un dossier, on cache ou faire apparaitre les lignes contenues dans le bloc concerné
 								$(".collapse_bom").click(function() {
@@ -4048,7 +4054,6 @@ class ActionsSubtotal
 
 								//Gestion de l'affichage des blocs à chaque chargement de page
 								function folderManage(element){
-
 									//On récupère le titre concerné
 									var id_line_title = element.attr('id').replace('collapse-', '');
 
