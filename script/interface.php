@@ -18,6 +18,7 @@
 	$set=GETPOST('set', 'none');
 
 	switch ($get) {
+		//récupération des lignes contenues dans un titre sous total en fonction d'un élément et de la ligne de titre concernée
 		case 'getLinesFromTitle':
 
 			global $db;
@@ -29,11 +30,15 @@
 			$object = new $element($db);
 			$object->fetch($element_id);
 
-			$TStructure = array();
-			foreach($object->lines as $line){
-				$line_title= TSubtotal::getParentTitleOfLine($object, $line->rang, 0);
-				if(!empty($line_title)){
-					$TStructure[$line_title->id][] = $line->id;
+			if(!empty($object->lines)) {
+				$TStructure = array();
+				foreach ($object->lines as $line) {
+					if ($line->product_type != 9) {
+						$line_title = TSubtotal::getParentTitleOfLine($object, $line->rang, 0);
+						if (!empty($line_title)) {
+							$TStructure[$line_title->id][] = $line->id;
+						}
+					}
 				}
 			}
 
@@ -52,21 +57,30 @@
 
 			break;
 
-
-		case 'update_hideblock_data': // Gestion du Compris/Non Compris via les titres et/ou lignes
+			//Mise à jour de la donnée "hideblock" sur une ligne titre afin de savoir si le bloc doit être caché ou pas
+		case 'update_hideblock_data':
 
 			global $db;
 
 			$id_line = GETPOST('lineid', 'int');
-			$elementline = GETPOST('elementline', 'alphanohtml');
+			$element = GETPOST('element', 'alphanohtml');
+			$element_id = GETPOST('elementid', 'int');
 			$value = GETPOST('value', 'int');
 
-			$line = new $elementline($db);
-			$res = $line->fetch($id_line);
-			$line->fetch_optionals();
-			$line->array_options['options_hideblock'] = $value;
-			$line->insertExtraFields();
+			$object = new $element($db);
+			$object->fetch($element_id);
 
+			if(!empty($object->lines)) {
+				foreach ($object->lines as $line) {
+					if ($line->id = $id_line) {
+						$line->fetch_optionals();
+						$line->array_options['options_hideblock'] = $value;
+						$line->insertExtraFields();
+					}
+				}
+			}
+
+			echo json_encode($id_line);
 			break;
 		default:
 			break;
