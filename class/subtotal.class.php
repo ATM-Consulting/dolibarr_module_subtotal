@@ -509,6 +509,39 @@ class TSubtotal {
 	}
 
 	/**
+	 * Donne la ligne sous-total associée au titre
+	 *
+	 * @param FactureLigne|PropaleLigne|OrderLine $object
+	 * @param int $rang  rank of the line in the object; The first line has rank = 1, not 0.
+	 * @param int $lvl
+	 * @return bool|FactureLigne|PropaleLigne|OrderLine
+	 */
+	public static function getSubLineOfTitle(&$object, $rang, $lvl = 0)
+	{
+		if ($rang <= 0) return false;
+
+		$skip_title = 0;
+
+		foreach($object->lines as $line) {
+			if ($line->rang <= $rang || ($lvl > 0 && self::getNiveau($line) < $lvl)) continue;
+
+			if (self::isTitle($line)) {
+				$skip_title++;
+
+			} elseif (self::isSubtotal($line)) {
+				if ($skip_title) {
+					$skip_title--;
+					continue;
+				}
+				return $line;
+				break;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * @param CommonObjectLine $line
 	 * @param int              $level
 	 * @return bool

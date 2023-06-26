@@ -31,18 +31,29 @@
 			$object->fetch($element_id);
 
 			if(!empty($object->lines)) {
-				$TStructure = array();
+				$TRes = array();
+
+
 				foreach ($object->lines as $line) {
-					if ($line->product_type != 9) {
-						$line_title = TSubtotal::getParentTitleOfLine($object, $line->rang, 0);
-						if (!empty($line_title)) {
-							$TStructure[$line_title->id][] = $line->id;
+					if ($line->id == $id_line) {
+						$title_line = $line;
+						$subline_line = TSubtotal::getSubLineOfTitle($object, $title_line->rang);
+						break;
+					}
+				}
+
+				foreach ($object->lines as $line) {
+					if(!empty($subline_line)) {
+						if ($line->product_type != 9 && $line->rang > $title_line->rang && $line->rang < $subline_line->rang) {
+							$TRes[] = $line->id;
+						}
+					} else {
+						if ($line->product_type != 9 && $line->rang > $title_line->rang) {
+							$TRes[] = $line->id;
 						}
 					}
 				}
 			}
-
-			$TRes = $TStructure[$id_line];
 
 			echo json_encode($TRes);
 
