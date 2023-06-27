@@ -4095,6 +4095,13 @@ class ActionsSubtotal
 									//On récupère le titre concerné
 									var id_line_title = element.attr('id').replace('collapse-', '');
 
+									//en fonction de l'état de l'icône "folder" on détermine si l'action demandée est de caché le dossier ou de montrer le dossier
+									if(element.html().indexOf('folder-open') <= 0){
+										var action_hide = 0;
+									} else {
+										var action_hide = 1;
+									}
+
 									//on récupère les lignes concernées en fonction du titre
 									$.ajax({
 										url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
@@ -4108,69 +4115,64 @@ class ActionsSubtotal
 										}
 									}).done(function(data) {
 
-										let TSubLines = [];
 										var data = JSON.parse(data);
 
 										//en fonction des lignes concernées, on définit les #id (html) concernée
 										$.each(data, function (title, tlines) {
-											if(element.html().indexOf('folder-open') <= 0 && title !== id_line_title){
-												//cas où le bloc fermé et contient des sous-blocs : si on ouvr ele bloc parent, on ouvre pas les sous-blocs
+
+											if(action_hide == 0 && title !== id_line_title){
+												//cas où le bloc fermé et contient des sous-blocs : si on ouvre le bloc parent, on ouvre pas les sous-blocs
 											} else {
 												$.each(tlines, function (key, line) {
 													//si le dossier est fermé, et qu'on clique, alors on ouvre le bloc
-													if(element.html().indexOf('folder-open') <= 0) {
+													if(action_hide == 0) {
 														//pour chaque #id (html) concerné, on affiche la ligne
 														$('#row-' + line).show();
 
+														//on met à jour l'extrafield "hideblock" pour indiquer que le bloc de cette ligne doit être affiché
+														$.ajax({
+															url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+															, type: 'POST'
+															, data: {
+																json: 1
+																, set: 'update_hideblock_data'
+																, lineid: title
+																, element: '<?php echo $element; ?>'
+																, elementid: '<?php echo $id; ?>'
+																, value: 0
+															}
+														})
+
+														//On met à jour l'icône "dossier"
+														$('#collapse-' + title).html('<?php echo dol_escape_js(img_picto('', 'folder-open')); ?>');
 													}
 													//si le dossier est ouvert, et qu'on clique, alors on ferme le bloc
 													else {
 														//pour chaque #id (html) concerné, on affiche la ligne
 														$('#row-' + line).hide();
 
+														//on met à jour l'extrafield "hideblock" pour indiquer que le bloc de cette ligne doit être caché
+														$.ajax({
+															url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+															, type: 'POST'
+															, data: {
+																json: 1
+																, set: 'update_hideblock_data'
+																, lineid: title
+																, element: '<?php echo $element; ?>'
+																, elementid: '<?php echo $id; ?>'
+																, value: 1
+															}
+														})
+
+														//On met à jour l'icône "dossier"
+														$('#collapse-' + title).html('<?php echo dol_escape_js(img_picto('', 'folder')); ?>');
 													}
 												});
-
-												if(element.html().indexOf('folder-open') <= 0) {
-													//on met à jour l'extrafield "hideblock" pour indiquer que le bloc de cette ligne doit être affiché
-													$.ajax({
-														url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
-														,type: 'POST'
-														,data: {
-															json:1
-															,set: 'update_hideblock_data'
-															,lineid: title
-															,element: '<?php echo $element; ?>'
-															,elementid: '<?php echo $id; ?>'
-															,value: 0
-														}
-													})
-
-													//On met à jour l'icône "dossier"
-													$('#collapse-' + title).html('<?php echo dol_escape_js(img_picto('', 'folder-open')); ?>');
-												} else {
-													//on met à jour l'extrafield "hideblock" pour indiquer que le bloc de cette ligne doit être caché
-													$.ajax({
-														url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
-														,type: 'POST'
-														,data: {
-															json:1
-															,set: 'update_hideblock_data'
-															,lineid: title
-															,element: '<?php echo $element; ?>'
-															,elementid: '<?php echo $id; ?>'
-															,value: 1
-														}
-													})
-
-													//On met à jour l'icône "dossier"
-													$('#collapse-' + title).html('<?php echo dol_escape_js(img_picto('', 'folder')); ?>');
-												}
 											}
 										});
+
 									});
-
-
 								}
 							});
 						</script>
