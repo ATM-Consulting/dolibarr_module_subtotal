@@ -33,7 +33,6 @@
 			if(!empty($object->lines)) {
 				$TRes = array();
 
-
 				foreach ($object->lines as $line) {
 					if ($line->id == $id_line) {
 						$title_line = $line;
@@ -43,7 +42,6 @@
 				}
 
 				foreach ($object->lines as $line) {
-					$TStructure = array();
 
 					$parent_line = TSubtotal::getParentTitleOfLine($object, $line->rang);
 
@@ -71,7 +69,7 @@
 
 			break;
 
-			//Mise à jour de la donnée "hideblock" sur une ligne titre afin de savoir si le bloc doit être caché ou pas
+		//Mise à jour de la donnée "hideblock" sur une ligne titre afin de savoir si le bloc doit être caché ou pas
 		case 'update_hideblock_data':
 
 			global $db;

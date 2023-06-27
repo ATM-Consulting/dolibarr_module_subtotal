@@ -4016,8 +4016,8 @@ class ActionsSubtotal
 				$id = GETPOST('id', 'int');
 				if(empty($id)) $id = GETPOST('facid', 'int');
 
+				//On détermine l'élement concernée en fonction du contexte
 				$TCurrentContexts = explode('card', $parameters['currentcontext']);
-
 				if($TCurrentContexts[0] == 'order') $element = 'Commande';
 				elseif($TCurrentContexts[0] == 'invoice') $element = 'Facture';
 				elseif($TCurrentContexts[0] == 'invoicesupplier') $element = 'FactureFournisseur';
@@ -4026,10 +4026,10 @@ class ActionsSubtotal
 				$object = new $element($db);
 				$object->fetch($id);
 
-				//On tous les titres sous-total
+				//On récupère tous les titres sous-total
 				$TLines = TSubtotal::getAllTitleFromDocument($object);
 
-				//On définit quels sont les blocs à cacher
+				//On définit quels sont les blocs à cacher en fonction des données existantes (hideblock)
 				if(!empty($TLines)) {
 					$TBlocksToHide = array();
 					foreach ($TLines as $line) {
@@ -4046,7 +4046,7 @@ class ActionsSubtotal
 								folderManage(element);
 								<?php }} ?>
 
-								//ALors du clic sur un dossier, on cache ou faire apparaitre les lignes contenues dans le bloc concerné
+								//Lors du clic sur un dossier, on cache ou faire apparaitre les lignes contenues dans le bloc concerné
 								$(".collapse_bom").click(function() {
 									folderManage_click($(this));
 									return false;
@@ -4072,7 +4072,7 @@ class ActionsSubtotal
 
 										let TSubLines = [];
 										var data = JSON.parse(data);
-										//en fonction des lignes concernées, on définit les #id (html) concernée
+										//en fonction des lignes concernées, on définit les #id (html) concernés
 										$.each(data, function (title, tlines) {
 											$.each(tlines, function (key, line) {
 												TSubLines.push('#row-' + line);
@@ -4114,15 +4114,17 @@ class ActionsSubtotal
 										//en fonction des lignes concernées, on définit les #id (html) concernée
 										$.each(data, function (title, tlines) {
 											if(element.html().indexOf('folder-open') <= 0 && title !== id_line_title){
-												//rien
+												//cas où le bloc fermé et contient des sous-blocs : si on ouvr ele bloc parent, on ouvre pas les sous-blocs
 											} else {
-												//on met à jour l'icône "dossier" pour indiquer qu'il est ouvert
 												$.each(tlines, function (key, line) {
+													//si le dossier est fermé, et qu'on clique, alors on ouvre le bloc
 													if(element.html().indexOf('folder-open') <= 0) {
 														//pour chaque #id (html) concerné, on affiche la ligne
 														$('#row-' + line).show();
 
-													} else {
+													}
+													//si le dossier est ouvert, et qu'on clique, alors on ferme le bloc
+													else {
 														//pour chaque #id (html) concerné, on affiche la ligne
 														$('#row-' + line).hide();
 
@@ -4130,8 +4132,6 @@ class ActionsSubtotal
 												});
 
 												if(element.html().indexOf('folder-open') <= 0) {
-
-													console.log(title);
 													//on met à jour l'extrafield "hideblock" pour indiquer que le bloc de cette ligne doit être affiché
 													$.ajax({
 														url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
@@ -4146,9 +4146,9 @@ class ActionsSubtotal
 														}
 													})
 
+													//On met à jour l'icône "dossier"
 													$('#collapse-' + title).html('<?php echo dol_escape_js(img_picto('', 'folder-open')); ?>');
 												} else {
-
 													//on met à jour l'extrafield "hideblock" pour indiquer que le bloc de cette ligne doit être caché
 													$.ajax({
 														url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
@@ -4163,11 +4163,10 @@ class ActionsSubtotal
 														}
 													})
 
+													//On met à jour l'icône "dossier"
 													$('#collapse-' + title).html('<?php echo dol_escape_js(img_picto('', 'folder')); ?>');
-
 												}
 											}
-
 										});
 									});
 
