@@ -4019,9 +4019,9 @@ class ActionsSubtotal
 				$TCurrentContexts = explode('card', $parameters['currentcontext']);
 
 				if($TCurrentContexts[0] == 'order') $element = 'Commande';
-				if($TCurrentContexts[0] == 'invoice') $element = 'Facture';
-				if($TCurrentContexts[0] == 'invoicesupplier') $element = 'FactureFournisseur';
-				if($TCurrentContexts[0] == 'ordersupplier') $element = 'CommandeFournisseur';
+				elseif($TCurrentContexts[0] == 'invoice') $element = 'Facture';
+				elseif($TCurrentContexts[0] == 'invoicesupplier') $element = 'FactureFournisseur';
+				elseif($TCurrentContexts[0] == 'ordersupplier') $element = 'CommandeFournisseur';
 				else $element = $TCurrentContexts[0];
 				$object = new $element($db);
 				$object->fetch($id);
@@ -4072,10 +4072,11 @@ class ActionsSubtotal
 
 										let TSubLines = [];
 										var data = JSON.parse(data);
-
 										//en fonction des lignes concernées, on définit les #id (html) concernée
-										$.each(data, function (key, value) {
-											TSubLines.push('#row-' + value);
+										$.each(data, function (title, tlines) {
+											$.each(tlines, function (key, line) {
+												TSubLines.push('#row-' + line);
+											});
 										});
 
 										//pour chaque #id (html) concerné, on cache la ligne
@@ -4111,60 +4112,63 @@ class ActionsSubtotal
 										var data = JSON.parse(data);
 
 										//en fonction des lignes concernées, on définit les #id (html) concernée
-										$.each(data, function(key, value){
-											TSubLines.push('#row-' + value);
+										$.each(data, function (title, tlines) {
+											if(element.html().indexOf('folder-open') <= 0 && title !== id_line_title){
+												//rien
+											} else {
+												//on met à jour l'icône "dossier" pour indiquer qu'il est ouvert
+												$.each(tlines, function (key, line) {
+													if(element.html().indexOf('folder-open') <= 0) {
+														//pour chaque #id (html) concerné, on affiche la ligne
+														$('#row-' + line).show();
+
+													} else {
+														//pour chaque #id (html) concerné, on affiche la ligne
+														$('#row-' + line).hide();
+
+													}
+												});
+
+												if(element.html().indexOf('folder-open') <= 0) {
+
+													console.log(title);
+													//on met à jour l'extrafield "hideblock" pour indiquer que le bloc de cette ligne doit être affiché
+													$.ajax({
+														url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+														,type: 'POST'
+														,data: {
+															json:1
+															,set: 'update_hideblock_data'
+															,lineid: title
+															,element: '<?php echo $element; ?>'
+															,elementid: '<?php echo $id; ?>'
+															,value: 0
+														}
+													})
+
+													$('#collapse-' + title).html('<?php echo dol_escape_js(img_picto('', 'folder-open')); ?>');
+												} else {
+
+													//on met à jour l'extrafield "hideblock" pour indiquer que le bloc de cette ligne doit être caché
+													$.ajax({
+														url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+														,type: 'POST'
+														,data: {
+															json:1
+															,set: 'update_hideblock_data'
+															,lineid: title
+															,element: '<?php echo $element; ?>'
+															,elementid: '<?php echo $id; ?>'
+															,value: 1
+														}
+													})
+
+													$('#collapse-' + title).html('<?php echo dol_escape_js(img_picto('', 'folder')); ?>');
+
+												}
+											}
+
 										});
-
-										//si le bloc est déjà fermé
-										if(element.html().indexOf('folder-open') <= 0) {
-
-											//pour chaque #id (html) concerné, on affiche la ligne
-											$.each(TSubLines, function(key, value) {
-												$(value).show();
-											});
-
-											//on met à jour l'extrafield "hideblock" pour indiquer que le bloc de cette ligne doit être affiché
-											$.ajax({
-												url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
-												,type: 'POST'
-												,data: {
-													json:1
-													,set: 'update_hideblock_data'
-													,lineid: id_line_title
-													,element: '<?php echo $element; ?>'
-													,elementid: '<?php echo $id; ?>'
-													,value: 0
-												}
-											})
-
-											//on met à jour l'icône "dossier" pour indiquer qu'il est ouvert
-											element.html('<?php echo dol_escape_js(img_picto('', 'folder-open')); ?>');
-										}
-										//si le bloc est ouvert
-										else {
-
-											//pour chaque #id (html) concerné, on cache la ligne
-											$.each(TSubLines, function(key, value){
-												$(value).hide();
-											});
-
-											//on met à jour l'extrafield "hideblock" pour indiquer que le bloc de cette ligne doit être caché
-											$.ajax({
-												url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
-												,type: 'POST'
-												,data: {
-													json:1
-													,set: 'update_hideblock_data'
-													,lineid: id_line_title
-													,element: '<?php echo $element; ?>'
-													,elementid: '<?php echo $id; ?>'
-													,value: 1
-												}
-											})
-
-											//on met à jour l'icône "dossier" pour indiquer qu'il est fermé
-											element.html('<?php echo dol_escape_js(img_picto('', 'folder')); ?>');
-										}
 									});
 
 

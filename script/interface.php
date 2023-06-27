@@ -43,20 +43,23 @@
 				}
 
 				foreach ($object->lines as $line) {
+					$TStructure = array();
+
+					$parent_line = TSubtotal::getParentTitleOfLine($object, $line->rang);
+
 					if(!empty($subline_line)) {
 						if ($line->product_type != 9 && $line->rang > $title_line->rang && $line->rang < $subline_line->rang) {
-							$TRes[] = $line->id;
+							$TRes[$parent_line->id][] = $line->id;
 						}
 					} else {
 						if ($line->product_type != 9 && $line->rang > $title_line->rang) {
-							$TRes[] = $line->id;
+							$TRes[$parent_line->id][] = $line->id;
 						}
 					}
 				}
 			}
 
 			echo json_encode($TRes);
-
 			break;
 		default:
 			break;
