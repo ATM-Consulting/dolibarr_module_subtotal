@@ -522,19 +522,21 @@ class TSubtotal {
 
 		$skip_title = 0;
 
-		foreach($object->lines as $line) {
-			if ($line->rang <= $rang || ($lvl > 0 && self::getNiveau($line) < $lvl)) continue;
+		if(!empty($object->lines)) {
+			foreach ($object->lines as $line) {
+				if ($line->rang <= $rang || ($lvl > 0 && self::getNiveau($line) < $lvl)) continue;
 
-			if (self::isTitle($line)) {
-				$skip_title++;
+				if (self::isTitle($line)) {
+					$skip_title++;
 
-			} elseif (self::isSubtotal($line)) {
-				if ($skip_title) {
-					$skip_title--;
-					continue;
+				} elseif (self::isSubtotal($line)) {
+					if ($skip_title) {
+						$skip_title--;
+						continue;
+					}
+					return $line;
+					break;
 				}
-				return $line;
-				break;
 			}
 		}
 
