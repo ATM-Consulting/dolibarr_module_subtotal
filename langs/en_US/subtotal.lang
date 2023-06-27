@@ -131,3 +131,6 @@ SubtotalExperimentalZone=Experimental or depreciated configurations
 
 QuickSummary = Quick summary
 SUBTOTAL_DISABLE_SUMMARY = Disable document "quick summary menu" (appears in left menu when the document has titles)
+
+Subtotal_HideAll=Hide all lines
+Subtotal_ShowAll=Show all lines

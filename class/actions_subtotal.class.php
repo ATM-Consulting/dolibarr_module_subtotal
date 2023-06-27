@@ -4052,7 +4052,9 @@ class ActionsSubtotal
 									return false;
 								});
 
-								//Gestion de l'affichage des blocs à chaque chargement de page
+								allFolderManage();
+
+								//Fonction qui permet la gestion de l'affichage des blocs à chaque chargement de page
 								function folderManage(element){
 									//On récupère le titre concerné
 									var id_line_title = element.attr('id').replace('collapse-', '');
@@ -4090,7 +4092,7 @@ class ActionsSubtotal
 								}
 
 
-								//Gestion des blocs cachés ou non lors du clic sur l'icône "dossier"
+								//Fonction qui permet la gestion des blocs cachés ou non lors du clic sur l'icône "dossier"
 								function folderManage_click(element) {
 									//On récupère le titre concerné
 									var id_line_title = element.attr('id').replace('collapse-', '');
@@ -4174,9 +4176,69 @@ class ActionsSubtotal
 
 									});
 								}
+
+
+								//Fonction qui permet d'ajouter l'option "Cacher les lignes" ou "Afficher les lignes"
+								function allFolderManage(){
+
+									//On ajoute une ligne au début du tableau qui propose de cacher toutes les lignes ou des les afficher
+									$('#tablelines>tbody:first').prepend('<tr><td colspan="100%" style="  text-align:right "><a id="hide_all" href="#"><?php echo img_picto('', 'folder-open', 'class="paddingright"').$langs->trans("Subtotal_HideAll"); ?></a>&nbsp;<a id="show_all" href="#"><?php echo img_picto('', 'folder', 'class="paddingright"').$langs->trans("Subtotal_ShowAll") ?></a></td></tr>')
+
+									//Lorsqu'on clique sur "cacher les lignes"
+									$("#hide_all").click(function() {
+										//on cache toutes les lignes de l'objet sauf les titres et sous-totaux
+										$("tr[data-product_type='0']").hide();
+										$("tr[data-product_type='1']").hide();
+
+										//on change tous les icônes "dossier" en fermé
+										$("[id*=collapse-]").html('<?php echo dol_escape_js(img_picto('', 'folder')); ?>');
+
+										//on sauvegarde l'information "hideblock" pour toutes les sections de l'objet
+										$.ajax({
+											url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+											, type: 'POST'
+											, data: {
+												json: 1
+												, set: 'updateall_hideblock_data'
+												, element: '<?php echo $element; ?>'
+												, elementid: '<?php echo $id; ?>'
+												, value: 1
+											}
+										})
+										return false;
+									});
+
+									//Lorsqu'on clique sur "afficher les lignes"
+									$("#show_all").click(function() {
+										//on affiche toutes les lignes de l'objet sauf les titres et sous-totaux
+										$("tr[data-product_type='0']").show();
+										$("tr[data-product_type='1']").show();
+
+										//on change tous les icônes "dossier" en ouvert
+										$("[id*=collapse-]").html('<?php echo dol_escape_js(img_picto('', 'folder-open')); ?>');
+
+										//on sauvegarde l'information "hideblock" pour toutes les sections de l'objet
+										$.ajax({
+											url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+											, type: 'POST'
+											, data: {
+												json: 1
+												, set: 'updateall_hideblock_data'
+												, element: '<?php echo $element; ?>'
+												, elementid: '<?php echo $id; ?>'
+												, value: 0
+											}
+										})
+
+										return false;
+									});
+								}
+
 							});
 						</script>
 				<?php
+
+
 			}
 			/**Gestion des dossiers qui permettent de réduire un bloc**/
 

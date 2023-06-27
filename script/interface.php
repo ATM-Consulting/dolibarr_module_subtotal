@@ -94,6 +94,26 @@
 
 			echo json_encode($id_line);
 			break;
+
+		case 'updateall_hideblock_data' :
+			$element = GETPOST('element', 'alphanohtml');
+			$element_id = GETPOST('elementid', 'int');
+			$value = GETPOST('value', 'int');
+
+			$object = new $element($db);
+			$object->fetch($element_id);
+
+			if(!empty($object->lines)) {
+				foreach ($object->lines as $line) {
+					if ($line->product_type == 9) {
+						$line->fetch_optionals();
+						$line->array_options['options_hideblock'] = $value;
+						$line->insertExtraFields();
+					}
+				}
+			}
+
+			break;
 		default:
 			break;
 	}
