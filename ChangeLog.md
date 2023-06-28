@@ -34,6 +34,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 3.15
 
+- FIX : lorsque l'option "Cacher le prix des lignes des ensembles" était cochée, la réduction n'apparaissait plus sur les lignes qui ne font pas partie d'un ensemble - *06/04/2023* - 3.15.5
 - FIX : retrait des constantonoff lorsqu'on est en mode edit dans la page de conf - *09/03/2023* - 3.15.4
 - FIX : Multiples erreurs de colspan qui créaient des décalages sur les tableaux de lignes - *20/01/2023* - 3.15.3
 - FIX : DA022658 - Gestion des non-compris non-fonctionnelle - 3.15.2
