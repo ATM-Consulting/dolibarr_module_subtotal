@@ -762,7 +762,6 @@ class TSubtotal {
 
 		foreach ($object->lines as $key => &$line)
 		{
-			;
 			if (!$under_title_found && !empty($TTitle_under_search))
 			{
 				if ($line->product_type == 9 && (in_array($line->desc, $TTitle_under_search) || in_array($line->label, $TTitle_under_search)) ) $under_title_found = true;

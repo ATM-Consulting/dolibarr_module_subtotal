@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 # [Unreleased]
 
 
+- NEW : add folder management - *28/06/2023* - 3.20.0
 
 ## Version 3.19 - 19/06/2023
 
