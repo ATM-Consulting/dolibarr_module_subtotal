@@ -2714,9 +2714,10 @@ class ActionsSubtotal
 				if ($object->element == 'invoice_supplier') {
 					$colspan -= 2;
 				}
+
 				?>
 
-				<td colspan="<?php echo $colspan; ?>" style="<?php TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;'; ?>  <?php echo ($line->qty>90)?'text-align:right':'' ?> "><?php
+				<?php
 					if($action=='editline' && GETPOST('lineid', 'int') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
 
 						$params=array('line'=>$line);
@@ -2873,6 +2874,53 @@ class ActionsSubtotal
 					}
 					else {
 
+				    if(TSubtotal::isSubtotal($line)) {
+						$colspan -= 2;
+
+						if (!empty($conf->global->SUBTOTAL_TITLE_STYLE)) $style = $conf->global->SUBTOTAL_TITLE_STYLE;
+						$titleStyleItalic = strpos($style, 'I') === false ? '' : ' font-style: italic;';
+						$titleStyleBold =  strpos($style, 'B') === false ? '' : ' font-weight:bold;';
+						$titleStyleUnderline =  strpos($style, 'U') === false ? '' : ' text-decoration: underline;';
+
+
+						$total_line = $this->getTotalLineFromObject($object, $line, '');
+
+						//Marge :
+						$style = $line->qty>90 ? 'text-align:right' : '';
+						echo '<td colspan="'.$colspan.'" style="'.$style.'">';
+						echo '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'">Marge :</span>';
+						echo '</td>';
+
+
+                        $parentTitleLine = TSubtotal::getParentTitleOfLine($object, $line->rang);
+                        $productLines = TSubtotal::getLinesFromTitleId($object, $parentTitleLine->id);
+
+						$totalCostPrice = 0;
+                        if(!empty($productLines)){
+							foreach ($productLines as $l) {
+								$product = new Product($db);
+								$res = $product->fetch($l->fk_product);
+                                if($res) {
+                                    $totalCostPrice += $product->cost_price * $l->qty;
+								}
+						    }
+						}
+
+                        $marge = $total_line - $totalCostPrice;
+
+						echo '<td class="linecolmarge nowrap" align="right" style="font-weight:bold;">';
+						echo $marge;
+						echo '</td>';
+					}
+
+
+
+
+						//SousTotal :
+                        $style = TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;';
+                        $style.= $line->qty>90 ? 'text-align:right' : '';
+
+                        echo '<td '. (!TSubtotal::isSubtotal($line) ? ' colspan="'.$colspan.'"' : '' ).' style="' .$style.'">';
 						 if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 						 {
 							if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
@@ -2889,36 +2937,28 @@ class ActionsSubtotal
 							else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 						 }
 
+						// Get display styles and apply them
+						$style = '';
 
-						 // Get display styles and apply them
-                        $style = '';
-		                if (!empty($conf->global->SUBTOTAL_TITLE_STYLE)) $style = $conf->global->SUBTOTAL_TITLE_STYLE;
-						 $titleStyleItalic = strpos($style, 'I') === false ? '' : ' font-style: italic;';
-						 $titleStyleBold =  strpos($style, 'B') === false ? '' : ' font-weight:bold;';
-						 $titleStyleUnderline =  strpos($style, 'U') === false ? '' : ' text-decoration: underline;';
+						if(empty($line->label)) {
+							if($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description . ' ' . '<span class="subtotal_label" style="' . $titleStyleItalic . $titleStyleBold . $titleStyleUnderline . '" >' . $this->getTitle($object, $line) . '</span>';
+							else print  '<span class="subtotal_label" style="' . $titleStyleItalic . $titleStyleBold . $titleStyleUnderline . '" >' . $line->description . '</span>';
+						} else {
 
-						 if (empty($line->label)) {
-							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description.' '.'<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$this->getTitle($object, $line).'</span>';
-							else print  '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->description.'</span>';
-						 }
-						 else {
-
-							if (! empty($conf->global->PRODUIT_DESC_IN_FORM) && !empty($line->description)) {
-								print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
+							if(! empty($conf->global->PRODUIT_DESC_IN_FORM) && ! empty($line->description)) {
+								print '<span class="subtotal_label" style="' . $titleStyleItalic . $titleStyleBold . $titleStyleUnderline . '" >' . $line->label . '</span><br><div class="subtotal_desc">' . dol_htmlentitiesbr($line->description) . '</div>';
+							} else {
+								print '<span class="subtotal_label classfortooltip" style=" ' . $titleStyleItalic . $titleStyleBold . $titleStyleUnderline . '" title="' . $line->description . '">' . $line->label . '</span>';
 							}
-							else{
-								print '<span class="subtotal_label classfortooltip" style=" '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
-							}
-
-						 }
-						if($line->qty>90) print ' : ';
+						}
+						if($line->qty > 90) print ' : ';
 						if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
 
 
 
 
 					}
-			?></td>
+			?>
 
 			<?php
 				if($line->qty>90) {
