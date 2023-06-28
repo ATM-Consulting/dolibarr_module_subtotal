@@ -130,3 +130,4 @@ SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES =  Masquer uniquement les prix pour les pr
 SubtotalExperimentalZone = Configurations expérimentales ou dépréciées
 QuickSummary = Sommaire rapide
 SUBTOTAL_DISABLE_SUMMARY = Désactiver le menu "sommaire rapide" (apparaît dans le menu de gauche lorsque le document a des titres)
+DISPLAY_MARGIN_ON_SUBTOTALS=Afficher les merges sur les lignes de sous-totaux

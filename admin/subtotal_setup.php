@@ -178,6 +178,9 @@ $item->helpText = $langs->transnoentities('SUBTOTAL_TITLE_SIZE_info');
 $item = $formSetup->newItem('SUBTOTAL_SUBTOTAL_STYLE');
 $item->fieldAttr['placeholder'] = 'BU';
 
+//Affichage des marges sur les sous-totaux
+$formSetup->newItem('DISPLAY_MARGIN_ON_SUBTOTALS')->setAsYesNo();
+
 // Couleur de fond utilisée sur les PDF pour les titres
 $item = $formSetup->newItem('SUBTOTAL_TITLE_BACKGROUNDCOLOR');
 $item->fieldValue = (empty($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)?'#ffffff':$conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR);
