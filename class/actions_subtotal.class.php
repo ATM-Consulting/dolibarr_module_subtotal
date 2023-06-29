@@ -2724,7 +2724,7 @@ class ActionsSubtotal
 
 				<?php
 					if($action=='editline' && GETPOST('lineid', 'int') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
-
+                        echo '<td colspan="'.$colspan.'" style="'.(TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;').(($line->qty>90)?'text-align:right':'').'">';
 						$params=array('line'=>$line);
 						$reshook=$hookmanager->executeHooks('formEditProductOptions',$params,$object,$action);
 
@@ -2975,7 +2975,7 @@ class ActionsSubtotal
 						 if($line->qty>90) print ' : ';
 						 if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
 					}
-			?></td>
+			?>
 
 			<?php
 				if($line->qty>90) {
