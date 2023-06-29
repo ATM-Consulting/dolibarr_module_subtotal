@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
-
+- NEW : Ajout des marges par blocs - *28/06/2023* - 3.21.0
 - NEW : add folder management - *28/06/2023* - 3.20.0
 
 ## Version 3.19 - 19/06/2023

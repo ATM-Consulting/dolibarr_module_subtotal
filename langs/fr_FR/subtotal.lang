@@ -133,3 +133,4 @@ SUBTOTAL_DISABLE_SUMMARY = Désactiver le menu "sommaire rapide" (apparaît dans
 
 Subtotal_HideAll=Cacher les lignes
 Subtotal_ShowAll=Afficher les lignes
+DISPLAY_MARGIN_ON_SUBTOTALS=Afficher les marges sur les lignes de sous-totaux
