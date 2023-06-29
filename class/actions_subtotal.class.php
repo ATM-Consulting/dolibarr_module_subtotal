@@ -2908,7 +2908,7 @@ class ActionsSubtotal
 
                         $marge = $total_line - $totalCostPrice;
 
-						echo '<td class="linecolmarge nowrap" align="right" style="font-weight:bold;">';
+						echo '<td class="linecolmarge nowrap" align="left" style="font-weight:bold;">';
 						echo $marge;
 						echo '</td>';
 					}
