@@ -509,6 +509,41 @@ class TSubtotal {
 	}
 
 	/**
+	 * Donne la ligne sous-total associée au titre
+	 *
+	 * @param FactureLigne|PropaleLigne|OrderLine $object
+	 * @param int $rang  rank of the line in the object; The first line has rank = 1, not 0.
+	 * @param int $lvl
+	 * @return bool|FactureLigne|PropaleLigne|OrderLine
+	 */
+	public static function getSubLineOfTitle(&$object, $rang, $lvl = 0)
+	{
+		if ($rang <= 0) return false;
+
+		$skip_title = 0;
+
+		if(!empty($object->lines)) {
+			foreach ($object->lines as $line) {
+				if ($line->rang <= $rang || ($lvl > 0 && self::getNiveau($line) < $lvl)) continue;
+
+				if (self::isTitle($line)) {
+					$skip_title++;
+
+				} elseif (self::isSubtotal($line)) {
+					if ($skip_title) {
+						$skip_title--;
+						continue;
+					}
+					return $line;
+					break;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * @param CommonObjectLine $line
 	 * @param int              $level
 	 * @return bool
@@ -733,8 +768,10 @@ class TSubtotal {
 			}
 			else
 			{
+
 				if ( ($key_is_id && $line->id == $key_trad) || (!$key_is_id && $line->product_type == 9 && $line->qty == $level && (in_array($line->desc, $TTitle_search) || in_array($line->label, $TTitle_search) )))
 				{
+
 					if ($key_is_id) $level = $line->qty;
 
 					$add_line = true;
@@ -743,12 +780,14 @@ class TSubtotal {
 				}
 				elseif ($add_line && TSubtotal::isModSubtotalLine($line) && TSubtotal::getNiveau($line) == $level) // Si on tombe sur un sous-total, il faut que ce soit un du même niveau que le titre
 				{
+
 					if ($withBlockLine) $TLine[] = $line;
 					break;
 				}
 
 				if ($add_line)
 				{
+
 					if (!$withBlockLine && (self::isTitle($line) || self::isSubtotal($line)) ) continue;
 					else $TLine[] = $line;
 				}

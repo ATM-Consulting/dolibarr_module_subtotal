@@ -3,7 +3,8 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
--NEW : Ajout des marges par blocs - *28/06/2023* - 3.20.0
+- NEW : Ajout des marges par blocs - *28/06/2023* - 3.21.0
+- NEW : add folder management - *28/06/2023* - 3.20.0
 
 ## Version 3.19 - 19/06/2023
 
@@ -33,7 +34,7 @@ All notable changes to this project will be documented in this file.
 - NEW : Ajout configuration SUBTOTAL_TITLE_SIZE permettant d'éditer la taille des titres - *07/02/2023* - 3.16.0
 
 ## Version 3.15
-
+- FIX : lorsque l'option "Cacher le prix des lignes des ensembles" était cochée, la réduction n'apparaissait plus sur les lignes qui ne font pas partie d'un ensemble - *06/04/2023* - 3.15.5
 - FIX : retrait des constantonoff lorsqu'on est en mode edit dans la page de conf - *09/03/2023* - 3.15.4
 - FIX : Multiples erreurs de colspan qui créaient des décalages sur les tableaux de lignes - *20/01/2023* - 3.15.3
 - FIX : DA022658 - Gestion des non-compris non-fonctionnelle - 3.15.2

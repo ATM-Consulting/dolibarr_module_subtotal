@@ -3,6 +3,7 @@
 dol_include_once('/subtotal/class/subtotal.class.php');
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
+include_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
 
 class ActionsSubtotal
 {
@@ -1819,8 +1820,12 @@ class ActionsSubtotal
 		    {
 		        if (!empty($hideprices) || !in_array(__FUNCTION__, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC)))
 		        {
-		            $this->resprints = ' ';
-		            return 1;
+					// Check if a title exist for this line && if the title have subtotal
+					$lineTitle = TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang);
+					if ($lineTitle && TSubtotal::titleHasTotalLine($object, $lineTitle, true)) {
+						$this->resprints = ' ';
+						return 1;
+					}
 		        }
 		    }
 
@@ -2937,28 +2942,40 @@ class ActionsSubtotal
 							else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 						 }
 
-						// Get display styles and apply them
-						$style = '';
 
-						if(empty($line->label)) {
-							if($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description . ' ' . '<span class="subtotal_label" style="' . $titleStyleItalic . $titleStyleBold . $titleStyleUnderline . '" >' . $this->getTitle($object, $line) . '</span>';
-							else print  '<span class="subtotal_label" style="' . $titleStyleItalic . $titleStyleBold . $titleStyleUnderline . '" >' . $line->description . '</span>';
-						} else {
+						 // Get display styles and apply them
+                        $style = '';
+		                if (!empty($conf->global->SUBTOTAL_TITLE_STYLE)) $style = $conf->global->SUBTOTAL_TITLE_STYLE;
+						 $titleStyleItalic = strpos($style, 'I') === false ? '' : ' font-style: italic;';
+						 $titleStyleBold =  strpos($style, 'B') === false ? '' : ' font-weight:bold;';
+						 $titleStyleUnderline =  strpos($style, 'U') === false ? '' : ' text-decoration: underline;';
 
-							if(! empty($conf->global->PRODUIT_DESC_IN_FORM) && ! empty($line->description)) {
-								print '<span class="subtotal_label" style="' . $titleStyleItalic . $titleStyleBold . $titleStyleUnderline . '" >' . $line->label . '</span><br><div class="subtotal_desc">' . dol_htmlentitiesbr($line->description) . '</div>';
-							} else {
-								print '<span class="subtotal_label classfortooltip" style=" ' . $titleStyleItalic . $titleStyleBold . $titleStyleUnderline . '" title="' . $line->description . '">' . $line->label . '</span>';
+						 if (empty($line->label)) {
+							if ($line->qty >= 91 && $line->qty <= 99 && $conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL) print  $line->description.' '.'<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$this->getTitle($object, $line).'</span>';
+							else print  '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->description.'</span>';
+						 }
+						 else {
+
+							if (! empty($conf->global->PRODUIT_DESC_IN_FORM) && !empty($line->description)) {
+								print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
 							}
+							else{
+								print '<span class="subtotal_label classfortooltip" style=" '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+							}
+
+						 }
+						if (TSubtotal::isTitle($line)) {
+							//Folder for expand
+							print ' <a class="collapse_bom" id="collapse-' . $line->id . '" href="#">';
+							print (($line->array_options['options_hideblock'] == 1) ? img_picto('', 'folder') : img_picto('', 'folder-open'));
+							print '</a>';
 						}
-						if($line->qty > 90) print ' : ';
-						if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
 
 
-
-
+						 if($line->qty>90) print ' : ';
+						 if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
 					}
-			?>
+			?></td>
 
 			<?php
 				if($line->qty>90) {
@@ -4030,4 +4047,252 @@ class ActionsSubtotal
         $TSub->generateDoc($object);
         return 0;
     }
+
+	public function printCommonFooter(&$parameters, &$object, &$action, $hookmanager)
+	{
+			global $langs, $db;
+
+			$contextArray = explode(':',$parameters['context']);
+
+			/**Gestion des dossiers qui permettent de réduire un bloc**/
+			if (
+			 in_array('invoicecard',$contextArray)
+				|| in_array('invoicesuppliercard',$contextArray)
+				|| in_array('propalcard',$contextArray)
+				|| in_array('ordercard',$contextArray)
+				|| in_array('ordersuppliercard',$contextArray)
+				|| in_array('invoicereccard',$contextArray)
+			)
+			{
+				//On récupère les informations de l'objet actuel
+				$id = GETPOST('id', 'int');
+				if(empty($id)) $id = GETPOST('facid', 'int');
+
+				//On détermine l'élement concernée en fonction du contexte
+				$TCurrentContexts = explode('card', $parameters['currentcontext']);
+				if($TCurrentContexts[0] == 'order') $element = 'Commande';
+				elseif($TCurrentContexts[0] == 'invoice') $element = 'Facture';
+				elseif($TCurrentContexts[0] == 'invoicesupplier') $element = 'FactureFournisseur';
+				elseif($TCurrentContexts[0] == 'ordersupplier') $element = 'CommandeFournisseur';
+				else $element = $TCurrentContexts[0];
+				$object = new $element($db);
+				$object->fetch($id);
+
+				//On récupère tous les titres sous-total
+				$TLines = TSubtotal::getAllTitleFromDocument($object);
+
+				//On définit quels sont les blocs à cacher en fonction des données existantes (hideblock)
+				if(!empty($TLines)) {
+					$TBlocksToHide = array();
+					foreach ($TLines as $line) {
+						if ($line->array_options['options_hideblock']) $TBlocksToHide[] = $line->id;
+					}
+				}
+					?>
+						<script type="text/javascript">
+							$(document).ready(function(){
+
+								//A chaque chargement de la page, on cache toutes les lignes qui font parties des blocs à cacher (sauf les titres et sous-totaux)
+								<?php if(!empty($TBlocksToHide)) { foreach($TBlocksToHide as $id_linetitle){ ?>
+								var element = $("#collapse-<?php echo $id_linetitle ?>");
+								folderManage(element);
+								<?php }} ?>
+
+								//Lors du clic sur un dossier, on cache ou faire apparaitre les lignes contenues dans le bloc concerné
+								$(".collapse_bom").click(function() {
+									folderManage_click($(this));
+									return false;
+								});
+
+								allFolderManage();
+
+								//Fonction qui permet la gestion de l'affichage des blocs à chaque chargement de page
+								function folderManage(element){
+									//On récupère le titre concerné
+									var id_line_title = element.attr('id').replace('collapse-', '');
+
+									//on récupère les lignes concernées en fonction du titre
+									$.ajax({
+										url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+										,type: 'POST'
+										,data: {
+											json:1
+											,get: 'getLinesFromTitle'
+											,element: '<?php echo $element; ?>'
+											,elementid: '<?php echo $id; ?>'
+											,lineid: id_line_title
+										}
+									}).done(function(data) {
+
+										let TSubLines = [];
+										var data = JSON.parse(data);
+										//en fonction des lignes concernées, on définit les #id (html) concernés
+										$.each(data, function (title, tlines) {
+											$.each(tlines, function (key, line) {
+												TSubLines.push('#row-' + line);
+											});
+										});
+
+										//pour chaque #id (html) concerné, on cache la ligne
+										$.each(TSubLines, function(key, value){
+											$(value).hide();
+										});
+									});
+
+									//on met à jour l'icône "dossier" pour indiquer qu'il est fermé
+									element.html('<?php echo dol_escape_js(img_picto('', 'folder')); ?>');
+								}
+
+
+								//Fonction qui permet la gestion des blocs cachés ou non lors du clic sur l'icône "dossier"
+								function folderManage_click(element) {
+									//On récupère le titre concerné
+									var id_line_title = element.attr('id').replace('collapse-', '');
+
+									//en fonction de l'état de l'icône "folder" on détermine si l'action demandée est de caché le dossier ou de montrer le dossier
+									if(element.html().indexOf('folder-open') <= 0){
+										var action_hide = 0;
+									} else {
+										var action_hide = 1;
+									}
+
+									//on récupère les lignes concernées en fonction du titre
+									$.ajax({
+										url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+										,type: 'POST'
+										,data: {
+											json:1
+											,get: 'getLinesFromTitle'
+											,element: '<?php echo $element; ?>'
+											,elementid: '<?php echo $id; ?>'
+											,lineid: id_line_title
+										}
+									}).done(function(data) {
+
+										var data = JSON.parse(data);
+
+										//en fonction des lignes concernées, on définit les #id (html) concernée
+										$.each(data, function (title, tlines) {
+
+											if(action_hide == 0 && title !== id_line_title){
+												//cas où le bloc fermé et contient des sous-blocs : si on ouvre le bloc parent, on ouvre pas les sous-blocs
+											} else {
+												$.each(tlines, function (key, line) {
+													//si le dossier est fermé, et qu'on clique, alors on ouvre le bloc
+													if(action_hide == 0) {
+														//pour chaque #id (html) concerné, on affiche la ligne
+														$('#row-' + line).show();
+
+														//on met à jour l'extrafield "hideblock" pour indiquer que le bloc de cette ligne doit être affiché
+														$.ajax({
+															url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+															, type: 'POST'
+															, data: {
+																json: 1
+																, set: 'update_hideblock_data'
+																, lineid: title
+																, element: '<?php echo $element; ?>'
+																, elementid: '<?php echo $id; ?>'
+																, value: 0
+															}
+														})
+
+														//On met à jour l'icône "dossier"
+														$('#collapse-' + title).html('<?php echo dol_escape_js(img_picto('', 'folder-open')); ?>');
+													}
+													//si le dossier est ouvert, et qu'on clique, alors on ferme le bloc
+													else {
+														//pour chaque #id (html) concerné, on affiche la ligne
+														$('#row-' + line).hide();
+
+														//on met à jour l'extrafield "hideblock" pour indiquer que le bloc de cette ligne doit être caché
+														$.ajax({
+															url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+															, type: 'POST'
+															, data: {
+																json: 1
+																, set: 'update_hideblock_data'
+																, lineid: title
+																, element: '<?php echo $element; ?>'
+																, elementid: '<?php echo $id; ?>'
+																, value: 1
+															}
+														})
+
+														//On met à jour l'icône "dossier"
+														$('#collapse-' + title).html('<?php echo dol_escape_js(img_picto('', 'folder')); ?>');
+													}
+												});
+											}
+										});
+
+									});
+								}
+
+
+								//Fonction qui permet d'ajouter l'option "Cacher les lignes" ou "Afficher les lignes"
+								function allFolderManage(){
+
+									//On ajoute une ligne au début du tableau qui propose de cacher toutes les lignes ou des les afficher
+									$('#tablelines>tbody:first').prepend('<tr><td colspan="100%" style="  text-align:right "><a id="hide_all" href="#"><?php echo img_picto('', 'folder-open', 'class="paddingright"').$langs->trans("Subtotal_HideAll"); ?></a>&nbsp;<a id="show_all" href="#"><?php echo img_picto('', 'folder', 'class="paddingright"').$langs->trans("Subtotal_ShowAll") ?></a></td></tr>')
+
+									//Lorsqu'on clique sur "cacher les lignes"
+									$("#hide_all").click(function() {
+										//on cache toutes les lignes de l'objet sauf les titres et sous-totaux
+										$("tr[data-product_type='0']").hide();
+										$("tr[data-product_type='1']").hide();
+
+										//on change tous les icônes "dossier" en fermé
+										$("[id*=collapse-]").html('<?php echo dol_escape_js(img_picto('', 'folder')); ?>');
+
+										//on sauvegarde l'information "hideblock" pour toutes les sections de l'objet
+										$.ajax({
+											url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+											, type: 'POST'
+											, data: {
+												json: 1
+												, set: 'updateall_hideblock_data'
+												, element: '<?php echo $element; ?>'
+												, elementid: '<?php echo $id; ?>'
+												, value: 1
+											}
+										})
+										return false;
+									});
+
+									//Lorsqu'on clique sur "afficher les lignes"
+									$("#show_all").click(function() {
+										//on affiche toutes les lignes de l'objet sauf les titres et sous-totaux
+										$("tr[data-product_type='0']").show();
+										$("tr[data-product_type='1']").show();
+
+										//on change tous les icônes "dossier" en ouvert
+										$("[id*=collapse-]").html('<?php echo dol_escape_js(img_picto('', 'folder-open')); ?>');
+
+										//on sauvegarde l'information "hideblock" pour toutes les sections de l'objet
+										$.ajax({
+											url: '<?php echo dol_buildpath('/subtotal/script/interface.php', 1); ?>'
+											, type: 'POST'
+											, data: {
+												json: 1
+												, set: 'updateall_hideblock_data'
+												, element: '<?php echo $element; ?>'
+												, elementid: '<?php echo $id; ?>'
+												, value: 0
+											}
+										})
+
+										return false;
+									});
+								}
+
+							});
+						</script>
+				<?php
+
+
+			}
+			/**Gestion des dossiers qui permettent de réduire un bloc**/
+
+	}
 }
