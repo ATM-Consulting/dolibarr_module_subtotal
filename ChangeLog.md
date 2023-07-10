@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+- FIX : Folder management ajax call - *10/07/2023* - 3.21.1
 - NEW : Ajout des marges par blocs - *28/06/2023* - 3.21.0
 - NEW : add folder management - *28/06/2023* - 3.20.0
 

@@ -13,6 +13,7 @@
 	dol_include_once('/fourn/class/fournisseur.commande.class.php');
 	dol_include_once('/supplier_proposal/class/supplier_proposal.class.php');
 	dol_include_once('/fourn/class/fournisseur.facture.class.php');
+	require_once __DIR__ . '/../class/subTotalJsonResponse.class.php';
 
 	$get=GETPOST('get', 'none');
 	$set=GETPOST('set', 'none');
@@ -71,28 +72,9 @@
 
 		//Mise à jour de la donnée "hideblock" sur une ligne titre afin de savoir si le bloc doit être caché ou pas
 		case 'update_hideblock_data':
-
-			global $db;
-
-			$id_line = GETPOST('lineid', 'int');
-			$element = GETPOST('element', 'alphanohtml');
-			$element_id = GETPOST('elementid', 'int');
-			$value = GETPOST('value', 'int');
-
-			$object = new $element($db);
-			$object->fetch($element_id);
-
-			if(!empty($object->lines)) {
-				foreach ($object->lines as $line) {
-					if ($line->id = $id_line) {
-						$line->fetch_optionals();
-						$line->array_options['options_hideblock'] = $value;
-						$line->insertExtraFields();
-					}
-				}
-			}
-
-			echo json_encode($id_line);
+			$jsonResponse = new SubTotalJsonResponse();
+			_updateHideBlockData($jsonResponse);
+			echo $jsonResponse->getJsonResponse();
 			break;
 
 		case 'updateall_hideblock_data' :
@@ -117,3 +99,63 @@
 		default:
 			break;
 	}
+
+
+
+
+
+/**
+ * @param SubTotalJsonResponse $jsonResponse
+ * @return bool|void
+ */
+function _updateHideBlockData($jsonResponse) {
+	global  $db, $langs;
+
+	$data = GETPOST('data', 'array');
+
+	$element = $data['element'];
+	$element_id = $data['element_id'];
+
+	if(empty($element)){
+		$jsonResponse->msg = $langs->trans('ElementMissing');
+		$jsonResponse->result = 0;
+		return false;
+	}
+
+	if(empty($element_id)){
+		$jsonResponse->msg = $langs->trans('ElementIdMissing');
+		$jsonResponse->result = 0;
+		return false;
+	}
+
+	$titleStatusList = $data['titleStatusList'];
+
+
+	if(!empty($titleStatusList)){
+		$object = new $element($db); // TODO : repris du dev de base mais il faut ajouter de la vérification ça c'est pas normale
+
+		if($object->fetch($element_id) <= 0){
+			$jsonResponse->msg = $langs->trans('ErrorFetchingElement');
+			$jsonResponse->result = 0;
+			return false;
+		}
+
+		if($object->fetch($element_id) >0 && !empty($object->lines)) {
+			foreach ($object->lines as $line) {
+				if ($line->product_type != 9) { // si ce n'est pas du sous total, skip
+					continue;
+				}
+
+				foreach($titleStatusList as $lineStatus){
+					if ($line->id = $lineStatus['id']) {
+						$line->fetch_optionals();
+						$line->array_options['options_hideblock'] = intval($lineStatus['status']);
+						$line->insertExtraFields();
+					}
+				}
+			}
+		}
+	}
+
+	$jsonResponse->result = 1;
+}
