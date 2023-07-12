@@ -4111,14 +4111,27 @@ class ActionsSubtotal
 										collapseBtn.html(o.config.img_folder_open);
 										collapseBtn.attr('title', o.config.langs.Subtotal_Hide);
 									}
+									if(childrenList.length > 0) {
 
-									childrenList.forEach((childLineId) => {
-										if(toggleStatus == 'closed'){
-											$('#'+childLineId).hide();
-										}else{
-											$('#'+childLineId).show();
-										}
-									});
+										let doNotDisplayLines = []; // Dans le cas de l'ouverture il faut vérifier que les titres enfants ne sont pas fermés avant d'ouvrir
+
+										childrenList.forEach((childLineId) => {
+											let $childLine = $('#'+childLineId);
+											if (toggleStatus == 'closed') {
+												$childLine.hide();
+											} else {
+												if(!doNotDisplayLines.includes(childLineId)){
+													$childLine.show();
+												}
+
+												if ($childLine.attr('data-issubtotal') == "title" && $childLine.attr('data-folder-status') == "closed"){
+													// Dans le cas de l'ouverture il faut vérifier que les titres enfants ne sont pas fermés avant d'ouvrir
+													let grandChildrenList = getSubtotalTitleChilds($childLine, true); // renvoi la liste des id des enfants
+													doNotDisplayLines = doNotDisplayLines.concat(grandChildrenList);
+												}
+											}
+										});
+									}
 								}
 							}
 
