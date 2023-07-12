@@ -3,9 +3,10 @@
 if (typeof getSubtotalTitleChilds !== "function") {
 	/**
 	 * @param {JQuery} $item
+	 * @param {bool} removeLastSubtotal remove last subtotal if it is the subtotal of the title
 	 * @returns {*[]}
 	 */
-	function getSubtotalTitleChilds($item) {
+	function getSubtotalTitleChilds($item, removeLastSubtotal = false) {
 		let TcurrentChilds = []; // = JSON.parse(item.attr('data-childrens'));
 		let level = $item.attr('data-level');
 
@@ -43,10 +44,19 @@ if (typeof getSubtotalTitleChilds !== "function") {
 						TcurrentChilds.push($(this).attr('id'));
 					});
 				}
-
 			}
-
 		});
+
+		// remove last subtotal if it is the subtotal of the title
+		if(removeLastSubtotal && TcurrentChilds.length > 0){
+			let lastChildId= TcurrentChilds.slice(-1);
+			let $lastChild = $('#'+lastChildId);
+			if($lastChild.length > 0 && $lastChild.attr('data-issubtotal') != undefined && $lastChild.attr('data-issubtotal') == 'subtotal'){
+				if(level == $lastChild.attr('data-level') ){
+					TcurrentChilds.pop();
+				}
+			}
+		}
 
 		return TcurrentChilds;
 	}

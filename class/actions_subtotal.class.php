@@ -3716,17 +3716,17 @@ class ActionsSubtotal
 
 	    if(TSubtotal::isTitle($line)){
 	        $ThtmlData['data-issubtotal'] = 'title';
-	    }elseif(TSubtotal::isSubtotal($line)){
+
+			$ThtmlData['data-folder-status'] = 'open';
+			if(!empty($line->array_options['options_hideblock'])){
+				$ThtmlData['data-folder-status'] = 'closed';
+			}
+		}elseif(TSubtotal::isSubtotal($line)){
 	        $ThtmlData['data-issubtotal'] = 'subtotal';
 	    }
 	    else{
 	        $ThtmlData['data-issubtotal'] = 'freetext';
 	    }
-
-		$ThtmlData['data-folder-status'] = 'open';
-		if(!empty($line->array_options['options_hideblock'])){
-			$ThtmlData['data-folder-status'] = 'closed';
-		}
 
 	    // Change or add data  from hooks
 	    $parameters = array_replace($parameters , array(  'ThtmlData' => $ThtmlData )  );
@@ -3786,8 +3786,9 @@ class ActionsSubtotal
 
 			$jsConf = array(
 				'useOldSplittedTrForLine' => intval(DOL_VERSION) < 16 ? 1 : 0,
-			)
+			);
 
+			print '<script type="text/javascript" src="'.dol_buildpath('subtotal/js/subtotal.lib.js', 1).'"></script>';
 	        ?>
 
 
@@ -3887,57 +3888,6 @@ class ActionsSubtotal
 			    	    }
 			    });
  				<?php } ?>
-
-				function getSubtotalTitleChilds(item)
-				{
-		    		var TcurrentChilds = []; // = JSON.parse(item.attr('data-childrens'));
-		    		var level = item.data('level');
-
-		    		var indexOfFirstSubtotal = -1;
-		    		var indexOfFirstTitle = -1;
-
-		    		item.nextAll('[id^="row-"]').each(function(index){
-
-						var dataLevel = $(this).attr('data-level');
-						var dataIsSubtotal = $(this).attr('data-issubtotal');
-
-						if(dataIsSubtotal != 'undefined' && dataLevel != 'undefined' )
-						{
-
-							if(dataLevel <=  level && indexOfFirstSubtotal < 0 && dataIsSubtotal == 'subtotal' )
-							{
-								indexOfFirstSubtotal = index;
-								if(indexOfFirstTitle < 0)
-								{
-									TcurrentChilds.push($(this).attr('id'));
-								}
-							}
-
-							if(dataLevel <=  level && indexOfFirstSubtotal < 0 && indexOfFirstTitle < 0 && dataIsSubtotal == 'title' )
-							{
-								indexOfFirstTitle = index;
-							}
-						}
-
-						if(indexOfFirstTitle < 0 && indexOfFirstSubtotal < 0)
-						{
-							TcurrentChilds.push($(this).attr('id'));
-
-							// Add extraffield support for dolibarr > 7
-							var thisId = $(this).attr('data-id');
-							var thisElement = $(this).attr('data-element');
-							if(thisId != undefined && thisElement != undefined && subTotalConf.useOldSplittedTrForLine )
-							{
-								$('[data-targetid="' + thisId + '"][data-element="extrafield"][data-targetelement="'+ thisElement +'"]').each(function(index){
-									TcurrentChilds.push($(this).attr('id'));
-								});
-							}
-
-						}
-
-		    		});
-		    		return TcurrentChilds;
-				}
 
 			});
 			</script>
@@ -4114,7 +4064,6 @@ class ActionsSubtotal
 					)
 				);
 
-
 				print '<script type="text/javascript" src="'.dol_buildpath('subtotal/js/subtotal.lib.js', 1).'"></script>';
 
 				?>
@@ -4127,6 +4076,7 @@ class ActionsSubtotal
 					}
 				</style>
 				<script type="text/javascript">
+					// TODO : mettre ça dans une classe js
 					$(document).ready(function(){
 						// Utilisation d'une sorte de namespace en JS
 						subtotalFolders = {};
@@ -4151,16 +4101,17 @@ class ActionsSubtotal
 								let collapseBtn = $('#collapse-' + titleId);
 								if($titleLine.length>0){
 									$titleLine.attr('data-folder-status', toggleStatus);
+									let childrenList = getSubtotalTitleChilds($titleLine, true); // renvoi la liste des id des enfants
 
 									if(toggleStatus == 'closed') {
-										collapseBtn.html(o.config.img_folder_closed);
-										collapseBtn.attr('title', o.config.langs.Subtotal_Show);
+										collapseBtn.html(o.config.img_folder_closed + ' ('+ childrenList.length +')');
+										collapseBtn.attr('title', o.config.langs.Subtotal_Show + ' : '+ childrenList.length );
+
 									}else{
 										collapseBtn.html(o.config.img_folder_open);
 										collapseBtn.attr('title', o.config.langs.Subtotal_Hide);
 									}
 
-									let childrenList = getSubtotalTitleChilds($titleLine); // renvoi la liste des id des enfants
 									childrenList.forEach((childLineId) => {
 										if(toggleStatus == 'closed'){
 											$('#'+childLineId).hide();
