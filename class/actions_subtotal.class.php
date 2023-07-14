@@ -2981,7 +2981,7 @@ class ActionsSubtotal
 							print '</span>';
 
 							// un span pour contenir des infos comme le nombre de lignes cachées etc...
-							print ' <span class="fold-subtotal-info" data-title-line-target="' . $line->id . '" ></span>';
+							print ' <span class="fold-subtotal-info" title="'.dol_escape_htmltag($langs->trans('NumberOfHiddenLines')).'" data-title-line-target="' . $line->id . '" ></span>';
 
 							print '</span>';
 						}
@@ -4134,11 +4134,12 @@ class ActionsSubtotal
 									$titleLine.attr('data-folder-status', toggleStatus);
 									let haveTitle = false;
 									let childrenList = getSubtotalTitleChilds($titleLine, true); // renvoi la liste des id des enfants
+									let totalHiddenLines = 0;
+
 									if(childrenList.length > 0) {
 
 										let doNotDisplayLines = []; // Dans le cas de l'ouverture il faut vérifier que les titres enfants ne sont pas fermés avant d'ouvrir
 										let doNotHiddeLines = []; // En mode keepTitle: Dans le cas de la fermeture il faut vérifier que les titres enfants ne sont pas ouvert avant de fermer
-
 
 										childrenList.forEach((childLineId) => {
 											let $childLine = $('#'+childLineId);
@@ -4156,12 +4157,12 @@ class ActionsSubtotal
 												}
 											}
 
-
 											if (toggleStatus == 'closed') {
 												if(o.config.closeMode == 'keepTitle' && ($childLine.attr('data-issubtotal') == "title" || $childLine.attr('data-issubtotal') == "subtotal"  )){
 													$childLine.show();
 												}else if(!doNotHiddeLines.includes(childLineId)){
 													$childLine.hide();
+													totalHiddenLines++;
 												}
 											} else {
 												if(!doNotDisplayLines.includes(childLineId)){
@@ -4171,18 +4172,19 @@ class ActionsSubtotal
 										});
 									}
 
+									$collapseInfos.html('('+ totalHiddenLines +')');
+									if(totalHiddenLines == 0){
+										$collapseInfos.html('');
+									}
 
 									if(toggleStatus == 'closed') {
 										$collapseBtn.html(o.config.img_folder_closed);
-										$collapseInfos.html('('+ childrenList.length +')');
-										$collapseSimpleBtn.attr('title', o.config.langs.Subtotal_Show + ' : '+ childrenList.length );
-										$collapseAllBtn.attr('title', o.config.langs.Subtotal_ForceShowAll + ' : '+ childrenList.length ); // TODO Mettre une autre trad
-
+										$collapseSimpleBtn.attr('title', o.config.langs.Subtotal_Show);
+										$collapseAllBtn.attr('title', o.config.langs.Subtotal_ForceShowAll);
 									}else{
 										$collapseBtn.html(o.config.img_folder_open);
-										$collapseInfos.html('');
 										$collapseSimpleBtn.attr('title', o.config.langs.Subtotal_Hide);
-										$collapseAllBtn.attr('title', o.config.langs.Subtotal_ForceHideAll); // TODO Mettre une autre trad
+										$collapseAllBtn.attr('title', o.config.langs.Subtotal_ForceHideAll);
 									}
 
 									// Si pas de titre pas besoin d'afficher le bouton dossier rouge
@@ -4194,12 +4196,17 @@ class ActionsSubtotal
 								}
 							}
 
-							if(o.config.linesToHide && o.config.linesToHide.length > 0){
-								o.config.linesToHide.forEach((lineId) => {
-									o.toggleChildFolderStatusDisplay(lineId, 'closed');
-								});
-							}
-
+							// initialisation des lignes affichées ou non
+							$('tr[data-issubtotal="title"]').each(function() {
+								let lineId = $( this ).attr('data-id');
+								if(lineId != null){
+									if(o.config.linesToHide.includes(lineId)){
+										o.toggleChildFolderStatusDisplay(lineId, 'closed');
+									}else{
+										o.toggleChildFolderStatusDisplay(lineId, 'open');
+									}
+								}
+							});
 
 							// Lors du clic sur un dossier, on cache ou faire apparaitre les lignes contenues dans le bloc concerné
 							$(document).on("click",".fold-subtotal-btn",function(event) {

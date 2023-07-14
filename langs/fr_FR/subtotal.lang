@@ -136,6 +136,7 @@ Subtotal_ShowAll=Afficher toutes les lignes
 Subtotal_Hide=Cacher les lignes
 Subtotal_Show=Afficher les lignes
 
+NumberOfHiddenLines = Nombre de lignes cachées
 Subtotal_ForceHideAll = Cacher toutes les lignes du bloc ainsi que les lignes des blocs de titre de niveau inférieur
 Subtotal_ForceShowAll = Afficher toutes les lignes du bloc ainsi que les lignes des blocs de titre de niveau inférieur
 DISPLAY_MARGIN_ON_SUBTOTALS=Afficher les marges sur les lignes de sous-totaux
