@@ -4090,6 +4090,12 @@ class ActionsSubtotal
 
 				?>
 				<style>
+					.fold-subtotal-container{
+						-webkit-user-select: none; /* Safari */
+						-ms-user-select: none; /* IE 10 and IE 11 */
+						user-select: none; /* Standard syntax */
+					}
+
 					.toggle-all-folder-status, .fold-subtotal-btn{
 						cursor: pointer;
 					}
