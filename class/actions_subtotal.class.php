@@ -4117,6 +4117,77 @@ class ActionsSubtotal
 							 */
 							o.newToken = '';
 
+							/**
+							 *
+							 * @param {int} titleId
+							 */
+							o.countHiddenLinesForTitle = function(titleId){
+								let $titleLine = $('#row-' + titleId);
+								let childrenList = getSubtotalTitleChilds($titleLine, true); // renvoi la liste des id des enfants
+								let totalHiddenLines = 0;
+								if(childrenList.length > 0) {
+									childrenList.forEach((childLineId) => {
+										let $childLine = $('#'+childLineId);
+										if(!$childLine.is(":visible")){
+											totalHiddenLines++;
+										}
+									});
+								}
+
+								return totalHiddenLines;
+							}
+
+							/**
+							 * Mise à jour des titres parents pour l'affichage du nombre de lignes cachées
+							 * @param {jQuery}  $childTilteLine la ligne de titre enfant
+							 */
+							o.updateHiddenLinesCountInfoForParentTitles = function($childTilteLine){
+								let parentTitles = o.getTitleParents($childTilteLine);
+								if(parentTitles.length>0){
+									parentTitles.forEach((parentTitleLineId) => {
+										let $titleCollapseInfos = $('.fold-subtotal-info[data-title-line-target="' + parentTitleLineId + '"]');
+										if($titleCollapseInfos.length>0){
+											let totalHiddenLines = o.countHiddenLinesForTitle(parentTitleLineId);
+											$titleCollapseInfos.html('('+ totalHiddenLines +')');
+											if(totalHiddenLines == 0){
+												$titleCollapseInfos.html('');
+											}
+										}
+									});
+								}
+							}
+
+							/**
+							 * @param {jQuery}  $childLine
+							 * @param {int} titleId
+							 */
+							o.addTitleParentId = function($childLine, titleId){
+								// Ajoute l'id parent si se n'est pas déja fait
+								let parentTitleIds = $childLine.attr('data-parent-titles');
+								if(parentTitleIds != null){
+									let parentTitleIdsList = parentTitleIds.split(",");
+									if(!parentTitleIdsList.includes(titleId)){
+										$childLine.attr('data-parent-titles', parentTitleIds + ',' + titleId);
+									}
+								}else{
+									$childLine.attr('data-parent-titles', titleId);
+								}
+							}
+
+							/**
+							 * @param {jQuery}  $childLine
+							 * @param {int} titleId
+							 * @return []
+							 */
+							o.getTitleParents = function($childLine){
+								let result = [];
+								let parentTitleIds = $childLine.attr('data-parent-titles');
+								if(parentTitleIds != null){
+									return parentTitleIds.split(",");
+								}
+
+								return result;
+							}
 
 							/**
 							 *
@@ -4145,6 +4216,10 @@ class ActionsSubtotal
 											let $childLine = $('#'+childLineId);
 
 											if ($childLine.attr('data-issubtotal') == "title"){
+
+												// Ajoute l'id parent si se n'est pas déja fait
+												o.addTitleParentId($childLine, titleId);
+
 												haveTitle = true;
 												// Dans le cas de l'ouverture il faut vérifier que les titres enfants ne sont pas fermés avant d'ouvrir
 												let grandChildrenList = getSubtotalTitleChilds($childLine, true); // renvoi la liste des id des enfants
@@ -4162,12 +4237,15 @@ class ActionsSubtotal
 													$childLine.show();
 												}else if(!doNotHiddeLines.includes(childLineId)){
 													$childLine.hide();
-													totalHiddenLines++;
 												}
 											} else {
 												if(!doNotDisplayLines.includes(childLineId)){
 													$childLine.show();
 												}
+											}
+
+											if(!$childLine.is(":visible")){
+												totalHiddenLines++;
 											}
 										});
 									}
@@ -4176,6 +4254,9 @@ class ActionsSubtotal
 									if(totalHiddenLines == 0){
 										$collapseInfos.html('');
 									}
+
+									// Mise à jour des parents pour l'affichage du nombre de lignes cachées
+									o.updateHiddenLinesCountInfoForParentTitles($titleLine);
 
 									if(toggleStatus == 'closed') {
 										$collapseBtn.html(o.config.img_folder_closed);
