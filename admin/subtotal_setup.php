@@ -196,6 +196,18 @@ $item->fieldOutputOverride ='<input type="color" value="'.$item->fieldValue .'" 
 $item = $formSetup->newItem('SUBTOTAL_DISABLE_SUMMARY')->setAsYesNo();
 
 
+
+$item = $formSetup->newItem('SUBTOTAL_BLOC_FOLD_MODE')->setAsSelect(array(
+		'default' => $langs->trans('HideSubtitleOnFold'),
+		'keepTitle' => $langs->trans('KeepSubtitleDisplayOnFold'),
+	));
+if(empty($conf->global->SUBTOTAL_BLOC_FOLD_MODE)){
+	$result = dolibarr_set_const($item->db, $item->confKey, 'default', 'chaine', 0, '', $item->entity);
+	$item->loadValueFromConf();
+}
+
+
+
 // Activer la gestion des blocs "Non Compris" pour exclusion du total
 $formSetup->newItem('ManageNonCompris')->setAsTitle();
 

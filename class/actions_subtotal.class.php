@@ -2972,6 +2972,11 @@ class ActionsSubtotal
 							print ' <span title="'.dol_escape_htmltag($titleAttr).'" class="collapse_bom" data-title-line-target="' . $line->id . '" id="collapse-' . $line->id . '" >';
 							print (($line->array_options['options_hideblock'] == 1) ? img_picto('', 'folder') : img_picto('', 'folder-open'));
 							print '</span>';
+
+							// TODO : ajouter un bouton pour ouvrir/fermer aussi les enfants
+//							print ' <span title="'.dol_escape_htmltag($titleAttr).'" class="collapse_bom" data-toggle-all-children="1" data-title-line-target="' . $line->id . '" id="collapse-' . $line->id . '" >';
+//							print (($line->array_options['options_hideblock'] == 1) ? img_picto('', 'folder') : img_picto('', 'folder-open'));
+//							print '</span>';
 						}
 
 
@@ -4010,7 +4015,7 @@ class ActionsSubtotal
 
 	public function printCommonFooter(&$parameters, &$object, &$action, $hookmanager)
 	{
-			global $langs, $db;
+			global $langs, $db, $conf;
 
 			$contextArray = explode(':',$parameters['context']);
 
@@ -4049,8 +4054,15 @@ class ActionsSubtotal
 					}
 				}
 
+
+				$hideMode = !empty($conf->global->SUBTOTAL_BLOC_FOLD_MODE)?$conf->global->SUBTOTAL_BLOC_FOLD_MODE:'default';
+				if(!in_array($hideMode, array('default', 'keepTitle'))){
+					$hideMode = 'default';
+				}
+
 				$jsConf = array(
 					'linesToHide' => $TBlocksToHide,
+					'closeMode' => $hideMode, // default, keepTitle
 					'interfaceUrl'=> dol_buildpath('/subtotal/script/interface.php', 1),
 					'element' => $element,
 					'element_id' => $id,
@@ -4071,8 +4083,14 @@ class ActionsSubtotal
 					.toggle-all-folder-status, .collapse_bom{
 						cursor: pointer;
 					}
+					.collapse_bom[data-toggle-all-children="1"]{
+						color: rgb(190, 53, 53);
+					}
 					.toggle-all-folder-status:hover, .collapse_bom:hover{
 						color: var(--colortextlink, rgb(10, 20, 100));
+					}
+					.collapse_bom[data-toggle-all-children="1"]:hover{
+						color: rgb(138, 28, 28);
 					}
 				</style>
 				<script type="text/javascript">
@@ -4114,27 +4132,39 @@ class ActionsSubtotal
 									if(childrenList.length > 0) {
 
 										let doNotDisplayLines = []; // Dans le cas de l'ouverture il faut vérifier que les titres enfants ne sont pas fermés avant d'ouvrir
+										let doNotHiddeLines = []; // En mode keepTitle: Dans le cas de la fermeture il faut vérifier que les titres enfants ne sont pas ouvert avant de fermer
 
 										childrenList.forEach((childLineId) => {
 											let $childLine = $('#'+childLineId);
+
+											if ($childLine.attr('data-issubtotal') == "title"){
+												// Dans le cas de l'ouverture il faut vérifier que les titres enfants ne sont pas fermés avant d'ouvrir
+												let grandChildrenList = getSubtotalTitleChilds($childLine, true); // renvoi la liste des id des enfants
+
+												if($childLine.attr('data-folder-status') == "closed"){
+													doNotDisplayLines = doNotDisplayLines.concat(grandChildrenList);
+												}
+												else if(o.config.closeMode == 'keepTitle' && $childLine.attr('data-folder-status') == "open"){
+													doNotHiddeLines = doNotDisplayLines.concat(grandChildrenList);
+												}
+											}
+
+
 											if (toggleStatus == 'closed') {
-												$childLine.hide();
+												if(o.config.closeMode == 'keepTitle' && ($childLine.attr('data-issubtotal') == "title" || $childLine.attr('data-issubtotal') == "subtotal"  )){
+													$childLine.show();
+												}else if(!doNotHiddeLines.includes(childLineId)){
+													$childLine.hide();
+												}
 											} else {
 												if(!doNotDisplayLines.includes(childLineId)){
 													$childLine.show();
-												}
-
-												if ($childLine.attr('data-issubtotal') == "title" && $childLine.attr('data-folder-status') == "closed"){
-													// Dans le cas de l'ouverture il faut vérifier que les titres enfants ne sont pas fermés avant d'ouvrir
-													let grandChildrenList = getSubtotalTitleChilds($childLine, true); // renvoi la liste des id des enfants
-													doNotDisplayLines = doNotDisplayLines.concat(grandChildrenList);
 												}
 											}
 										});
 									}
 								}
 							}
-
 
 							if(o.config.linesToHide && o.config.linesToHide.length > 0){
 								o.config.linesToHide.forEach((lineId) => {
@@ -4160,8 +4190,27 @@ class ActionsSubtotal
 										}]
 									};
 
+									// TODO pour le coup on l'on rajoute un autre bouton pour ouvrir / fermer tout les blocs enfants (genre dossier rouge)
+									if($(this).attr('data-toggle-all-children') == '1'){ //o.config.closeMode == 'keepTitle'
+										let childrenList = getSubtotalTitleChilds(titleRow, true); // renvoi la liste des id des enfants
+										if(childrenList.length > 0) {
+											childrenList.forEach((childLineId) => {
+												let $childLine = $('#'+childLineId);
+												if ($childLine.attr('data-issubtotal') == "title"){
+													sendData.titleStatusList.push({
+														'id': $childLine.attr('data-id'),
+														'status': newStatus !== 'closed' ? 0 : 1,
+													});
+													o.toggleChildFolderStatusDisplay($childLine.attr('data-id'), newStatus);
+												}
+											});
+										}
+									}
+
+									o.toggleChildFolderStatusDisplay(targetTitleLineId, newStatus); // devrait être dans le callback ajax success mais pour plus d'ergonomie et rapidité de feedback je le sort
 									o.callInterface('set' , 'update_hideblock_data', sendData, function(response){
-										o.toggleChildFolderStatusDisplay(targetTitleLineId, newStatus);
+										// TODO gérer un retour en cas d'érreur
+										// o.toggleChildFolderStatusDisplay(targetTitleLineId, newStatus);
 									})
 								}
 							});
