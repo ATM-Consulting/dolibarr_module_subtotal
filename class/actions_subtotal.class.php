@@ -2968,15 +2968,22 @@ class ActionsSubtotal
 							//Folder for expand
 							$titleAttr = ($line->array_options['options_hideblock'] == 1) ? $langs->trans("Subtotal_Show") : $langs->trans("Subtotal_Hide");
 
+							print '<span class="fold-subtotal-container" >';
 
-							print ' <span title="'.dol_escape_htmltag($titleAttr).'" class="collapse_bom" data-title-line-target="' . $line->id . '" id="collapse-' . $line->id . '" >';
+							// bouton pour ouvrir/fermer le bloc
+							print ' <span title="'.dol_escape_htmltag($titleAttr).'" class="fold-subtotal-btn" data-toggle-all-children="0" data-title-line-target="' . $line->id . '" id="collapse-' . $line->id . '" >';
 							print (($line->array_options['options_hideblock'] == 1) ? img_picto('', 'folder') : img_picto('', 'folder-open'));
 							print '</span>';
 
-							// TODO : ajouter un bouton pour ouvrir/fermer aussi les enfants
-//							print ' <span title="'.dol_escape_htmltag($titleAttr).'" class="collapse_bom" data-toggle-all-children="1" data-title-line-target="' . $line->id . '" id="collapse-' . $line->id . '" >';
-//							print (($line->array_options['options_hideblock'] == 1) ? img_picto('', 'folder') : img_picto('', 'folder-open'));
-//							print '</span>';
+							// Bouton pour ouvrir/fermer aussi les enfants
+							print ' <span title="'.dol_escape_htmltag($titleAttr).'" class="fold-subtotal-btn" data-toggle-all-children="1" data-title-line-target="' . $line->id . '" id="collapse-children-' . $line->id . '" >';
+							print (($line->array_options['options_hideblock'] == 1) ? img_picto('', 'folder') : img_picto('', 'folder-open'));
+							print '</span>';
+
+							// un span pour contenir des infos comme le nombre de lignes cachées etc...
+							print ' <span class="fold-subtotal-info" data-title-line-target="' . $line->id . '" ></span>';
+
+							print '</span>';
 						}
 
 
@@ -4060,6 +4067,7 @@ class ActionsSubtotal
 					$hideMode = 'default';
 				}
 
+
 				$jsConf = array(
 					'linesToHide' => $TBlocksToHide,
 					'closeMode' => $hideMode, // default, keepTitle
@@ -4069,10 +4077,12 @@ class ActionsSubtotal
 					'img_folder_closed' => img_picto('', 'folder'),
 					'img_folder_open' => img_picto('', 'folder-open'),
 					'langs' => array(
-						'Subtotal_HideAll' => $langs->trans("Subtotal_HideAll"),
-						'Subtotal_ShowAll' => $langs->trans("Subtotal_ShowAll"),
-						'Subtotal_Hide' => $langs->trans("Subtotal_Hide"),
-						'Subtotal_Show' => $langs->trans("Subtotal_Show")
+						'Subtotal_HideAll' => $langs->transnoentities("Subtotal_HideAll"),
+						'Subtotal_ShowAll' => $langs->transnoentities("Subtotal_ShowAll"),
+						'Subtotal_Hide' => $langs->transnoentities("Subtotal_Hide"),
+						'Subtotal_Show' => $langs->transnoentities("Subtotal_Show"),
+						'Subtotal_ForceHideAll' => $langs->transnoentities("Subtotal_ForceHideAll"),
+						'Subtotal_ForceShowAll' => $langs->transnoentities("Subtotal_ForceShowAll")
 					)
 				);
 
@@ -4080,16 +4090,16 @@ class ActionsSubtotal
 
 				?>
 				<style>
-					.toggle-all-folder-status, .collapse_bom{
+					.toggle-all-folder-status, .fold-subtotal-btn{
 						cursor: pointer;
 					}
-					.collapse_bom[data-toggle-all-children="1"]{
+					.fold-subtotal-btn[data-toggle-all-children="1"]{
 						color: rgb(190, 53, 53);
 					}
-					.toggle-all-folder-status:hover, .collapse_bom:hover{
+					.toggle-all-folder-status:hover, .fold-subtotal-btn:hover{
 						color: var(--colortextlink, rgb(10, 20, 100));
 					}
-					.collapse_bom[data-toggle-all-children="1"]:hover{
+					.fold-subtotal-btn[data-toggle-all-children="1"]:hover{
 						color: rgb(138, 28, 28);
 					}
 				</style>
@@ -4115,29 +4125,26 @@ class ActionsSubtotal
 							 */
 							o.toggleChildFolderStatusDisplay = function(titleId, toggleStatus = 'open'){
 								let $titleLine = $('#row-' + titleId);
+								let $collapseBtn = $('.fold-subtotal-btn[data-title-line-target="' + titleId + '"]');
+								let $collapseSimpleBtn = $('.fold-subtotal-btn[data-title-line-target="' + titleId + '"][data-toggle-all-children="0"]');
+								let $collapseAllBtn = $('.fold-subtotal-btn[data-title-line-target="' + titleId + '"][data-toggle-all-children="1"]');
+								let $collapseInfos = $('.fold-subtotal-info[data-title-line-target="' + titleId + '"]');
 
-								let collapseBtn = $('#collapse-' + titleId);
 								if($titleLine.length>0){
 									$titleLine.attr('data-folder-status', toggleStatus);
+									let haveTitle = false;
 									let childrenList = getSubtotalTitleChilds($titleLine, true); // renvoi la liste des id des enfants
-
-									if(toggleStatus == 'closed') {
-										collapseBtn.html(o.config.img_folder_closed + ' ('+ childrenList.length +')');
-										collapseBtn.attr('title', o.config.langs.Subtotal_Show + ' : '+ childrenList.length );
-
-									}else{
-										collapseBtn.html(o.config.img_folder_open);
-										collapseBtn.attr('title', o.config.langs.Subtotal_Hide);
-									}
 									if(childrenList.length > 0) {
 
 										let doNotDisplayLines = []; // Dans le cas de l'ouverture il faut vérifier que les titres enfants ne sont pas fermés avant d'ouvrir
 										let doNotHiddeLines = []; // En mode keepTitle: Dans le cas de la fermeture il faut vérifier que les titres enfants ne sont pas ouvert avant de fermer
 
+
 										childrenList.forEach((childLineId) => {
 											let $childLine = $('#'+childLineId);
 
 											if ($childLine.attr('data-issubtotal') == "title"){
+												haveTitle = true;
 												// Dans le cas de l'ouverture il faut vérifier que les titres enfants ne sont pas fermés avant d'ouvrir
 												let grandChildrenList = getSubtotalTitleChilds($childLine, true); // renvoi la liste des id des enfants
 
@@ -4163,6 +4170,27 @@ class ActionsSubtotal
 											}
 										});
 									}
+
+
+									if(toggleStatus == 'closed') {
+										$collapseBtn.html(o.config.img_folder_closed);
+										$collapseInfos.html('('+ childrenList.length +')');
+										$collapseSimpleBtn.attr('title', o.config.langs.Subtotal_Show + ' : '+ childrenList.length );
+										$collapseAllBtn.attr('title', o.config.langs.Subtotal_ForceShowAll + ' : '+ childrenList.length ); // TODO Mettre une autre trad
+
+									}else{
+										$collapseBtn.html(o.config.img_folder_open);
+										$collapseInfos.html('');
+										$collapseSimpleBtn.attr('title', o.config.langs.Subtotal_Hide);
+										$collapseAllBtn.attr('title', o.config.langs.Subtotal_ForceHideAll); // TODO Mettre une autre trad
+									}
+
+									// Si pas de titre pas besoin d'afficher le bouton dossier rouge
+									if(haveTitle){
+										$collapseAllBtn.show();
+									}else{
+										$collapseAllBtn.hide();
+									}
 								}
 							}
 
@@ -4174,7 +4202,7 @@ class ActionsSubtotal
 
 
 							// Lors du clic sur un dossier, on cache ou faire apparaitre les lignes contenues dans le bloc concerné
-							$(document).on("click",".collapse_bom",function(event) {
+							$(document).on("click",".fold-subtotal-btn",function(event) {
 								event.preventDefault();
 								let targetTitleLineId = $(this).attr('data-title-line-target');
 								if(targetTitleLineId != undefined){
@@ -4190,7 +4218,9 @@ class ActionsSubtotal
 										}]
 									};
 
-									// TODO pour le coup on l'on rajoute un autre bouton pour ouvrir / fermer tout les blocs enfants (genre dossier rouge)
+									/**
+									 * Pour les boutons de type "block" bouton pour ouvrir / fermer tous les blocs enfants (ex dossier rouge)
+									 **/
 									if($(this).attr('data-toggle-all-children') == '1'){ //o.config.closeMode == 'keepTitle'
 										let childrenList = getSubtotalTitleChilds(titleRow, true); // renvoi la liste des id des enfants
 										if(childrenList.length > 0) {
@@ -4260,6 +4290,21 @@ class ActionsSubtotal
 								$( this ).fadeIn();
 							});
 
+
+							o.checkListOfLinesIdHaveTitle = function(childrenList){
+								if(!Array.isArray(childrenList)){
+									return false;
+								}
+
+								childrenList.forEach((childLineId) => {
+									let $childLine = $('#' + childLineId);
+									if ($childLine.length > 0 && $childLine.attr('data-issubtotal') == "title") {
+										return true;
+									}
+								});
+
+								return false;
+							}
 
 							/**
 							 *
