@@ -2333,32 +2333,38 @@ class ActionsSubtotal
 						$label .= ' '.$this->getTitle($object, $line);
 					}
 
-					/**
-					 * TCPDF::startTransaction() committe la transaction en cours s'il y en a une,
-					 * ce qui peut être problématique. Comme TCPDF::rollbackTransaction() ne fait rien
-					 * si aucune transaction n'est en cours, on peut y faire appel sans problème pour revenir
-					 * à l'état d'origine.
-					 */
-					$pdf->rollbackTransaction(true);
-					$pdf->startTransaction();
-
-					$pageBefore = $pdf->getPage();
-					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-					$pageAfter = $pdf->getPage();
-
-					if($pageAfter>$pageBefore) {
-						//print "ST $pageAfter>$pageBefore<br>";
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						/**
+						 * TCPDF::startTransaction() committe la transaction en cours s'il y en a une,
+						 * ce qui peut être problématique. Comme TCPDF::rollbackTransaction() ne fait rien
+						 * si aucune transaction n'est en cours, on peut y faire appel sans problème pour revenir
+						 * à l'état d'origine.
+						 */
 						$pdf->rollbackTransaction(true);
-						$pdf->addPage('', '', true);
-						$posy = $pdf->GetY();
-						$this->pdf_add_total($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
-						$posy = $pdf->GetY();
-						//print 'add ST'.$pdf->getPage().'<br />';
+						$pdf->startTransaction();
 
+						$pageBefore = $pdf->getPage();
 					}
-					else	// No pagebreak
-					{
-						$pdf->commitTransaction();
+
+					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
+
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						$pageAfter = $pdf->getPage();
+
+						if($pageAfter > $pageBefore) {
+							//print "ST $pageAfter>$pageBefore<br>";
+							$pdf->rollbackTransaction(true);
+							$pdf->addPage('', '', true);
+							$posy = $pdf->GetY();
+							$this->pdf_add_total($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
+							$posy = $pdf->GetY();
+							//print 'add ST'.$pdf->getPage().'<br />';
+
+						}
+						else    // No pagebreak
+						{
+							$pdf->commitTransaction();
+						}
 					}
 
 					// On delivery PDF, we don't want quantities to appear and there are no hooks => setting text color to background color;
@@ -2385,32 +2391,38 @@ class ActionsSubtotal
 					return 1;
 				}
 				else if ($line->qty < 10) {
-					/**
-					 * TCPDF::startTransaction() committe la transaction en cours s'il y en a une,
-					 * ce qui peut être problématique. Comme TCPDF::rollbackTransaction() ne fait rien
-					 * si aucune transaction n'est en cours, on peut y faire appel sans problème pour revenir
-					 * à l'état d'origine.
-					 */
-					$pdf->rollbackTransaction(true);
-					$pdf->startTransaction();
-
-					$pageBefore = $pdf->getPage();
-					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-					$pageAfter = $pdf->getPage();
-
-					if($pageAfter>$pageBefore) {
-						//print "ST $pageAfter>$pageBefore<br>";
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						/**
+						 * TCPDF::startTransaction() committe la transaction en cours s'il y en a une,
+						 * ce qui peut être problématique. Comme TCPDF::rollbackTransaction() ne fait rien
+						 * si aucune transaction n'est en cours, on peut y faire appel sans problème pour revenir
+						 * à l'état d'origine.
+						 */
 						$pdf->rollbackTransaction(true);
-						$pdf->addPage('', '', true);
-						$posy = $pdf->GetY();
-						$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-						$posy = $pdf->GetY();
-						//print 'add ST'.$pdf->getPage().'<br />';
+						$pdf->startTransaction();
 
+						$pageBefore = $pdf->getPage();
 					}
-					else	// No pagebreak
-					{
-						$pdf->commitTransaction();
+
+					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
+
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						$pageAfter = $pdf->getPage();
+
+						if($pageAfter > $pageBefore) {
+							//print "ST $pageAfter>$pageBefore<br>";
+							$pdf->rollbackTransaction(true);
+							$pdf->addPage('', '', true);
+							$posy = $pdf->GetY();
+							$this->pdf_add_title($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
+							$posy = $pdf->GetY();
+							//print 'add ST'.$pdf->getPage().'<br />';
+
+						}
+						else    // No pagebreak
+						{
+							$pdf->commitTransaction();
+						}
 					}
 
 					if($object->element == 'delivery')
@@ -2426,32 +2438,38 @@ class ActionsSubtotal
 
 					$labelproductservice = preg_replace('/(<img[^>]*src=")([^"]*)(&amp;)([^"]*")/', '\1\2&\4', $labelproductservice, -1, $nbrep);
 
-					/**
-					 * TCPDF::startTransaction() committe la transaction en cours s'il y en a une,
-					 * ce qui peut être problématique. Comme TCPDF::rollbackTransaction() ne fait rien
-					 * si aucune transaction n'est en cours, on peut y faire appel sans problème pour revenir
-					 * à l'état d'origine.
-					 */
-					$pdf->rollbackTransaction(true);
-					$pdf->startTransaction();
-
-					$pageBefore = $pdf->getPage();
-					$pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
-					$pageAfter = $pdf->getPage();
-
-					if($pageAfter>$pageBefore) {
-						//print "ST $pageAfter>$pageBefore<br>";
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						/**
+						 * TCPDF::startTransaction() committe la transaction en cours s'il y en a une,
+						 * ce qui peut être problématique. Comme TCPDF::rollbackTransaction() ne fait rien
+						 * si aucune transaction n'est en cours, on peut y faire appel sans problème pour revenir
+						 * à l'état d'origine.
+						 */
 						$pdf->rollbackTransaction(true);
-						$pdf->addPage('', '', true);
-						$posy = $pdf->GetY();
-						$pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
-						$posy = $pdf->GetY();
-						//print 'add ST'.$pdf->getPage().'<br />';
+						$pdf->startTransaction();
 
+						$pageBefore = $pdf->getPage();
 					}
-					else	// No pagebreak
-					{
-						$pdf->commitTransaction();
+
+					$pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						$pageAfter = $pdf->getPage();
+
+						if($pageAfter > $pageBefore) {
+							//print "ST $pageAfter>$pageBefore<br>";
+							$pdf->rollbackTransaction(true);
+							$pdf->addPage('', '', true);
+							$posy = $pdf->GetY();
+							$pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+							$posy = $pdf->GetY();
+							//print 'add ST'.$pdf->getPage().'<br />';
+
+						}
+						else    // No pagebreak
+						{
+							$pdf->commitTransaction();
+						}
 					}
 
 					return 1;
