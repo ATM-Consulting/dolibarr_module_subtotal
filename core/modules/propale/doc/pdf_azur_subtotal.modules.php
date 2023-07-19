@@ -371,9 +371,9 @@ class pdf_azur_subtotal extends ModelePDFPropales
 				// Loop on each lines
 				for ($i = 0 ; $i < $nblignes ; $i++)
 				{
-					$package_qty = $TStack[count($TStack) - 1]['package_qty'];
 					$inPackage = count($TStack) > 0;
-					
+					if($inPackage) $package_qty = $TStack[count($TStack) - 1]['package_qty'];
+
 					// Ligne de titre
 					if ($object->lines[$i]->product_type == 9 && $object->lines[$i]->qty < 97 && $object->lines[$i]->fk_product > 0) {
 						$inPackage = true;
@@ -1353,26 +1353,30 @@ class pdf_azur_subtotal extends ModelePDFPropales
 		$pdf->SetXY($this->marge_gauche,$posy);
 
 		// Logo
-		$logo=$conf->mycompany->dir_output.'/logos/'.$this->emetteur->logo;
-		if ($this->emetteur->logo)
-		{
-			if (is_readable($logo))
-			{
-			    $height=pdf_getHeightForLogo($logo);
-			    $pdf->Image($logo, $this->marge_gauche, $posy, 0, $height);	// width=0 (auto)
+		if (empty($conf->global->PDF_DISABLE_MYCOMPANY_LOGO)) {
+			if ($this->emetteur->logo) {
+				$logodir = $conf->mycompany->dir_output;
+				if (!empty($conf->mycompany->multidir_output[$object->entity])) {
+					$logodir = $conf->mycompany->multidir_output[$object->entity];
+				}
+				if (empty($conf->global->MAIN_PDF_USE_LARGE_LOGO)) {
+					$logo = $logodir.'/logos/thumbs/'.$this->emetteur->logo_small;
+				} else {
+					$logo = $logodir.'/logos/'.$this->emetteur->logo;
+				}
+				if (is_readable($logo)) {
+					$height = pdf_getHeightForLogo($logo);
+					$pdf->Image($logo, $this->marge_gauche, $posy, 0, $height); // width=0 (auto)
+				} else {
+					$pdf->SetTextColor(200, 0, 0);
+					$pdf->SetFont('', 'B', $default_font_size - 2);
+					$pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorLogoFileNotFound", $logo), 0, 'L');
+					$pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorGoToGlobalSetup"), 0, 'L');
+				}
+			} else {
+				$text = $this->emetteur->name;
+				$pdf->MultiCell(100, 4, $outputlangs->convToOutputCharset($text), 0, $ltrdirection);
 			}
-			else
-			{
-				$pdf->SetTextColor(200,0,0);
-				$pdf->SetFont('','B',$default_font_size - 2);
-				$pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorLogoFileNotFound",$logo), 0, 'L');
-				$pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorGoToGlobalSetup"), 0, 'L');
-			}
-		}
-		else
-		{
-			$text=$this->emetteur->name;
-			$pdf->MultiCell(100, 4, $outputlangs->convToOutputCharset($text), 0, 'L');
 		}
 
 		$pdf->SetFont('','B',$default_font_size + 3);

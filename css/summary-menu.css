@@ -1,0 +1,43 @@
+/*html {*/
+/*	scroll-behavior: smooth;*/
+/*}*/
+#subtotal-summary-let-menu-contaner{
+
+	--left-menu-width: 188px;
+
+	position: relative;
+	display: block;
+	box-sizing: border-box;
+	max-width: calc(var(--left-menu-width) + 15px); /* see div.menu_titre */
+	position: sticky;
+	top: 60px;
+	padding: 15px;
+	max-height: calc(100vh - 200px);
+	overflow: hidden;
+	overflow-y: auto;
+}
+
+#subtotal-summary-title{
+	box-sizing: border-box;
+	color: var(--colortextbackvmenu);
+	font-weight: bold;
+	font-size: 12px;
+}
+
+a.subtotal-summary-link{
+	box-sizing: border-box;
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	width: 100%;
+	font-size: 11px;
+	line-height: 1.5em;
+
+	color: #666;
+}
+a.subtotal-summary-link.--target-in-viewport, a.subtotal-summary-link.--child-in-viewport{
+	font-weight: bold;
+	color : var(--colortextlink);
+}
+

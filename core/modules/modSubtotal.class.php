@@ -66,7 +66,9 @@ class modSubtotal extends DolibarrModules
         $this->description = "Module permettant l'ajout de sous-totaux et sous-totaux intermédiaires et le déplacement d'une ligne aisée de l'un dans l'autre";
         // Possible values for version are: 'development', 'experimental' or version
 
-        $this->version = '3.14.7';
+
+        $this->version = '3.22.0';
+
 		// Url to the file with your last numberversion of this module
 		require_once __DIR__ . '/../../class/techatm.class.php';
 		$this->url_last_version = \subtotal\TechATM::getLastModuleVersionUrl($this);
@@ -127,6 +129,7 @@ class modSubtotal extends DolibarrModules
 				,'invoicelist'
 				,'supplierorderlist'
 				,'supplierinvoicelist'
+                ,'cron'
             ),
             // Set here all workflow context managed by module
             //'workflow' => array('order' => array('WORKFLOW_ORDER_AUTOCREATE_INVOICE')),
@@ -509,7 +512,13 @@ class modSubtotal extends DolibarrModules
             $extra->addExtraField('subtotal_show_qty', 'Afficher la Quantité du Sous-Total', 'int', 0, 10, $element_type, 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
         }
 
-        return $this->_init($sql, $options);
+		$extra->addExtraField('hideblock', 'Cacher les lignes contenues dans ce titre', 'int', 4, 2, 'propaldet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
+		$extra->addExtraField('hideblock', 'Cacher les lignes contenues dans ce titre', 'int', 4, 2, 'commandedet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
+		$extra->addExtraField('hideblock', 'Cacher les lignes contenues dans ce titre', 'int', 4, 2, 'commande_fournisseurdet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
+		$extra->addExtraField('hideblock', 'Cacher les lignes contenues dans ce titre', 'int', 4, 2, 'facturedet', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
+		$extra->addExtraField('hideblock', 'Cacher les lignes contenues dans ce titre', 'int', 4, 2, 'facture_fourn_det', 0, 0, '', unserialize('a:1:{s:7:"options";a:1:{s:0:"";N;}}'), 0, '', 0, 1);
+
+		return $this->_init($sql, $options);
     }
 
     /**

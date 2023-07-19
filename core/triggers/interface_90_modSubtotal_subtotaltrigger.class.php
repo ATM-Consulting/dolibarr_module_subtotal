@@ -293,7 +293,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 				        $facture = new FactureFournisseur($this->db);
 				        $ret = $facture->fetch($object->fk_facture_fourn);
                     }
-
+					$rang = 0;
 				    if ($ret > 0 && !$subtotal_bloc_already_add_st)
 				    {
 					    $rang = !empty($subtotal_current_rang) ? $subtotal_current_rang : $object->rang;
@@ -320,11 +320,13 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
                         $object->rang = $rang;
 					    $facture->updateRangOfLine($object->id, $rang);
 					    $rang++;
+
 					    // Est-ce qu'il s'agit de la dernière ligne de la commande d'origine ? Si oui alors on ajout un sous-total
-                            if ($last_fk_commandedet === (int) $object->origin_id && !empty($current_fk_commande))
+                        if ($last_fk_commandedet === (int) $object->origin_id && !empty($current_fk_commande))
 					    {
                             $subtotal_skip = true;
                             $subtotal_bloc_already_add_st = 1;
+							$rang+=2; // pour eviter un bug de décalage ou le sous total ce retrouve apres le nouveau titre : dug constaté en V16 ne doit pas avoir d'impact sur les anciennes versions
                             TSubtotal::addTotal($facture, $langs->trans('SubTotal'), 1, $rang);
                             $subtotal_bloc_already_add_st = 0;
                             $rang++;
