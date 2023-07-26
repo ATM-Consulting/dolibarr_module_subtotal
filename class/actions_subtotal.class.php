@@ -2330,52 +2330,43 @@ class ActionsSubtotal
 
 				if($line->qty>90) {
 					if (!empty($conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL)) {
-                        $label .= ' '.$this->getTitle($object, $line);
-                    }
-					/**
-					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
-					 * cette pr fait suite à un bug chez Le client SECP
-					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
-					 * chez le client. il faudra voir avec le client si le problème revient.
-					 *
-					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
-					 * il a était convenu de commenter  les transactions  dans cette partie du code
-					 * TCPDF ne gère pas les transactions dans des trasactions.
-					 *
-					 */
-                   // $pdf->startTransaction();
-
-				   // $pageBefore = $pdf->getPage();
-					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-				   // $pageAfter = $pdf->getPage();
-					/**
-					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
-					 * cette pr fait suite à un bug chez Le client SECP
-					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
-					 * chez le client. il faudra voir avec le client si le problème revient.
-					 *
-					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
-					 * il a était convenu de commenter  les transactions  dans cette partie du code
-					 * TCPDF ne gère pas les transactions dans des trasactions.
-					 *
-					 */
-					 //
-					/*if($pageAfter>$pageBefore) {
-						//print "ST $pageAfter>$pageBefore<br>";
-						//$pdf->rollbackTransaction(true);
-						$pdf->addPage('', '', true);
-						$posy = $pdf->GetY();
-						$this->pdf_add_total($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
-						$posy = $pdf->GetY();
-						//print 'add ST'.$pdf->getPage().'<br />';
-
+						$label .= ' '.$this->getTitle($object, $line);
 					}
-                    else	// No pagebreak
-                    {
-                        $pdf->commitTransaction();
-                    }*/
-					// FIN REMOVE
-					//
+
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						/**
+						 * TCPDF::startTransaction() committe la transaction en cours s'il y en a une,
+						 * ce qui peut être problématique. Comme TCPDF::rollbackTransaction() ne fait rien
+						 * si aucune transaction n'est en cours, on peut y faire appel sans problème pour revenir
+						 * à l'état d'origine.
+						 */
+						$pdf->rollbackTransaction(true);
+						$pdf->startTransaction();
+
+						$pageBefore = $pdf->getPage();
+					}
+
+					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
+
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						$pageAfter = $pdf->getPage();
+
+						if($pageAfter > $pageBefore) {
+							//print "ST $pageAfter>$pageBefore<br>";
+							$pdf->rollbackTransaction(true);
+							$pdf->addPage('', '', true);
+							$posy = $pdf->GetY();
+							$this->pdf_add_total($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
+							$posy = $pdf->GetY();
+							//print 'add ST'.$pdf->getPage().'<br />';
+
+						}
+						else    // No pagebreak
+						{
+							$pdf->commitTransaction();
+						}
+					}
+
 					// On delivery PDF, we don't want quantities to appear and there are no hooks => setting text color to background color;
 					if($object->element == 'delivery')
 					{
@@ -2400,49 +2391,39 @@ class ActionsSubtotal
 					return 1;
 				}
 				else if ($line->qty < 10) {
-					/**
-					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
-					 * cette pr fait suite à un bug chez Le client SECP
-					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
-					 * chez le client. il faudra voir avec le client si le problème revient.
-					 *
-					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
-					 * il a était convenu de commenter  les transactions  dans cette partie du code
-					 * TCPDF ne gère pas les transactions dans des trasactions.
-					 *
-					 */
-                    //$pdf->startTransaction();
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						/**
+						 * TCPDF::startTransaction() committe la transaction en cours s'il y en a une,
+						 * ce qui peut être problématique. Comme TCPDF::rollbackTransaction() ne fait rien
+						 * si aucune transaction n'est en cours, on peut y faire appel sans problème pour revenir
+						 * à l'état d'origine.
+						 */
+						$pdf->rollbackTransaction(true);
+						$pdf->startTransaction();
 
-					//$pageBefore = $pdf->getPage();
+						$pageBefore = $pdf->getPage();
+					}
+
 					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-					//$pageAfter = $pdf->getPage();
 
-					/**
-					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
-					 * cette pr fait suite à un bug chez Le client SECP
-					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
-					 * chez le client. il faudra voir avec le client si le problème revient.
-					 *
-					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
-					 * il a était convenu de commenter  les transactions  dans cette partie du code
-					 * TCPDF ne gère pas les transactions dans des trasactions.
-					 *
-					 */
-                    /*if($pageAfter>$pageBefore) {
-                        //print "ST $pageAfter>$pageBefore<br>";
-                       // $pdf->rollbackTransaction(true);
-                        $pdf->addPage('', '', true);
-                        $posy = $pdf->GetY();
-                        $this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-                        $posy = $pdf->GetY();
-                        //print 'add ST'.$pdf->getPage().'<br />';
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						$pageAfter = $pdf->getPage();
 
-                    }
-                    else    // No pagebreak
-                    {
-                        $pdf->commitTransaction();
-                    }*/
-					// FIN REMOVE
+						if($pageAfter > $pageBefore) {
+							//print "ST $pageAfter>$pageBefore<br>";
+							$pdf->rollbackTransaction(true);
+							$pdf->addPage('', '', true);
+							$posy = $pdf->GetY();
+							$this->pdf_add_title($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
+							$posy = $pdf->GetY();
+							//print 'add ST'.$pdf->getPage().'<br />';
+
+						}
+						else    // No pagebreak
+						{
+							$pdf->commitTransaction();
+						}
+					}
 
 					if($object->element == 'delivery')
 					{
@@ -2456,47 +2437,40 @@ class ActionsSubtotal
 					$labelproductservice = pdf_getlinedesc($object, $i, $outputlangs, $parameters['hideref'], $parameters['hidedesc'], $parameters['issupplierline']);
 
 					$labelproductservice = preg_replace('/(<img[^>]*src=")([^"]*)(&amp;)([^"]*")/', '\1\2&\4', $labelproductservice, -1, $nbrep);
-					/**
-					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
-					 * cette pr fait suite à un bug chez Le client SECP
-					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
-					 * chez le client. il faudra voir avec le client si le problème revient.
-					 *
-					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
-					 * il a était convenu de commenter  les transactions  dans cette partie du code
-					 * TCPDF ne gère pas les transactions dans des trasactions.
-					 *
-					 */
-                   // $pdf->startTransaction();
-                    //$pageBefore = $pdf->getPage();
-                    $pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
-                    //$pageAfter = $pdf->getPage();
 
-					/**
-					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
-					 * cette pr fait suite à un bug chez Le client SECP
-					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
-					 * chez le client. il faudra voir avec le client si le problème revient.
-					 *
-					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
-					 * il a était convenu de commenter  les transactions  dans cette partie du code
-					 * TCPDF ne gère pas les transactions dans des trasactions.
-					 *
-					 */
-                    /*if($pageAfter>$pageBefore) {
-                        //print "ST $pageAfter>$pageBefore<br>";
-                        $pdf->rollbackTransaction(true);
-                        $pdf->addPage('', '', true);
-                        $posy = $pdf->GetY();
-                        $pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
-                        $posy = $pdf->GetY();
-                        //print 'add ST'.$pdf->getPage().'<br />';
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						/**
+						 * TCPDF::startTransaction() committe la transaction en cours s'il y en a une,
+						 * ce qui peut être problématique. Comme TCPDF::rollbackTransaction() ne fait rien
+						 * si aucune transaction n'est en cours, on peut y faire appel sans problème pour revenir
+						 * à l'état d'origine.
+						 */
+						$pdf->rollbackTransaction(true);
+						$pdf->startTransaction();
 
-                    }
-                    else    // No pagebreak
-                    {
-                        $pdf->commitTransaction();
-                    }*/
+						$pageBefore = $pdf->getPage();
+					}
+
+					$pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						$pageAfter = $pdf->getPage();
+
+						if($pageAfter > $pageBefore) {
+							//print "ST $pageAfter>$pageBefore<br>";
+							$pdf->rollbackTransaction(true);
+							$pdf->addPage('', '', true);
+							$posy = $pdf->GetY();
+							$pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+							$posy = $pdf->GetY();
+							//print 'add ST'.$pdf->getPage().'<br />';
+
+						}
+						else    // No pagebreak
+						{
+							$pdf->commitTransaction();
+						}
+					}
 
 					return 1;
 				}
