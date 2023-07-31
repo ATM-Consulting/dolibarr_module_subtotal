@@ -255,12 +255,8 @@ class TSubtotal {
 
 				self::addSubTotalLine($object, $langs->trans('SubTotal'), 100-$title_niveau, $rang_to_add);
 
-				$object->lines[] = $object->line; // ajout de la ligne dans le tableau de ligne (Dolibarr ne le fait pas)
-				if ($rang_to_add != -1)
-				{
-					if (method_exists($object, 'fetch_lines')) $object->fetch_lines();
-					else $object->fetch($object->id);
-				}
+				if (method_exists($object, 'fetch_lines')) $object->fetch_lines();
+				else $object->fetch($object->id);
 			}
 		}
 	}
