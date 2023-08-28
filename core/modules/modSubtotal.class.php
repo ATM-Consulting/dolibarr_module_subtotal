@@ -69,6 +69,7 @@ class modSubtotal extends DolibarrModules
 
         $this->version = '3.23.0';
 
+
 		// Url to the file with your last numberversion of this module
 		require_once __DIR__ . '/../../class/techatm.class.php';
 		$this->url_last_version = \subtotal\TechATM::getLastModuleVersionUrl($this);
