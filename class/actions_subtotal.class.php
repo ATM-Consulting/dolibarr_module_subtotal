@@ -4046,7 +4046,9 @@ class ActionsSubtotal
 				elseif($TCurrentContexts[0] == 'invoice') $element = 'Facture';
 				elseif($TCurrentContexts[0] == 'invoicesupplier') $element = 'FactureFournisseur';
 				elseif($TCurrentContexts[0] == 'ordersupplier') $element = 'CommandeFournisseur';
+				elseif($TCurrentContexts[0] == 'invoicerec') $element = 'FactureRec';
 				else $element = $TCurrentContexts[0];
+
 				$object = new $element($db);
 				$object->fetch($id);
 
