@@ -2862,7 +2862,7 @@ class ActionsSubtotal
 					}
 					else {
 
-				    if(TSubtotal::isSubtotal($line) && $conf->global->DISPLAY_MARGIN_ON_SUBTOTALS) {
+				    if(TSubtotal::isSubtotal($line) && !empty($conf->global->DISPLAY_MARGIN_ON_SUBTOTALS)) {
 						$colspan -= 2;
 
 						if (!empty($conf->global->SUBTOTAL_TITLE_STYLE)) $style = $conf->global->SUBTOTAL_TITLE_STYLE;
@@ -2908,7 +2908,7 @@ class ActionsSubtotal
                         $style = TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;';
                         $style.= $line->qty>90 ? 'text-align:right' : '';
 
-                        echo '<td '. (!TSubtotal::isSubtotal($line) || !$conf->global->DISPLAY_MARGIN_ON_SUBTOTALS ? ' colspan="'.$colspan.'"' : '' ).' style="' .$style.'">';
+                        echo '<td '. (!TSubtotal::isSubtotal($line) || empty($conf->global->DISPLAY_MARGIN_ON_SUBTOTALS) ? ' colspan="'.$colspan.'"' : '' ).' style="' .$style.'">';
 						 if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 						 {
 							if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
@@ -2949,18 +2949,18 @@ class ActionsSubtotal
 						 }
 						if (TSubtotal::isTitle($line)) {
 							//Folder for expand
-							$titleAttr = ($line->array_options['options_hideblock'] == 1) ? $langs->trans("Subtotal_Show") : $langs->trans("Subtotal_Hide");
+							$titleAttr = (array_key_exists('options_hideblock', $line->array_options) && $line->array_options['options_hideblock'] == 1) ? $langs->trans("Subtotal_Show") : $langs->trans("Subtotal_Hide");
 
 							print '<span class="fold-subtotal-container" >';
 
 							// bouton pour ouvrir/fermer le bloc
 							print ' <span title="'.dol_escape_htmltag($titleAttr).'" class="fold-subtotal-btn" data-toggle-all-children="0" data-title-line-target="' . $line->id . '" id="collapse-' . $line->id . '" >';
-							print (($line->array_options['options_hideblock'] == 1) ? img_picto('', 'folder') : img_picto('', 'folder-open'));
+							print ((array_key_exists('options_hideblock', $line->array_options) && $line->array_options['options_hideblock'] == 1) ? img_picto('', 'folder') : img_picto('', 'folder-open'));
 							print '</span>';
 
 							// Bouton pour ouvrir/fermer aussi les enfants
 							print ' <span title="'.dol_escape_htmltag($titleAttr).'" class="fold-subtotal-btn" data-toggle-all-children="1" data-title-line-target="' . $line->id . '" id="collapse-children-' . $line->id . '" >';
-							print (($line->array_options['options_hideblock'] == 1) ? img_picto('', 'folder') : img_picto('', 'folder-open'));
+							print ((array_key_exists('options_hideblock', $line->array_options) && $line->array_options['options_hideblock'] == 1) ? img_picto('', 'folder') : img_picto('', 'folder-open'));
 							print '</span>';
 
 							// un span pour contenir des infos comme le nombre de lignes cachées etc...
@@ -4062,7 +4062,7 @@ class ActionsSubtotal
 				if(!empty($TLines)) {
 					$TBlocksToHide = array();
 					foreach ($TLines as $line) {
-						if ($line->array_options['options_hideblock']) $TBlocksToHide[] = $line->id;
+						if (array_key_exists('options_hideblock', $line->array_options) && $line->array_options['options_hideblock']) $TBlocksToHide[] = $line->id;
 					}
 				}
 

@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 
 # Version 3.22 - 19/07/2023
 
+- FIX : PHP8 warnings - *07/09/2023* - 3.22.3
 - FIX : Fatal error au recurring invoices - *28/08/2023* - 3.22.2
 - FIX : Add missing subtotal fail cause dolibarr make a reorder of subtotal after title juste added  - *28/07/2023* - 3.22.1
 - NEW : Add new option to chose for folder management behavior  - *17/07/2023* - 3.22.0
