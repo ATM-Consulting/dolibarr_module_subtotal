@@ -77,7 +77,7 @@ $label = GETPOST('label', 'alpha');
 
 if(!class_exists('FormSetup')){
 	// une Pr est en cour pour fixer certains elements de la class en V16 (car c'est des fix/new)
-	if (versioncompare(explode('.' , DOL_VERSION), array(16)) < 0 && !class_exists('FormSetup')){
+	if (versioncompare(explode('.' , DOL_VERSION), array(16)) < 0){
 		require_once __DIR__.'/../backport/v16/core/class/html.formsetup.class.php';
 	} else {
 		require_once DOL_DOCUMENT_ROOT.'/core/class/html.formsetup.class.php';
