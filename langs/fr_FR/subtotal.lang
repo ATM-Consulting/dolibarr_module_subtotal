@@ -143,3 +143,4 @@ DISPLAY_MARGIN_ON_SUBTOTALS=Afficher les marges sur les lignes de sous-totaux
 HideSubtitleOnFold = Cacher les lignes de titre et sous total enfant
 KeepSubtitleDisplayOnFold = Afficher les lignes de titre et sous total enfant
 SUBTOTAL_BLOC_FOLD_MODE = Comportement à adopter lorsque l'on cache un bloc de titre
+ErrorClassXNotExists = ERREUR : la classe php %s n'est pas chargée
