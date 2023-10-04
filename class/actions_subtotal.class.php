@@ -7,6 +7,17 @@ include_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
 
 class ActionsSubtotal
 {
+
+	/**
+	 * @var string $error
+	 */
+	public $error;
+
+	/**
+	 * @var array $errors
+	 */
+	public $errors = array();
+
     /**
      * @var int Subtotal current level
      */
@@ -4023,7 +4034,7 @@ class ActionsSubtotal
         return 0;
     }
 
-	public function printCommonFooter(&$parameters, &$object, &$action, $hookmanager)
+	public function printCommonFooter(&$parameters, &$objectHook, &$action, $hookmanager)
 	{
 			global $langs, $db, $conf;
 
@@ -4045,12 +4056,41 @@ class ActionsSubtotal
 
 				//On détermine l'élement concernée en fonction du contexte
 				$TCurrentContexts = explode('card', $parameters['currentcontext']);
-				if($TCurrentContexts[0] == 'order') $element = 'Commande';
-				elseif($TCurrentContexts[0] == 'invoice') $element = 'Facture';
-				elseif($TCurrentContexts[0] == 'invoicesupplier') $element = 'FactureFournisseur';
-				elseif($TCurrentContexts[0] == 'ordersupplier') $element = 'CommandeFournisseur';
-				elseif($TCurrentContexts[0] == 'invoicerec') $element = 'FactureRec';
+				/**
+				 *  TODO John le 11/08/2023 : Je trouve bizarre d'utiliser le contexte pour déterminer la class de l'objet alors
+				 *    que l'objet est passé en paramètres ça doit être due à de vielle versions de Dolibarr ou une compat avec un module externe...
+				 *    Cette methode de chargement d'objet a causée une fatale car la classe de l'objet correspondant au contexte n'était pas chargé ce qui n'est pas logique...
+				 *    La logique voudrait que l'on utilise $object->element
+				 *    Cependant si on regarde plus loin $object qui est passé en référence dans les paramètres de cette méthode est remplacé quelques lignes plus bas.
+				 */
+				if($TCurrentContexts[0] == 'order'){
+					$element = 'Commande';
+					if(!class_exists($element)){ require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';}
+				}
+				elseif($TCurrentContexts[0] == 'invoice'){
+					$element = 'Facture';
+					if(!class_exists($element)){ require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';}
+				}
+				elseif($TCurrentContexts[0] == 'invoicesupplier'){
+					$element = 'FactureFournisseur';
+					if(!class_exists($element)){ require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';}
+				}
+				elseif($TCurrentContexts[0] == 'ordersupplier'){
+					$element = 'CommandeFournisseur';
+					if(!class_exists($element)){ require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';}
+				}
+				elseif($TCurrentContexts[0] == 'invoicerec'){
+					$element = 'FactureRec';
+					if(!class_exists($element)){ require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture-rec.class.php';}
+				}
 				else $element = $TCurrentContexts[0];
+
+
+				if(!class_exists($element)){
+					// Pour éviter la fatale sur une page d'un module externe qui utiliserait un nom de context de Dolibarr mais qui
+					$this->error = $langs->trans('ErrorClassXNotExists', $element);
+					return -1;
+				}
 
 				$object = new $element($db);
 				$object->fetch($id);
