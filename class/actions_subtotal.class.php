@@ -2665,7 +2665,7 @@ class ActionsSubtotal
 
             // Prepare CSS class
             $class													= '';
-            if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))		$class	.= 'newSubtotal';
+            if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))		$class	.= 'newSubtotal ';
             if ($line->qty == 1)									$class	.= 'subtitleLevel1';	// Title level 1
             elseif ($line->qty == 2)								$class	.= 'subtitleLevel2';	// Title level 2
             elseif ($line->qty > 2 && $line->qty < 10)				$class	.= 'subtitleLevel3to9';	// Sub-total level 3 to 9
@@ -3197,7 +3197,7 @@ class ActionsSubtotal
 			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
 
             $class													= '';
-            if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))		$class	.= 'newSubtotal';
+            if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))		$class	.= 'newSubtotal ';
             if ($line->qty == 1)									$class	.= 'subtitleLevel1';	// Title level 1
             elseif ($line->qty == 2)								$class	.= 'subtitleLevel2';	// Title level 2
             elseif ($line->qty > 2 && $line->qty < 10)				$class	.= 'subtitleLevel3to9';	// Sub-total level 3 to 9
@@ -3323,7 +3323,7 @@ class ActionsSubtotal
 			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
 
             $class													= '';
-            if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))		$class	.= 'newSubtotal';
+            if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))		$class	.= 'newSubtotal ';
             if ($line->qty == 1)									$class	.= 'subtitleLevel1';	// Title level 1
             elseif ($line->qty == 2)								$class	.= 'subtitleLevel2';	// Title level 2
             elseif ($line->qty > 2 && $line->qty < 10)				$class	.= 'subtitleLevel3to9';	// Sub-total level 3 to 9
@@ -3546,7 +3546,7 @@ class ActionsSubtotal
 						$object->tpl["sublabel"].= '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
 					}
 					else{
-						$object->tpl["sublabel"].= '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+						$object->tpl["sublabel"].= '<span class="subtotal_label classfortooltip" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';	// InfraS change
 					}
 
 				}
@@ -3673,21 +3673,17 @@ class ActionsSubtotal
 
 		$this->_ajax_block_order_js($object);
 
-
-
-
 		if(empty($conf->global->SUBTOTAL_DISABLE_SUMMARY)){
-			$jsConfig = array(
-				'langs' => array(
-					'SubtotalSummaryTitle' => $langs->trans('QuickSummary')
-				),
-				'useOldSplittedTrForLine' => intval(DOL_VERSION) < 16 ? 1 : 0
-			);
-
 			print '<link rel="stylesheet" type="text/css" href="'.dol_buildpath('subtotal/css/summary-menu.css', 1).'">';
 			print '<script type="text/javascript" src="'.dol_buildpath('subtotal/js/summary-menu.js', 1).'"></script>';
-			print '<script type="text/javascript"> var subtotalSummaryJsConf = '.json_encode($jsConfig).'; </script>';
 		}
+		$jsConfig = array(
+			'langs' => array(
+				'SubtotalSummaryTitle' => $langs->trans('QuickSummary')
+			),
+			'useOldSplittedTrForLine' => intval(DOL_VERSION) < 16 ? 1 : 0
+		);
+		print '<script type="text/javascript"> var subtotalSummaryJsConf = '.json_encode($jsConfig).'; </script>';
 
 		return 0;
 	}
