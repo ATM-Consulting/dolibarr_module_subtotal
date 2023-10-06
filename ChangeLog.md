@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+- FIX : js error when summary menu is disabled - *06/10/2023* - 3.23.2
+- FIX : css break due to incompatible conf - *06/10/2023* - 3.23.1
 - FIX : page break issue from PR #271, #292 & #328 - *19/07/2023* - 3.23.0  
   To disable this fix use Hidden conf  SUBTOTAL_DISABLE_FIX_TRANSACTION set to 1  
   This correction is being prepared for the next version, to avoid any possible side-effects that we haven't yet seen.
