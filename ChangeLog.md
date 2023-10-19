@@ -27,6 +27,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 3.18 - 26/04/2023
 
+- FIX : DA024015 - lors de la création de facture fournisseur depuis plusieurs commandes fournisseur, les titres qui reprennent la ref des commandes d'origine n'était pas bon - *19-10-2023* - 3.18.4
 - FIX : DA023419 - Les arrondis des sous-totaux n'était plus qu'à un chiffre après la virgule - *01/06/2023* - 3.18.3
 - FIX : DA023305 compat php8  *02/06/2023* - 3.18.3
 - FIX : Include path  *03/05/2023* - 3.18.2
@@ -48,6 +49,7 @@ All notable changes to this project will be documented in this file.
 - NEW : Ajout configuration SUBTOTAL_TITLE_SIZE permettant d'éditer la taille des titres - *07/02/2023* - 3.16.0
 
 ## Version 3.15
+
 - FIX : lorsque l'option "Cacher le prix des lignes des ensembles" était cochée, la réduction n'apparaissait plus sur les lignes qui ne font pas partie d'un ensemble - *06/04/2023* - 3.15.5
 - FIX : retrait des constantonoff lorsqu'on est en mode edit dans la page de conf - *09/03/2023* - 3.15.4
 - FIX : Multiples erreurs de colspan qui créaient des décalages sur les tableaux de lignes - *20/01/2023* - 3.15.3
