@@ -7,6 +7,17 @@ include_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
 
 class ActionsSubtotal
 {
+
+	/**
+	 * @var string $error
+	 */
+	public $error;
+
+	/**
+	 * @var array $errors
+	 */
+	public $errors = array();
+
     /**
      * @var int Subtotal current level
      */
@@ -2331,52 +2342,43 @@ class ActionsSubtotal
 
 				if($line->qty>90) {
 					if (!empty($conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL)) {
-                        $label .= ' '.$this->getTitle($object, $line);
-                    }
-					/**
-					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
-					 * cette pr fait suite à un bug chez Le client SECP
-					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
-					 * chez le client. il faudra voir avec le client si le problème revient.
-					 *
-					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
-					 * il a était convenu de commenter  les transactions  dans cette partie du code
-					 * TCPDF ne gère pas les transactions dans des trasactions.
-					 *
-					 */
-                   // $pdf->startTransaction();
-
-				   // $pageBefore = $pdf->getPage();
-					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-				   // $pageAfter = $pdf->getPage();
-					/**
-					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
-					 * cette pr fait suite à un bug chez Le client SECP
-					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
-					 * chez le client. il faudra voir avec le client si le problème revient.
-					 *
-					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
-					 * il a était convenu de commenter  les transactions  dans cette partie du code
-					 * TCPDF ne gère pas les transactions dans des trasactions.
-					 *
-					 */
-					 //
-					/*if($pageAfter>$pageBefore) {
-						//print "ST $pageAfter>$pageBefore<br>";
-						//$pdf->rollbackTransaction(true);
-						$pdf->addPage('', '', true);
-						$posy = $pdf->GetY();
-						$this->pdf_add_total($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
-						$posy = $pdf->GetY();
-						//print 'add ST'.$pdf->getPage().'<br />';
-
+						$label .= ' '.$this->getTitle($object, $line);
 					}
-                    else	// No pagebreak
-                    {
-                        $pdf->commitTransaction();
-                    }*/
-					// FIN REMOVE
-					//
+
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						/**
+						 * TCPDF::startTransaction() committe la transaction en cours s'il y en a une,
+						 * ce qui peut être problématique. Comme TCPDF::rollbackTransaction() ne fait rien
+						 * si aucune transaction n'est en cours, on peut y faire appel sans problème pour revenir
+						 * à l'état d'origine.
+						 */
+						$pdf->rollbackTransaction(true);
+						$pdf->startTransaction();
+
+						$pageBefore = $pdf->getPage();
+					}
+
+					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
+
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						$pageAfter = $pdf->getPage();
+
+						if($pageAfter > $pageBefore) {
+							//print "ST $pageAfter>$pageBefore<br>";
+							$pdf->rollbackTransaction(true);
+							$pdf->addPage('', '', true);
+							$posy = $pdf->GetY();
+							$this->pdf_add_total($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
+							$posy = $pdf->GetY();
+							//print 'add ST'.$pdf->getPage().'<br />';
+
+						}
+						else    // No pagebreak
+						{
+							$pdf->commitTransaction();
+						}
+					}
+
 					// On delivery PDF, we don't want quantities to appear and there are no hooks => setting text color to background color;
 					if($object->element == 'delivery')
 					{
@@ -2401,49 +2403,39 @@ class ActionsSubtotal
 					return 1;
 				}
 				else if ($line->qty < 10) {
-					/**
-					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
-					 * cette pr fait suite à un bug chez Le client SECP
-					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
-					 * chez le client. il faudra voir avec le client si le problème revient.
-					 *
-					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
-					 * il a était convenu de commenter  les transactions  dans cette partie du code
-					 * TCPDF ne gère pas les transactions dans des trasactions.
-					 *
-					 */
-                    //$pdf->startTransaction();
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						/**
+						 * TCPDF::startTransaction() committe la transaction en cours s'il y en a une,
+						 * ce qui peut être problématique. Comme TCPDF::rollbackTransaction() ne fait rien
+						 * si aucune transaction n'est en cours, on peut y faire appel sans problème pour revenir
+						 * à l'état d'origine.
+						 */
+						$pdf->rollbackTransaction(true);
+						$pdf->startTransaction();
 
-					//$pageBefore = $pdf->getPage();
+						$pageBefore = $pdf->getPage();
+					}
+
 					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-					//$pageAfter = $pdf->getPage();
 
-					/**
-					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
-					 * cette pr fait suite à un bug chez Le client SECP
-					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
-					 * chez le client. il faudra voir avec le client si le problème revient.
-					 *
-					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
-					 * il a était convenu de commenter  les transactions  dans cette partie du code
-					 * TCPDF ne gère pas les transactions dans des trasactions.
-					 *
-					 */
-                    /*if($pageAfter>$pageBefore) {
-                        //print "ST $pageAfter>$pageBefore<br>";
-                       // $pdf->rollbackTransaction(true);
-                        $pdf->addPage('', '', true);
-                        $posy = $pdf->GetY();
-                        $this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-                        $posy = $pdf->GetY();
-                        //print 'add ST'.$pdf->getPage().'<br />';
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						$pageAfter = $pdf->getPage();
 
-                    }
-                    else    // No pagebreak
-                    {
-                        $pdf->commitTransaction();
-                    }*/
-					// FIN REMOVE
+						if($pageAfter > $pageBefore) {
+							//print "ST $pageAfter>$pageBefore<br>";
+							$pdf->rollbackTransaction(true);
+							$pdf->addPage('', '', true);
+							$posy = $pdf->GetY();
+							$this->pdf_add_title($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
+							$posy = $pdf->GetY();
+							//print 'add ST'.$pdf->getPage().'<br />';
+
+						}
+						else    // No pagebreak
+						{
+							$pdf->commitTransaction();
+						}
+					}
 
 					if($object->element == 'delivery')
 					{
@@ -2457,47 +2449,40 @@ class ActionsSubtotal
 					$labelproductservice = pdf_getlinedesc($object, $i, $outputlangs, $parameters['hideref'], $parameters['hidedesc'], $parameters['issupplierline']);
 
 					$labelproductservice = preg_replace('/(<img[^>]*src=")([^"]*)(&amp;)([^"]*")/', '\1\2&\4', $labelproductservice, -1, $nbrep);
-					/**
-					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
-					 * cette pr fait suite à un bug chez Le client SECP
-					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
-					 * chez le client. il faudra voir avec le client si le problème revient.
-					 *
-					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
-					 * il a était convenu de commenter  les transactions  dans cette partie du code
-					 * TCPDF ne gère pas les transactions dans des trasactions.
-					 *
-					 */
-                   // $pdf->startTransaction();
-                    //$pageBefore = $pdf->getPage();
-                    $pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
-                    //$pageAfter = $pdf->getPage();
 
-					/**
-					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
-					 * cette pr fait suite à un bug chez Le client SECP
-					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
-					 * chez le client. il faudra voir avec le client si le problème revient.
-					 *
-					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
-					 * il a était convenu de commenter  les transactions  dans cette partie du code
-					 * TCPDF ne gère pas les transactions dans des trasactions.
-					 *
-					 */
-                    /*if($pageAfter>$pageBefore) {
-                        //print "ST $pageAfter>$pageBefore<br>";
-                        $pdf->rollbackTransaction(true);
-                        $pdf->addPage('', '', true);
-                        $posy = $pdf->GetY();
-                        $pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
-                        $posy = $pdf->GetY();
-                        //print 'add ST'.$pdf->getPage().'<br />';
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						/**
+						 * TCPDF::startTransaction() committe la transaction en cours s'il y en a une,
+						 * ce qui peut être problématique. Comme TCPDF::rollbackTransaction() ne fait rien
+						 * si aucune transaction n'est en cours, on peut y faire appel sans problème pour revenir
+						 * à l'état d'origine.
+						 */
+						$pdf->rollbackTransaction(true);
+						$pdf->startTransaction();
 
-                    }
-                    else    // No pagebreak
-                    {
-                        $pdf->commitTransaction();
-                    }*/
+						$pageBefore = $pdf->getPage();
+					}
+
+					$pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+
+					if(!empty($conf->global->SUBTOTAL_DISABLE_FIX_TRANSACTION)) {
+						$pageAfter = $pdf->getPage();
+
+						if($pageAfter > $pageBefore) {
+							//print "ST $pageAfter>$pageBefore<br>";
+							$pdf->rollbackTransaction(true);
+							$pdf->addPage('', '', true);
+							$posy = $pdf->GetY();
+							$pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
+							$posy = $pdf->GetY();
+							//print 'add ST'.$pdf->getPage().'<br />';
+
+						}
+						else    // No pagebreak
+						{
+							$pdf->commitTransaction();
+						}
+					}
 
 					return 1;
 				}
@@ -2679,29 +2664,38 @@ class ActionsSubtotal
 			// HTML 5 data for js
             $data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
 
-
+            // Prepare CSS class
+            $class													= '';
+            if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))		$class	.= ' newSubtotal';
+            if ($line->qty == 1)									$class	.= ' subtitleLevel1';	// Title level 1
+            elseif ($line->qty == 2)								$class	.= ' subtitleLevel2';	// Title level 2
+            elseif ($line->qty > 2 && $line->qty < 10)				$class	.= ' subtitleLevel3to9';	// Sub-total level 3 to 9
+            elseif ($line->qty == 99)								$class	.= ' subtotalLevel1';	// Sub-total level 1
+            elseif ($line->qty == 98)								$class	.= ' subtotalLevel2';	// Sub-total level 2
+            elseif ($line->qty > 90 && $line->qty < 98)				$class	.= ' subtotalLevel3to9';	// Sub-total level 3 to 9
+            elseif ($line->qty == 50)								$class	.= ' subtotalText';      // Free text
 			?>
 			<!-- actions_subtotal.class.php line <?php echo __LINE__; ?> -->
-			<tr class="oddeven" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
+			<tr class="oddeven <?php echo $class; ?>" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
-						if($line->qty==99) print 'background:#adadcf';
-						else if($line->qty==98) print 'background:#ddddff;';
-						else if($line->qty<=97 && $line->qty>=91) print 'background:#eeeeff;';
-						else if($line->qty==1) print 'background:#adadcf;';
-						else if($line->qty==2) print 'background:#ddddff;';
-						else if($line->qty==50) print '';
-						else print 'background:#eeeeff;';
+						if($line->qty==99) print 'background:#adadcf';          // Sub-total level 1
+						else if($line->qty==98) print 'background:#ddddff;';    // Sub-total level 2
+						else if($line->qty<=97 && $line->qty>=91) print 'background:#eeeeff;';  // Sub-total level 3 to 9
+						else if($line->qty==1) print 'background:#adadcf;';     // Title level 1
+						else if($line->qty==2) print 'background:#ddddff;';     // Title level 2
+						else if($line->qty==50) print '';                       // Free text
+						else print 'background:#eeeeff;';                       // Title level 3 to 9
 
-						//A compléter si on veux plus de nuances de couleurs avec les niveau 4,5,6,7,8 et 9
+						// À compléter si on veut plus de nuances de couleurs avec les niveaux 4,5,6,7,8 et 9
 					}
 					else
 					{
-						if($line->qty==99) print 'background:#ddffdd';
-						else if($line->qty==98) print 'background:#ddddff;';
-						else if($line->qty==2) print 'background:#eeeeff; ';
-						else if($line->qty==50) print '';
-						else print 'background:#eeffee;' ;
+						if($line->qty==99) print 'background:#ddffdd';          // Sub-total level 1
+						else if($line->qty==98) print 'background:#ddddff;';    // Sub-total level 2
+						else if($line->qty==2) print 'background:#eeeeff; ';    // Title level 2
+						else if($line->qty==50) print '';                       // Free text
+						else print 'background:#eeffee;' ;                      // Title level 1 and 3 to 9
 					}
 
 			?>;">
@@ -3202,29 +3196,39 @@ class ActionsSubtotal
 
 			// HTML 5 data for js
 			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
+
+            $class													= '';
+            if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))		$class	.= ' newSubtotal';
+            if ($line->qty == 1)									$class	.= ' subtitleLevel1';	// Title level 1
+            elseif ($line->qty == 2)								$class	.= ' subtitleLevel2';	// Title level 2
+            elseif ($line->qty > 2 && $line->qty < 10)				$class	.= ' subtitleLevel3to9';	// Sub-total level 3 to 9
+            elseif ($line->qty == 99)								$class	.= ' subtotalLevel1';	// Sub-total level 1
+            elseif ($line->qty == 98)								$class	.= ' subtotalLevel2';	// Sub-total level 2
+            elseif ($line->qty > 90 && $line->qty < 98)				$class	.= ' subtotalLevel3to9';	// Sub-total level 3 to 9
+            elseif ($line->qty == 50)								$class	.= ' subtotalText';      // Free text
 ?>
 
 			<!-- actions_subtotal.class.php line <?php echo __LINE__; ?> -->
-			<tr class="oddeven" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
+			<tr class="oddeven <?php echo $class; ?>" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
-						if($line->qty==99) print 'background:#adadcf';
-						else if($line->qty==98) print 'background:#ddddff;';
-						else if($line->qty<=97 && $line->qty>=91) print 'background:#eeeeff;';
-						else if($line->qty==1) print 'background:#adadcf;';
-						else if($line->qty==2) print 'background:#ddddff;';
-						else if($line->qty==50) print '';
-						else print 'background:#eeeeff;';
+                        if($line->qty==99) print 'background:#adadcf';          // Sub-total level 1
+                        else if($line->qty==98) print 'background:#ddddff;';	// Sub-total level 2
+                        else if($line->qty<=97 && $line->qty>=91) print 'background:#eeeeff;';	// Sub-total level 3 to 9
+                        else if($line->qty==1) print 'background:#adadcf;';     // Title level 1
+                        else if($line->qty==2) print 'background:#ddddff;';     // Title level 2
+                        else if($line->qty==50) print '';                       // Free text
+                        else print 'background:#eeeeff;';                       // Title level 3 to 9
 
-						//A compléter si on veux plus de nuances de couleurs avec les niveau 4,5,6,7,8 et 9
+						// À compléter si on veut plus de nuances de couleurs avec les niveaux 4,5,6,7,8 et 9
 					}
 					else
 					{
-						if($line->qty==99) print 'background:#ddffdd';
-						else if($line->qty==98) print 'background:#ddddff;';
-						else if($line->qty==2) print 'background:#eeeeff; ';
-						else if($line->qty==50) print '';
-						else print 'background:#eeffee;' ;
+                        if($line->qty==99) print 'background:#ddffdd';          // Sub-total level 1
+                        else if($line->qty==98) print 'background:#ddddff;';	// Sub-total level 2
+                        else if($line->qty==2) print 'background:#eeeeff; ';    // Title level 2
+                        else if($line->qty==50) print '';                       // Free text
+                        else print 'background:#eeffee;';                       // Title level 1 and 3 to 9
 					}
 
 			?>;">
@@ -3318,28 +3322,38 @@ class ActionsSubtotal
 
 			// HTML 5 data for js
 			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
+
+            $class													= '';
+            if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))		$class	.= ' newSubtotal ';
+            if ($line->qty == 1)									$class	.= ' subtitleLevel1';	// Title level 1
+            elseif ($line->qty == 2)								$class	.= ' subtitleLevel2';	// Title level 2
+            elseif ($line->qty > 2 && $line->qty < 10)				$class	.= ' subtitleLevel3to9';	// Sub-total level 3 to 9
+            elseif ($line->qty == 99)								$class	.= ' subtotalLevel1';	// Sub-total level 1
+            elseif ($line->qty == 98)								$class	.= ' subtotalLevel2';	// Sub-total level 2
+            elseif ($line->qty > 90 && $line->qty < 98)				$class	.= ' subtotalLevel3to9';	// Sub-total level 3 to 9
+            elseif ($line->qty == 50)								$class	.= ' subtotalText';      // Free text
 			?>
 			<!-- actions_subtotal.class.php line <?php echo __LINE__; ?> -->
-			<tr class="oddeven" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
+			<tr class="oddeven <?php echo $class; ?>" <?php echo $data; ?> rel="subtotal" id="row-<?php echo $line->id ?>" style="<?php
 					if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 					{
-						if($line->qty==99) print 'background:#adadcf';
-						else if($line->qty==98) print 'background:#ddddff;';
-						else if($line->qty<=97 && $line->qty>=91) print 'background:#eeeeff;';
-						else if($line->qty==1) print 'background:#adadcf;';
-						else if($line->qty==2) print 'background:#ddddff;';
-						else if($line->qty==50) print '';
-						else print 'background:#eeeeff;';
+                        if($line->qty==99) print 'background:#adadcf';          // Sub-total level 1
+                        else if($line->qty==98) print 'background:#ddddff;';	// Sub-total level 2
+                        else if($line->qty<=97 && $line->qty>=91) print 'background:#eeeeff;';	// Sub-total level 3 to 9
+                        else if($line->qty==1) print 'background:#adadcf;';     // Title level 1
+                        else if($line->qty==2) print 'background:#ddddff;';     // Title level 2
+                        else if($line->qty==50) print '';                       // Free text
+                        else print 'background:#eeeeff;';                       // Title level 3 to 9
 
-						//A compléter si on veux plus de nuances de couleurs avec les niveau 4,5,6,7,8 et 9
+						// À compléter si on veut plus de nuances de couleurs avec les niveaux 4,5,6,7,8 et 9
 					}
 					else
 					{
-						if($line->qty==99) print 'background:#ddffdd';
-						else if($line->qty==98) print 'background:#ddddff;';
-						else if($line->qty==2) print 'background:#eeeeff; ';
-						else if($line->qty==50) print '';
-						else print 'background:#eeffee;' ;
+                        if($line->qty==99) print 'background:#ddffdd';          // Sub-total level 1
+                        else if($line->qty==98) print 'background:#ddddff;';	// Sub-total level 2
+                        else if($line->qty==2) print 'background:#eeeeff; ';	// Title level 2
+                        else if($line->qty==50) print '';                       // Free text
+                        else print 'background:#eeffee;';                       // Title level 1, Sub-total level 1 and 3 to 9
 					}
 
 			?>;">
@@ -3478,23 +3492,23 @@ class ActionsSubtotal
 				$object->tpl['sub-tr-style'] = '';
 				if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 				{
-					if($line->qty==99) $object->tpl['sub-tr-style'].= 'background:#adadcf';
-					else if($line->qty==98) $object->tpl['sub-tr-style'].= 'background:#ddddff;';
-					else if($line->qty<=97 && $line->qty>=91) $object->tpl['sub-tr-style'].= 'background:#eeeeff;';
-					else if($line->qty==1) $object->tpl['sub-tr-style'].= 'background:#adadcf;';
-					else if($line->qty==2) $object->tpl['sub-tr-style'].= 'background:#ddddff;';
-					else if($line->qty==50) $object->tpl['sub-tr-style'].= '';
-					else $object->tpl['sub-tr-style'].= 'background:#eeeeff;';
+                    if($line->qty==99) $object->tpl['sub-tr-style'].= 'background:#adadcf';         // Sub-total level 1
+                    else if($line->qty==98) $object->tpl['sub-tr-style'].= 'background:#ddddff;';	// Sub-total level 2
+                    else if($line->qty<=97 && $line->qty>=91) $object->tpl['sub-tr-style'].= 'background:#eeeeff;';	// Sub-total level 3 to 9
+                    else if($line->qty==1) $object->tpl['sub-tr-style'].= 'background:#adadcf;';	// Title level 1
+                    else if($line->qty==2) $object->tpl['sub-tr-style'].= 'background:#ddddff;';	// Title level 2
+                    else if($line->qty==50) $object->tpl['sub-tr-style'].= '';                      // Free text
+                    else $object->tpl['sub-tr-style'].= 'background:#eeeeff;';                      // Sub-total level 1 and 3 to 9
 
-					//A compléter si on veux plus de nuances de couleurs avec les niveau 4,5,6,7,8 et 9
+					// À compléter si on veut plus de nuances de couleurs avec les niveaux 4,5,6,7,8 et 9
 				}
 				else
 				{
-					if($line->qty==99) $object->tpl['sub-tr-style'].= 'background:#ddffdd';
-					else if($line->qty==98) $object->tpl['sub-tr-style'].= 'background:#ddddff;';
-					else if($line->qty==2) $object->tpl['sub-tr-style'].= 'background:#eeeeff; ';
-					else if($line->qty==50) $object->tpl['sub-tr-style'].= '';
-					else $object->tpl['sub-tr-style'].= 'background:#eeffee;' ;
+                    if($line->qty==99) $object->tpl['sub-tr-style'].= 'background:#ddffdd';         // Sub-total level 1
+                    else if($line->qty==98) $object->tpl['sub-tr-style'].= 'background:#ddddff;';	// Sub-total level 2
+                    else if($line->qty==2) $object->tpl['sub-tr-style'].= 'background:#eeeeff; ';	// Title level 2
+                    else if($line->qty==50) $object->tpl['sub-tr-style'].= '';                      // Free text
+                    else $object->tpl['sub-tr-style'].= 'background:#eeffee;';                      // Title level 1, Sub-total level 1 and 3 to 9
 				}
 
 
@@ -3533,7 +3547,7 @@ class ActionsSubtotal
 						$object->tpl["sublabel"].= '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
 					}
 					else{
-						$object->tpl["sublabel"].= '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+						$object->tpl["sublabel"].= '<span class="subtotal_label classfortooltip" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
 					}
 
 				}
@@ -3660,20 +3674,18 @@ class ActionsSubtotal
 
 		$this->_ajax_block_order_js($object);
 
+		$jsConfig = array(
+			'langs' => array(
+				'SubtotalSummaryTitle' => $langs->trans('QuickSummary')
+			),
+			'useOldSplittedTrForLine' => intval(DOL_VERSION) < 16 ? 1 : 0
+		);
 
-
+		print '<script type="text/javascript"> var subtotalSummaryJsConf = '.json_encode($jsConfig).'; </script>'; // used also for subtotal.lib.js
 
 		if(empty($conf->global->SUBTOTAL_DISABLE_SUMMARY)){
-			$jsConfig = array(
-				'langs' => array(
-					'SubtotalSummaryTitle' => $langs->trans('QuickSummary')
-				),
-				'useOldSplittedTrForLine' => intval(DOL_VERSION) < 16 ? 1 : 0
-			);
-
 			print '<link rel="stylesheet" type="text/css" href="'.dol_buildpath('subtotal/css/summary-menu.css', 1).'">';
 			print '<script type="text/javascript" src="'.dol_buildpath('subtotal/js/summary-menu.js', 1).'"></script>';
-			print '<script type="text/javascript"> var subtotalSummaryJsConf = '.json_encode($jsConfig).'; </script>';
 		}
 
 		return 0;
@@ -4021,7 +4033,7 @@ class ActionsSubtotal
         return 0;
     }
 
-	public function printCommonFooter(&$parameters, &$object, &$action, $hookmanager)
+	public function printCommonFooter(&$parameters, &$objectHook, &$action, $hookmanager)
 	{
 			global $langs, $db, $conf;
 
@@ -4043,12 +4055,41 @@ class ActionsSubtotal
 
 				//On détermine l'élement concernée en fonction du contexte
 				$TCurrentContexts = explode('card', $parameters['currentcontext']);
-				if($TCurrentContexts[0] == 'order') $element = 'Commande';
-				elseif($TCurrentContexts[0] == 'invoice') $element = 'Facture';
-				elseif($TCurrentContexts[0] == 'invoicesupplier') $element = 'FactureFournisseur';
-				elseif($TCurrentContexts[0] == 'ordersupplier') $element = 'CommandeFournisseur';
-				elseif($TCurrentContexts[0] == 'invoicerec') $element = 'FactureRec';
+				/**
+				 *  TODO John le 11/08/2023 : Je trouve bizarre d'utiliser le contexte pour déterminer la class de l'objet alors
+				 *    que l'objet est passé en paramètres ça doit être due à de vielle versions de Dolibarr ou une compat avec un module externe...
+				 *    Cette methode de chargement d'objet a causée une fatale car la classe de l'objet correspondant au contexte n'était pas chargé ce qui n'est pas logique...
+				 *    La logique voudrait que l'on utilise $object->element
+				 *    Cependant si on regarde plus loin $object qui est passé en référence dans les paramètres de cette méthode est remplacé quelques lignes plus bas.
+				 */
+				if($TCurrentContexts[0] == 'order'){
+					$element = 'Commande';
+					if(!class_exists($element)){ require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';}
+				}
+				elseif($TCurrentContexts[0] == 'invoice'){
+					$element = 'Facture';
+					if(!class_exists($element)){ require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';}
+				}
+				elseif($TCurrentContexts[0] == 'invoicesupplier'){
+					$element = 'FactureFournisseur';
+					if(!class_exists($element)){ require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';}
+				}
+				elseif($TCurrentContexts[0] == 'ordersupplier'){
+					$element = 'CommandeFournisseur';
+					if(!class_exists($element)){ require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';}
+				}
+				elseif($TCurrentContexts[0] == 'invoicerec'){
+					$element = 'FactureRec';
+					if(!class_exists($element)){ require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture-rec.class.php';}
+				}
 				else $element = $TCurrentContexts[0];
+
+
+				if(!class_exists($element)){
+					// Pour éviter la fatale sur une page d'un module externe qui utiliserait un nom de context de Dolibarr mais qui
+					$this->error = $langs->trans('ErrorClassXNotExists', $element);
+					return -1;
+				}
 
 				$object = new $element($db);
 				$object->fetch($id);
@@ -4509,6 +4550,6 @@ class ActionsSubtotal
 
 				<?php
 			}
-
+        return 0;
 	}
 }
