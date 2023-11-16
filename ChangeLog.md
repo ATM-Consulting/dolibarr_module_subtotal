@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 
 # Version 3.22 - 19/07/2023
 
+- FIX : DA024057 - Anomalie PDF lors de l'activation conf "Remplacer par le détail des TVA si l'option "Cacher le détail des ensembles" est utilisée (expérimental)" - *16/11/2023* - 3.22.4
 - FIX : PHP8 warnings - *07/09/2023* - 3.22.3
 - FIX : Fatal error au recurring invoices - *28/08/2023* - 3.22.2
 - FIX : Add missing subtotal fail cause dolibarr make a reorder of subtotal after title juste added  - *28/07/2023* - 3.22.1
@@ -97,6 +98,7 @@ All notable changes to this project will be documented in this file.
 - NEW : Can select sub-total lines in supplier order and invoice  *10/12/2021* - 3.8.0 [PR #226 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/226)
 
 ## Version 3.7
+- FIX : typo dans hook ODTSubstitutionLine *30/10/2023* - 3.7.5
 - FIX : object was never fetch *07/02/2022* - 3.7.4
 - FIX : Fix compatibility 11.0 pdfEvolution *19/01/2022* - 3.7.3
 - FIX : Compatibility with version 14 and lower *20/12/2021* - 3.7.2 @jyhere #229

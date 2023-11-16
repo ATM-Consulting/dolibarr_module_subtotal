@@ -1599,9 +1599,10 @@ class ActionsSubtotal
 				}
 			}
 		}
-		if (GETPOST('hideInnerLines', 'int') && !empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES)){
-		    $this->resprints = price($object->lines[$i]->total_ht,0,'',1,0,$conf->global->MAIN_MAX_DECIMALS_TOT);
-		}
+        // If commenté car : Affichage du total HT des lignes produit en doublon TICKET DA024057
+//		if (GETPOST('hideInnerLines', 'int') && !empty($conf->global->SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES)){
+//		    $this->resprints = price($object->lines[$i]->total_ht,0,'',1,0,$conf->global->MAIN_MAX_DECIMALS_TOT);
+//		}
 
 		// Si la gestion C/NC est active et que je suis sur un ligne dont l'extrafield est coché
 		if (
@@ -2211,17 +2212,17 @@ class ActionsSubtotal
     					    $nbtva = count($TTvas);
     					    if(!empty($nbtva)){
     					        foreach ($TTvas as $tx =>$val){
-    					            $l = clone $line;
-    					            $l->product_type = 1;
-    					            $l->special_code = '';
-    					            $l->qty = 1;
-    					            $l->desc = $langs->trans('AmountBeforeTaxesSubjectToVATX%', $langs->transnoentitiesnoconv('VAT'), price($tx));
-    					            $l->tva_tx = $tx;
-    					            $l->total_ht = $val['total_ht'];
-    					            $l->total_tva = $val['total_tva'];
-    					            $l->total = $line->total_ht;
-    					            $l->total_ttc = $val['total_ttc'];
-    					            $TLines[] = $l;
+    					            $copyL = clone $line; // la variable $coyyL était nommé $l, j' l'ai renommé car probleme de référence d'instance dans le clone
+									$copyL->product_type = 1;
+									$copyL->special_code = '';
+									$copyL->qty = 1;
+									$copyL->desc = $langs->trans('AmountBeforeTaxesSubjectToVATX%', $langs->transnoentitiesnoconv('VAT'), price($tx));
+									$copyL->tva_tx = $tx;
+									$copyL->total_ht = $val['total_ht'];
+									$copyL->total_tva = $val['total_tva'];
+									$copyL->total = $line->total_ht;
+									$copyL->total_ttc = $val['total_ttc'];
+    					            $TLines[] = $copyL;
     					            array_shift($TTvas);
     					       }
     					    }
