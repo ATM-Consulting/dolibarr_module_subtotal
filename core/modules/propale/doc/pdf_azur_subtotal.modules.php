@@ -578,7 +578,7 @@ class pdf_azur_subtotal extends ModelePDFPropales
 						$pdf->MultiCell($this->postotalht-$this->posxdiscount+2, 3, $remise_percent, 0, 'R');
 					}
 
-					// Total HT line
+					 // Total HT line
 					if ($hidedetails && !$inPackage && $conf->global->SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES) {
 						$total_excl_tax = pdf_getlinetotalexcltax($object, $i, $outputlangs, 0);
 					} else {
