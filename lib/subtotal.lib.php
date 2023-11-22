@@ -60,7 +60,7 @@ function getHtmlSelectTitle(&$object, $showLabel=false)
 	$nbsp = '&nbsp;';
 	foreach ($TTitle as &$line)
 	{
-		$str = str_repeat($nbsp, ($line->qty - 1) * 3);
+		if($line->qty > 1) $str = str_repeat($nbsp, (floatval($line->qty) - 1) * 3);
 		$html .= '<option value="'.$line->rang.'">'.$str.(!empty($line->label) ? $line->label : dol_trunc($line->desc, 30)).'</option>';
 	}
 
