@@ -2642,7 +2642,7 @@ class ActionsSubtotal
 			if($object->element == 'invoice_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 4: $colspan = 7;
 			if($object->element == 'supplier_proposal') (float) DOL_VERSION < 6.0 ? $colspan = 4 : $colspan = 3;
 
-			if(DOL_VERSION > 16.0) $colspan++; // Ajout de la colonne PU TTC
+			if(DOL_VERSION > 16.0 && empty($conf->global->MAIN_NO_INPUT_PRICE_WITH_TAX)) $colspan++; // Ajout de la colonne PU TTC
 
 			if($object->element == 'facturerec' ) $colspan = 5;
 
