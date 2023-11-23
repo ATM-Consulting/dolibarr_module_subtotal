@@ -230,7 +230,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
             }
         }
 
-        if (!empty($conf->global->SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE) && in_array($action, array('LINEPROPAL_INSERT', 'LINEORDER_INSERT', 'LINEBILL_INSERT')))
+        if (getDolGlobalString('SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE') && in_array($action, array('LINEPROPAL_INSERT', 'LINEORDER_INSERT', 'LINEBILL_INSERT')))
 		{
 			$rang = GETPOST('under_title', 'int'); // Rang du titre
 			if ($rang > 0)
@@ -256,7 +256,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 						break;
 				}
 
-				if (!empty($conf->global->SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK)) $this->addToEnd($parent, $object, $rang);
+				if (getDolGlobalString('SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK')) $this->addToEnd($parent, $object, $rang);
 				else $this->addToBegin($parent, $object, $rang);
 
 			}
@@ -305,7 +305,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
                             else $commande = new CommandeFournisseur($this->db);
                             $commande->fetch($current_fk_commande);
 
-                            $label = $conf->global->SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE;
+                            $label = getDolGlobalString('SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE');
                             if (empty($label)) {
                                 $label = 'Commande [__REFORDER__]';
                                 if (!$is_supplier) $label .= ' - Référence client : [__REFCUSTOMER__]';
@@ -352,7 +352,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 			}
 		}
 
-		if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($action, array('LINEPROPAL_INSERT', 'LINEPROPAL_UPDATE','LINEPROPAL_MODIFY', 'LINEORDER_INSERT', 'LINEORDER_UPDATE','LINEORDER_MODIFY', 'LINEBILL_INSERT', 'LINEBILL_UPDATE','LINEBILL_MODIFY', 'LINEBILL_SUPPLIER_CREATE', 'LINEBILL_SUPPLIER_UPDATE','LINEBILL_SUPPLIER_MODIFY')))
+		if (getDolGlobalString('SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS') && in_array($action, array('LINEPROPAL_INSERT', 'LINEPROPAL_UPDATE','LINEPROPAL_MODIFY', 'LINEORDER_INSERT', 'LINEORDER_UPDATE','LINEORDER_MODIFY', 'LINEBILL_INSERT', 'LINEBILL_UPDATE','LINEBILL_MODIFY', 'LINEBILL_SUPPLIER_CREATE', 'LINEBILL_SUPPLIER_UPDATE','LINEBILL_SUPPLIER_MODIFY')))
 		{
             if(! function_exists('_updateLineNC')) dol_include_once('/subtotal/lib/subtotal.lib.php');
 
@@ -432,7 +432,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 				$orderline->fetch($line->origin_line_id);
 				// si la conf pas d'affichage des titres  et consorts (sous total )
 				//on supprime la ligne de sous total
-				if ($conf->global->NO_TITLE_SHOW_ON_EXPED_GENERATION){
+				if (getDolGlobalString('NO_TITLE_SHOW_ON_EXPED_GENERATION')){
 					// le special code n'est pas tranmit dans l'expedition
 					// @todo voir plus tard pourquoi nous n'avons pas cette information dans la ligne d'expedition
 					if (empty($line->special_code)){
@@ -661,7 +661,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 
 			$doli_action = GETPOST('action', 'none');
 
-			if (!empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && in_array($doli_action, array('confirm_clone')))
+			if (getDolGlobalString('SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS') && in_array($doli_action, array('confirm_clone')))
 			{
 				dol_syslog(
 					"[SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS] Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". object=".$object->element." id=" . $object->id
@@ -767,7 +767,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 
             global $conf;
 
-            if (!empty($conf->global->INVOICE_USE_SITUATION) && $object->element == 'facture' && $object->type == Facture::TYPE_SITUATION)
+            if (getDolGlobalString('INVOICE_USE_SITUATION') && $object->element == 'facture' && $object->type == Facture::TYPE_SITUATION)
             {
                 $object->situation_final = 1;
                 foreach($object->lines as $i => $line) {

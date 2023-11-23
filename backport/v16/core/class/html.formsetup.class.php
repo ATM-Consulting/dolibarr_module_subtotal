@@ -635,7 +635,7 @@ if(!class_exists('FormSetup')){
 			$this->entity = $conf->entity;
 
 			$this->confKey = $confKey;
-			$this->fieldValue = $conf->global->{$this->confKey};
+			$this->fieldValue = getDolGlobalString($this->confKey);
 		}
 
 		/**
@@ -645,7 +645,7 @@ if(!class_exists('FormSetup')){
 		public function reloadValueFromConf()
 		{
 			global $conf;
-			$this->fieldValue = $conf->global->{$this->confKey};
+			$this->fieldValue = getDolGlobalString($this->confKey);
 		}
 
 
