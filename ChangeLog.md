@@ -3,7 +3,9 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+# Version 3.23 - 23/11/2023
 
+- FIX Compat v19 et php8.2
 
 # Version 3.22 - 19/07/2023
 
