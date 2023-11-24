@@ -2208,9 +2208,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				        if($line->tva_tx != '0.000' && $line->product_type!=9){
 
     				        // on remplit le tableau de tva pour substituer les lignes cachées
-    				        $TTvas[$line->tva_tx]['total_tva'] += $line->total_tva;
-    				        $TTvas[$line->tva_tx]['total_ht'] += $line->total_ht;
-    				        $TTvas[$line->tva_tx]['total_ttc'] += $line->total_ttc;
+    				       if (!empty($TTvas[$line->tva_tx]['total_tva'])) $TTvas[$line->tva_tx]['total_tva'] += $line->total_tva;
+                           if (!empty($TTvas[$line->tva_tx]['total_ht'])) $TTvas[$line->tva_tx]['total_ht'] += $line->total_ht;
+                           if (!empty($TTvas[$line->tva_tx]['total_ttc'])) $TTvas[$line->tva_tx]['total_ttc'] += $line->total_ttc;
     				    }
     					if($line->product_type==9 && $line->rowid>0)
     					{
@@ -2351,7 +2351,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				if (getDolGlobalString('CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL')) {
                         $label .= ' '.$this->getTitle($object, $line);
                     }
-					if(!empty(getDolGlobalString('SUBTOTAL_DISABLE_FIX_TRANSACTION')) {
+					if(!empty(getDolGlobalString('SUBTOTAL_DISABLE_FIX_TRANSACTION'))) {
 						/**
 						 * TCPDF::startTransaction() committe la transaction en cours s'il y en a une,
 						 * ce qui peut être problématique. Comme TCPDF::rollbackTransaction() ne fait rien
@@ -2672,7 +2672,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
             // Prepare CSS class
             $class													= '';
-            if (!empty(getDolGlobalString('SUBTOTAL_USE_NEW_FORMAT'))		$class	.= ' newSubtotal';
+            if (!empty(getDolGlobalString('SUBTOTAL_USE_NEW_FORMAT')))		$class	.= ' newSubtotal';
             if ($line->qty == 1)									$class	.= ' subtitleLevel1';	// Title level 1
             elseif ($line->qty == 2)								$class	.= ' subtitleLevel2';	// Title level 2
             elseif ($line->qty > 2 && $line->qty < 10)				$class	.= ' subtitleLevel3to9';	// Sub-total level 3 to 9
@@ -3059,7 +3059,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				<?php
 
 				if ($action != 'editline' && $action != 'selectlines') {
-						if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_ALLOW_REMOVE_BLOCK))
+						if ($object->statut == 0  && $createRight && !empty(getDolGlobalString('SUBTOTAL_ALLOW_REMOVE_BLOCK')))
 						{
                             if(empty($line->fk_prev_id)) $line->fk_prev_id = null;
 							if (!isset($line->fk_prev_id) || $line->fk_prev_id === null)
@@ -3085,7 +3085,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			</td>
 
 			<?php
-			if ($object->statut == 0  && $createRight && !empty($conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS) && TSubtotal::isTitle($line) && $action != 'editline' && $action != 'selectlines')
+			if ($object->statut == 0  && $createRight && !empty(getDolGlobalString('SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS')) && TSubtotal::isTitle($line) && $action != 'editline' && $action != 'selectlines')
 			{
 				echo '<td class="subtotal_nc">';
 				echo '<input id="subtotal_nc-'.$line->id.'" class="subtotal_nc_chkbx" data-lineid="'.$line->id.'" type="checkbox" name="subtotal_nc" value="1" '.(!empty($line->array_options['options_subtotal_nc']) ? 'checked="checked"' : '').' />';
@@ -3103,7 +3103,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				<?php
 				$Telement = array('propal','commande','facture','supplier_proposal','order_supplier','invoice_supplier');
 
-				if (!empty($conf->global->MASSACTION_CARD_ENABLE_SELECTLINES) && $object->status == $object::STATUS_DRAFT && $usercandelete && in_array($object->element,$Telement)|| $action == 'selectlines' ) { // dolibarr 8
+				if (!empty(getDolGlobalString('MASSACTION_CARD_ENABLE_SELECTLINES')) && $object->status == $object::STATUS_DRAFT && $usercandelete && in_array($object->element,$Telement)|| $action == 'selectlines' ) { // dolibarr 8
 
 					if ($action !== 'editline' && GETPOST('lineid', 'int') !== $line->id) {
 						$checked = '';
@@ -3204,7 +3204,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
 
             $class													= '';
-            if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))		$class	.= ' newSubtotal';
+            if (!empty(getDolGlobalString('SUBTOTAL_USE_NEW_FORMAT')))		$class	.= ' newSubtotal';
             if ($line->qty == 1)									$class	.= ' subtitleLevel1';	// Title level 1
             elseif ($line->qty == 2)								$class	.= ' subtitleLevel2';	// Title level 2
             elseif ($line->qty > 2 && $line->qty < 10)				$class	.= ' subtitleLevel3to9';	// Sub-total level 3 to 9
@@ -3330,7 +3330,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			$data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
 
             $class													= '';
-            if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))		$class	.= ' newSubtotal ';
+            if (!empty(getDolGlobalString('SUBTOTAL_USE_NEW_FORMAT')))		$class	.= ' newSubtotal ';
             if ($line->qty == 1)									$class	.= ' subtitleLevel1';	// Title level 1
             elseif ($line->qty == 2)								$class	.= ' subtitleLevel2';	// Title level 2
             elseif ($line->qty > 2 && $line->qty < 10)				$class	.= ' subtitleLevel3to9';	// Sub-total level 3 to 9

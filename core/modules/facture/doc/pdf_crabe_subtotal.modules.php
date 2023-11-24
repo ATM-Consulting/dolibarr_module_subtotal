@@ -344,7 +344,7 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 				// Loop on each lines
 				for ($i = 0; $i < $nblignes; $i++)
 				{
-					$package_qty = $TStack[count($TStack) - 1]['package_qty'];
+					$package_qty = isset($TStack[count($TStack) - 1]['package_qty']) ? $TStack[count($TStack) - 1]['package_qty'] : null;
 					$inPackage = count($TStack) > 0;
 
 					// Ligne de titre
@@ -591,12 +591,12 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 					{
 						foreach ($object->lines[$i]->TTotal_tva as $vatrate => $tvaligne)
 						{
-							$this->tva[$vatrate] += $tvaligne;
+							if(!empty($this->tva[$vatrate])) $this->tva[$vatrate] += $tvaligne;
 						}
 					}
 					else {
 						// standard
-                        if(!empty($tvaligne)) $this->tva[$vatrate] += $tvaligne;
+                        if(!empty($this->tva[$vatrate])) $this->tva[$vatrate] += $tvaligne;
 					}
 
 					if ($posYAfterImage > $posYAfterDescription) $nexY=$posYAfterImage;
