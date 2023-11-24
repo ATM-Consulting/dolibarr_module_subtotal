@@ -759,15 +759,18 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				global $hideprices;
 
 				$hideInnerLines = GETPOST('hideInnerLines', 'int');
-				if(empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname][$object->id]) ) $_SESSION[$sessname] = array($object->id => 0); // prevent old system
+				if (empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname]) || !isset($_SESSION[$sessname][$object->id]) || !is_array($_SESSION[$sessname][$object->id]))
+                    $_SESSION[$sessname] = array($object->id => 0); // prevent old system
 				$_SESSION[$sessname][$object->id] = $hideInnerLines;
 
 				$hidedetails= GETPOST('hidedetails', 'int');
-				if(empty($_SESSION[$sessname2]) || !is_array($_SESSION[$sessname2][$object->id]) ) $_SESSION[$sessname2] = array($object->id => 0); // prevent old system
+				if (empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname2]) || !isset($_SESSION[$sessname2][$object->id]) || !is_array($_SESSION[$sessname2][$object->id]))
+					$_SESSION[$sessname2] = array($object->id => 0); // prevent old system
 				$_SESSION[$sessname2][$object->id] = $hidedetails;
 
 				$hideprices= GETPOST('hideprices', 'int');
-				if(empty($_SESSION[$sessname3]) || !is_array($_SESSION[$sessname3][$object->id]) ) $_SESSION[$sessname3] = array($object->id => 0); // prevent old system
+				if (empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname3]) || !isset($_SESSION[$sessname3][$object->id]) || !is_array($_SESSION[$sessname3][$object->id]))
+					$_SESSION[$sessname3] = array($object->id => 0); // prevent old system
 				$_SESSION[$sessname3][$object->id] = $hideprices;
 
 				foreach($object->lines as &$line) {
@@ -4114,8 +4117,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				$TLines = TSubtotal::getAllTitleFromDocument($object);
 
 				//On définit quels sont les blocs à cacher en fonction des données existantes (hideblock)
-				if(!empty($TLines)) {
-					$TBlocksToHide = array();
+			$TBlocksToHide = array();
+			if(!empty($TLines)) {
 					foreach ($TLines as $line) {
 						if (array_key_exists('options_hideblock', $line->array_options) && $line->array_options['options_hideblock']) $TBlocksToHide[] = $line->id;
 					}
