@@ -38,6 +38,9 @@ SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE=Texte des titres lors de la facturation 
 SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info=Clés de remplacement :<br /><b>__REFORDER__</b> = Référence de la commande<br /><b>__REFCUSTOMER__</b> = Référence client de la commande
 subtotal_add_title_bloc_from_orderstoinvoice=Ajouter un bloc titre et sous-total entre chaque commande
 SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK=L'ajout sous un titre se fera en fin de section 
+SUBTOTAL_HIDE_OPTIONS_TITLE=Cacher les options de titre
+SUBTOTAL_HIDE_OPTIONS_BREAK_PAGE_BEFORE=Cacher l'option du saut de page avant
+SUBTOTAL_HIDE_OPTIONS_BUILD_DOC=Cache les options génération du document
 SUBTOTAL_TITLE_STYLE=Style des titres (B = gras, U = souligné, I = italique)
 SUBTOTAL_TITLE_SIZE=Taille des titres
 SUBTOTAL_TITLE_SIZE_info=égale à 9 si non renseignée
@@ -125,3 +128,19 @@ SUBTOTAL_SHOW_QTY_ON_TITLES = Afficher la quantité sur les lignes de sous-total
 SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES =  Masquer uniquement les prix pour les produits se trouvant dans un ensemble
 
 SubtotalExperimentalZone = Configurations expérimentales ou dépréciées
+QuickSummary = Sommaire rapide
+SUBTOTAL_DISABLE_SUMMARY = Désactiver le menu "sommaire rapide" (apparaît dans le menu de gauche lorsque le document a des titres)
+
+Subtotal_HideAll=Cacher toutes les lignes
+Subtotal_ShowAll=Afficher toutes les lignes
+Subtotal_Hide=Cacher les lignes
+Subtotal_Show=Afficher les lignes
+
+NumberOfHiddenLines = Nombre de lignes cachées
+Subtotal_ForceHideAll = Cacher toutes les lignes du bloc ainsi que les lignes des blocs de titre de niveau inférieur
+Subtotal_ForceShowAll = Afficher toutes les lignes du bloc ainsi que les lignes des blocs de titre de niveau inférieur
+DISPLAY_MARGIN_ON_SUBTOTALS=Afficher les marges sur les lignes de sous-totaux
+HideSubtitleOnFold = Cacher les lignes de titre et sous total enfant
+KeepSubtitleDisplayOnFold = Afficher les lignes de titre et sous total enfant
+SUBTOTAL_BLOC_FOLD_MODE = Comportement à adopter lorsque l'on cache un bloc de titre
+ErrorClassXNotExists = ERREUR : la classe php %s n'est pas chargée
