@@ -339,30 +339,30 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 				$TChilds = array();
 				$package_qty = 0;
 				$TStack = array();
-				
+
 				// Loop on each lines
 				for ($i = 0; $i < $nblignes; $i++)
 				{
 					$package_qty = $TStack[count($TStack) - 1]['package_qty'];
 					$inPackage = count($TStack) > 0;
-					
+
 					// Ligne de titre
 					if ($object->lines[$i]->product_type == 9 && $object->lines[$i]->qty < 97) {
 						$inPackage = true;
-						
+
 						if ($conf->global->SUBTOTAL_SHOW_QTY_ON_TITLES) {
 							if (!empty($object->lines[$i]->fk_product)) {
 								$product = new Product($db);
 								$product->fetch($object->lines[$i]->fk_product);
-								
+
 								$TChilds = $product->getChildsArbo($product->id);
-								
+
 								$TStack[count($TStack)] = array(
 									'childs' => $TChilds,
 									'package' => array(),
 									'package_qty' => 0
 								);
-								
+
 								// Si on se trouvait déjà dans un package, on rajoute ce produit à la liste des produits
 								// du précédent package
 								if (count($TStack) > 1) {
@@ -371,18 +371,18 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 							}
 						}
 					}
-					
+
 					if ($conf->global->SUBTOTAL_SHOW_QTY_ON_TITLES) {
 						if ($inPackage && $object->lines[$i]->product_type != 9 && $object->lines[$i]->fk_product > 0) {
 							$TStack[count($TStack) - 1]['package'][$object->lines[$i]->fk_product] += $object->lines[$i]->qty;
 						}
 					}
-					
+
 					if ($inPackage && $object->lines[$i]->product_type == 9 && $object->lines[$i]->qty >= 97) {
 						if (count($TStack) <= 1) {
 							$inPackage = false;
 						}
-						
+
 						if ($conf->global->SUBTOTAL_SHOW_QTY_ON_TITLES) {
 							// Comparaison pour déterminer la quantité de package
 							$TProducts = array_keys($TStack[count($TStack) - 1]['package']);
@@ -398,11 +398,11 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 								$TStack[count($TStack) - 1]['package_qty'] = $document_qty / $base_qty;
 								$package_qty = $TStack[count($TStack) - 1]['package_qty'];
 							}
-							
+
 							array_pop($TStack);
 						}
 					}
-					
+
 					$curY = $nexY;
 					$pdf->SetFont('','', $default_font_size - 1);   // Into loop to work with multipage
 					$pdf->SetTextColor(0,0,0);
@@ -499,7 +499,7 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 						} else {
 							$vat_rate = pdf_getlinevatrate($object, $i, $outputlangs, $hidedetails);
 						}
-						
+
 						$pdf->SetXY($this->posxtva, $curY);
 						$pdf->MultiCell($this->posxup-$this->posxtva-0.8, 3, $vat_rate, 0, 'R');
 					}
@@ -510,13 +510,13 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 					} else {
 						$up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, $hidedetails);
 					}
-					
+
 					$pdf->SetXY($this->posxup, $curY);
 					$pdf->MultiCell($this->posxqty-$this->posxup-0.8, 3, $up_excl_tax, 0, 'R', 0);
 
 					// Quantity
 					// Affichage de la quantité sur les lignes de total si la conf l'indique
-			
+
 					// Récupération de la quantité à afficher
 					if ($conf->global->SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY && $hidedetails) {
 						if ($conf->global->SUBTOTAL_SHOW_QTY_ON_TITLES && $package_qty > 0) {
@@ -531,7 +531,7 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 							$qty = pdf_getlineqty($object, $i, $outputlangs, $hidedetails);
 						}
 					}
-					
+
 					$pdf->SetXY($this->posxqty, $curY);
 					$pdf->MultiCell($this->posxdiscount-$this->posxqty-0.8, 3, $qty, 0, 'R');	// Enough for 6 chars
 
@@ -549,7 +549,7 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 					} else {
 						$total_excl_tax = pdf_getlinetotalexcltax($object, $i, $outputlangs, $hidedetails);
 					}
-					
+
 					$pdf->SetXY($this->postotalht, $curY);
 					$pdf->MultiCell($this->page_largeur-$this->marge_droite-$this->postotalht, 3, $total_excl_tax, 0, 'R', 0);
 
@@ -562,9 +562,10 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 					$localtax1_type=$object->lines[$i]->localtax1_type;
 					$localtax2_type=$object->lines[$i]->localtax2_type;
 
-					if ($object->remise_percent) $tvaligne-=($tvaligne*$object->remise_percent)/100;
+					// TODO remise_percent in parent object is deprecated
+					/*if ($object->remise_percent) $tvaligne-=($tvaligne*$object->remise_percent)/100;
 					if ($object->remise_percent) $localtax1ligne-=($localtax1ligne*$object->remise_percent)/100;
-					if ($object->remise_percent) $localtax2ligne-=($localtax2ligne*$object->remise_percent)/100;
+					if ($object->remise_percent) $localtax2ligne-=($localtax2ligne*$object->remise_percent)/100;*/
 
 					$vatrate=(string) $object->lines[$i]->tva_tx;
 
