@@ -539,7 +539,7 @@ class pdf_azur_subtotal extends ModelePDFPropales
 					}
 
 					// Unit price before discount
-					if ($hidedetails && !$inPackage && $conf->global->SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES) {
+					if ($hidedetails && !$inPackage && getDolGlobalString('SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES')) {
 						$up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, 0);
 					} else {
 						$up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, $hidedetails);
