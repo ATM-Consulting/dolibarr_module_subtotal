@@ -183,13 +183,13 @@ $formSetup->newItem('DISPLAY_MARGIN_ON_SUBTOTALS')->setAsYesNo();
 
 // Couleur de fond utilisée sur les PDF pour les titres
 $item = $formSetup->newItem('SUBTOTAL_TITLE_BACKGROUNDCOLOR');
-$item->fieldValue = (!getDolGlobalString('SUBTOTAL_TITLE_BACKGROUNDCOLOR')?'#ffffff':getDolGlobalString('SUBTOTAL_TITLE_BACKGROUNDCOLOR'));
+$item->fieldValue = getDolGlobalString('SUBTOTAL_TITLE_BACKGROUNDCOLOR','#ffffff');
 $item->fieldAttr['type'] = 'color';
 $item->fieldOutputOverride ='<input type="color" value="'.$item->fieldValue .'" disabled />';
 
 // Couleur de fond utilisée sur les PDF pour les sous-totaux
 $item = $formSetup->newItem('SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR');
-$item->fieldValue = (!getDolGlobalString('SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR')?'#ebebeb':getDolGlobalString('SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR'));
+$item->fieldValue = getDolGlobalString('SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR','#ebebeb');
 $item->fieldAttr['type'] = 'color';
 $item->fieldOutputOverride ='<input type="color" value="'.$item->fieldValue .'" disabled />';
 
@@ -199,9 +199,9 @@ $item = $formSetup->newItem('SUBTOTAL_DISABLE_SUMMARY')->setAsYesNo();
 
 $item = $formSetup->newItem('SUBTOTAL_BLOC_FOLD_MODE')->setAsSelect(array(
 		'default' => $langs->trans('HideSubtitleOnFold'),
-		'keepTitle' => $langs->trans('KeepSubtitleDisplayOnFold'),
+		-'keepTitle' => $langs->trans('KeepSubtitleDisplayOnFold'),
 	));
-if(!getDolGlobalString('SUBTOTAL_BLOC_FOLD_MODE')){
+if(!getDolGlobalInt('SUBTOTAL_BLOC_FOLD_MODE')){
 	$result = dolibarr_set_const($item->db, $item->confKey, 'default', 'chaine', 0, '', $item->entity);
 	$item->loadValueFromConf();
 }

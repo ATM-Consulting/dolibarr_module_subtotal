@@ -111,7 +111,7 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 		$this->posxdiscount=162;
 		$this->postotalht=174;
 		if (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT')) $this->posxtva=$this->posxup;
-		$this->posxpicture=$this->posxtva - (!getDolGlobalString('MAIN_DOCUMENTS_WITH_PICTURE_WIDTH')?20:getDolGlobalString('MAIN_DOCUMENTS_WITH_PICTURE_WIDTH'));	// width of images
+		$this->posxpicture=$this->posxtva - floatval(!getDolGlobalString('MAIN_DOCUMENTS_WITH_PICTURE_WIDTH')?20:getDolGlobalString('MAIN_DOCUMENTS_WITH_PICTURE_WIDTH'));	// width of images
 		if ($this->page_largeur < 210) // To work with US executive format
 		{
 			$this->posxpicture-=20;
@@ -205,7 +205,7 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 				$pdf=pdf_getInstance($this->format);
 				$default_font_size = pdf_getPDFFontSize($outputlangs);	// Must be after pdf_getInstance
 				$heightforinfotot = 50;	// Height reserved to output the info and total part
-				$heightforfreetext= getDolGlobalString('MAIN_PDF_FREETEXT_HEIGHT', 5);
+				$heightforfreetext= floatval(getDolGlobalString('MAIN_PDF_FREETEXT_HEIGHT', 5));
 	            $heightforfooter = $this->marge_basse + 8;	// Height reserved to output the footer (value include bottom margin)
                 $pdf->SetAutoPageBreak(1,0);
 

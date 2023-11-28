@@ -160,7 +160,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				$createRight = $user->hasRight('facture', 'creer');
 			} elseif($object->element == 'order_supplier' )
 			{
-			    $createRight = $user->hasRight('fournisseur', 'creer');
+			    $createRight = $user->hasRight('fournisseur', 'commande', 'creer');
 			} elseif($object->element == 'invoice_supplier' )
 			{
 			    $createRight = $user->hasRight('fournisseur', 'facture', 'creer');
@@ -263,8 +263,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 		$jsData = array(
 			'conf' => array(
-				'SUBTOTAL_USE_NEW_FORMAT' => getDolGlobalString('SUBTOTAL_USE_NEW_FORMAT'),
-				'MAIN_VIEW_LINE_NUMBER' => getDolGlobalString('MAIN_VIEW_LINE_NUMBER'),
+				'SUBTOTAL_USE_NEW_FORMAT' => getDolGlobalInt('SUBTOTAL_USE_NEW_FORMAT'),
+				'MAIN_VIEW_LINE_NUMBER' => getDolGlobalInt('MAIN_VIEW_LINE_NUMBER'),
 				'token' => ((float) DOL_VERSION < 11.0) ?  $_SESSION['newtoken'] : newToken()
 			),
 			'langs' => array(
@@ -346,7 +346,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 						<?php
 						$editorTool = getDolGlobalString('FCKEDITOR_EDITORNAME', 'ckeditor');
-						$editorConf = getDolGlobalString('FCKEDITOR_ENABLE_DETAILS', false);
+						$editorConf = empty(getDolGlobalString('FCKEDITOR_ENABLE_DETAILS')) ? false : getDolGlobalString('FCKEDITOR_ENABLE_DETAILS');
 						if($editorConf && in_array($editorTool,array('textarea','ckeditor'))){
 						?>
 						if (action == 'addTitle' || action == 'addFreeTxt')

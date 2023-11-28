@@ -671,7 +671,7 @@ if(!class_exists('FormSetup')){
 		public function loadValueFromConf()
 		{
 			global $conf;
-			if (!getDolGlobalString($this->confKey)) {
+			if (getDolGlobalString($this->confKey)) {
 				$this->fieldValue = getDolGlobalString($this->confKey);
 				return true;
 			} else {
