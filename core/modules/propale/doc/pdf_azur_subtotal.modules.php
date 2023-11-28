@@ -373,6 +373,7 @@ class pdf_azur_subtotal extends ModelePDFPropales
 				for ($i = 0 ; $i < $nblignes ; $i++)
 				{
 					$inPackage = count($TStack) > 0;
+
 					if($inPackage) $package_qty = $TStack[count($TStack) - 1]['package_qty'];
 
 					// Ligne de titre
@@ -538,7 +539,7 @@ class pdf_azur_subtotal extends ModelePDFPropales
 					}
 
 					// Unit price before discount
-					if ($hidedetails && !$inPackage && getDolGlobalString('SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES')) {
+					if ($hidedetails && !$inPackage && $conf->global->SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES) {
 						$up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, 0);
 					} else {
 						$up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, $hidedetails);
@@ -1378,7 +1379,7 @@ class pdf_azur_subtotal extends ModelePDFPropales
 				}
 			} else {
 				$text = $this->emetteur->name;
-				$pdf->MultiCell(100, 4, $outputlangs->convToOutputCharset($text), 0);
+				$pdf->MultiCell(100, 4, $outputlangs->convToOutputCharset($text), 0, $ltrdirection);
 			}
 		}
 

@@ -81,7 +81,7 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 		$this->page_hauteur = $formatarray['height'];
 		$this->format = array($this->page_largeur,$this->page_hauteur);
 
-				$this->marge_gauche= floatval(getDolGlobalString('MAIN_PDF_MARGIN_LEFT',10));
+		$this->marge_gauche= floatval(getDolGlobalString('MAIN_PDF_MARGIN_LEFT',10));
 		$this->marge_droite= floatval(getDolGlobalString('MAIN_PDF_MARGIN_RIGHT', 10));
 		$this->marge_haute =floatval(getDolGlobalString('MAIN_PDF_MARGIN_TOP', 10));
 		$this->marge_basse = floatval(getDolGlobalString('MAIN_PDF_MARGIN_BOTTOM', 10));
@@ -340,13 +340,13 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 				$TChilds = array();
 				$package_qty = 0;
 				$TStack = array();
-
+				
 				// Loop on each lines
 				for ($i = 0; $i < $nblignes; $i++)
 				{
 					$package_qty = isset($TStack[count($TStack) - 1]['package_qty']) ? $TStack[count($TStack) - 1]['package_qty'] : null;
 					$inPackage = count($TStack) > 0;
-
+					
 					// Ligne de titre
 					if ($object->lines[$i]->product_type == 9 && $object->lines[$i]->qty < 97) {
 						$inPackage = true;
@@ -355,15 +355,15 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 							if (!empty($object->lines[$i]->fk_product)) {
 								$product = new Product($db);
 								$product->fetch($object->lines[$i]->fk_product);
-
+								
 								$TChilds = $product->getChildsArbo($product->id);
-
+								
 								$TStack[count($TStack)] = array(
 									'childs' => $TChilds,
 									'package' => array(),
 									'package_qty' => 0
 								);
-
+								
 								// Si on se trouvait déjà dans un package, on rajoute ce produit à la liste des produits
 								// du précédent package
 								if (count($TStack) > 1) {
@@ -378,7 +378,7 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 							$TStack[count($TStack) - 1]['package'][$object->lines[$i]->fk_product] += $object->lines[$i]->qty;
 						}
 					}
-
+					
 					if ($inPackage && $object->lines[$i]->product_type == 9 && $object->lines[$i]->qty >= 97) {
 						if (count($TStack) <= 1) {
 							$inPackage = false;
@@ -399,11 +399,11 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 								$TStack[count($TStack) - 1]['package_qty'] = $document_qty / $base_qty;
 								$package_qty = $TStack[count($TStack) - 1]['package_qty'];
 							}
-
+							
 							array_pop($TStack);
 						}
 					}
-
+					
 					$curY = $nexY;
 					$pdf->SetFont('','', $default_font_size - 1);   // Into loop to work with multipage
 					$pdf->SetTextColor(0,0,0);
@@ -500,7 +500,7 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 						} else {
 							$vat_rate = pdf_getlinevatrate($object, $i, $outputlangs, $hidedetails);
 						}
-
+						
 						$pdf->SetXY($this->posxtva, $curY);
 						$pdf->MultiCell($this->posxup-$this->posxtva-0.8, 3, $vat_rate, 0, 'R');
 					}
@@ -511,13 +511,13 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 					} else {
 						$up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, $hidedetails);
 					}
-
+					
 					$pdf->SetXY($this->posxup, $curY);
 					$pdf->MultiCell($this->posxqty-$this->posxup-0.8, 3, $up_excl_tax, 0, 'R', 0);
 
 					// Quantity
 					// Affichage de la quantité sur les lignes de total si la conf l'indique
-
+			
 					// Récupération de la quantité à afficher
 					if (getDolGlobalString('SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY')  && $hidedetails) {
 						if (getDolGlobalString('SUBTOTAL_SHOW_QTY_ON_TITLES')  && $package_qty > 0) {
@@ -532,7 +532,7 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 							$qty = pdf_getlineqty($object, $i, $outputlangs, $hidedetails);
 						}
 					}
-
+					
 					$pdf->SetXY($this->posxqty, $curY);
 					$pdf->MultiCell($this->posxdiscount-$this->posxqty-0.8, 3, $qty, 0, 'R');	// Enough for 6 chars
 
@@ -550,7 +550,7 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 					} else {
 						$total_excl_tax = pdf_getlinetotalexcltax($object, $i, $outputlangs, $hidedetails);
 					}
-
+					
 					$pdf->SetXY($this->postotalht, $curY);
 					$pdf->MultiCell($this->page_largeur-$this->marge_droite-$this->postotalht, 3, $total_excl_tax, 0, 'R', 0);
 

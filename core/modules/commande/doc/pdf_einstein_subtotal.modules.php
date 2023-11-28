@@ -81,10 +81,10 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 		$this->page_hauteur = $formatarray['height'];
 		$this->format = array($this->page_largeur,$this->page_hauteur);
 
-		$this->marge_gauche= getDolGlobalString('MAIN_PDF_MARGIN_LEFT',10);
-		$this->marge_droite= getDolGlobalString('MAIN_PDF_MARGIN_RIGHT', 10);
-		$this->marge_haute =getDolGlobalString('MAIN_PDF_MARGIN_TOP', 10);
-		$this->marge_basse = getDolGlobalString('MAIN_PDF_MARGIN_BOTTOM', 10);
+		$this->marge_gauche= floatval(getDolGlobalString('MAIN_PDF_MARGIN_LEFT',10));
+		$this->marge_droite= floatval(getDolGlobalString('MAIN_PDF_MARGIN_RIGHT', 10));
+		$this->marge_haute = floatval(getDolGlobalString('MAIN_PDF_MARGIN_TOP', 10));
+		$this->marge_basse = floatval(getDolGlobalString('MAIN_PDF_MARGIN_BOTTOM', 10));
 
 		$this->option_logo = 1;                    // Affiche logo
 		$this->option_tva = 1;                     // Gere option tva FACTURE_TVAOPTION
@@ -500,6 +500,7 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 					$pdf->MultiCell($this->page_largeur-$this->marge_droite-$this->postotalht, 3, $total_excl_tax, 0, 'R', 0);
 
 					// Collecte des totaux par valeur de tva dans $this->tva["taux"]=total_tva
+					$tvaligne=doubleval($object->lines[$i]->total_tva);
 
 					if (!empty($object->lines[$i])) {
 						$tvaligne = doubleval($object->lines[$i]->total_tva);
