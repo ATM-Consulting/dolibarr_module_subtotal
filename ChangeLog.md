@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file.
 - FIX : page break issue from PR #271, #292 & #328 - *19/07/2023* - 3.23.0  
   To disable this fix use Hidden conf  SUBTOTAL_DISABLE_FIX_TRANSACTION set to 1  
   This correction is being prepared for the next version, to avoid any possible side-effects that we haven't yet seen.
+- FIX Compat v19 et php8.2 - *23/10/2023* - 3.23.0  
+Changed Dolibarr compatibility range to 15 min - 19 max  
+    Change PHP compatibility range to 7.0 min - 8.2 max
 
 # Version 3.22 - 19/07/2023
 

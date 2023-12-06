@@ -58,7 +58,7 @@ class TSubtotal {
         global $conf;
 
         $show = false;
-        if (!empty($conf->global->SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS) && in_array($object->element, explode(',', $conf->global->SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS))) {
+        if (getDolGlobalString('SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS') && in_array($object->element, explode(',', getDolGlobalString('SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS')))) {
             $show = true;
         }
 
@@ -174,16 +174,16 @@ class TSubtotal {
 	{
 		global $conf,$langs,$db;
 
-		if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE))
+		if (!getDolGlobalString('MAIN_DISABLE_PDF_AUTOUPDATE'))
 		{
-			$hidedetails = (GETPOST('hidedetails', 'int') ? GETPOST('hidedetails', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS) ? 1 : 0));
-			$hidedesc = (GETPOST('hidedesc', 'int') ? GETPOST('hidedesc', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC) ? 1 : 0));
-			$hideref = (GETPOST('hideref', 'int') ? GETPOST('hideref', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF) ? 1 : 0));
+			$hidedetails = (GETPOST('hidedetails', 'int') ? GETPOST('hidedetails', 'int') : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS') ? 1 : 0));
+			$hidedesc = (GETPOST('hidedesc', 'int') ? GETPOST('hidedesc', 'int') : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DESC') ? 1 : 0));
+			$hideref = (GETPOST('hideref', 'int') ? GETPOST('hideref', 'int') : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_REF') ? 1 : 0));
 
 			// Define output language
 			$outputlangs = $langs;
 			$newlang = GETPOST('lang_id', 'alpha');
-			if (! empty($conf->global->MAIN_MULTILANGS) && empty($newlang))
+			if (getDolGlobalString('MAIN_MULTILANGS') && empty($newlang))
 				$newlang = !empty($object->client) ? $object->client->default_lang : $object->thirdparty->default_lang;
 			if (! empty($newlang)) {
 				$outputlangs = new Translate("", $conf);
@@ -597,10 +597,10 @@ class TSubtotal {
 		// editeur wysiwyg
 		require_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
 		$nbrows=ROWS_2;
-		if (! empty($conf->global->MAIN_INPUT_DESC_HEIGHT)) $nbrows=$conf->global->MAIN_INPUT_DESC_HEIGHT;
-		$enable=(isset($conf->global->FCKEDITOR_ENABLE_DETAILS)?$conf->global->FCKEDITOR_ENABLE_DETAILS:0);
+		$nbrows=getDolGlobalString('MAIN_INPUT_DESC_HEIGHT', '');
+		$enable= getDolGlobalString('FCKEDITOR_ENABLE_DETAILS', 0);
 		$toolbarname='dolibarr_details';
-		if (! empty($conf->global->FCKEDITOR_ENABLE_DETAILS_FULL)) $toolbarname='dolibarr_notes';
+		if (getDolGlobalString('FCKEDITOR_ENABLE_DETAILS_FULL')) $toolbarname='dolibarr_notes';
 		$text = !empty($line->description)?$line->description:$line->label;
 		$doleditor=new DolEditor('line-description',$text,'',164,$toolbarname,'',false,true,$enable,$nbrows,'98%', $readonly);
 		return $doleditor->Create(1);
@@ -616,22 +616,22 @@ class TSubtotal {
 	{
 		global $db,$user,$conf;
 
-		$createRight = $user->rights->{$object->element}->creer;
+		$createRight = $user->hasRight($object->element, 'creer');
 		if($object->element == 'facturerec' )
 		{
 		    $object->statut = 0; // hack for facture rec
-		    $createRight = $user->rights->facture->creer;
+		    $createRight =  $user->hasRight('facture', 'creer');
 		}
 		elseif($object->element == 'order_supplier' )
 		{
-		    $createRight = $user->rights->fournisseur->commande->creer;
+		    $createRight = $user->hasRight('fournisseur', 'commande', 'creer');
 		}
 		elseif($object->element == 'invoice_supplier' )
 		{
-		    $createRight = $user->rights->fournisseur->facture->creer;
+			$createRight = $user->hasRight('fournisseur', 'facture', 'creer');
 		}
 
-		if ($object->statut == 0  && $createRight && (!empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_BLOCK) || !empty($conf->global->SUBTOTAL_ALLOW_DUPLICATE_LINE)))
+		if ($object->statut == 0  && $createRight && (getDolGlobalString('SUBTOTAL_ALLOW_DUPLICATE_BLOCK') || getDolGlobalString('SUBTOTAL_ALLOW_DUPLICATE_LINE')))
 		{
 			dol_include_once('/subtotal/lib/subtotal.lib.php');
 
@@ -1024,9 +1024,9 @@ class TSubtotal {
 		}
 		$pdf->SetFont(pdf_getPDFFont($outputlangs));
 		// Set path to the background PDF File
-		if (empty($conf->global->MAIN_DISABLE_FPDI) && ! empty($conf->global->MAIN_ADD_PDF_BACKGROUND))
+		if (!getDolGlobalString('MAIN_DISABLE_FPDI') && getDolGlobalString('MAIN_ADD_PDF_BACKGROUND'))
 		{
-			$pagecount = $pdf->setSourceFile($conf->mycompany->dir_output.'/'.$conf->global->MAIN_ADD_PDF_BACKGROUND);
+			$pagecount = $pdf->setSourceFile($conf->mycompany->dir_output.'/' . getDolGlobalString('MAIN_ADD_PDF_BACKGROUND'));
 			$tplidx = $pdf->importPage(1);
 		}
 
@@ -1039,7 +1039,7 @@ class TSubtotal {
 		$pdf->SetCreator("Dolibarr ".DOL_VERSION);
 		$pdf->SetAuthor($outputlangs->convToOutputCharset($user->getFullName($outputlangs)));
 		$pdf->SetKeyWords($outputlangs->convToOutputCharset($object->ref)." ".$outputlangs->transnoentities("subtotalRecap")." ".$outputlangs->convToOutputCharset($object->thirdparty->name));
-		if (! empty($conf->global->MAIN_DISABLE_PDF_COMPRESSION)) $pdf->SetCompression(false);
+		if (getDolGlobalString('MAIN_DISABLE_PDF_COMPRESSION')) $pdf->SetCompression(false);
 
 		$pdf->SetMargins($objmarge->marge_gauche, $objmarge->marge_haute, $objmarge->marge_droite);   // Left, Top, Right
 
@@ -1066,7 +1066,7 @@ class TSubtotal {
 		$posx_montant = 170;
 
 		$tab_top = 72;
-		$tab_top_newpage = (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)?72:20); // TODO à vérifier
+		$tab_top_newpage = (!getDolGlobalString('MAIN_PDF_DONOTREPEAT_HEAD')?72:20); // TODO à vérifier
 
 		$TTot = array('total_ht' => 0, 'total_ttc' => 0, 'TTotal_tva' => array());
 
@@ -1145,7 +1145,7 @@ class TSubtotal {
 						{
 							$pdf->AddPage('','',true);
 							if (! empty($tplidx)) $pdf->useTemplate($tplidx);
-							if (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)) self::pagehead($objmarge, $pdf, $object, 0, $outputlangs);
+							if (!getDolGlobalString('MAIN_PDF_DONOTREPEAT_HEAD')) self::pagehead($objmarge, $pdf, $object, 0, $outputlangs);
 							$pdf->setPage($pageposafter+1);
 						}
 					}
@@ -1204,7 +1204,7 @@ class TSubtotal {
 					$pagenb++;
 					$pdf->setPage($pagenb);
 					$pdf->setPageOrientation('', 1, 0);	// The only function to edit the bottom margin of current page to set it.
-					if (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)) self::pagehead($objmarge, $pdf, $object, 0, $outputlangs);
+					if (!getDolGlobalString('MAIN_PDF_DONOTREPEAT_HEAD')) self::pagehead($objmarge, $pdf, $object, 0, $outputlangs);
 				}
 			}
 		}
@@ -1229,7 +1229,7 @@ class TSubtotal {
 
 		$pagecount = self::concat($outputlangs, array($origin_file, $file), $origin_file);
 
-		if (empty($conf->global->SUBTOTAL_KEEP_RECAP_FILE)) unlink($file);
+		if (!getDolGlobalString('SUBTOTAL_KEEP_RECAP_FILE')) unlink($file);
 	}
 
 	/**
@@ -1356,7 +1356,7 @@ class TSubtotal {
 			$pdf->SetXY($objmarge->page_largeur - $objmarge->marge_droite - ($pdf->GetStringWidth($titre) + 3), $tab_top-4.5);
 			$pdf->MultiCell(($pdf->GetStringWidth($titre) + 3), 2, $titre);
 
-			if (! empty($conf->global->MAIN_PDF_TITLE_BACKGROUND_COLOR)) $pdf->Rect($objmarge->marge_gauche, $tab_top, $objmarge->page_largeur-$objmarge->marge_droite-$objmarge->marge_gauche, 8, 'F', null, explode(',',$conf->global->MAIN_PDF_TITLE_BACKGROUND_COLOR));
+			if (getDolGlobalString('MAIN_PDF_TITLE_BACKGROUND_COLOR')) $pdf->Rect($objmarge->marge_gauche, $tab_top, $objmarge->page_largeur-$objmarge->marge_droite-$objmarge->marge_gauche, 8, 'F', null, explode(',', getDolGlobalString('MAIN_PDF_TITLE_BACKGROUND_COLOR')));
 
 
 			$pdf->line($objmarge->marge_gauche, $tab_top, $objmarge->page_largeur-$objmarge->marge_droite, $tab_top);	// line prend une position y en 2eme param et 4eme param
@@ -1506,7 +1506,7 @@ class TSubtotal {
         }
         $pdf->SetFont(pdf_getPDFFont($outputlangs));
 
-        if (! empty($conf->global->MAIN_DISABLE_PDF_COMPRESSION)) $pdf->SetCompression(false);
+        if (getDolGlobalString('MAIN_DISABLE_PDF_COMPRESSION')) $pdf->SetCompression(false);
 
 
 		foreach($files as $file)
@@ -1522,7 +1522,7 @@ class TSubtotal {
 		}
 
 		$pdf->Output($fileoutput,'F');
-		if (! empty($conf->global->MAIN_UMASK)) @chmod($file, octdec($conf->global->MAIN_UMASK));
+		if (getDolGlobalString('MAIN_UMASK')) @chmod($file, octdec(getDolGlobalString('MAIN_UMASK')));
 
 		return $pagecount;
 	}
