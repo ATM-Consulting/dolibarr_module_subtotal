@@ -470,7 +470,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 						}
 				}
 
-				if(TSubtotal::isTitle($orderline) || TSubtotal::isSubtotal($orderline)) { // Nous sommes sur une ligne titre, si la ligne précédente est un titre de même niveau, on supprime la ligne précédente
+				if(TSubtotal::isModSubtotalLine($orderline)) { // Nous sommes sur une ligne titre, si la ligne précédente est un titre de même niveau, on supprime la ligne précédente
 					$line->special_code = TSubtotal::$module_number;
 
 				}
@@ -482,7 +482,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 					$TBlocks = array();
 					$isThereProduct = false;
 					foreach($TLines as $lineInBlock) {
-							if(TSubtotal::isTitle($lineInBlock) || TSubtotal::isSubtotal($lineInBlock)) $TBlocks[$lineInBlock->id] = $lineInBlock;
+							if(TSubtotal::isModSubtotalLine($lineInBlock) ) $TBlocks[$lineInBlock->id] = $lineInBlock;
 							else $isThereProduct = true;
 					}
 					if(!$isThereProduct) {
@@ -495,7 +495,6 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 					$lineToDelete->delete($user);
 				}
 			}
-
 		}
 
         if ($action == 'USER_LOGIN') {
