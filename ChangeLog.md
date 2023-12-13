@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 
 # Version 3.22 - 19/07/2023
 
-- FIX : DA024159 - Suppression des ligne sous total hors bloc expédié dans le bon d'expédition - *13/12/2023* - 3.22.5
+- FIX : DA024159 - Suppression des ligne sous total hors bloc expédié dans le bon d'expédition - *13/12/2023* - 3.22.6
 - HOTFIX : must be greater than 0 fatal - *22/11/2023* - 3.22.5
 - FIX : DA024057 - Anomalie PDF lors de l'activation conf "Remplacer par le détail des TVA si l'option "Cacher le détail des ensembles" est utilisée (expérimental)" - *16/11/2023* - 3.22.4
 - FIX : PHP8 warnings - *07/09/2023* - 3.22.3
