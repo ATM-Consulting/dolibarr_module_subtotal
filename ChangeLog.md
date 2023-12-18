@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+
+
+# Release 3.23 - 18/12/2023
+
 - FIX : colum in card if global 'MAIN_NO_INPUT_PRICE_WITH_TAX' is enable
 - FIX : js error when summary menu is disabled - *06/10/2023* - 3.23.2
 - FIX : css break due to incompatible conf - *06/10/2023* - 3.23.1
@@ -13,7 +17,7 @@ All notable changes to this project will be documented in this file.
 Changed Dolibarr compatibility range to 15 min - 19 max  
     Change PHP compatibility range to 7.0 min - 8.2 max
 
-# Version 3.22 - 19/07/2023
+# Release 3.22 - 19/07/2023
 
 - FIX : DA024159 - Suppression des ligne sous total hors bloc expédié dans le bon d'expédition - *13/12/2023* - 3.22.6
 - HOTFIX : must be greater than 0 fatal - *22/11/2023* - 3.22.5
@@ -27,12 +31,12 @@ Changed Dolibarr compatibility range to 15 min - 19 max
 - NEW : Ajout des marges par blocs - *28/06/2023* - 3.21.0
 - NEW : Add folder management - *28/06/2023* - 3.20.0
 
-## Version 3.19 - 19/06/2023
+## Release 3.19 - 19/06/2023
 
 - FIX : title group lines move placeholder colspan and adapt to V16+ new line dom - *06/06/2023* - 3.19.1
 - NEW : Document summary addition in left menu  - *06/06/2023* - 3.19.0
 
-## Version 3.18 - 26/04/2023
+## Release 3.18 - 26/04/2023
 
 - FIX : DA024015 - lors de la création de facture fournisseur depuis plusieurs commandes fournisseur, les titres qui reprennent la ref des commandes d'origine n'était pas bon - *19-10-2023* - 3.18.4
 - FIX : DA023419 - Les arrondis des sous-totaux n'était plus qu'à un chiffre après la virgule - *01/06/2023* - 3.18.3
@@ -51,11 +55,11 @@ Changed Dolibarr compatibility range to 15 min - 19 max
 - FIX : La création de factures depuis la liste des commandes créé un décalage titre sous total - *20/02/2023* - 3.16.1
 - NEW : add rank input for subtotal lines *24/01/2023* - 3.16.0
 
-## Version 3.16
+## Release 3.16
 
 - NEW : Ajout configuration SUBTOTAL_TITLE_SIZE permettant d'éditer la taille des titres - *07/02/2023* - 3.16.0
 
-## Version 3.15
+## Release 3.15
 
 - FIX : lorsque l'option "Cacher le prix des lignes des ensembles" était cochée, la réduction n'apparaissait plus sur les lignes qui ne font pas partie d'un ensemble - *06/04/2023* - 3.15.5
 - FIX : retrait des constantonoff lorsqu'on est en mode edit dans la page de conf - *09/03/2023* - 3.15.4
@@ -64,7 +68,7 @@ Changed Dolibarr compatibility range to 15 min - 19 max
 - FIX : Fatal error *02/01/2023* - 3.15.1
 - NEW : Ajout de massaction de suppression de ligne sur les card *16/11/2022* 3.15.0
 
-## Version 3.14 PI
+## Release 3.14 PI
 
 - FIX : Update info bits on create from hook - *18/11/2022* - 3.14.8 ```PR #273 OpenDsi```  
   le code permettant de mettre à jour l'info bit semble être obsolète depuis la version 10 de Dolibarr (le mieux serait de remonter sur les versions précédentes et retrouver à partir de quelle version de Dolibarr ce code n'est plus utile)
@@ -81,7 +85,7 @@ Changed Dolibarr compatibility range to 15 min - 19 max
 - NEW : Ajout de la class TechATM pour l'affichage de la page "A propos" *10/05/2022* 3.13.0
 - NEW : Add total_ht on originproductline tpl if available + add class td identification + add data-id tr identification *07/04/2022* - 3.12.0
 
-## Version 3.11
+## Release 3.11
 - FIX : FIX DOUBLE PARENTHESIS - *15/05/2023* - 3.11.13  
 - FIX : COMPAT V16 family - *02/06/2022)* - 3.11.12  
 - FIX : TRIGGER UPDATE AND MODIFY - *02/06/2022)* - 3.11.11 
@@ -103,7 +107,7 @@ Changed Dolibarr compatibility range to 15 min - 19 max
   Les options sur les sous-totaux ont été mises sur les lignes de sous-totaux pour simplification du code et éviter de parcourir toutes les lignes afin de retrouver le titre parent.
 - NEW : Can select sub-total lines in supplier order and invoice  *10/12/2021* - 3.8.0 [PR #226 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/226)
 
-## Version 3.7
+## Release 3.7
 - FIX : typo dans hook ODTSubstitutionLine *30/10/2023* - 3.7.5
 - FIX : object was never fetch *07/02/2022* - 3.7.4
 - FIX : Fix compatibility 11.0 pdfEvolution *19/01/2022* - 3.7.3
@@ -112,7 +116,7 @@ Changed Dolibarr compatibility range to 15 min - 19 max
 - NEW : add api subtotal to module. add entryPoint getTotalLine  *17/11/2021* - 3.7.0
     
 
-## Version 3.6
+## Release 3.6
 - FIX : Substitutions ODT ne se font pas pour toutes les actions sur les factures *15/12/2022* 3.6.11
 - FIX : Title lines broken on PDF for documents whose lines use the `desc` field instead of the `label` field (such as
         supplier orders and invoices) *22/11/2021* - 3.6.10
@@ -130,7 +134,7 @@ Changed Dolibarr compatibility range to 15 min - 19 max
   supprimer les lignes de sous-total à la main si le besoin s'en fait sentir) *03/04/2021* - 3.5.5
 
 
-## Version 3.5
+## Release 3.5
 
 - FIX : Text or title line break PDF *15/04/2021* - 3.5.7
 - NEW Ajouter les lignes 'Titre' , 'Total' , 'Libre' aux generations d'expeditions de commandes expédiables (il faudra
@@ -139,7 +143,7 @@ Changed Dolibarr compatibility range to 15 min - 19 max
   Ceci est un fix avec un fort impact potentiel sur les instances courantes. Il est donc préférable de le placer
   sur une nouvelle release - 3.5
 
-## Version 3.5
+## Release 3.5
 - FIX: invoice creation: title/subtotal/free text lines coming from shipments or deliveries not imported with special code (MDLL) - *17/11/2021* - 3.5.8
 - FIX : Text or title line break PDF *15/04/2021* - 3.5.7
 - NEW Ajouter les lignes 'Titre' , 'total' , 'libre' aux generation d'expedition de commandes expédiables (il faudra supprimer les lignes de sous-total à la main si le besoin s'en fait sentir ) [2021-02-03]
