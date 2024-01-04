@@ -2,7 +2,8 @@
 var subtotalSummaryJsConf = {
 	langs:{
 		'SubtotalSummaryTitle' : 'Quick summary'
-	}
+	},
+	useOldSplittedTrForLine : 0
 };
 
 /**
@@ -10,7 +11,7 @@ var subtotalSummaryJsConf = {
  */
 $( document ).ready(function() {
 
-	let $tablelines = $('#tablelines tr[data-issubtotal="title"]')
+	let $tablelines = $('#tablelines tr[data-issubtotal="title"]');
 	let summaryLines = [];
 
 	if($tablelines.length > 0){
@@ -92,12 +93,31 @@ $( document ).ready(function() {
 	let checkMenuActiveInViewPort = function (){
 		$('.subtotal-summary-link').each(function(i) {
 			let targetId = $(this).attr('data-id');
-			let tagetElem = document.getElementById('row-' + targetId);
-			if(tagetElem != null){
-				if(isInViewport(tagetElem)){
+			let targetElem = document.getElementById('row-' + targetId);
+			if(targetElem != null){
+				if(isInViewport(targetElem)){
 					$(this).addClass('--target-in-viewport');
 				}else{
-					$(this).removeClass('--target-in-viewport');
+					let atLeastOneChildInViewPort = false;
+
+					let children = getSubtotalTitleChilds($('#row-' + targetId));
+					if(children.length > 0){
+						children.forEach(function(item){
+							let targetChildElem= document.getElementById(item);
+							if(targetChildElem != null){
+								if(isInViewport(targetChildElem)){
+									atLeastOneChildInViewPort = true;
+									return true;
+								}
+							}
+						});
+					}
+
+					if(atLeastOneChildInViewPort) {
+						$(this).addClass('--child-in-viewport');
+					}else{
+						$(this).removeClass('--target-in-viewport --child-in-viewport');
+					}
 				}
 			}
 		});

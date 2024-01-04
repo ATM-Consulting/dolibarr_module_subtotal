@@ -130,6 +130,19 @@ SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES =  Masquer uniquement les prix pour les pr
 SubtotalExperimentalZone = Configurations expérimentales ou dépréciées
 QuickSummary = Sommaire rapide
 SUBTOTAL_DISABLE_SUMMARY = Désactiver le menu "sommaire rapide" (apparaît dans le menu de gauche lorsque le document a des titres)
+
+Subtotal_HideAll=Cacher toutes les lignes
+Subtotal_ShowAll=Afficher toutes les lignes
+Subtotal_Hide=Cacher les lignes
+Subtotal_Show=Afficher les lignes
+
+NumberOfHiddenLines = Nombre de lignes cachées
+Subtotal_ForceHideAll = Cacher toutes les lignes du bloc ainsi que les lignes des blocs de titre de niveau inférieur
+Subtotal_ForceShowAll = Afficher toutes les lignes du bloc ainsi que les lignes des blocs de titre de niveau inférieur
+DISPLAY_MARGIN_ON_SUBTOTALS=Afficher les marges sur les lignes de sous-totaux
+HideSubtitleOnFold = Cacher les lignes de titre et sous total enfant
+KeepSubtitleDisplayOnFold = Afficher les lignes de titre et sous total enfant
+SUBTOTAL_BLOC_FOLD_MODE = Comportement à adopter lorsque l'on cache un bloc de titre
 LinkedShippings = Bons d'expéditions liés
 LinkedShipping = Bon d'expédition lié
 LinkedDeliveries = Bons de livraison liés

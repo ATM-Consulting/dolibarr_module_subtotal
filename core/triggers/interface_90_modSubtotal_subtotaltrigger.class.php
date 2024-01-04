@@ -281,7 +281,8 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 			    {
 				    global $subtotal_current_rang, $subtotal_bloc_previous_fk_commande, $subtotal_bloc_already_add_title, $subtotal_bloc_already_add_st;
 
-				    $current_fk_commande = TSubtotal::getOrderIdFromLineId($this->db, $object->origin_id, $is_supplier);
+                    if($object->origin == 'order_supplier') $current_fk_commande = $object->origin_id;
+				    else $current_fk_commande = TSubtotal::getOrderIdFromLineId($this->db, $object->origin_id, $is_supplier);
 				    $last_fk_commandedet = TSubtotal::getLastLineOrderId($this->db, $current_fk_commande, $is_supplier);
 
 				    if (!$is_supplier){
@@ -294,6 +295,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 				        $ret = $facture->fetch($object->fk_facture_fourn);
                     }
 					$rang = 0;
+
 				    if ($ret > 0 && !$subtotal_bloc_already_add_st)
 				    {
 					    $rang = !empty($subtotal_current_rang) ? $subtotal_current_rang : $object->rang;
@@ -308,6 +310,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
                                 $label = 'Commande [__REFORDER__]';
                                 if (!$is_supplier) $label .= ' - Référence client : [__REFCUSTOMER__]';
                             }
+
                             $label = str_replace(array('__REFORDER__', '__REFCUSTOMER__'), array($commande->ref, $commande->ref_client), $label);
 							$desc = '';
 
@@ -473,7 +476,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 						}
 				}
 
-				if(TSubtotal::isTitle($orderline) || TSubtotal::isSubtotal($orderline)) { // Nous sommes sur une ligne titre, si la ligne précédente est un titre de même niveau, on supprime la ligne précédente
+				if(TSubtotal::isModSubtotalLine($orderline)) { // Nous sommes sur une ligne titre, si la ligne précédente est un titre de même niveau, on supprime la ligne précédente
 					$line->special_code = TSubtotal::$module_number;
 
 				}
@@ -485,7 +488,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 					$TBlocks = array();
 					$isThereProduct = false;
 					foreach($TLines as $lineInBlock) {
-							if(TSubtotal::isTitle($lineInBlock) || TSubtotal::isSubtotal($lineInBlock)) $TBlocks[$lineInBlock->id] = $lineInBlock;
+							if(TSubtotal::isModSubtotalLine($lineInBlock) ) $TBlocks[$lineInBlock->id] = $lineInBlock;
 							else $isThereProduct = true;
 					}
 					if(!$isThereProduct) {
@@ -498,7 +501,6 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 					$lineToDelete->delete($user);
 				}
 			}
-
 		}
 
         if ($action == 'USER_LOGIN') {

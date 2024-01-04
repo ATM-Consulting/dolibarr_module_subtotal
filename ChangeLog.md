@@ -3,11 +3,30 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+
+
+# Version 3.22 - 19/07/2023
+
+- FIX : DA024159 - Suppression des ligne sous total hors bloc expédié dans le bon d'expédition - *13/12/2023* - 3.22.6
+- HOTFIX : must be greater than 0 fatal - *22/11/2023* - 3.22.5
+- FIX : DA024057 - Anomalie PDF lors de l'activation conf "Remplacer par le détail des TVA si l'option "Cacher le détail des ensembles" est utilisée (expérimental)" - *16/11/2023* - 3.22.4
+- FIX : PHP8 warnings - *07/09/2023* - 3.22.3
+- FIX : Fatal error au recurring invoices - *28/08/2023* - 3.22.2
+- FIX : Add missing subtotal fail cause dolibarr make a reorder of subtotal after title juste added  - *28/07/2023* - 3.22.1
+- NEW : Add new option to chose for folder management behavior  - *17/07/2023* - 3.22.0
+  Also add a new BTN to open/close a complete block with its children too.
+- FIX : Folder management ajax call - *10/07/2023* - 3.21.1
+- NEW : Ajout des marges par blocs - *28/06/2023* - 3.21.0
+- NEW : Add folder management - *28/06/2023* - 3.20.0
+
+## Version 3.19 - 19/06/2023
+
 - FIX : title group lines move placeholder colspan and adapt to V16+ new line dom - *06/06/2023* - 3.19.1
 - NEW : Document summary addition in left menu  - *06/06/2023* - 3.19.0
 
 ## Version 3.18 - 26/04/2023
 
+- FIX : DA024015 - lors de la création de facture fournisseur depuis plusieurs commandes fournisseur, les titres qui reprennent la ref des commandes d'origine n'était pas bon - *19-10-2023* - 3.18.4
 - FIX : DA023419 - Les arrondis des sous-totaux n'était plus qu'à un chiffre après la virgule - *01/06/2023* - 3.18.3
 - FIX : DA023305 compat php8  *02/06/2023* - 3.18.3
 - FIX : Include path  *03/05/2023* - 3.18.2
@@ -30,6 +49,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 3.15
 
+- FIX : lorsque l'option "Cacher le prix des lignes des ensembles" était cochée, la réduction n'apparaissait plus sur les lignes qui ne font pas partie d'un ensemble - *06/04/2023* - 3.15.5
 - FIX : retrait des constantonoff lorsqu'on est en mode edit dans la page de conf - *09/03/2023* - 3.15.4
 - FIX : Multiples erreurs de colspan qui créaient des décalages sur les tableaux de lignes - *20/01/2023* - 3.15.3
 - FIX : DA022658 - Gestion des non-compris non-fonctionnelle - 3.15.2
@@ -76,6 +96,7 @@ All notable changes to this project will be documented in this file.
 - NEW : Can select sub-total lines in supplier order and invoice  *10/12/2021* - 3.8.0 [PR #226 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/226)
 
 ## Version 3.7
+- FIX : typo dans hook ODTSubstitutionLine *30/10/2023* - 3.7.5
 - FIX : object was never fetch *07/02/2022* - 3.7.4
 - FIX : Fix compatibility 11.0 pdfEvolution *19/01/2022* - 3.7.3
 - FIX : Compatibility with version 14 and lower *20/12/2021* - 3.7.2 @jyhere #229

@@ -180,6 +180,9 @@ $item->helpText = $langs->transnoentities('SUBTOTAL_TITLE_SIZE_info');
 $item = $formSetup->newItem('SUBTOTAL_SUBTOTAL_STYLE');
 $item->fieldAttr['placeholder'] = 'BU';
 
+//Affichage des marges sur les sous-totaux
+$formSetup->newItem('DISPLAY_MARGIN_ON_SUBTOTALS')->setAsYesNo();
+
 // Couleur de fond utilisée sur les PDF pour les titres
 $item = $formSetup->newItem('SUBTOTAL_TITLE_BACKGROUNDCOLOR');
 $item->fieldValue = (empty($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)?'#ffffff':$conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR);
@@ -193,6 +196,18 @@ $item->fieldAttr['type'] = 'color';
 $item->fieldOutputOverride ='<input type="color" value="'.$item->fieldValue .'" disabled />';
 
 $item = $formSetup->newItem('SUBTOTAL_DISABLE_SUMMARY')->setAsYesNo();
+
+
+
+$item = $formSetup->newItem('SUBTOTAL_BLOC_FOLD_MODE')->setAsSelect(array(
+		'default' => $langs->trans('HideSubtitleOnFold'),
+		'keepTitle' => $langs->trans('KeepSubtitleDisplayOnFold'),
+	));
+if(empty($conf->global->SUBTOTAL_BLOC_FOLD_MODE)){
+	$result = dolibarr_set_const($item->db, $item->confKey, 'default', 'chaine', 0, '', $item->entity);
+	$item->loadValueFromConf();
+}
+
 
 
 // Activer la gestion des blocs "Non Compris" pour exclusion du total
