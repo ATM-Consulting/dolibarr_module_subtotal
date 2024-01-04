@@ -3953,20 +3953,39 @@ class ActionsSubtotal
 	 */
 	private function _billOrdersAddCheckBoxForTitleBlocks()
 	{
-		global $delayedhtmlcontent, $langs;
+		global $delayedhtmlcontent, $langs, $conf;
+
 		ob_start();
+		$jsConf = array(
+			'langs'=>  array(
+				'AddTitleBlocFromOrdersToInvoice' => $langs->trans('subtotal_add_title_bloc_from_orderstoinvoice'),
+				'AddShippingListToTile' => $langs->trans('AddShippingListToTile'),
+				'SubtotalOptions' => $langs->trans('SubtotalOptions'),
+				'UseHiddenConfToAutoCheck' => $langs->trans('UseHiddenConfToAutoCheck'),
+			),
+			'isModShippingEnable' => !empty($conf->expedition->enabled),
+			'SUBTOTAL_DEFAULT_CHECK_SHIPPING_LIST_FOR_TITLE_DESC' => getDolGlobalInt('SUBTOTAL_DEFAULT_CHECK_SHIPPING_LIST_FOR_TITLE_DESC')
+		);
 		?>
 			<script type="text/javascript">
 				$(function() {
-					var tr = $("<tr><td><?php echo $langs->trans('subtotal_add_title_bloc_from_orderstoinvoice'); ?></td><td><input type='checkbox' value='1' name='subtotal_add_title_bloc_from_orderstoinvoice' checked='checked' /></td></tr>");
-					var $noteTextArea = $("textarea[name=note]");
+					let jsConf = <?php print json_encode($jsConf); ?>;
+
+					let tr = '<tr><td>'+jsConf.langs.SubtotalOptions+'</td><td>';
+					tr+= '<label><input type="checkbox" value="1" name="subtotal_add_title_bloc_from_orderstoinvoice" checked="checked" /> '+jsConf.langs.AddTitleBlocFromOrdersToInvoice+'</label>';
+					if(jsConf.isModShippingEnable){
+						tr+= '<br/><label><input type="checkbox" value="1" name="subtotal_add_shipping_list_to_title_desc" /> '+jsConf.langs.AddShippingListToTile+' <i class="fa fa-question-circle-o" title="'+jsConf.langs.UseHiddenConfToAutoCheck+' SUBTOTAL_DEFAULT_CHECK_SHIPPING_LIST_FOR_TITLE_DESC"></label>';
+					}
+					tr+= '<td></tr>';
+
+					let $noteTextArea = $("textarea[name=note]");
 					if ($noteTextArea.length === 1) {
-						$noteTextArea.closest('tr').after(tr);
+						$noteTextArea.closest($('tr')).after(tr);
 						return;
 					}
-					var $inpCreateBills = $("#validate_invoices");
+					let $inpCreateBills = $("#validate_invoices");
 					if ($inpCreateBills.length === 1) {
-						$inpCreateBills.closest('tr').after(tr);
+						$inpCreateBills.closest($('tr')).after(tr);
 					}
 				});
 			</script>
