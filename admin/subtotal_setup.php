@@ -135,6 +135,8 @@ if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
 	// Autoriser l'ajout d'un titre et sous-total
 	$formSetup->newItem('SUBTOTAL_ALLOW_ADD_BLOCK')->setAsYesNo();
 
+	$formSetup->newItem('SUBTOTAL_ALLOW_ADD_BLOCK')->setAsYesNo();
+
 	// Autoriser la suppression d'un titre ou sous-total
 	$formSetup->newItem('SUBTOTAL_ALLOW_EDIT_BLOCK')->setAsYesNo();
 
