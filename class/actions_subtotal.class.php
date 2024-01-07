@@ -1178,6 +1178,13 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			if(isset($staticPdfModel->cols['totalexcltax']['content']['padding'][2])){
 				$subtotalDefaultBottomPadding = $staticPdfModel->cols['totalexcltax']['content']['padding'][0];
 			}
+
+			if(isset($staticPdfModel->cols['totalincltax']['content']['padding'][0])){
+				$subtotalDefaultTopPadding = $staticPdfModel->cols['totalincltax']['content']['padding'][0];
+			}
+			if(isset($staticPdfModel->cols['totalincltax']['content']['padding'][2])){
+				$subtotalDefaultBottomPadding = $staticPdfModel->cols['totalincltax']['content']['padding'][0];
+			}
 		}
 
 
@@ -1308,6 +1315,10 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 			if($pdfModelUseColSystem){
 				$staticPdfModel->printStdColumnContent($pdf, $posy, 'totalexcltax', $total_to_print);
+				if(!empty($conf->global->PDF_PROPAL_SHOW_PRICE_INCL_TAX))
+				{
+					$staticPdfModel->printStdColumnContent($pdf, $posy, 'totalincltax', price($line->total_ttc,0,'',1,0,getDolGlobalInt('MAIN_MAX_DECIMALS_TOT')));
+				}
 			}
 			else{
 				$pdf->MultiCell($pdf->page_largeur-$pdf->marge_droite-$pdf->postotalht, 3, $total_to_print, 0, 'R', 0);
