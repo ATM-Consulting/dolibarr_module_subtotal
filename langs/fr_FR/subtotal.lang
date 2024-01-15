@@ -113,8 +113,8 @@ SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET = Champs complémentaires disponible su
 SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET = Champs complémentaires disponible sur les titres dans les factures clients
 CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL = Sur les lignes de sous total des PDF, ajouter le libellé du titre auquel cette dernière est rattaché.
 
-SubtotalSetup = Paramettre module sous total
-SubTotalSetupPage = Paramettre module sous total
+SubtotalSetup = Paramètre module sous total
+SubTotalSetupPage = Paramètre module sous total
 EXPERIMENTAL=EXPERIMENTAL
 ManageNonCompris = Gestion des "Non compris"
 SetupForExtrafields = Paramètres liés aux champs complémentaires
