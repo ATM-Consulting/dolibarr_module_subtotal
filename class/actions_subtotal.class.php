@@ -759,17 +759,17 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				global $hideprices;
 
 				$hideInnerLines = GETPOST('hideInnerLines', 'int');
-				if (empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname]) || !isset($_SESSION[$sessname][$object->id]) || !is_array($_SESSION[$sessname][$object->id]))
+				if (!isset($_SESSION[$sessname]) || empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname]) || !isset($_SESSION[$sessname][$object->id]) || !is_array($_SESSION[$sessname][$object->id]))
                     $_SESSION[$sessname] = array($object->id => 0); // prevent old system
 				$_SESSION[$sessname][$object->id] = $hideInnerLines;
 
 				$hidedetails= GETPOST('hidedetails', 'int');
-				if (empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname2]) || !isset($_SESSION[$sessname2][$object->id]) || !is_array($_SESSION[$sessname2][$object->id]))
+				if (!isset($_SESSION[$sessname]) || empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname2]) || !isset($_SESSION[$sessname2][$object->id]) || !is_array($_SESSION[$sessname2][$object->id]))
 					$_SESSION[$sessname2] = array($object->id => 0); // prevent old system
 				$_SESSION[$sessname2][$object->id] = $hidedetails;
 
 				$hideprices= GETPOST('hideprices', 'int');
-				if (empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname3]) || !isset($_SESSION[$sessname3][$object->id]) || !is_array($_SESSION[$sessname3][$object->id]))
+				if (!isset($_SESSION[$sessname]) || empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname3]) || !isset($_SESSION[$sessname3][$object->id]) || !is_array($_SESSION[$sessname3][$object->id]))
 					$_SESSION[$sessname3] = array($object->id => 0); // prevent old system
 				$_SESSION[$sessname3][$object->id] = $hideprices;
 
@@ -1340,7 +1340,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	 */
 	function pdf_add_title(&$pdf,&$object, &$line, $label, $description,$posx, $posy, $w, $h) {
 
-		global $db,$conf,$subtotal_last_title_posy;
+		global $db,$conf,$subtotal_last_title_posy, $hidedesc;
 
 		empty($pdf->page_largeur) ? $pdf->page_largeur = 0 : '';
 		empty($pdf->marge_droite) ? $pdf->marge_droite = 0 : '';
@@ -1415,7 +1415,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 
 		$posYBeforeDesc = $pdf->GetY();
-		if($description && !$hidedesc) {
+		if($description && !($hidedesc??0)) {
 			$pdf->setColor('text', 0,0,0);
 			$pdf->SetFont('', '', $size_title-1);
 			$pdf->writeHTMLCell($w, $h, $posx, $posYBeforeDesc+1, $description, 0, 1, $fillDescBloc, true, 'J',true);
@@ -3595,7 +3595,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
     }
 
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
-		global $conf,$langs;
+		global $conf,$langs, $db;
 
 		if ($object->statut == 0 && getDolGlobalString('SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS') && $action != 'editline')
 		{
@@ -3615,7 +3615,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			$TSubNc = array();
 			foreach ($object->lines as &$l)
 			{
-				$TSubNc[$l->id] = (int) $l->array_options['options_subtotal_nc'];
+				$TSubNc[$l->id] = (int) ($l->array_options['options_subtotal_nc']??0);
 			}
 
 			print '<script type="text/javascript" src="'.dol_buildpath('subtotal/js/subtotal.lib.js', 1).'"></script>';
