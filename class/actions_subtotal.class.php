@@ -3595,7 +3595,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
     }
 
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
-		global $conf,$langs, $db;
+		global $langs, $db;
 
 		if ($object->statut == 0 && getDolGlobalString('SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS') && $action != 'editline')
 		{
