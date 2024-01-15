@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 # [Unreleased]
-
+- FIX : Display subtotal with tax when global PDF_PROPAL_SHOW_PRICE_INCL_TAX is enable
 
 
 # Release 3.23 - 18/12/2023
