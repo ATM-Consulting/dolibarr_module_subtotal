@@ -227,6 +227,7 @@ $TField = array(
 	'pdf_getlinevatrate' => $langs->trans('VAT'),
 	'pdf_getlineupexcltax' => $langs->trans('PriceUHT'),
 	'pdf_getlinetotalexcltax' => $langs->trans('TotalHT'),
+	'pdf_getlinetotalincltax' => $langs->trans('TotalTTC'),
 	'pdf_getlineunit' => $langs->trans('Unit'),
 	'pdf_getlineremisepercent' => $langs->trans('Discount')
 );
