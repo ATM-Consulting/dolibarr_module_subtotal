@@ -199,7 +199,7 @@ print '<td align="right" width="300">';
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print '<input type="hidden" name="action" value="set_SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE">';
-print '<input type="text" name="SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE" value="'.$conf->global->SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE.'" />';
+print '<input type="text" name="SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE" value="' . getDolGlobalString('SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE').'" />';
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -211,7 +211,7 @@ print '<td align="right" width="300">';
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print '<input type="hidden" name="action" value="set_SUBTOTAL_TITLE_STYLE">';
-print '<input type="text" placeholder="BU" name="SUBTOTAL_TITLE_STYLE" value="'.$conf->global->SUBTOTAL_TITLE_STYLE.'" />';
+print '<input type="text" placeholder="BU" name="SUBTOTAL_TITLE_STYLE" value="' . getDolGlobalString('SUBTOTAL_TITLE_STYLE').'" />';
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -223,7 +223,7 @@ print '<td align="right" width="300">';
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print '<input type="hidden" name="action" value="set_SUBTOTAL_SUBTOTAL_STYLE">';
-print '<input type="text" placeholder="B" name="SUBTOTAL_SUBTOTAL_STYLE" value="'.$conf->global->SUBTOTAL_SUBTOTAL_STYLE.'" />';
+print '<input type="text" placeholder="B" name="SUBTOTAL_SUBTOTAL_STYLE" value="' . getDolGlobalString('SUBTOTAL_SUBTOTAL_STYLE').'" />';
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -235,7 +235,7 @@ print '<td align="right" width="300">';
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print '<input type="hidden" name="action" value="set_SUBTOTAL_TITLE_BACKGROUNDCOLOR">';
-print '<input type="color" name="SUBTOTAL_TITLE_BACKGROUNDCOLOR" value="'.(empty($conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR)?'#ffffff':$conf->global->SUBTOTAL_TITLE_BACKGROUNDCOLOR).'" />';
+print '<input type="color" name="SUBTOTAL_TITLE_BACKGROUNDCOLOR" value="'.(!getDolGlobalString('SUBTOTAL_TITLE_BACKGROUNDCOLOR')?'#ffffff': getDolGlobalInt('SUBTOTAL_TITLE_BACKGROUNDCOLOR') ).'" />';
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -247,7 +247,7 @@ print '<td align="right" width="300">';
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print '<input type="hidden" name="action" value="set_SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR">';
-print '<input type="color" name="SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR" value="'.(empty($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)?'#ebebeb':$conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR).'" />';
+print '<input type="color" name="SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR" value="'.(!getDolGlobalString('SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR')?'#ebebeb':getDolGlobalString('SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR') ).'" />';
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -275,7 +275,7 @@ if ((double) DOL_VERSION >= 4.0)
 	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print '<input type="hidden" name="action" value="set_SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS">';
-	print $html->selectyesno("SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS",$conf->global->SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS,1);
+	print $html->selectyesno("SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS", getDolGlobalString('SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS'),1);
 	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 	print '</form>';
 	print '</td></tr>';
@@ -295,7 +295,7 @@ if ((double) DOL_VERSION >= 4.0)
 		'pdf_getlineunit' => $langs->trans('Unit'),
 		'pdf_getlineremisepercent' => $langs->trans('Discount')
 	);
-	print $html->multiselectarray('SUBTOTAL_TFIELD_TO_KEEP_WITH_NC', $TField, explode(',', $conf->global->SUBTOTAL_TFIELD_TO_KEEP_WITH_NC), 0, 0, '', 0, 0, 'style="min-width:100px"');
+	print $html->multiselectarray('SUBTOTAL_TFIELD_TO_KEEP_WITH_NC', $TField, explode(',', getDolGlobalString('SUBTOTAL_TFIELD_TO_KEEP_WITH_NC')), 0, 0, '', 0, 0, 'style="min-width:100px"');
 	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 	print '</form>';
 	print '</td></tr>';
@@ -331,7 +331,7 @@ print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print '<input type="hidden" name="action" value="set_SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET">';
 $extrafields = new ExtraFields($db);
 $extralabels = $extrafields->fetch_name_optionals_label('propaldet');
-print Form::multiselectarray("SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET", $extralabels, explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET));
+print Form::multiselectarray("SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET", $extralabels, explode(',',  getDolGlobalString('SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET')));
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -345,7 +345,7 @@ print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print '<input type="hidden" name="action" value="set_SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET">';
 $extrafields = new ExtraFields($db);
 $extralabels = $extrafields->fetch_name_optionals_label('commandedet');
-print Form::multiselectarray("SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET", $extralabels, explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET));
+print Form::multiselectarray("SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET", $extralabels, explode(',',  getDolGlobalString('SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET')));
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -359,7 +359,7 @@ print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print '<input type="hidden" name="action" value="set_SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET">';
 $extrafields = new ExtraFields($db);
 $extralabels = $extrafields->fetch_name_optionals_label('facturedet');
-print Form::multiselectarray("SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET", $extralabels, explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET));
+print Form::multiselectarray("SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET", $extralabels, explode(',',  getDolGlobalString('SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET')));
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -374,8 +374,8 @@ $TElementType = array(
 	'invoice_supplier' => $langs->trans('SupplierInvoice'),
 );
 $TSubtotalDefaultQtyOnElements = array();
-if (!empty($conf->global->SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS)) {
-	$TSubtotalDefaultQtyOnElements = explode(',', $conf->global->SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS);
+if (getDolGlobalString('SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS')) {
+	$TSubtotalDefaultQtyOnElements = explode(',',  getDolGlobalString('SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS'));
 }
 print '<tr class="oddeven">';
 print '<td>'.$html->textwithpicto($langs->trans("SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS"), $langs->trans("SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS_info")).'</td>';
@@ -467,7 +467,7 @@ print '</td></tr>';
 			<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
 				<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
 				<input type="hidden" name="action" value="set_SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY" />
-				<?php echo $html->selectyesno("SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY",$conf->global->SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY,1); ?>
+				<?php echo $html->selectyesno("SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY", getDolGlobalString('SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY'),1); ?>
 				<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
 			</form>
 		</td>
@@ -479,7 +479,7 @@ print '</td></tr>';
 			<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
 				<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
 				<input type="hidden" name="action" value="set_SUBTOTAL_HIDE_DOCUMENT_TOTAL" />
-				<?php echo $html->selectyesno("SUBTOTAL_HIDE_DOCUMENT_TOTAL",$conf->global->SUBTOTAL_HIDE_DOCUMENT_TOTAL,1); ?>
+				<?php echo $html->selectyesno("SUBTOTAL_HIDE_DOCUMENT_TOTAL",getDolGlobalString('SUBTOTAL_HIDE_DOCUMENT_TOTAL'),1); ?>
 				<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
 			</form>
 		</td>
@@ -492,7 +492,7 @@ print '</td></tr>';
 				<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
 					<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
 					<input type="hidden" name="action" value="set_SUBTOTAL_SHOW_QTY_ON_TITLES" />
-					<?php echo $html->selectyesno("SUBTOTAL_SHOW_QTY_ON_TITLES",$conf->global->SUBTOTAL_SHOW_QTY_ON_TITLES,1); ?>
+					<?php echo $html->selectyesno("SUBTOTAL_SHOW_QTY_ON_TITLES",getDolGlobalString('SUBTOTAL_SHOW_QTY_ON_TITLES'),1); ?>
 					<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
 				</form>
 			</td>
@@ -504,7 +504,7 @@ print '</td></tr>';
 				<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
 					<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
 					<input type="hidden" name="action" value="set_SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES" />
-					<?php echo $html->selectyesno("SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES",$conf->global->SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES,1); ?>
+					<?php echo $html->selectyesno("SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES",getDolGlobalString('SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES'),1); ?>
 					<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
 				</form>
 			</td>
@@ -528,7 +528,7 @@ print '</td></tr>';
 			<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] ?>">
 				<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken'] ?>">
 				<input type="hidden" name="action" value="set_SUBTOTAL_SHIPPABLE_ORDER" />
-				<?php echo $html->selectyesno("SUBTOTAL_SHIPPABLE_ORDER",$conf->global->SUBTOTAL_SHIPPABLE_ORDER,1); ?>
+				<?php echo $html->selectyesno("SUBTOTAL_SHIPPABLE_ORDER",getDolGlobalString('SUBTOTAL_SHIPPABLE_ORDER'),1); ?>
 					<input type="submit" class="button" value="<?php echo $langs->trans("Modify") ?>">
 				</form>
 			</td>
