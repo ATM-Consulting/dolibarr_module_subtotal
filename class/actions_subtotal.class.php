@@ -2945,7 +2945,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						 {
 							if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
 							{
-								echo str_repeat('&nbsp;&nbsp;&nbsp;', $line->qty-1);
+								echo str_repeat('&nbsp;&nbsp;&nbsp;', max(floatval($line->qty) - 1, 0));
 
 								if (TSubtotal::isTitle($line)) print img_picto('', 'subtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;">'.$line->qty.'</span>&nbsp;&nbsp;';
 								else print img_picto('', 'subtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;">'.(100-$line->qty).'</span>&nbsp;&nbsp;';
@@ -3260,7 +3260,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						 {
 							if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
 							{
-								echo str_repeat('&nbsp;&nbsp;&nbsp;', $line->qty-1);
+								echo str_repeat('&nbsp;&nbsp;&nbsp;', max(floatval($line->qty) - 1, 0));
 
 								if (TSubtotal::isTitle($line)) print img_picto('', 'subtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;">'.$line->qty.'</span>&nbsp;&nbsp;';
 								else print img_picto('', 'subtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;">'.(100-$line->qty).'</span>&nbsp;&nbsp;';
@@ -3393,7 +3393,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			{
 				if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
 				{
-					echo str_repeat('&nbsp;&nbsp;&nbsp;', $line->qty-1);
+					echo str_repeat('&nbsp;&nbsp;&nbsp;', max(floatval($line->qty) - 1, 0));
 
 					if (TSubtotal::isTitle($line)) print img_picto('', 'subtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;">'.$line->qty.'</span>&nbsp;&nbsp;';
 					else print img_picto('', 'subtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;">'.(100-$line->qty).'</span>&nbsp;&nbsp;';
@@ -3540,7 +3540,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				{
 					if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
 					{
-						$object->tpl["sublabel"] = str_repeat('&nbsp;&nbsp;&nbsp;', $line->qty-1);
+						$object->tpl["sublabel"] = str_repeat('&nbsp;&nbsp;&nbsp;', max(floatval($line->qty) - 1, 0));
 
 						if (TSubtotal::isTitle($line)) $object->tpl["sublabel"].= img_picto('', 'subtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;">'.$line->qty.'</span>&nbsp;&nbsp;';
 						else $object->tpl["sublabel"].= img_picto('', 'subtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;">'.(100-$line->qty).'</span>&nbsp;&nbsp;';
