@@ -21,6 +21,7 @@ Changed Dolibarr compatibility range to 15 min - 19 max
 
 # Release 3.22 - 19/07/2023
 
+- FIX : DA024364 - Fatal error deuxieme parametre de str_repeat - *19/01/2024* - 3.22.7
 - FIX : DA024159 - Suppression des ligne sous total hors bloc expédié dans le bon d'expédition - *13/12/2023* - 3.22.6
 - HOTFIX : must be greater than 0 fatal - *22/11/2023* - 3.22.5
 - FIX : DA024057 - Anomalie PDF lors de l'activation conf "Remplacer par le détail des TVA si l'option "Cacher le détail des ensembles" est utilisée (expérimental)" - *16/11/2023* - 3.22.4
