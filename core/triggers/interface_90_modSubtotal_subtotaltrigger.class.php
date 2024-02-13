@@ -156,8 +156,12 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
      */
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
-
+		global $db, $user;
        #COMPATIBILITÉ V16
+		require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
+		require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+
+
         if ($action == 'LINEBILL_UPDATE'){
 			$action = 'LINEBILL_MODIFY';
 		}
@@ -173,7 +177,18 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 		if ($action == 'LINEBILL_SUPPLIER_UPDATE'){
 			$action = 'LINEBILL_SUPPLIER_MODIFY';
 		}
-
+		$orderLine = new OrderLine($db);
+		$invoice = new Facture($db);
+		if ($action === 'LINEBILL_INSERT' && $object->element === 'facturedet'){
+			$invoice->fetch($object->fk_facture);
+			if ($invoice->type == Facture::TYPE_DEPOSIT){
+				$orderLine->fetch($object->origin_id);
+				if (TSubtotal::isSubtotal($orderLine)) {
+					TSubtotal::addTotal($invoice, $object->label, 0);
+					$object->delete($user);
+				}
+			}
+		}
 		// Put here code you want to execute when a Dolibarr business events occurs.
         // Data and type of action are stored into $object and $action
         // Users
@@ -404,8 +419,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 				}
 			}
 		}
-
-		// Les lignes libres (y compris les sous-totaux) créées à partir d'une facture modèle n'ont pas la TVA de la ligne du modèle mais la TVA par défaut
+			// Les lignes libres (y compris les sous-totaux) créées à partir d'une facture modèle n'ont pas la TVA de la ligne du modèle mais la TVA par défaut
 		if ($action == 'BILL_CREATE' && $object->fac_rec > 0) {
 			dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
 
@@ -801,8 +815,9 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
-        } elseif ($action == 'LINEBILL_INSERT') {
+        } elseif ($action == 'LINEBILL_INSERT' && TSubtotal::isSubtotal($object)) {
 
+	var_dump($object->desc);
         	dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
