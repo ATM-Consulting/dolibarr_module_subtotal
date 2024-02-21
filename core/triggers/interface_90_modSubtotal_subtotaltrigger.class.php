@@ -156,7 +156,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
      */
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
-		global $db, $user;
+		global $user;
        #COMPATIBILITÉ V16
 		require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
 		require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
@@ -179,8 +179,8 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 		}
 		if ($action === 'LINEBILL_INSERT' && $object->element === 'facturedet'){
 			if( strtolower(Commande::class) == $object->origin){
-				$orderLine = new OrderLine($db);
-				$invoice = new Facture($db);
+				$orderLine = new OrderLine($this->db);
+				$invoice = new Facture($this->db);
 				$invoice->fetch($object->fk_facture);
 				if ($invoice->type == Facture::TYPE_DEPOSIT){
 					$orderLine->fetch($object->origin_id);
@@ -821,9 +821,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
-        } elseif ($action == 'LINEBILL_INSERT' && TSubtotal::isSubtotal($object)) {
-
-	var_dump($object->desc);
+        } elseif ($action == 'LINEBILL_INSERT') {
         	dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
