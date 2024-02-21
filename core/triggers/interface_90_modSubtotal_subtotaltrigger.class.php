@@ -177,19 +177,21 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 		if ($action == 'LINEBILL_SUPPLIER_UPDATE'){
 			$action = 'LINEBILL_SUPPLIER_MODIFY';
 		}
-		if ($action === 'LINEBILL_INSERT' && $object->element === 'facturedet'){ // TODO tester l'origine commande
-			$orderLine = new OrderLine($db);
-			$invoice = new Facture($db);
-			$invoice->fetch($object->fk_facture);
-			if ($invoice->type == Facture::TYPE_DEPOSIT){
-				$orderLine->fetch($object->origin_id);
-				if (TSubtotal::isSubtotal($orderLine)) {
-					TSubtotal::addTotal($invoice, $object->label, 0);
-					$object->delete($user);
-				}
-				if (TSubtotal::isFreeText($orderLine)) {
-					$object->qty = 50;
-					$object->update($user);
+		if ($action === 'LINEBILL_INSERT' && $object->element === 'facturedet'){
+			if( strtolower(Commande::class) == $object->origin){
+				$orderLine = new OrderLine($db);
+				$invoice = new Facture($db);
+				$invoice->fetch($object->fk_facture);
+				if ($invoice->type == Facture::TYPE_DEPOSIT){
+					$orderLine->fetch($object->origin_id);
+					if (TSubtotal::isSubtotal($orderLine)) {
+						TSubtotal::addTotal($invoice, $object->label, 0);
+						$object->delete($user);
+					}
+					if (TSubtotal::isFreeText($orderLine)) {
+						$object->qty = 50;
+						$object->update($user);
+					}
 				}
 			}
 		}
