@@ -3293,7 +3293,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 						 }
 						//if($line->qty>90) print ' : ';
-						if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
+						if(!empty($line->info_bits) && $line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
 
 			?>
 				</td>
