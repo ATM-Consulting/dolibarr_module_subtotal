@@ -766,23 +766,22 @@ class TSubtotal {
 
 				if ( ($key_is_id && $line->id == $key_trad) || (!$key_is_id && $line->product_type == 9 && $line->qty == $level && (in_array($line->desc, $TTitle_search) || in_array($line->label, $TTitle_search) )))
 				{
-
 					if ($key_is_id) $level = $line->qty;
 
 					$add_line = true;
 					if ($withBlockLine) $TLine[] = $line;
 					continue;
 				}
-				elseif ($add_line && TSubtotal::isModSubtotalLine($line) && TSubtotal::getNiveau($line) == $level) // Si on tombe sur un sous-total, il faut que ce soit un du même niveau que le titre
+				elseif ($add_line && self::isModSubtotalLine($line) && self::getNiveau($line) == $level) // Si on tombe sur un sous-total, il faut que ce soit un du même niveau que le titre.
 				{
-
-					if ($withBlockLine) $TLine[] = $line;
+					if (self::isSubtotal($line)) {
+						if ($withBlockLine) $TLine[] = $line;
+					} // Si le sous-total a été supprimé, il ne faut pas premdre le titre de mêm niveau qui suit
 					break;
 				}
 
 				if ($add_line)
 				{
-
 					if (!$withBlockLine && (self::isTitle($line) || self::isSubtotal($line)) ) continue;
 					else $TLine[] = $line;
 				}
