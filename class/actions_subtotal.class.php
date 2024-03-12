@@ -1493,6 +1493,15 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 	}
 
+    function beforePercentCalculation ($parameters=array(), &$object, &$action='') {
+        if($object->name == 'sponge' && !empty($parameters['object']->lines)) {
+            foreach ($parameters['object']->lines as $k => $line) {
+                if(TSubtotal::isModSubtotalLine($line)) {
+                    unset($parameters['object']->lines[$k]);
+                }
+            }
+        }
+    }
 	function pdf_getlineqty($parameters=array(), &$object, &$action='') {
 		global $conf,$hideprices;
 
