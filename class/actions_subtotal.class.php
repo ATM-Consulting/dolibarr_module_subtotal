@@ -1493,6 +1493,28 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 	}
 
+    /**
+     * @param array $parameters
+     * @param Object $object
+     * @param string $action
+     * @return void
+     */
+    function beforePercentCalculation ($parameters=array(), &$object, &$action='') {
+        if($object->name == 'sponge' && isset($parameters['object']) && !empty($parameters['object']->lines)) {
+            foreach ($parameters['object']->lines as $k => $line) {
+                if(TSubtotal::isModSubtotalLine($line)) {
+                    unset($parameters['object']->lines[$k]);
+                }
+            }
+        }
+    }
+
+    /**
+     * @param array $parameters
+     * @param Object $object
+     * @param string $action
+     * @return int
+     */
 	function pdf_getlineqty($parameters=array(), &$object, &$action='') {
 		global $conf,$hideprices;
 
@@ -3293,7 +3315,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 						 }
 						//if($line->qty>90) print ' : ';
-						if($line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
+						if(!empty($line->info_bits) && $line->info_bits > 0) echo img_picto($langs->trans('Pagebreak'), 'pagebreak@subtotal');
 
 			?>
 				</td>
