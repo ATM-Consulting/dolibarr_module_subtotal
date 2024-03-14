@@ -772,7 +772,7 @@ class TSubtotal {
 					if ($withBlockLine) $TLine[] = $line;
 					continue;
 				}
-				elseif ($add_line && self::isModSubtotalLine($line) && self::getNiveau($line) == $level) // Si on tombe sur un sous-total, il faut que ce soit un du même niveau que le titre.
+				elseif ($add_line && static::isModSubtotalLine($line) && static::getNiveau($line) == $level) // Si on tombe sur un sous-total, il faut que ce soit un du même niveau que le titre.
 				{
 					if (self::isSubtotal($line)) {
 						if ($withBlockLine) $TLine[] = $line;
