@@ -133,7 +133,7 @@ class TSubtotal {
                 /** @var FactureFournisseur $object */
 			    $object->special_code = TSubtotal::$module_number;
                 if( (float)DOL_VERSION < 6 ) $rang = $object->line_max() + 1;
-			    $res = $object->addline($label,0,0,0,0,$qty,0,0,'','',0,0,'HT',9,$rang);
+			    $res = $object->addline($label,0,0,0,0,$qty,0,0,'','',0,0,'HT',9,$rang,false,0,null,0,0,'',TSubtotal::$module_number);
 			}
 			/**
 			 * @var $object Propal
