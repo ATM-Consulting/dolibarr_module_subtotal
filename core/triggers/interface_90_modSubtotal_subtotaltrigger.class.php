@@ -177,21 +177,25 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 		if ($action == 'LINEBILL_SUPPLIER_UPDATE'){
 			$action = 'LINEBILL_SUPPLIER_MODIFY';
 		}
-		if ($action === 'LINEBILL_INSERT' && $object->element === 'facturedet'){
-			if( strtolower(Commande::class) == $object->origin){
-				$orderLine = new OrderLine($this->db);
-				$invoice = new Facture($this->db);
-				$invoice->fetch($object->fk_facture);
-				if ($invoice->type == Facture::TYPE_DEPOSIT){
-					$orderLine->fetch($object->origin_id);
-					if (TSubtotal::isSubtotal($orderLine)) {
-						TSubtotal::addTotal($invoice, $object->label, 0);
-						$object->delete($user);
-					}
-					if (TSubtotal::isFreeText($orderLine)) {
-						$object->qty = 50;
-						$object->update($user);
-					}
+		/* Refer to issue #379 */
+		if (in_array($action, array('LINEBILL_INSERT', 'LINEBILL_SUPPLIER_CREATE'))){
+			static $staticInvoiceArray = array();
+			$invoiceType = array('LINEBILL_INSERT' => 'fk_facture', 'LINEBILL_SUPPLIER_CREATE' => 'fk_facture_fourn');
+			if ($staticInvoiceArray[$object->{$invoiceType[$action]}] === null) {
+				$staticInvoice = new Facture($this->db);
+				if ($staticInvoice->fetch($object->{$invoiceType[$action]}) < 0){
+					$object->error = $staticInvoice->error;
+					$object->errors []= $staticInvoice->errors;
+					return -1;
+				}
+				$isEligible = $staticInvoice->type == Facture::TYPE_DEPOSIT && GETPOST('typedeposit', 'aZ09') == "variablealllines";
+				$staticInvoiceArray[$object->{$invoiceType[$action]}] = $isEligible;
+			}
+			if ($staticInvoiceArray[$object->{$invoiceType[$action]}]) {
+				if (!empty($object->origin) && !empty($object->origin_id) && $object->special_code == TSubtotal::$module_number){
+					$valuedeposit = price2num(str_replace('%', '', GETPOST('valuedeposit', 'alpha')), 'MU');
+					$object->qty = 100 * $object->qty / $valuedeposit;
+					if ($object->update('', 1) < 0)	return -1;
 				}
 			}
 		}
