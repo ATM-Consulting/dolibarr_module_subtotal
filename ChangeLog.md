@@ -6,8 +6,9 @@ All notable changes to this project will be documented in this file.
 
 
 # Release 3.23 - 18/12/2023
-
-- FIX : DA024587 - Les totaux remisés sur le PDF Sponge sont erronés  - *20/03/2024* - 3.23.7
+- FIX : DA024587 - Les totaux remisés sur le PDF Sponge sont erronés  - *20/03/2024* - 3.23.9
+- FIX : Suite a l'issue #379, la création de facture d'acompte avec un montant variable change les qté des lignes générées par le module donc on utilise un trigger pour remettre les bonnes qtés - *18/03/2024* - 3.23.8
+- FIX : Sur le modèle PDF Sponge, retrait des lignes de sous totaux au moment du calcul de l'avancement global - *12/03/2024* - 3.23.7
 - FIX : Create invoice deposit line same order with percent : FIX add Line subtotal and free text  - *20/02/2024* - 3.23.6
 - FIX : Display subtotal with tax when global PDF_PROPAL_SHOW_PRICE_INCL_TAX is enable - *15/01/2024* - 3.23.5
 - FIX : php 8.2 warning - *15/01/2024* - 3.23.4

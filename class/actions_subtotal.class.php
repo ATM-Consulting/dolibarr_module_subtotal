@@ -1493,6 +1493,28 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 	}
 
+    /**
+     * @param array $parameters
+     * @param Object $object
+     * @param string $action
+     * @return void
+     */
+    function beforePercentCalculation ($parameters=array(), &$object, &$action='') {
+        if($object->name == 'sponge' && isset($parameters['object']) && !empty($parameters['object']->lines)) {
+            foreach ($parameters['object']->lines as $k => $line) {
+                if(TSubtotal::isModSubtotalLine($line)) {
+                    unset($parameters['object']->lines[$k]);
+                }
+            }
+        }
+    }
+
+    /**
+     * @param array $parameters
+     * @param Object $object
+     * @param string $action
+     * @return int
+     */
 	function pdf_getlineqty($parameters=array(), &$object, &$action='') {
 		global $conf,$hideprices;
 
@@ -2610,7 +2632,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			if ($object->statut == 0  && $createRight && getDolGlobalString('SUBTOTAL_ALLOW_DUPLICATE_LINE') && $object->element !== 'invoice_supplier')
             {
                 if(empty($line->fk_prev_id)) $line->fk_prev_id = null;
-                if(!(TSubtotal::isModSubtotalLine($line)) && ( $line->fk_prev_id === null ) && !($action == "editline" && GETPOST('lineid', 'int') == $line->id)) {
+                if(($object->element != 'shipping' && $object->element != 'delivery')&& !(TSubtotal::isModSubtotalLine($line)) && ( $line->fk_prev_id === null ) && !($action == "editline" && GETPOST('lineid', 'int') == $line->id)) {
                     echo '<a name="duplicate-'.$line->id.'" href="' . $_SERVER['PHP_SELF'] . '?' . $idvar . '=' . $object->id . '&action=duplicate&lineid=' . $line->id . '&token='.$newToken.'"><i class="fa fa-clone" aria-hidden="true"></i></a>';
 
                     ?>
