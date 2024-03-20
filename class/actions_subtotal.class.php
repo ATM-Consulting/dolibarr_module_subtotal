@@ -3745,15 +3745,16 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	 */
 	function getlinetotalremise($parameters, &$object, &$action, $hookmanager)
 	{
-	    // Les lignes NC ne sont pas censées afficher de montant total de remise, nouveau hook en v11 dans pdf_sponge
-	    if (! empty($object->lines[$parameters['i']]->array_options['options_subtotal_nc']))
-	    {
+        // Si c'est une ligne de sous-total, la méthode pdfGetLineTotalDiscountAmount ne doit rien renvoyer
+        if (!empty($object->lines[$parameters['i']]) && TSubtotal::isModSubtotalLine($object->lines[$parameters['i']])) {
             $this->resprints = '';
-            return 1;
-	    }
+            $this->results = [];
 
-		return 0;
-	}
+            return 1;
+        }
+
+        return 0;
+    }
 
 	// HTML 5 data for js
 	private function _getHtmlData($parameters, &$object, &$action, $hookmanager)
