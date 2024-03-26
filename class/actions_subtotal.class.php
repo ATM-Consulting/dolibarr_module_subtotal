@@ -1519,7 +1519,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		global $conf,$hideprices;
 
         $i = intval($parameters['i']);
-        $line = isset($object->lines[$i]);
+        $line = isset($object->lines[$i]) ? $object->lines[$i] : null ;
 
 		if($this->isModSubtotalLine($parameters,$object) ){
             if ($this->subtotal_sum_qty_enabled === true) {
@@ -1563,6 +1563,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
             }
 		} else {
             if ($this->subtotal_sum_qty_enabled === true) {
+
                 // sum quantities by subtotal level
                 if ($this->subtotal_level_cur >= 1) {
                     for ($subtotal_level = 1; $subtotal_level <= $this->subtotal_level_cur; $subtotal_level++) {
