@@ -1033,6 +1033,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		$total = 0;
 		$total_tva = 0;
 		$total_ttc = 0;
+        $total_qty = 0;
 		$TTotal_tva = array();
 
 
@@ -1056,6 +1057,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
             if (!empty($title_break) && $title_break->id == $l->id) break;
             elseif (!TSubtotal::isModSubtotalLine($l))
             {
+                $total_qty += $l->qty;
                 // TODO retirer le test avec $builddoc quand Dolibarr affichera le total progression sur la card et pas seulement dans le PDF
                 if ($builddoc && $object->element == 'facture' && $object->type==Facture::TYPE_SITUATION)
                 {
@@ -1095,7 +1097,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
             }
 		}
 		if (!$return_all) return $total;
-		else return array($total, $total_tva, $total_ttc, $TTotal_tva);
+		else return array($total, $total_tva, $total_ttc, $TTotal_tva, $total_qty);
 	}
 
 	/**
@@ -2757,11 +2759,25 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				if ($object->element == 'invoice_supplier') {
 					$colspan -= 2;
 				}
+                $line_show_qty = false;
+
+                if($line->qty>90) {
+
+                    /* Total */
+                    $TSubtotalDatas = $this->getTotalLineFromObject($object, $line, '', 1);
+                    $total_line = $TSubtotalDatas[0];
+                    $total_qty = $TSubtotalDatas[4];
+                    if (TSubtotal::isSubtotal($line) && $show_qty_bu_deault = TSubtotal::showQtyForObject($object)) {
+                        $line_show_qty = TSubtotal::showQtyForObjectLine($line, $show_qty_bu_deault);
+
+                    }
+                }
 
 				?>
 
 				<?php
 					if($action=='editline' && GETPOST('lineid', 'int') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
+
                         echo '<td colspan="'.$colspan.'" style="'.(TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;').(($line->qty>90)?'text-align:right':'').'">';
 						$params=array('line'=>$line);
 						$reshook=$hookmanager->executeHooks('formEditProductOptions',$params,$object,$action);
@@ -2862,7 +2878,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
                         if (TSubtotal::isSubtotal($line) && $show_qty_bu_deault = TSubtotal::showQtyForObject($object)) {
                             $line_show_qty = TSubtotal::showQtyForObjectLine($line, $show_qty_bu_deault);
-
                             echo '<div>';
                             echo '<input style="vertical-align:sub;"  type="checkbox" name="line-showQty" id="subtotal-showQty" value="1" ' . ($line_show_qty ? 'checked="checked"' : '') . ' />&nbsp;';
                             echo '<label for="subtotal-showQty">' . $langs->trans('SubtotalLineShowQty') . '</label>';
@@ -2958,7 +2973,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 
 
-
 						//SousTotal :
                         $style = TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;';
                         $style.= $line->qty>90 ? 'text-align:right' : '';
@@ -3032,9 +3046,16 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 			<?php
 				if($line->qty>90) {
+
 					/* Total */
-					$total_line = $this->getTotalLineFromObject($object, $line, '');
-					echo '<td class="linecolht nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
+
+                    $toDisplay = price($total_line);
+                    if ($line_show_qty) {
+                        $toDisplay .= '<br/>'.$langs->trans('Qty').' : '.price($total_qty);
+                    }
+
+
+					echo '<td class="linecolht nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.$toDisplay.'</td>';
 					if (!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 					}
