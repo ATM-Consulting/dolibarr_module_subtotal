@@ -2932,8 +2932,22 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 					}
 					else {
 
+                        if ($line_show_qty) {
+                            $colspan -= 2;
+
+                            $style = getDolGlobalString('SUBTOTAL_TITLE_STYLE', '');
+                            $titleStyleItalic = strpos($style, 'I') === false ? '' : ' font-style: italic;';
+                            $titleStyleBold = strpos($style, 'B') === false ? '' : ' font-weight:bold;';
+                            $titleStyleUnderline = strpos($style, 'U') === false ? '' : ' text-decoration: underline;';
+
+                            $style = 'text-align:right;';
+                            echo '<td colspan="' . $colspan . '" style="' . $style . $titleStyleBold . '">';
+                            echo '<span class="subtotal_label" style="' . $titleStyleItalic . $titleStyleBold . $titleStyleUnderline . '">' . $langs->trans('Qty') . ' : </span>&nbsp;&nbsp;' . price($total_qty, 0, '', 0, 0);
+                            echo '</td>';
+                            $colspan = 2;
+                        }
 				    if(TSubtotal::isSubtotal($line) && getDolGlobalString('DISPLAY_MARGIN_ON_SUBTOTALS')) {
-						$colspan -= 2;
+						$colspan --;
 
 				        $style = getDolGlobalString('SUBTOTAL_TITLE_STYLE', '');
 						$titleStyleItalic = strpos($style, 'I') === false ? '' : ' font-style: italic;';
@@ -2944,10 +2958,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						$total_line = $this->getTotalLineFromObject($object, $line, '');
 
 						//Marge :
-						$style = $line->qty>90 ? 'text-align:right' : '';
-						echo '<td colspan="'.$colspan.'" style="'.$style.'">';
+						$style = $line->qty>90 ? 'text-align:right;font-weight:bold;' : '';
+						echo '<td nowrap="nowrap" colspan="'.$colspan.'" style="'.$style.'">';
 						echo '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'">Marge :</span>';
-						echo '</td>';
 
 
                         $parentTitleLine = TSubtotal::getParentTitleOfLine($object, $line->rang);
@@ -2966,10 +2979,10 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
                         $marge = $total_line - $totalCostPrice;
 
-						echo '<td class="linecolmarge nowrap" align="left" style="font-weight:bold;">';
-						echo price($marge);
+						echo '&nbsp;&nbsp;'.price($marge);
 						echo '</td>';
 					}
+
 
 
 
@@ -2980,7 +2993,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
                         echo '<td '. (!TSubtotal::isSubtotal($line) || !getDolGlobalString('DISPLAY_MARGIN_ON_SUBTOTALS') ? ' colspan="'.$colspan.'"' : '' ).' style="' .$style.'">';
 						 if (getDolGlobalString('SUBTOTAL_USE_NEW_FORMAT'))
 						 {
-							if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
+							if(TSubtotal::isTitle($line))
 							{
 								echo str_repeat('&nbsp;&nbsp;&nbsp;', max(floatval($line->qty) - 1, 0));
 
@@ -3048,14 +3061,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				if($line->qty>90) {
 
 					/* Total */
-
-                    $toDisplay = price($total_line);
-                    if ($line_show_qty) {
-                        $toDisplay .= '<br/>'.$langs->trans('Qty').' : '.price($total_qty);
-                    }
-
-
-					echo '<td class="linecolht nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.$toDisplay.'</td>';
+					echo '<td class="linecolht nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
 					if (!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 					}

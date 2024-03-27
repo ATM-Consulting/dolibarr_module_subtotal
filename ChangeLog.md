@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 # [Unreleased]
-
+- NEW : Ajout des quantités par sous totaux sur l'interface - *27/03/2024* - 3.24.0
 
 
 # Release 3.23 - 18/12/2023
