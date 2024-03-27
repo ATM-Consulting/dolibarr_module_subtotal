@@ -2761,13 +2761,13 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				}
                 $line_show_qty = false;
 
-                if($line->qty>90) {
+                if(TSubtotal::isSubtotal($line)) {
 
                     /* Total */
                     $TSubtotalDatas = $this->getTotalLineFromObject($object, $line, '', 1);
                     $total_line = $TSubtotalDatas[0];
                     $total_qty = $TSubtotalDatas[4];
-                    if (TSubtotal::isSubtotal($line) && $show_qty_bu_deault = TSubtotal::showQtyForObject($object)) {
+                    if ($show_qty_bu_deault = TSubtotal::showQtyForObject($object)) {
                         $line_show_qty = TSubtotal::showQtyForObjectLine($line, $show_qty_bu_deault);
 
                     }
