@@ -2577,6 +2577,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	{
 		global $conf, $langs, $user, $db, $bc, $usercandelete, $toselect;
 
+		$lineLabel = "";
 		$num = &$parameters['num'];
 		$line = &$parameters['line'];
 		$i = &$parameters['i'];
@@ -2704,7 +2705,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			// Compatibility module showprice
 			if(!empty($conf->showprice->enabled)) $colspan++;
 			/* Titre */
-			//var_dump($line);
+
 
 			// HTML 5 data for js
             $data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
@@ -3022,7 +3023,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						 else {
 
 							if (getDolGlobalString('PRODUIT_DESC_IN_FORM') && !empty($line->description)) {
-								print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
+								// on ne veut pas afficher le label et la description si elles sont identiques
+								 $lineLabel = $line->description != $line->label ? $line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description) : $line->label ;
+								print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >' . $lineLabel . '</div>';
 							}
 							else{
 								print '<span class="subtotal_label classfortooltip" style=" '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';

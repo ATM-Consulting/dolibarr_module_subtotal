@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 # [Unreleased]
+
+- FIX : doublon affichage label description lors de la création de facture depuis un objet (propal/commande ...)  - *03/04/2024* - 3.24.1  
 - NEW : Ajout des quantités par sous totaux sur l'interface - *27/03/2024* - 3.24.0
 
 
