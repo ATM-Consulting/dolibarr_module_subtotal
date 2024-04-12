@@ -548,7 +548,7 @@ class TSubtotal {
 	 */
 	public static function isTitle(&$line, $level=-1)
 	{
-		$res = $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty <= 9;
+		$res = !empty($line->special_code) && $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty <= 9;
 		if($res && $level > -1) {
 			return $line->qty == $level;
 		} else return $res;
@@ -562,7 +562,7 @@ class TSubtotal {
 	 */
 	public static function isSubtotal(&$line, $level=-1)
 	{
-	    $res = $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty >= 90;
+	    $res = !empty($line->special_code) && $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty >= 90;
 	    if($res && $level > -1) {
 	        return self::getNiveau($line) == $level;
 	    } else return $res;
@@ -574,7 +574,7 @@ class TSubtotal {
 	 */
 	public static function isFreeText(&$line)
 	{
-		return $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty == 50;
+		return !empty($line->special_code) && $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty == 50;
 	}
 
 	/**
