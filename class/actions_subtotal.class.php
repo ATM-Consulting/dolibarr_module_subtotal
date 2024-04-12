@@ -2922,7 +2922,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 										if(in_array($code, $TKey) && $extrafields->attributes[$line->element]['list'][$code] > 0) {
 											echo '<div class="sub-'.$code.'">';
 											echo '<label class="">'.$extrafields->attributes[$line->element]['label'][$code].'</label>';
-											echo $extrafields->showInputField($code, $line->array_options['options_'.$code], '', '', 'subtotal_');
+                                            if(floatval(DOL_VERSION) >= 17) echo $extrafields->showInputField($code, $line->array_options['options_'.$code], '', '', 'subtotal_','',0,$object->table_element_line);
+                                            else echo $extrafields->showInputField($code, $line->array_options['options_'.$code], '', '', 'subtotal_');
 											echo '</div>';
 										}
 									}
