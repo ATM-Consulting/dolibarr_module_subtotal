@@ -1607,7 +1607,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	}
 
 	function pdf_getlinetotalexcltax($parameters=array(), &$object, &$action='') {
-	    global $conf, $hideprices, $hookmanager;
+	    global $conf, $hideprices, $hookmanager, $langs;
 
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
@@ -1622,15 +1622,21 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
-
 		}
 		elseif (getDolGlobalString('SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS'))
 		{
+//			var_dump(__FUNCTION__);
+
+//			print  '<pre>' . var_export(getDolGlobalString('SUBTOTAL_TFIELD_TO_KEEP_WITH_NC') .'---'. __FUNCTION__, true) . '</pre>';
+//			var_dump( getDolGlobalString('SUBTOTAL_TFIELD_TO_KEEP_WITH_NC'));
+//			var_dump(in_array('pdf_getlinetotalexcltax', explode(',', getDolGlobalString('SUBTOTAL_TFIELD_TO_KEEP_WITH_NC'))));
+//			var_dump(!in_array(__FUNCTION__, explode(',', getDolGlobalString('SUBTOTAL_TFIELD_TO_KEEP_WITH_NC') )));
 			if (!in_array(__FUNCTION__, explode(',', getDolGlobalString('SUBTOTAL_TFIELD_TO_KEEP_WITH_NC') )))
 			{
 				if (!empty($object->lines[$i]->array_options['options_subtotal_nc']))
 				{
-					$this->resprints = ' ';
+//					$this->resprints = price( $object->lines[$i]->qty  * $object->lines[$i]->subprice);
+					$this->resprints = '';
 					return 1;
 				}
 
@@ -1643,6 +1649,11 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						return 1;
 					}
 				}
+			} elseif(in_array('pdf_getlinetotalexcltax', explode(',', getDolGlobalString('SUBTOTAL_TFIELD_TO_KEEP_WITH_NC'))) &&
+					floatval($object->lines[$i]->total_ht) == 0
+			){
+				$this->resprints = price($object->lines[$i]->qty * $object->lines[$i]->subprice);
+				return 1;
 			}
 		}
         // If commenté car : Affichage du total HT des lignes produit en doublon TICKET DA024057
