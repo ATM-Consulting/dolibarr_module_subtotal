@@ -1627,7 +1627,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
-
 		}
 		elseif (getDolGlobalString('SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS'))
 		{
@@ -1648,6 +1647,12 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						return 1;
 					}
 				}
+			} elseif(in_array('pdf_getlinetotalexcltax', explode(',', getDolGlobalString('SUBTOTAL_TFIELD_TO_KEEP_WITH_NC'))) &&
+					floatval($object->lines[$i]->total_ht) == 0
+			){
+				// On affiche le véritable total ht de la ligne sans le comptabilisé
+				$this->resprints = price($object->lines[$i]->qty * $object->lines[$i]->subprice);
+				return 1;
 			}
 		}
         // If commenté car : Affichage du total HT des lignes produit en doublon TICKET DA024057
