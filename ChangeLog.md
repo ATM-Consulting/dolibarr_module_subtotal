@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - NEW : Ajout des quantités par sous totaux sur l'interface - *27/03/2024* - 3.24.0
 
 # Release 3.23 - 18/12/2023
+- FIX : DA024939 - Added static method hasBreakPage to check if a line has a break page or not - *17/05/2024* - 3.23.10
 - FIX : DA024587 - Les totaux remisés sur le PDF Sponge sont erronés  - *20/03/2024* - 3.23.9
 - FIX : Suite a l'issue #379, la création de facture d'acompte avec un montant variable change les qté des lignes générées par le module donc on utilise un trigger pour remettre les bonnes qtés - *18/03/2024* - 3.23.8
 - FIX : Sur le modèle PDF Sponge, retrait des lignes de sous totaux au moment du calcul de l'avancement global - *12/03/2024* - 3.23.7

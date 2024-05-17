@@ -542,6 +542,15 @@ class TSubtotal {
 	}
 
 	/**
+	 * @param $line
+	 * @return bool
+	 */
+	public static function hasBreakPage($line)
+	{
+		return $line->info_bits == 8;
+	}
+
+	/**
 	 * @param CommonObjectLine $line
 	 * @param int              $level
 	 * @return bool
