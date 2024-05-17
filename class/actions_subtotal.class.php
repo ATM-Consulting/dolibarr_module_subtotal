@@ -1033,6 +1033,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		$total = 0;
 		$total_tva = 0;
 		$total_ttc = 0;
+        $total_qty = 0;
 		$TTotal_tva = array();
 
 
@@ -1056,6 +1057,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
             if (!empty($title_break) && $title_break->id == $l->id) break;
             elseif (!TSubtotal::isModSubtotalLine($l))
             {
+                $total_qty += $l->qty;
                 // TODO retirer le test avec $builddoc quand Dolibarr affichera le total progression sur la card et pas seulement dans le PDF
                 if ($builddoc && $object->element == 'facture' && $object->type==Facture::TYPE_SITUATION)
                 {
@@ -1095,7 +1097,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
             }
 		}
 		if (!$return_all) return $total;
-		else return array($total, $total_tva, $total_ttc, $TTotal_tva);
+		else return array($total, $total_tva, $total_ttc, $TTotal_tva, $total_qty);
 	}
 
 	/**
@@ -1620,7 +1622,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			else if((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
-
 		}
 		elseif (getDolGlobalString('SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS'))
 		{
@@ -1641,6 +1642,12 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						return 1;
 					}
 				}
+			} elseif(in_array('pdf_getlinetotalexcltax', explode(',', getDolGlobalString('SUBTOTAL_TFIELD_TO_KEEP_WITH_NC'))) &&
+					floatval($object->lines[$i]->total_ht) == 0
+			){
+				// On affiche le véritable total ht de la ligne sans le comptabilisé
+				$this->resprints = price($object->lines[$i]->qty * $object->lines[$i]->subprice);
+				return 1;
 			}
 		}
         // If commenté car : Affichage du total HT des lignes produit en doublon TICKET DA024057
@@ -2575,6 +2582,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	{
 		global $conf, $langs, $user, $db, $bc, $usercandelete, $toselect;
 
+		$lineLabel = "";
 		$num = &$parameters['num'];
 		$line = &$parameters['line'];
 		$i = &$parameters['i'];
@@ -2702,7 +2710,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			// Compatibility module showprice
 			if(!empty($conf->showprice->enabled)) $colspan++;
 			/* Titre */
-			//var_dump($line);
+
 
 			// HTML 5 data for js
             $data = $this->_getHtmlData($parameters, $object, $action, $hookmanager);
@@ -2757,11 +2765,25 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				if ($object->element == 'invoice_supplier') {
 					$colspan -= 2;
 				}
+                $line_show_qty = false;
+
+                if(TSubtotal::isSubtotal($line)) {
+
+                    /* Total */
+                    $TSubtotalDatas = $this->getTotalLineFromObject($object, $line, '', 1);
+                    $total_line = $TSubtotalDatas[0];
+                    $total_qty = $TSubtotalDatas[4];
+                    if ($show_qty_bu_deault = TSubtotal::showQtyForObject($object)) {
+                        $line_show_qty = TSubtotal::showQtyForObjectLine($line, $show_qty_bu_deault);
+
+                    }
+                }
 
 				?>
 
 				<?php
 					if($action=='editline' && GETPOST('lineid', 'int') == $line->id && TSubtotal::isModSubtotalLine($line) ) {
+
                         echo '<td colspan="'.$colspan.'" style="'.(TSubtotal::isFreeText($line) ? '' : 'font-weight:bold;').(($line->qty>90)?'text-align:right':'').'">';
 						$params=array('line'=>$line);
 						$reshook=$hookmanager->executeHooks('formEditProductOptions',$params,$object,$action);
@@ -2862,7 +2884,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
                         if (TSubtotal::isSubtotal($line) && $show_qty_bu_deault = TSubtotal::showQtyForObject($object)) {
                             $line_show_qty = TSubtotal::showQtyForObjectLine($line, $show_qty_bu_deault);
-
                             echo '<div>';
                             echo '<input style="vertical-align:sub;"  type="checkbox" name="line-showQty" id="subtotal-showQty" value="1" ' . ($line_show_qty ? 'checked="checked"' : '') . ' />&nbsp;';
                             echo '<label for="subtotal-showQty">' . $langs->trans('SubtotalLineShowQty') . '</label>';
@@ -2906,7 +2927,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 										if(in_array($code, $TKey) && $extrafields->attributes[$line->element]['list'][$code] > 0) {
 											echo '<div class="sub-'.$code.'">';
 											echo '<label class="">'.$extrafields->attributes[$line->element]['label'][$code].'</label>';
-											echo $extrafields->showInputField($code, $line->array_options['options_'.$code], '', '', 'subtotal_');
+                                            if(floatval(DOL_VERSION) >= 17) echo $extrafields->showInputField($code, $line->array_options['options_'.$code], '', '', 'subtotal_','',0,$object->table_element_line);
+                                            else echo $extrafields->showInputField($code, $line->array_options['options_'.$code], '', '', 'subtotal_');
 											echo '</div>';
 										}
 									}
@@ -2917,8 +2939,22 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 					}
 					else {
 
+                        if ($line_show_qty) {
+                            $colspan -= 2;
+
+                            $style = getDolGlobalString('SUBTOTAL_TITLE_STYLE', '');
+                            $titleStyleItalic = strpos($style, 'I') === false ? '' : ' font-style: italic;';
+                            $titleStyleBold = strpos($style, 'B') === false ? '' : ' font-weight:bold;';
+                            $titleStyleUnderline = strpos($style, 'U') === false ? '' : ' text-decoration: underline;';
+
+                            $style = 'text-align:right;';
+                            echo '<td colspan="' . $colspan . '" style="' . $style . $titleStyleBold . '">';
+                            echo '<span class="subtotal_label" style="' . $titleStyleItalic . $titleStyleBold . $titleStyleUnderline . '">' . $langs->trans('Qty') . ' : </span>&nbsp;&nbsp;' . price($total_qty, 0, '', 0, 0);
+                            echo '</td>';
+                            $colspan = 2;
+                        }
 				    if(TSubtotal::isSubtotal($line) && getDolGlobalString('DISPLAY_MARGIN_ON_SUBTOTALS')) {
-						$colspan -= 2;
+						$colspan --;
 
 				        $style = getDolGlobalString('SUBTOTAL_TITLE_STYLE', '');
 						$titleStyleItalic = strpos($style, 'I') === false ? '' : ' font-style: italic;';
@@ -2929,10 +2965,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						$total_line = $this->getTotalLineFromObject($object, $line, '');
 
 						//Marge :
-						$style = $line->qty>90 ? 'text-align:right' : '';
-						echo '<td colspan="'.$colspan.'" style="'.$style.'">';
+						$style = $line->qty>90 ? 'text-align:right;font-weight:bold;' : '';
+						echo '<td nowrap="nowrap" colspan="'.$colspan.'" style="'.$style.'">';
 						echo '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'">Marge :</span>';
-						echo '</td>';
 
 
                         $parentTitleLine = TSubtotal::getParentTitleOfLine($object, $line->rang);
@@ -2951,8 +2986,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
                         $marge = $total_line - $totalCostPrice;
 
-						echo '<td class="linecolmarge nowrap" align="left" style="font-weight:bold;">';
-						echo price($marge);
+						echo '&nbsp;&nbsp;'.price($marge);
 						echo '</td>';
 					}
 
@@ -2966,7 +3000,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
                         echo '<td '. (!TSubtotal::isSubtotal($line) || !getDolGlobalString('DISPLAY_MARGIN_ON_SUBTOTALS') ? ' colspan="'.$colspan.'"' : '' ).' style="' .$style.'">';
 						 if (getDolGlobalString('SUBTOTAL_USE_NEW_FORMAT'))
 						 {
-							if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
+							if(TSubtotal::isTitle($line))
 							{
 								echo str_repeat('&nbsp;&nbsp;&nbsp;', max(floatval($line->qty) - 1, 0));
 
@@ -2995,7 +3029,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						 else {
 
 							if (getDolGlobalString('PRODUIT_DESC_IN_FORM') && !empty($line->description)) {
-								print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
+								// on ne veut pas afficher le label et la description si elles sont identiques
+								 $lineLabel = $line->description != $line->label ? $line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description) : $line->label ;
+								print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >' . $lineLabel . '</div>';
 							}
 							else{
 								print '<span class="subtotal_label classfortooltip" style=" '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
@@ -3032,8 +3068,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 			<?php
 				if($line->qty>90) {
+
 					/* Total */
-					$total_line = $this->getTotalLineFromObject($object, $line, '');
 					echo '<td class="linecolht nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
 					if (!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
