@@ -4642,4 +4642,21 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			}
         return 0;
 	}
+	/**
+	 * Suite au ticket DA024892
+	 * S'applique aux descriptions de lignes faites sur CKeditor
+	 * Enlève la marge haute de 14.72px sur les balises <ul><li></li></ul>
+	 * @param $parameters
+	 * @param $pdf
+	 * @return int
+	 */
+	public function printPDFline($parameters, $pdf) {
+		global $pdf;
+
+		$pdf->setListIndentWidth(5);
+		$TMarginList = ['ul' => [['h'=>0.1, ],['h'=>0.1, ]], 'li' => [['h'=>0.1, ],],];
+		$pdf->setHtmlVSpace($TMarginList);
+
+		return 0;
+	}
 }
