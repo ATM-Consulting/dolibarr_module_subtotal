@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 
 # Release 3.24 - 08/04/2024
-
+- FIX : Module_number missed in subTotal class. function  addSubTotalLine function  in test order_supplier - *26/06/2024* - 3.24.4  
 - FIX : display totalht ligne 'non compris' - *12/04/2024* - 3.24.3  
 - FIX : Title extrafields wasn't working - *12/04/2024* - 3.24.2  
 - FIX : doublon affichage label description lors de la création de facture depuis un objet (propal/commande ...)  - *03/04/2024* - 3.24.1  
