@@ -3572,6 +3572,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				$object->tpl['subtotal'] = $line->id;
 				if (TSubtotal::isTitle($line)) $object->tpl['sub-type'] = 'title';
 				else if (TSubtotal::isSubtotal($line)) $object->tpl['sub-type'] = 'total';
+				else if (TSubtotal::isFreeText($line)) $object->tpl['sub-type'] = 'freetext';
 
 				$object->tpl['sub-tr-style'] = '';
 				if (getDolGlobalString('SUBTOTAL_USE_NEW_FORMAT'))
