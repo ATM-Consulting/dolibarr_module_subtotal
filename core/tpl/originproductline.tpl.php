@@ -30,7 +30,7 @@ if (empty($conf) || ! is_object($conf))
 
 $selected=1;
 
-if ($this->tpl['subtotal'] != $this->tpl['id'] || !in_array($this->tpl['sub-type'], array('title', 'total')))
+if ($this->tpl['subtotal'] != $this->tpl['id'] || !in_array($this->tpl['sub-type'], array('title', 'total', 'freetext')))
 {
 	print '<tr data-id="'.$this->tpl['id'].'" class="oddeven'.(empty($this->tpl['strike'])?'':' strikefordisabled').'">';
 	print '<td class="linecolref">'.$this->tpl['label'].'</td>';
