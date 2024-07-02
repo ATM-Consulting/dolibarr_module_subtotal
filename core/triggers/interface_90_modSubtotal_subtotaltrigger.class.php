@@ -156,8 +156,12 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
      */
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
-
+		global $user;
        #COMPATIBILITÉ V16
+		require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
+		require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+
+
         if ($action == 'LINEBILL_UPDATE'){
 			$action = 'LINEBILL_MODIFY';
 		}
@@ -173,7 +177,31 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 		if ($action == 'LINEBILL_SUPPLIER_UPDATE'){
 			$action = 'LINEBILL_SUPPLIER_MODIFY';
 		}
-
+		/* Refer to issue #379 */
+		if($action == 'LINEBILL_INSERT'){
+			static $TInvoices = array();
+			if (!array_key_exists($object->fk_facture, $TInvoices) || (array_key_exists($object->fk_facture, $TInvoices) && $TInvoices[$object->fk_facture] === null)) {
+				$staticInvoice = new Facture($this->db);
+				if ($staticInvoice->fetch($object->fk_facture) < 0){
+					$object->error = $staticInvoice->error;
+					$object->errors []= $staticInvoice->errors;
+					return -1;
+				}
+				$isEligible = $staticInvoice->type == Facture::TYPE_DEPOSIT && GETPOST('typedeposit', 'aZ09') == "variablealllines";
+				$TInvoices[$object->fk_facture] = $isEligible;
+			}
+			if ($TInvoices[$object->fk_facture]) {
+				if (!empty($object->origin) && !empty($object->origin_id) && $object->special_code == TSubtotal::$module_number){
+					$valuedeposit = price2num(str_replace('%', '', GETPOST('valuedeposit', 'alpha')), 'MU');
+					$object->qty = 100 * $object->qty / $valuedeposit;
+					if ($object->update('', 1) < 0){
+						$object->error = $object->error;
+						$object->errors []= $object->errors;
+						return -1;
+					}
+				}
+			}
+		}
 		// Put here code you want to execute when a Dolibarr business events occurs.
         // Data and type of action are stored into $object and $action
         // Users
@@ -276,7 +304,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
             }
 		    else
             {
-			    $subtotal_add_title_bloc_from_orderstoinvoice = (GETPOST('subtotal_add_title_bloc_from_orderstoinvoice', 'none') || GETPOST('createbills_onebythird', 'int'));
+			    $subtotal_add_title_bloc_from_orderstoinvoice = (GETPOST('subtotal_add_title_bloc_from_orderstoinvoice', 'none') && GETPOST('createbills_onebythird', 'int'));
 			    if (!empty($subtotal_add_title_bloc_from_orderstoinvoice))
 			    {
 				    global $subtotal_current_rang, $subtotal_bloc_previous_fk_commande, $subtotal_bloc_already_add_title, $subtotal_bloc_already_add_st;
@@ -410,8 +438,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 				}
 			}
 		}
-
-		// Les lignes libres (y compris les sous-totaux) créées à partir d'une facture modèle n'ont pas la TVA de la ligne du modèle mais la TVA par défaut
+			// Les lignes libres (y compris les sous-totaux) créées à partir d'une facture modèle n'ont pas la TVA de la ligne du modèle mais la TVA par défaut
 		if ($action == 'BILL_CREATE' && $object->fac_rec > 0) {
 			dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
 
@@ -808,7 +835,6 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
         } elseif ($action == 'LINEBILL_INSERT') {
-
         	dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
