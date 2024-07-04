@@ -84,6 +84,9 @@ if(!class_exists('FormSetup')){
 	}
 }
 
+if(!function_exists('isModEnabled')) {
+	require_once __DIR__.'/../backport/v16/core/lib/functions.lib.php';
+}
 
 $formSetup = new FormSetup($db);
 
@@ -326,11 +329,11 @@ if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
 	$formSetup->newItem('SUBTOTAL_HIDE_DOCUMENT_TOTAL')->setAsYesNo();
 
 
-	if (!empty($conf->shippableorder->enabled)) {
+	if (isModEnabled('shippableorder')) {
 		$formSetup->newItem('SUBTOTAL_SHIPPABLE_ORDER')->setAsYesNo();
 	}
 
-	if (!empty($conf->clilacevenements->enabled)) {
+	if (isModEnabled('clilacevenements')) {
 		// Afficher la quantité sur les lignes de sous-total (uniquement dans le cas d'un produit virtuel ajouté)
 		$formSetup->newItem('SUBTOTAL_SHOW_QTY_ON_TITLES')->setAsYesNo();
 

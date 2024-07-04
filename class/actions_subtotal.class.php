@@ -9,6 +9,7 @@ dol_include_once('/subtotal/class/subtotal.class.php');
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
+require_once __DIR__ . '/../backport/v16/core/lib/functions.lib.php';
 require_once __DIR__ . '/../backport/v19/core/class/commonhookactions.class.php';
 
 
@@ -105,7 +106,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 									$(item).replaceWith($('<textarea name="content">'+value+'</textarea>'));
 								});
 
-								<?php if (!empty($conf->fckeditor->enabled) && getDolGlobalString('FCKEDITOR_ENABLE_DETAILS')) { ?>
+								<?php if (isModEnabled('fckeditor') && getDolGlobalString('FCKEDITOR_ENABLE_DETAILS')) { ?>
 								$('textarea[name=content]').each(function(i, item) {
 									CKEDITOR.replace(item, {
 										toolbar: 'dolibarr_notes'
@@ -118,7 +119,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						// <= 5.0
 						// Le CKEditor est forcé sur la page dictionnaire, pas possible de mettre une valeur custom
 						// petit js qui supprimer le wysiwyg et affiche le textarea car avant la version 6.0 le wysiwyg sur une page de dictionnaire est inexploitable
-						<?php if (!empty($conf->fckeditor->enabled)) { ?>
+						<?php if (isModEnabled('fckeditor')) { ?>
 							CKEDITOR.on('instanceReady', function(ev) {
 								var editor = ev.editor;
 
@@ -2702,10 +2703,10 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 			if($object->element == 'facturerec' ) $colspan = 5;
 
-			if(!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+			if(isModEnabled('multicurrency') && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 				$colspan++; // Colonne PU Devise
 			}
-			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
+			if($object->element == 'commande' && $object->statut < 3 && isModEnabled('shippableorder')) $colspan++;
 			$margins_hidden_by_module = empty($conf->affmarges->enabled) ? false : !($_SESSION['marginsdisplayed']);
 			if(!empty($conf->margin->enabled) && !$margins_hidden_by_module) $colspan++;
 			if(!empty($conf->margin->enabled) && getDolGlobalString('DISPLAY_MARGIN_RATES') && !$margins_hidden_by_module && $affectedByMarge > 0) $colspan++;
@@ -3076,12 +3077,12 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 					/* Total */
 					echo '<td class="linecolht nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
-					if (!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+					if (isModEnabled('multicurrency') && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 					}
 				} else {
 					echo '<td class="linecolht movetitleblock">&nbsp;</td>';
-					if (!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+					if (isModEnabled('multicurrency') && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 					}
 				}
@@ -3395,8 +3396,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 			$colspan = 4;
 			if($object->origin && $object->origin_id > 0) $colspan++;
-			if(! empty($conf->stock->enabled)) $colspan++;
-			if(! empty($conf->productbatch->enabled)) $colspan++;
+			if(isModEnabled('stock')) $colspan++;
+			if(isModEnabled('productbatch')) $colspan++;
 			if($object->statut == 0) $colspan++;
 			if($object->statut == 0 && !getDolGlobalString('SUBTOTAL_ALLOW_REMOVE_BLOCK')) $colspan++;
 
