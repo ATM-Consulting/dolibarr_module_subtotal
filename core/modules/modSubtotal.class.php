@@ -407,7 +407,7 @@ class modSubtotal extends DolibarrModules
         //	's.cp'=>'Zip',
         //	's.ville'=>'Town',
         //	's.fk_pays'=>'Country',
-        //	's.tel'=>'Phone',
+        //	's.phone'=>'Phone',
         //	's.siren'=>'ProfId1',
         //	's.siret'=>'ProfId2',
         //	's.ape'=>'ProfId3',
