@@ -1489,7 +1489,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		{
 			dol_include_once('/commande/class/commande.class.php');
 			$line = new OrderLine($object->db);
-			$line->fetch($object->lines[$i]->fk_origin_line);
+			$line->fetch($object->lines[$i]->fk_elementdet ?? $object->lines[$i]->fk_origin_line);
 		}
 
 
@@ -2381,7 +2381,10 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 				$line = &$object->lines[$i];
 
+				// Unset on Dolibarr < 20.0
 				if($object->element == 'delivery' && ! empty($object->commande->expeditions[$line->fk_origin_line])) unset($object->commande->expeditions[$line->fk_origin_line]);
+				// Unset on Dolibarr >= 20.0
+				if($object->element == 'delivery' && ! empty($object->commande->expeditions[$line->fk_elementdet])) unset($object->commande->expeditions[$line->fk_elementdet]);
 
 				$margin = $pdf->getMargins();
 				if(!empty($margin) && $line->info_bits>0) { // PAGE BREAK
@@ -2586,6 +2589,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	 */
 	function printObjectLine ($parameters, &$object, &$action, $hookmanager)
 	{
+		dol_syslog(get_class($this).'::printObjectLine $object->element: '.$object->element.' $context: '.$parameters['context'], LOG_INFO);
 		global $conf, $langs, $user, $db, $bc, $usercandelete, $toselect;
 
 		$lineLabel = "";
@@ -2623,13 +2627,13 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		}
 		elseif($object->element == 'shipping' || $object->element == 'delivery')
 		{
-			if(empty($line->origin_line_id) && ! empty($line->fk_origin_line))
+			if(empty($line->origin_line_id) && (! empty($line->fk_origin_line || ! empty($line->fk_elementdet))))
 			{
-				$line->origin_line_id = $line->fk_origin_line;
+				$line->origin_line_id = $line->fk_elementdet ?? $line->fk_origin_line;
 			}
 
 			$originline = new OrderLine($db);
-			$originline->fetch($line->fk_origin_line);
+			$originline->fetch($line->fk_elementdet ?? $line->fk_origin_line);
 
 			foreach(get_object_vars($line) as $property => $value)
 			{
@@ -3502,7 +3506,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				$lineid = $line->id;
 				if($line->element === 'commandedet') {
 					foreach($object->lines as $shipmentLine) {
-						if(!empty($shipmentLine->fk_origin_line) && $shipmentLine->fk_origin == 'orderline' && $shipmentLine->fk_origin_line == $line->id) {
+						if((!empty($shipmentLine->fk_elementdet)) && $shipmentLine->fk_origin == 'orderline' && $shipmentLine->fk_elementdet == $line->id) {
+							$lineid = $shipmentLine->id;
+						} elseif((!empty($shipmentLine->fk_origin_line)) && $shipmentLine->fk_origin == 'orderline' && $shipmentLine->fk_origin_line == $line->id) {
 							$lineid = $shipmentLine->id;
 						}
 					}
