@@ -9,7 +9,6 @@ dol_include_once('/subtotal/class/subtotal.class.php');
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
-require_once __DIR__ . '/../backport/v16/core/lib/functions.lib.php';
 require_once __DIR__ . '/../backport/v19/core/class/commonhookactions.class.php';
 
 

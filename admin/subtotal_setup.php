@@ -84,10 +84,6 @@ if(!class_exists('FormSetup')){
 	}
 }
 
-if(!function_exists('isModEnabled')) {
-	require_once __DIR__.'/../backport/v16/core/lib/functions.lib.php';
-}
-
 $formSetup = new FormSetup($db);
 
 

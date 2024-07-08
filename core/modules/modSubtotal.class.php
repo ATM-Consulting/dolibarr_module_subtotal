@@ -24,7 +24,6 @@
  * 	\brief		Description and activation file for module titre
  */
 include_once DOL_DOCUMENT_ROOT . "/core/modules/DolibarrModules.class.php";
-require_once __DIR__ . '/../../backport/v16/core/lib/functions.lib.php';
 
 /**
  * Description and activation class for module titre
@@ -68,7 +67,7 @@ class modSubtotal extends DolibarrModules
         // Possible values for version are: 'development', 'experimental' or version
 
 
-        $this->version = '3.24.4';
+        $this->version = '3.25.0';
 
 
 		// Url to the file with your last numberversion of this module
@@ -156,7 +155,7 @@ class modSubtotal extends DolibarrModules
         // Minimum version of PHP required by module
         $this->phpmin = array(7,0);
         // Minimum version of Dolibarr required by module
-        $this->need_dolibarr_version = array(15,0);
+        $this->need_dolibarr_version = array(16,0);
         $this->langfiles = array("subtotal@subtotal"); // langfiles@titre
         // Constants
         // List of particular constants to add when module is enabled

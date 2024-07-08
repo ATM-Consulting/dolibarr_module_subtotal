@@ -96,10 +96,6 @@ class Subtotal extends DolibarrApi
 	{
 		global $db,$conf;
 
-		if(!function_exists('isModEnabled')) {
-			require_once __DIR__.'/../backport/v16/core/lib/functions.lib.php';
-		}
-
 		if (isModEnabled('subtotal')){
 
 			dol_include_once('/custom/subtotal/class/subtotal.class.php');

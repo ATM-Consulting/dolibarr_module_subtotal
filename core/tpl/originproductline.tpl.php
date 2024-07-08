@@ -23,10 +23,6 @@ if (empty($conf) || ! is_object($conf))
 	exit;
 }
 
-if(!function_exists('isModEnabled')) {
-	require_once __DIR__ . '/../../../backport/v16/core/lib/functions.lib.php';
-}
-
 ?>
 
 <!-- BEGIN PHP TEMPLATE originproductline.tpl.php -->
