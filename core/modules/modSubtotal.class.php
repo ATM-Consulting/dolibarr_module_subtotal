@@ -496,7 +496,7 @@ class modSubtotal extends DolibarrModules
 	  	global $conf, $db;
 
 
-/*		if(isModEnabled('modMilestone')) {
+/*		if(isModEnabled('milestone')) {
 			exit("Attention, ce module rentre ne conflit avec le module Jalon/Milestones. Merci de le désactiver auparavant.");
 		}
       */

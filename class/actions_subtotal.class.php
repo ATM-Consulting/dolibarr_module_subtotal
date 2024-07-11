@@ -2588,7 +2588,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	 */
 	function printObjectLine ($parameters, &$object, &$action, $hookmanager)
 	{
-		dol_syslog(get_class($this).'::printObjectLine $object->element: '.$object->element.' $context: '.$parameters['context'], LOG_INFO);
 		global $conf, $langs, $user, $db, $bc, $usercandelete, $toselect;
 
 		$lineLabel = "";
