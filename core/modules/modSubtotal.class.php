@@ -131,6 +131,7 @@ class modSubtotal extends DolibarrModules
 				,'supplierorderlist'
 				,'supplierinvoicelist'
                 ,'cron'
+				,'pdfgeneration'
             ),
             // Set here all workflow context managed by module
             //'workflow' => array('order' => array('WORKFLOW_ORDER_AUTOCREATE_INVOICE')),
