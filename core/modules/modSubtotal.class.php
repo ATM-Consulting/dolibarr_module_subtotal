@@ -190,9 +190,9 @@ class modSubtotal extends DolibarrModules
         // Example:
         $this->tabs = array(
             //	// To add a new tab identified by code tabname1
-            //	'objecttype:+tabname1:Title1:langfile@titre:$user->rights->titre->read:/titre/mynewtab1.php?id=__ID__',
+            //	'objecttype:+tabname1:Title1:langfile@titre:$user->hasRight('titre', 'read'):/titre/mynewtab1.php?id=__ID__',
             //	// To add another new tab identified by code tabname2
-            //	'objecttype:+tabname2:Title2:langfile@titre:$user->rights->othermodule->read:/titre/mynewtab2.php?id=__ID__',
+            //	'objecttype:+tabname2:Title2:langfile@titre:$user->hasRight('othermodule', 'read'):/titre/mynewtab2.php?id=__ID__',
             //	// To remove an existing tab identified by code tabname
             //	'objecttype:-tabname'
         );
@@ -219,7 +219,7 @@ class modSubtotal extends DolibarrModules
 		if (intval(DOL_VERSION)< 16) $dictionnariesTablePrefix =  MAIN_DB_PREFIX;
 
         // Dictionnaries
-        if (! isset($conf->subtotal->enabled)) {
+        if (! isModEnabled('subtotal')) {
             $conf->subtotal=new stdClass();
             $conf->subtotal->enabled = 0;
         }
@@ -233,11 +233,11 @@ class modSubtotal extends DolibarrModules
             'tabfieldvalue'=>array('label,content'),						// List of fields (list of fields to edit a record)
             'tabfieldinsert'=>array('label,content,entity'),					// List of fields (list of fields for insert)
             'tabrowid'=>array('rowid'),											// Name of columns with primary key (try to always name it 'rowid')
-            'tabcond'=>array($conf->subtotal->enabled)
+            'tabcond'=>array(isModEnabled('subtotal'))
 		);
         /* Example:
           // This is to avoid warnings
-          if (! isset($conf->titre->enabled)) $conf->titre->enabled=0;
+          if (! isModEnabled('titre')) $conf->titre->enabled=0;
           $this->dictionnaries=array(
           'langs'=>'titre@titre',
           // List of tables we want to see into dictonnary editor
@@ -269,9 +269,9 @@ class modSubtotal extends DolibarrModules
           'tabrowid'=>array("rowid","rowid","rowid"),
           // Condition to show each dictionnary
           'tabcond'=>array(
-          $conf->titre->enabled,
-          $conf->titre->enabled,
-          $conf->titre->enabled
+          isModEnabled('titre'),
+          isModEnabled('titre'),
+          isModEnabled('titre')
           )
           );
          */
@@ -299,10 +299,10 @@ class modSubtotal extends DolibarrModules
         //// Permission by default for new user (0/1)
         //$this->rights[$r][3] = 1;
         //// In php code, permission will be checked by test
-        //// if ($user->rights->permkey->level1->level2)
+        //// if ($user->hasRight('permkey', 'level1', 'level2'))
         //$this->rights[$r][4] = 'level1';
         //// In php code, permission will be checked by test
-        //// if ($user->rights->permkey->level1->level2)
+        //// if ($user->hasRight('permkey', 'level1', 'level2'))
         //$this->rights[$r][5] = 'level2';
         //$r++;
         // Main menu entries
@@ -326,9 +326,9 @@ class modSubtotal extends DolibarrModules
         //	'langs'=>'mylangfile',
         //	'position'=>100,
         //	// Define condition to show or hide menu entry.
-        //	// Use '$conf->titre->enabled' if entry must be visible if module is enabled.
-        //	'enabled'=>'$conf->titre->enabled',
-        //	// Use 'perms'=>'$user->rights->titre->level1->level2'
+        //	// Use 'isModEnabled('titre')' if entry must be visible if module is enabled.
+        //	'enabled'=>'isModEnabled('titre')',
+        //	// Use 'perms'=>'$user->hasRight('titre', 'level1', 'level2')'
         //	// if you want your menu with a permission rules
         //	'perms'=>'1',
         //	'target'=>'',
@@ -351,9 +351,9 @@ class modSubtotal extends DolibarrModules
         //	'langs'=>'mylangfile',
         //	'position'=>100,
         //	// Define condition to show or hide menu entry.
-        //	// Use '$conf->titre->enabled' if entry must be visible if module is enabled.
-        //	'enabled'=>'$conf->titre->enabled',
-        //	// Use 'perms'=>'$user->rights->titre->level1->level2'
+        //	// Use 'isModEnabled('titre')' if entry must be visible if module is enabled.
+        //	'enabled'=>'isModEnabled('titre')',
+        //	// Use 'perms'=>'$user->hasRight('titre', 'level1', 'level2')'
         //	// if you want your menu with a permission rules
         //	'perms'=>'1',
         //	'target'=>'',
@@ -377,10 +377,10 @@ class modSubtotal extends DolibarrModules
         //	'langs'=>'mylangfile',
         //	'position'=>100,
         //	// Define condition to show or hide menu entry.
-        //	// Use '$conf->titre->enabled' if entry must be visible if module is enabled.
+        //	// Use 'isModEnabled('titre')' if entry must be visible if module is enabled.
         //	// Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-        //	'enabled'=>'$conf->titre->enabled',
-        //	// Use 'perms'=>'$user->rights->titre->level1->level2'
+        //	'enabled'=>'isModEnabled('titre')',
+        //	// Use 'perms'=>'$user->hasRight('titre', 'level1', 'level2')'
         //	// if you want your menu with a permission rules
         //	'perms'=>'1',
         //	'target'=>'',
@@ -496,7 +496,7 @@ class modSubtotal extends DolibarrModules
 	  	global $conf, $db;
 
 
-/*		if($conf->milestone->enabled) {
+/*		if(isModEnabled('milestone')) {
 			exit("Attention, ce module rentre ne conflit avec le module Jalon/Milestones. Merci de le désactiver auparavant.");
 		}
       */

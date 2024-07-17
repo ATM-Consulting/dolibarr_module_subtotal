@@ -485,7 +485,7 @@ print '</td></tr>';
 		</td>
 	</tr>
 
-	<?php if ($conf->clilacevenements->enabled) { ?>
+	<?php if (isModEnabled('clilacevenements')) { ?>
 		<tr>
 			<td>Afficher la quantité sur les lignes de sous-total (uniquement dans le cas d'un produit virtuel ajouté)</td>
 			<td style="text-align: right;">
@@ -514,7 +514,7 @@ print '</td></tr>';
 
 
 
-<?php if ($conf->shippableorder->enabled) { ?>
+<?php if (isModEnabled('shippableorder')) { ?>
 <br />
 
 <table width="100%" class="noborder" style="background-color: #fff;">

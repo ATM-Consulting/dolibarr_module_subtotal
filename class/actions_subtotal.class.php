@@ -105,7 +105,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 									$(item).replaceWith($('<textarea name="content">'+value+'</textarea>'));
 								});
 
-								<?php if (!empty($conf->fckeditor->enabled) && getDolGlobalString('FCKEDITOR_ENABLE_DETAILS')) { ?>
+								<?php if (isModEnabled('fckeditor') && getDolGlobalString('FCKEDITOR_ENABLE_DETAILS')) { ?>
 								$('textarea[name=content]').each(function(i, item) {
 									CKEDITOR.replace(item, {
 										toolbar: 'dolibarr_notes'
@@ -118,7 +118,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						// <= 5.0
 						// Le CKEditor est forcé sur la page dictionnaire, pas possible de mettre une valeur custom
 						// petit js qui supprimer le wysiwyg et affiche le textarea car avant la version 6.0 le wysiwyg sur une page de dictionnaire est inexploitable
-						<?php if (!empty($conf->fckeditor->enabled)) { ?>
+						<?php if (isModEnabled('fckeditor')) { ?>
 							CKEDITOR.on('instanceReady', function(ev) {
 								var editor = ev.editor;
 
@@ -2380,7 +2380,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 				$line = &$object->lines[$i];
 
-				if($object->element == 'delivery' && ! empty($object->commande->expeditions[$line->fk_origin_line])) unset($object->commande->expeditions[$line->fk_origin_line]);
+				if($object->element == 'delivery' && ! empty($object->commande->expeditions[$line->fk_elementdet ?? $line->fk_origin_line])) unset($object->commande->expeditions[$line->fk_elementdet ?? $line->fk_origin_line]);
 
 				$margin = $pdf->getMargins();
 				if(!empty($margin) && $line->info_bits>0) { // PAGE BREAK
@@ -2622,13 +2622,13 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		}
 		elseif($object->element == 'shipping' || $object->element == 'delivery')
 		{
-			if(empty($line->origin_line_id) && ! empty($line->fk_origin_line))
+			if(empty($line->origin_line_id) && ! empty($line->fk_elementdet ?? $line->fk_origin_line))
 			{
-				$line->origin_line_id = $line->fk_origin_line;
+				$line->origin_line_id = $line->fk_elementdet ?? $line->fk_origin_line;
 			}
 
 			$originline = new OrderLine($db);
-			$originline->fetch($line->fk_origin_line);
+			$originline->fetch($line->fk_elementdet ?? $line->fk_origin_line);
 
 			foreach(get_object_vars($line) as $property => $value)
 			{
@@ -2702,18 +2702,18 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 			if($object->element == 'facturerec' ) $colspan = 5;
 
-			if(!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+			if(isModEnabled('multicurrency') && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 				$colspan++; // Colonne PU Devise
 			}
-			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
-			$margins_hidden_by_module = empty($conf->affmarges->enabled) ? false : !($_SESSION['marginsdisplayed']);
-			if(!empty($conf->margin->enabled) && !$margins_hidden_by_module) $colspan++;
-			if(!empty($conf->margin->enabled) && getDolGlobalString('DISPLAY_MARGIN_RATES') && !$margins_hidden_by_module && $affectedByMarge > 0) $colspan++;
-			if(!empty($conf->margin->enabled) && getDolGlobalString('DISPLAY_MARK_RATES') && !$margins_hidden_by_module && $affectedByMarge > 0) $colspan++;
+			if($object->element == 'commande' && $object->statut < 3 && isModEnabled('shippableorder')) $colspan++;
+			$margins_hidden_by_module = !isModEnabled('affmarges') ? false : !($_SESSION['marginsdisplayed']);
+			if(isModEnabled('margin') && !$margins_hidden_by_module) $colspan++;
+			if(isModEnabled('margin') && getDolGlobalString('DISPLAY_MARGIN_RATES') && !$margins_hidden_by_module && $affectedByMarge > 0) $colspan++;
+			if(isModEnabled('margin') && getDolGlobalString('DISPLAY_MARK_RATES') && !$margins_hidden_by_module && $affectedByMarge > 0) $colspan++;
 			if($object->element == 'facture' && getDolGlobalString('INVOICE_USE_SITUATION') && $object->type == Facture::TYPE_SITUATION) $colspan++;
 			if(getDolGlobalString('PRODUCT_USE_UNITS')) $colspan++;
 			// Compatibility module showprice
-			if(!empty($conf->showprice->enabled)) $colspan++;
+			if(isModEnabled('showprice')) $colspan++;
 			/* Titre */
 
 
@@ -3076,12 +3076,12 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 					/* Total */
 					echo '<td class="linecolht nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
-					if (!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+					if (isModEnabled('multicurrency') && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 					}
 				} else {
 					echo '<td class="linecolht movetitleblock">&nbsp;</td>';
-					if (!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+					if (isModEnabled('multicurrency') && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 					}
 				}
@@ -3395,8 +3395,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 			$colspan = 4;
 			if($object->origin && $object->origin_id > 0) $colspan++;
-			if(! empty($conf->stock->enabled)) $colspan++;
-			if(! empty($conf->productbatch->enabled)) $colspan++;
+			if(isModEnabled('stock')) $colspan++;
+			if(isModEnabled('productbatch')) $colspan++;
 			if($object->statut == 0) $colspan++;
 			if($object->statut == 0 && !getDolGlobalString('SUBTOTAL_ALLOW_REMOVE_BLOCK')) $colspan++;
 
@@ -3501,7 +3501,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				$lineid = $line->id;
 				if($line->element === 'commandedet') {
 					foreach($object->lines as $shipmentLine) {
-						if(!empty($shipmentLine->fk_origin_line) && $shipmentLine->fk_origin == 'orderline' && $shipmentLine->fk_origin_line == $line->id) {
+						if(!empty($shipmentLine->fk_elementdet ?? $shipmentLine->fk_origin_line) && $shipmentLine->fk_origin == 'orderline' && $shipmentLine->fk_elementdet ?? $shipmentLine->fk_origin_line == $line->id) {
 							$lineid = $shipmentLine->id;
 						}
 					}
