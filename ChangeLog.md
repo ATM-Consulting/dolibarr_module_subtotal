@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 # [Unreleased]
 
 - FIX : Compat v20 
-  Changed Dolibarr compatibility range to 16 min - 20 max
+  Changed Dolibarr compatibility range to 16 min - 20 max - *11/07/2024* - 3.25.0
 
 # Release 3.24 - 08/04/2024
 - FIX : Module_number missed in subTotal class. function  addSubTotalLine function  in test order_supplier - *26/06/2024* - 3.24.4  
