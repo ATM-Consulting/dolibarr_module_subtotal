@@ -1459,7 +1459,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			$posy = $posYAfterDesc;
 			$pdf->SetXY($posx, $posy); //reset position
 			$pdf->SetFont('', $style, $size_title); //reset style
-			$pdf->SetTextColor('text', 0, 0, 0); // restore default text color;
+			$pdf->SetColor('text', 0, 0, 0); // restore default text color;
 		}
 
 		// restore cell padding
