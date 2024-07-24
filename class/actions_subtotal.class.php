@@ -1459,7 +1459,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			$posy = $posYAfterDesc;
 			$pdf->SetXY($posx, $posy); //reset position
 			$pdf->SetFont('', $style, $size_title); //reset style
-			$pdf->SetTextColor('text', 0, 0, 0); // restore default text color;
+			$pdf->SetColor('text', 0, 0, 0); // restore default text color;
 		}
 
 		// restore cell padding
@@ -2415,6 +2415,15 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 						$pageBefore = $pdf->getPage();
 					}
+
+
+					// FIX DA024845 : Le module sous total amène des erreurs dans les sauts de page lorsque l'on arrive tout juste en bas de page.
+					$heightForFooter = getDolGlobalInt('MAIN_PDF_MARGIN_BOTTOM', 10) + (getDolGlobalInt('MAIN_GENERATE_DOCUMENTS_SHOW_FOOT_DETAILS') ? 12 : 22); // Height reserved to output the footer (value include bottom margin)
+					if($pdf->getPageHeight() - $posy - $heightForFooter < 8){
+						$pdf->addPage('', '', true);
+						$posy = $pdf->GetY();
+					}
+
 
 					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 
