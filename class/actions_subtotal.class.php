@@ -3779,7 +3779,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			'useOldSplittedTrForLine' => intval(DOL_VERSION) < 16 ? 1 : 0
 		);
 
-		print '<script type="text/javascript"> var subtotalSummaryJsConf = '.json_encode($jsConfig).'; </script>'; // used also for subtotal.lib.js
+		print '<script type="text/javascript"> if (typeof subtotalSummaryJsConf === undefined) { var subtotalSummaryJsConf = {}; } subtotalSummaryJsConf = '.json_encode($jsConfig).'; </script>'; // used also for subtotal.lib.js
 
 
 		if(!getDolGlobalString('SUBTOTAL_DISABLE_SUMMARY')){
