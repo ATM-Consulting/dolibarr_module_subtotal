@@ -2252,6 +2252,10 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 				if ($hideInnerLines)
 				{
+						$hasParentTitle = TSubtotal::getParentTitleOfLine($object, $line->rang);
+						if (empty($hasParentTitle) && empty(TSubtotal::isModSubtotalLine($line))) {	// cette ligne n'est pas dans un titre => on l'affiche
+							$TLines[] = $line;
+						}
 				    if(getDolGlobalString('SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES'))
 				    {
 				        if($line->tva_tx != '0.000' && $line->product_type!=9){
