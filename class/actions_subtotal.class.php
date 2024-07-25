@@ -2718,14 +2718,14 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				$colspan++; // Colonne PU Devise
 			}
 			if($object->element == 'commande' && $object->statut < 3 && isModEnabled('shippableorder')) $colspan++;
-			$margins_hidden_by_module = empty($conf->affmarges->enabled) ? false : !($_SESSION['marginsdisplayed']);
-			if(!empty($conf->margin->enabled) && !$margins_hidden_by_module) $colspan++;
-			if(!empty($conf->margin->enabled) && getDolGlobalString('DISPLAY_MARGIN_RATES') && !$margins_hidden_by_module && $affectedByMarge > 0) $colspan++;
-			if(!empty($conf->margin->enabled) && getDolGlobalString('DISPLAY_MARK_RATES') && !$margins_hidden_by_module && $affectedByMarge > 0) $colspan++;
+			$margins_hidden_by_module = !isModEnabled('affmarges') ? false : !($_SESSION['marginsdisplayed']);
+			if(isModEnabled('margin') && !$margins_hidden_by_module) $colspan++;
+			if(isModEnabled('margin') && getDolGlobalString('DISPLAY_MARGIN_RATES') && !$margins_hidden_by_module && $affectedByMarge > 0) $colspan++;
+			if(isModEnabled('margin') && getDolGlobalString('DISPLAY_MARK_RATES') && !$margins_hidden_by_module && $affectedByMarge > 0) $colspan++;
 			if($object->element == 'facture' && getDolGlobalString('INVOICE_USE_SITUATION') && $object->type == Facture::TYPE_SITUATION) $colspan++;
 			if(getDolGlobalString('PRODUCT_USE_UNITS')) $colspan++;
 			// Compatibility module showprice
-			if(!empty($conf->showprice->enabled)) $colspan++;
+			if(isModEnabled('showprice')) $colspan++;
 			/* Titre */
 
 
