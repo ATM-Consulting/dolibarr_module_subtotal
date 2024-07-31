@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+- FIX(supplier): order and invoice subtotal lines
 
 
 # Release 3.25 - 24/07/2024
