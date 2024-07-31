@@ -142,9 +142,9 @@ class TSubtotal {
 			    $object->special_code = TSubtotal::$module_number;
                 if( (float)DOL_VERSION < 6 ) $rang = $object->line_max() + 1;
 				if ((int)DOL_VERSION < 17) {
-					$res = $object->addline($label,0,0,0,0,$qty, 0,0,'','', 0, '', 'HT', 9, $rang, false, 0, null, 0,0,'',TSubtotal::$module_number, 0,0);
-				} else {
 					$res = $object->addline($label,0,0,0,0,$qty,0,0,'','',0,0,'HT',9,$rang);
+				} else {
+					$res = $object->addline($label,0,0,0,0,$qty, 0,0,'','', 0, '', 'HT', 9, $rang, false, 0, null, 0,0,'',TSubtotal::$module_number, 0,0);
 				}
 			}
 			/**
@@ -167,9 +167,9 @@ class TSubtotal {
 				/** @var CommandeFournisseur $object */
 			    $object->special_code = TSubtotal::$module_number;
 				if ((int)DOL_VERSION < 17) {
-					$res = $object->addline($label, 0, $qty, 0, 0, 0, 0, 0, '', 0, 'HT', 0, 9, 0, false, null, null, 0, null, 0, '', 0 ,$rang, TSubtotal::$module_number);
-				} else {
 					$res = $object->addline($label, 0,$qty,0,0,0,0,0,'',0,'HT', 0, 9);
+				} else {
+					$res = $object->addline($label, 0, $qty, 0, 0, 0, 0, 0, '', 0, 'HT', 0, 9, 0, false, null, null, 0, null, 0, '', 0 ,$rang, TSubtotal::$module_number);
 				}
 			}
 			/**
