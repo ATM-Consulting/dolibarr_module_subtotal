@@ -2162,6 +2162,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		if(!empty($object->context)){ $object->context = array(); }
 		$object->context['subtotalPdfModelInfo'] = new stdClass(); // see defineColumnFiel method in this class
 		$object->context['subtotalPdfModelInfo']->cols = false;
+		$object->context['subtotalTransactionLine'] = array();
 
 
 
@@ -2410,7 +2411,10 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						 * si aucune transaction n'est en cours, on peut y faire appel sans problème pour revenir
 						 * à l'état d'origine.
 						 */
-						$pdf->rollbackTransaction(true);
+						if (!isset($object->context['subtotalTransactionLine'][$i])) {
+							$pdf->rollbackTransaction(true);
+							$object->context['subtotalTransactionLine'][$i]  = true;
+						}
 						$pdf->startTransaction();
 
 						$pageBefore = $pdf->getPage();
@@ -2477,7 +2481,10 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						 * si aucune transaction n'est en cours, on peut y faire appel sans problème pour revenir
 						 * à l'état d'origine.
 						 */
-						$pdf->rollbackTransaction(true);
+						if (!isset($object->context['subtotalTransactionLine'][$i])) {
+							$pdf->rollbackTransaction(true);
+							$object->context['subtotalTransactionLine'][$i]  = true;
+						}
 						$pdf->startTransaction();
 
 						$pageBefore = $pdf->getPage();
@@ -2524,7 +2531,10 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						 * si aucune transaction n'est en cours, on peut y faire appel sans problème pour revenir
 						 * à l'état d'origine.
 						 */
-						$pdf->rollbackTransaction(true);
+						if (!isset($object->context['subtotalTransactionLine'][$i])) {
+							$pdf->rollbackTransaction(true);
+							$object->context['subtotalTransactionLine'][$i]  = true;
+						}
 						$pdf->startTransaction();
 
 						$pageBefore = $pdf->getPage();
