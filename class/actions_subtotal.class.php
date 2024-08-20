@@ -426,7 +426,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						{
 							if (typeof use_textarea != 'undefined' && use_textarea && typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" )
 							{
-								 CKEDITOR.replace( 'sub-total-title', {toolbar: 'dolibarr_details', toolbarStartupExpanded: false} );
+								 CKEDITOR.replace( 'sub-total-title', {toolbar: 'dolibarr_details', versionCheck: false, toolbarStartupExpanded: false} );
 							}
 						}
 						<?php } ?>
