@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 
 # Release 3.24 - 08/04/2024
+- FIX : CKeditor no check version to avoid the error message  - *20/09/2024* - 3.24.6
 - FIX : DA024845 : Le module sous total amène des erreurs dans les sauts de page lorsque l'on arrive tout juste en bas de page. - *24/07/2024* - 3.24.5
 - FIX : Module_number missed in subTotal class. function  addSubTotalLine function  in test order_supplier - *26/06/2024* - 3.24.4  
 - FIX : display totalht ligne 'non compris' - *12/04/2024* - 3.24.3  
