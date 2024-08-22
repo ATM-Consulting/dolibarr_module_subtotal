@@ -7,7 +7,8 @@ All notable changes to this project will be documented in this file.
 
 # Release 3.25 - 24/07/2024
 
-- FIX : CKeditor no check version to avoid the error message  - *20/09/2024* - 3.25.2
+- FIX DA025399 : GETPOST type integer n'existe pas - *22/08/2024* - 3.25.3
+- FIX : CKeditor no check version to avoid the error message  - *20/08/2024* - 3.25.2
 - FIX : Title summary - *24/07/2024* - 3.25.1
 - FIX : Compat v20 
   Changed Dolibarr compatibility range to 16 min - 20 max - *11/07/2024* - 3.25.0

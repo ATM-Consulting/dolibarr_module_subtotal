@@ -233,7 +233,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				else if($action==='ask_deleteallline') {
 						$form=new Form($db);
 
-						$lineid = GETPOST('lineid','integer');
+						$lineid = GETPOST('lineid','int');
 						$TIdForGroup = TSubtotal::getLinesFromTitleId($object, $lineid, true);
 
 						$nbLines = count($TIdForGroup);
@@ -795,7 +795,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 		}
 		else if($action === 'confirm_delete_all_lines' && GETPOST('confirm', 'none')=='yes') {
-
+			$error = 0;
 			$Tab = TSubtotal::getLinesFromTitleId($object, GETPOST('lineid', 'int'), true);
 			foreach($Tab as $line) {
                 $result = 0;
@@ -847,7 +847,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
                 if ($result < 0) $error++;
 			}
 
-            if ($error) {
+            if ($error > 0) {
                 setEventMessages($object->error, $object->errors, 'errors');
                 $db->rollback();
             } else {
