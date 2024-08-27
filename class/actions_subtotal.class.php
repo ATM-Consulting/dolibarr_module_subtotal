@@ -105,7 +105,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 									$(item).replaceWith($('<textarea name="content">'+value+'</textarea>'));
 								});
 
-								<?php if (!empty($conf->fckeditor->enabled) && getDolGlobalString('FCKEDITOR_ENABLE_DETAILS')) { ?>
+								<?php if (isModEnabled('fckeditor') && getDolGlobalString('FCKEDITOR_ENABLE_DETAILS')) { ?>
 								$('textarea[name=content]').each(function(i, item) {
 									CKEDITOR.replace(item, {
 										toolbar: 'dolibarr_notes'
@@ -118,7 +118,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						// <= 5.0
 						// Le CKEditor est forcé sur la page dictionnaire, pas possible de mettre une valeur custom
 						// petit js qui supprimer le wysiwyg et affiche le textarea car avant la version 6.0 le wysiwyg sur une page de dictionnaire est inexploitable
-						<?php if (!empty($conf->fckeditor->enabled)) { ?>
+						<?php if (isModEnabled('fckeditor')) { ?>
 							CKEDITOR.on('instanceReady', function(ev) {
 								var editor = ev.editor;
 
@@ -233,7 +233,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				else if($action==='ask_deleteallline') {
 						$form=new Form($db);
 
-						$lineid = GETPOST('lineid','integer');
+						$lineid = GETPOST('lineid','int');
 						$TIdForGroup = TSubtotal::getLinesFromTitleId($object, $lineid, true);
 
 						$nbLines = count($TIdForGroup);
@@ -358,7 +358,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						{
 							if (typeof use_textarea != 'undefined' && use_textarea && typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" )
 							{
-								 CKEDITOR.replace( 'sub-total-title', {toolbar: 'dolibarr_details', toolbarStartupExpanded: false} );
+								 CKEDITOR.replace( 'sub-total-title', {toolbar: 'dolibarr_details', versionCheck: false, toolbarStartupExpanded: false} );
 							}
 						}
 						<?php } ?>
@@ -795,7 +795,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 		}
 		else if($action === 'confirm_delete_all_lines' && GETPOST('confirm', 'none')=='yes') {
-
+			$error = 0;
 			$Tab = TSubtotal::getLinesFromTitleId($object, GETPOST('lineid', 'int'), true);
 			foreach($Tab as $line) {
                 $result = 0;
@@ -847,7 +847,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
                 if ($result < 0) $error++;
 			}
 
-            if ($error) {
+            if ($error > 0) {
                 setEventMessages($object->error, $object->errors, 'errors');
                 $db->rollback();
             } else {
@@ -1459,7 +1459,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			$posy = $posYAfterDesc;
 			$pdf->SetXY($posx, $posy); //reset position
 			$pdf->SetFont('', $style, $size_title); //reset style
-			$pdf->SetTextColor('text', 0, 0, 0); // restore default text color;
+			$pdf->SetColor('text', 0, 0, 0); // restore default text color;
 		}
 
 		// restore cell padding
@@ -1488,7 +1488,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		{
 			dol_include_once('/commande/class/commande.class.php');
 			$line = new OrderLine($object->db);
-			$line->fetch($object->lines[$i]->fk_origin_line);
+			$line->fetch($object->lines[$i]->fk_elementdet ?? $object->lines[$i]->fk_origin_line);
 		}
 
 
@@ -2380,7 +2380,10 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 				$line = &$object->lines[$i];
 
+				// Unset on Dolibarr < 20.0
 				if($object->element == 'delivery' && ! empty($object->commande->expeditions[$line->fk_origin_line])) unset($object->commande->expeditions[$line->fk_origin_line]);
+				// Unset on Dolibarr >= 20.0
+				if($object->element == 'delivery' && ! empty($object->commande->expeditions[$line->fk_elementdet])) unset($object->commande->expeditions[$line->fk_elementdet]);
 
 				$margin = $pdf->getMargins();
 				if(!empty($margin) && $line->info_bits>0) { // PAGE BREAK
@@ -2412,6 +2415,15 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 						$pageBefore = $pdf->getPage();
 					}
+
+
+					// FIX DA024845 : Le module sous total amène des erreurs dans les sauts de page lorsque l'on arrive tout juste en bas de page.
+					$heightForFooter = getDolGlobalInt('MAIN_PDF_MARGIN_BOTTOM', 10) + (getDolGlobalInt('MAIN_GENERATE_DOCUMENTS_SHOW_FOOT_DETAILS') ? 12 : 22); // Height reserved to output the footer (value include bottom margin)
+					if($pdf->getPageHeight() - $posy - $heightForFooter < 8){
+						$pdf->addPage('', '', true);
+						$posy = $pdf->GetY();
+					}
+
 
 					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
 
@@ -2622,13 +2634,13 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		}
 		elseif($object->element == 'shipping' || $object->element == 'delivery')
 		{
-			if(empty($line->origin_line_id) && ! empty($line->fk_origin_line))
+			if(empty($line->origin_line_id) && (! empty($line->fk_origin_line || ! empty($line->fk_elementdet))))
 			{
-				$line->origin_line_id = $line->fk_origin_line;
+				$line->origin_line_id = $line->fk_elementdet ?? $line->fk_origin_line;
 			}
 
 			$originline = new OrderLine($db);
-			$originline->fetch($line->fk_origin_line);
+			$originline->fetch($line->fk_elementdet ?? $line->fk_origin_line);
 
 			foreach(get_object_vars($line) as $property => $value)
 			{
@@ -2702,18 +2714,18 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 			if($object->element == 'facturerec' ) $colspan = 5;
 
-			if(!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+			if(isModEnabled('multicurrency') && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 				$colspan++; // Colonne PU Devise
 			}
-			if($object->element == 'commande' && $object->statut < 3 && !empty($conf->shippableorder->enabled)) $colspan++;
-			$margins_hidden_by_module = empty($conf->affmarges->enabled) ? false : !($_SESSION['marginsdisplayed']);
-			if(!empty($conf->margin->enabled) && !$margins_hidden_by_module) $colspan++;
-			if(!empty($conf->margin->enabled) && getDolGlobalString('DISPLAY_MARGIN_RATES') && !$margins_hidden_by_module && $affectedByMarge > 0) $colspan++;
-			if(!empty($conf->margin->enabled) && getDolGlobalString('DISPLAY_MARK_RATES') && !$margins_hidden_by_module && $affectedByMarge > 0) $colspan++;
+			if($object->element == 'commande' && $object->statut < 3 && isModEnabled('shippableorder')) $colspan++;
+			$margins_hidden_by_module = !isModEnabled('affmarges') ? false : !($_SESSION['marginsdisplayed']);
+			if(isModEnabled('margin') && !$margins_hidden_by_module) $colspan++;
+			if(isModEnabled('margin') && getDolGlobalString('DISPLAY_MARGIN_RATES') && !$margins_hidden_by_module && $affectedByMarge > 0) $colspan++;
+			if(isModEnabled('margin') && getDolGlobalString('DISPLAY_MARK_RATES') && !$margins_hidden_by_module && $affectedByMarge > 0) $colspan++;
 			if($object->element == 'facture' && getDolGlobalString('INVOICE_USE_SITUATION') && $object->type == Facture::TYPE_SITUATION) $colspan++;
 			if(getDolGlobalString('PRODUCT_USE_UNITS')) $colspan++;
 			// Compatibility module showprice
-			if(!empty($conf->showprice->enabled)) $colspan++;
+			if(isModEnabled('showprice')) $colspan++;
 			/* Titre */
 
 
@@ -3076,12 +3088,12 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 					/* Total */
 					echo '<td class="linecolht nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
-					if (!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+					if (isModEnabled('multicurrency') && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 					}
 				} else {
 					echo '<td class="linecolht movetitleblock">&nbsp;</td>';
-					if (!empty($conf->multicurrency->enabled) && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+					if (isModEnabled('multicurrency') && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
 						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 					}
 				}
@@ -3395,8 +3407,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 			$colspan = 4;
 			if($object->origin && $object->origin_id > 0) $colspan++;
-			if(! empty($conf->stock->enabled)) $colspan++;
-			if(! empty($conf->productbatch->enabled)) $colspan++;
+			if(isModEnabled('stock')) $colspan++;
+			if(isModEnabled('productbatch')) $colspan++;
 			if($object->statut == 0) $colspan++;
 			if($object->statut == 0 && !getDolGlobalString('SUBTOTAL_ALLOW_REMOVE_BLOCK')) $colspan++;
 
@@ -3501,7 +3513,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				$lineid = $line->id;
 				if($line->element === 'commandedet') {
 					foreach($object->lines as $shipmentLine) {
-						if(!empty($shipmentLine->fk_origin_line) && $shipmentLine->fk_origin == 'orderline' && $shipmentLine->fk_origin_line == $line->id) {
+						if((!empty($shipmentLine->fk_elementdet)) && $shipmentLine->fk_origin == 'orderline' && $shipmentLine->fk_elementdet == $line->id) {
+							$lineid = $shipmentLine->id;
+						} elseif((!empty($shipmentLine->fk_origin_line)) && $shipmentLine->fk_origin == 'orderline' && $shipmentLine->fk_origin_line == $line->id) {
 							$lineid = $shipmentLine->id;
 						}
 					}
@@ -3765,7 +3779,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			'useOldSplittedTrForLine' => intval(DOL_VERSION) < 16 ? 1 : 0
 		);
 
-		print '<script type="text/javascript"> var subtotalSummaryJsConf = '.json_encode($jsConfig).'; </script>'; // used also for subtotal.lib.js
+		print '<script type="text/javascript"> if (typeof subtotalSummaryJsConf === undefined) { var subtotalSummaryJsConf = {}; } subtotalSummaryJsConf = '.json_encode($jsConfig).'; </script>'; // used also for subtotal.lib.js
 
 
 		if(!getDolGlobalString('SUBTOTAL_DISABLE_SUMMARY')){

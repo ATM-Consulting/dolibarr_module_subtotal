@@ -37,7 +37,7 @@ if ($this->tpl['subtotal'] != $this->tpl['id'] || !in_array($this->tpl['sub-type
 	print '<td class="linecoldescription">'.$this->tpl['description'].'</td>';
 	print '<td class="linecolvat right">'.$this->tpl['vat_rate'].'</td>';
 	print '<td class="linecoluht right">'.$this->tpl['price'].'</td>';
-	if (!empty($conf->multicurrency->enabled))
+	if (isModEnabled('multicurrency'))
 		print '<td class="linecoluht_currency right">'.$this->tpl['multicurrency_price'].'</td>';
 
 	print '<td class="linecolqty right">'.$this->tpl['qty'].'</td>';
@@ -58,7 +58,7 @@ if ($this->tpl['subtotal'] != $this->tpl['id'] || !in_array($this->tpl['sub-type
 else
 {
 	$colspan = 6;
-    if($conf->multicurrency->enabled) $colspan++;
+	if (isModEnabled('multicurrency')) $colspan++;
     if(getDolGlobalString('PRODUCT_USE_UNITS')) $colspan++;
 	print '<tr class="oddeven'.(empty($this->tpl['strike'])?'':' strikefordisabled').'" '.(!empty($this->tpl['sub-tr-style']) ? 'style="'.$this->tpl['sub-tr-style'].'"' : '').'>';
 	print '<td colspan="'.$colspan.'" '.$this->tpl['sub-td-style'].'>'.$this->tpl["sublabel"].'</td>';

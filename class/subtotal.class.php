@@ -1431,7 +1431,7 @@ class TSubtotal {
 		$pdf->SetXY($col1x, $tab2_top + 0);
 		$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalHT"), 0, 'L', 1);
 
-		// $total_ht = ($conf->multicurrency->enabled && $object->mylticurrency_tx != 1) ? $TTot['multicurrency_total_ht'] : $TTot['total_ht'];
+		// $total_ht = (isModEnabled('multicurrency') && $object->mylticurrency_tx != 1) ? $TTot['multicurrency_total_ht'] : $TTot['total_ht'];
 		$total_ht = $TTot['total_ht'];
 		$pdf->SetXY($col2x, $tab2_top + 0);
 		$pdf->MultiCell($largcol2, $tab2_hl, price($total_ht, 0, $outputlangs), 0, 'R', 1);
@@ -1471,7 +1471,7 @@ class TSubtotal {
 		$pdf->SetFillColor(224,224,224);
 		$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalTTC"), $useborder, 'L', 1);
 
-		// $total_ttc = ($conf->multicurrency->enabled && $object->multiccurency_tx != 1) ? $TTot['multicurrency_total_ttc'] : $TTot['total_ttc'];
+		// $total_ttc = (isModEnabled('multicurrency') && $object->multiccurency_tx != 1) ? $TTot['multicurrency_total_ttc'] : $TTot['total_ttc'];
 		$total_ttc = $TTot['total_ttc'];
 		$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
 		$pdf->MultiCell($largcol2, $tab2_hl, price($total_ttc, 0, $outputlangs), $useborder, 'R', 1);
