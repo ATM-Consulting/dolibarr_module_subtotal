@@ -237,7 +237,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
             require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
             $originOrderLine = new OrderLine($this->db);
 
-            $originOrderLineFetchReturn = $originOrderLine->fetch($originSendingLine->fk_origin_line);
+			$originOrderLineFetchReturn = $originOrderLine->fetch($originSendingLine->fk_elementdet ?? $originSendingLine->fk_origin_line);
 
             if ($originOrderLineFetchReturn < 0) {
                 $this->error = $originOrderLine->error;
