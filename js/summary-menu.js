@@ -1,10 +1,11 @@
-
-var subtotalSummaryJsConf = {
-	langs:{
-		'SubtotalSummaryTitle' : 'Quick summary'
-	},
-	useOldSplittedTrForLine : 0
-};
+if (typeof subtotalSummaryJsConf === undefined) {
+	var subtotalSummaryJsConf = {
+		langs: {
+			'SubtotalSummaryTitle': 'Quick summary'
+		},
+		useOldSplittedTrForLine: 0
+	};
+}
 
 /**
  * SOMMAIRE DES TITRE (du module sous total)

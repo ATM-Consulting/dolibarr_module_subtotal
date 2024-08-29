@@ -34,10 +34,10 @@ a.subtotal-summary-link{
 	font-size: 11px;
 	line-height: 1.5em;
 
-	color: #666;
+	color: var(--colortextbackvmenu, #666);
 }
 a.subtotal-summary-link.--target-in-viewport, a.subtotal-summary-link.--child-in-viewport{
 	font-weight: bold;
-	color : var(--colortextlink);
+	color : var(--colortextbackvmenu, #666);
 }
 
