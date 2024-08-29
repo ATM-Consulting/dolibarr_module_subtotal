@@ -1579,4 +1579,21 @@ class TSubtotal {
 		if (empty($title)) $title = !empty($line->description) ? $line->description : $line->desc;
 		return $title;
 	}
+
+	/**
+	 * Méthode pour récupérer le code html contenu dans un éditeur WYSIWYG d'un dictionnaire
+	 *
+	 * @return	string
+	 */
+	public static function getHtmlDictionnary():string
+	{
+		global $db;
+		$value = '';
+		$sql = 'SELECT content FROM '.$db->prefix().'c_subtotal_free_text WHERE rowid = '.GETPOST('rowid', 'int');
+		$resql = $db->query($sql);
+		if ($resql && ($obj = $db->fetch_object($resql))) {
+			$value = $obj->content;
+		}
+		return $value;
+	}
 }
