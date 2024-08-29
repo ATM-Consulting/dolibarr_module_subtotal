@@ -80,13 +80,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			// Merci Dolibarr de remplacer les textarea par un input text
 			if ((float) DOL_VERSION >= 6.0)
 			{
-				$value = '';
-				$sql = 'SELECT content FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text WHERE rowid = '.GETPOST('rowid', 'int');
-				$resql = $this->db->query($sql);
-				if ($resql && ($obj = $this->db->fetch_object($resql))) {
-					$value = $obj->content;
-				}
+				$value = TSubtotal::getHtmlDictionnary();
 			}
+
 			?>
 			<script type="text/javascript">
 				$(function() {
@@ -148,12 +144,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			// Merci Dolibarr de remplacer les textarea par un input text
 			if ((float) DOL_VERSION >= 6.0)
 			{
-				$value = '';
-				$sql = 'SELECT content FROM '.MAIN_DB_PREFIX.'c_subtotal_free_text WHERE rowid = '.GETPOST('rowid', 'int');
-				$resql = $this->db->query($sql);
-				if ($resql && ($obj = $this->db->fetch_object($resql))) {
-					$value = $obj->content;
-				}
+				$value = TSubtotal::getHtmlDictionnary();
 			}
 			?>
 			<script type="text/javascript">
