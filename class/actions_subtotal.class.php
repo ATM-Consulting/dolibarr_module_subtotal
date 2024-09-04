@@ -4189,7 +4189,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 					let tr = '<tr><td>'+jsConf.langs.SubtotalOptions+'</td><td>';
 					tr+= '<label><input type="checkbox" value="1" name="subtotal_add_title_bloc_from_orderstoinvoice" checked="checked" /> '+jsConf.langs.AddTitleBlocFromOrdersToInvoice+'</label>';
 					if(jsConf.isModShippingEnable){
-						tr+= '<br/><label><input type="checkbox" value="1" name="subtotal_add_shipping_list_to_title_desc" /> '+jsConf.langs.AddShippingListToTile+' <i class="fa fa-question-circle-o" title="'+jsConf.langs.UseHiddenConfToAutoCheck+' SUBTOTAL_DEFAULT_CHECK_SHIPPING_LIST_FOR_TITLE_DESC"></label>';
+						tr+= '<br/><label><input type="checkbox" value="1" name="subtotal_add_shipping_list_to_title_desc" /> '+jsConf.langs.AddShippingListToTile+' <i class="fa fa-question-circle" title="'+jsConf.langs.UseHiddenConfToAutoCheck+' SUBTOTAL_DEFAULT_CHECK_SHIPPING_LIST_FOR_TITLE_DESC"></label>';
 					}
 					tr+= '<td></tr>';
 
