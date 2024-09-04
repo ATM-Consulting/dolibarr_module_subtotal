@@ -3,7 +3,8 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
-
+- NEW : Add more order to invoice massaction option - *04/02/2024* - 3.26.0  
+  Allow adding list of shipping ref to title block 
 
 # Release 3.25 - 24/07/2024
 
