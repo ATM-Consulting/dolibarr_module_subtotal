@@ -3,12 +3,12 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+- FIX : Compat V20 : Document col missing for title for NC - *16/09/2024* - 3.26.1
 - NEW : Add more order to invoice massaction option - *04/09/2024* - 3.26.0  
   Allow adding list of shipping ref to title block 
 
 # Release 3.25 - 24/07/2024
 
-- FIX : Compat V20 : Document col missing for title for NC - *16/09/2024* - 3.25.4
 - FIX DA025399 : GETPOST type integer n'existe pas - *22/08/2024* - 3.25.3
 - FIX : CKeditor no check version to avoid the error message  - *20/08/2024* - 3.25.2
 - FIX : Title summary - *24/07/2024* - 3.25.1
