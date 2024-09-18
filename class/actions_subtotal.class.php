@@ -768,7 +768,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
                     $_SESSION[$sessname] = array($object->id => 0); // prevent old system
 				$_SESSION[$sessname][$object->id] = $hideInnerLines;
 
-				$hidedetails= GETPOST('hidedetails', 'int');
+				$hidedetails= GETPOST('hidedetails', 'int') ? GETPOST('hidedetails', 'int') : null ;
 				if (!array_key_exists($sessname, $_SESSION) || empty($_SESSION[$sessname]) || !is_array($_SESSION[$sessname2]) || !isset($_SESSION[$sessname2][$object->id]) || !is_array($_SESSION[$sessname2][$object->id]))
 					$_SESSION[$sessname2] = array($object->id => 0); // prevent old system
 				$_SESSION[$sessname2][$object->id] = $hidedetails;
