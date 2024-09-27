@@ -68,6 +68,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	}
 
 
+	function editDictionaryFieldlist($parameters, &$object, &$action, $hookmanager) {
+        return $this->createDictionaryFieldlist($parameters, $object, $action, $hookmanager);
+    }
 	function createDictionaryFieldlist($parameters, &$object, &$action, $hookmanager)
 	{
 		global $conf;
@@ -91,7 +94,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				$(function() {
 
 					<?php if ((float) DOL_VERSION >= 6.0) { ?>
-							if ($('input[name=content]').length > 0)
+							if ($('input[name=content]').length > 0 || $('textarea[name=content]').length > 0)
 							{
 								$('input[name=content]').each(function(i,item) {
 									var value = '';
@@ -99,6 +102,16 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 									if (i == $('input[name=content]').length) value = <?php echo json_encode($value); ?>;
 									$(item).replaceWith($('<textarea name="content">'+value+'</textarea>'));
 								});
+
+                                $('textarea[name=content]').each(function(i,item) {
+                                    var value = '';
+                                    // Le dernier item correspond à l'édition
+                                    value = <?php echo json_encode($value); ?>;
+                                    $(item).replaceWith($('<textarea name="content">'+value+'</textarea>'));
+                                    console.log(value);
+
+                                });
+
 
 								<?php if (!empty($conf->fckeditor->enabled) && getDolGlobalString('FCKEDITOR_ENABLE_DETAILS')) { ?>
 								$('textarea[name=content]').each(function(i, item) {
