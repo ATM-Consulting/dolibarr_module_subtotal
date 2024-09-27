@@ -90,11 +90,14 @@ class TSubtotal {
 
 
 	/**
+	 *
+	 * n'est pas appelé lors de la  de facture depuis un object (propal/command)
 	 * @param CommonObject $object
 	 * @param string       $label
 	 * @param int          $qty
 	 * @param int          $rang
 	 * @return int
+	 *
 	 */
 	static function addSubTotalLine(&$object, $label, $qty, $rang=-1) {
 
@@ -119,7 +122,7 @@ class TSubtotal {
 			$desc = '';
 
 			$TNotElements = array ('invoice_supplier', 'order_supplier');
-			if ((float) DOL_VERSION < 6  || $qty==50 && !in_array($object->element, $TNotElements) ) {
+			if ((float) DOL_VERSION < 6  || $qty==50 && !in_array($object->element, $TNotElements)) {
 				$desc = $label;
 				$label = '';
 			}
@@ -133,7 +136,7 @@ class TSubtotal {
                 /** @var FactureFournisseur $object */
 			    $object->special_code = TSubtotal::$module_number;
                 if( (float)DOL_VERSION < 6 ) $rang = $object->line_max() + 1;
-			    $res = $object->addline($label,0,0,0,0,$qty,0,0,'','',0,0,'HT',9,$rang);
+			    $res = $object->addline($label,0,0,0,0,$qty,0,0,'','',0,0,'HT',9,$rang,false,0,null,0,0,'',TSubtotal::$module_number);
 			}
 			/**
 			 * @var $object Propal
@@ -152,8 +155,8 @@ class TSubtotal {
 			 * @var $object Commande fournisseur
 			 */
 			else if($object->element=='order_supplier') {
-			    $object->special_code = TSubtotal::$module_number;
-			    $res = $object->addline($label, 0,$qty,0,0,0,0,0,'',0,'HT', 0, 9);
+				$object->special_code = TSubtotal::$module_number; // à garder pour la rétrocompatibilité
+			    $res = $object->addline($label, 0,$qty,0,0,0,0,0,'',0,'HT', 0, 9, 0, false, null, null, 0, null, 0, '', 0, -1, TSubtotal::$module_number);
 			}
 			/**
 			 * @var $object Facturerec
@@ -555,7 +558,7 @@ class TSubtotal {
 	 */
 	public static function isTitle(&$line, $level=-1)
 	{
-		$res = $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty <= 9;
+		$res = !empty($line->special_code) && $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty <= 9;
 		if($res && $level > -1) {
 			return $line->qty == $level;
 		} else return $res;
@@ -569,7 +572,7 @@ class TSubtotal {
 	 */
 	public static function isSubtotal(&$line, $level=-1)
 	{
-	    $res = $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty >= 90;
+	    $res = !empty($line->special_code) && $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty >= 90;
 	    if($res && $level > -1) {
 	        return self::getNiveau($line) == $level;
 	    } else return $res;
@@ -581,7 +584,7 @@ class TSubtotal {
 	 */
 	public static function isFreeText(&$line)
 	{
-		return $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty == 50;
+		return !empty($line->special_code) && $line->special_code == self::$module_number && $line->product_type == 9 && $line->qty == 50;
 	}
 
 	/**
@@ -776,23 +779,22 @@ class TSubtotal {
 
 				if ( ($key_is_id && $line->id == $key_trad) || (!$key_is_id && $line->product_type == 9 && $line->qty == $level && (in_array($line->desc, $TTitle_search) || in_array($line->label, $TTitle_search) )))
 				{
-
 					if ($key_is_id) $level = $line->qty;
 
 					$add_line = true;
 					if ($withBlockLine) $TLine[] = $line;
 					continue;
 				}
-				elseif ($add_line && TSubtotal::isModSubtotalLine($line) && TSubtotal::getNiveau($line) == $level) // Si on tombe sur un sous-total, il faut que ce soit un du même niveau que le titre
+				elseif ($add_line && static::isModSubtotalLine($line) && static::getNiveau($line) == $level) // Si on tombe sur un sous-total, il faut que ce soit un du même niveau que le titre.
 				{
-
-					if ($withBlockLine) $TLine[] = $line;
+					if (self::isSubtotal($line)) {
+						if ($withBlockLine) $TLine[] = $line;
+					} // Si le sous-total a été supprimé, il ne faut pas premdre le titre de mêm niveau qui suit
 					break;
 				}
 
 				if ($add_line)
 				{
-
 					if (!$withBlockLine && (self::isTitle($line) || self::isSubtotal($line)) ) continue;
 					else $TLine[] = $line;
 				}
@@ -864,7 +866,7 @@ class TSubtotal {
 
 			case 'order_supplier':
 			    $object->special_code = SELF::$module_number;
-			    if (empty($desc)) $desc = $label;
+			    if (empty($desc) ) $desc = $label;
 			    $res = $object->updateline($rowid, $desc, $pu, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $type, 0, $date_start, $date_end, $array_options, $fk_unit);
 			    break;
 
@@ -1571,5 +1573,22 @@ class TSubtotal {
 		$title = $line->label;
 		if (empty($title)) $title = !empty($line->description) ? $line->description : $line->desc;
 		return $title;
+	}
+
+	/**
+	 * Méthode pour récupérer le code html contenu dans un éditeur WYSIWYG d'un dictionnaire
+	 *
+	 * @return	string
+	 */
+	public static function getHtmlDictionnary():string
+	{
+		global $db;
+		$value = '';
+		$sql = 'SELECT content FROM '.$db->prefix().'c_subtotal_free_text WHERE rowid = '.GETPOST('rowid', 'int');
+		$resql = $db->query($sql);
+		if ($resql && ($obj = $db->fetch_object($resql))) {
+			$value = $obj->content;
+		}
+		return $value;
 	}
 }
