@@ -111,6 +111,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 									customConfig: ckeditorConfig,
 									versionCheck: false
 								});
+								});
 								<?php } ?>
 							}
 					<?php } else { ?>
