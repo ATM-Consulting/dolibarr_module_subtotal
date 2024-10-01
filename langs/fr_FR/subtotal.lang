@@ -151,3 +151,4 @@ SubtotalOptions = Option subtotal
 AddShippingListToTile = Ajouter la liste des référence des bons d'expédition ou livraison liés dans la description du block titre
 UseHiddenConfToAutoCheck = Pour précocher par défaut vous pouvez activer la configuration divers
 ErrorClassXNotExists = ERREUR : la classe php %s n'est pas chargée
+SubtotalsAndTitlesActionBtnLabel = Titre & Sous total

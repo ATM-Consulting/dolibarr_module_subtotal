@@ -333,7 +333,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			'conf' => array(
 				'SUBTOTAL_USE_NEW_FORMAT' => getDolGlobalInt('SUBTOTAL_USE_NEW_FORMAT'),
 				'MAIN_VIEW_LINE_NUMBER' => getDolGlobalInt('MAIN_VIEW_LINE_NUMBER'),
-				'token' => ((float) DOL_VERSION < 11.0) ?  $_SESSION['newtoken'] : newToken()
+				'token' => ((float) DOL_VERSION < 11.0) ?  $_SESSION['newtoken'] : newToken(),
+				'groupBtn' => intval(DOL_VERSION) < 20.0 || getDolGlobalInt('SUBTOTAL_FORCE_EXPLODE_ACTION_BTN') ? 0 : 1
 			),
 			'langs' => array(
 				'Level' => $langs->trans('Level'),
@@ -341,17 +342,33 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			)
 		);
 
+
+		$jsData['buttons'] = dolGetButtonAction('', $langs->trans('SubtotalsAndTitlesActionBtnLabel'), 'default', [
+				['params'=> ['attr' => [ 'rel' => 'add_title_line']], 'id' => 'add_title_line', 'url' =>'javascript:;', 'label' => $langs->trans('AddTitle'), 'perm' => 1],
+				['params'=> ['attr' => [ 'rel' => 'add_total_line']], 'id' => 'add_total_line', 'url' =>'javascript:;', 'label' => $langs->trans('AddSubTotal'), 'perm' => 1],
+				['params'=> ['attr' => [ 'rel' => 'add_free_text']], 'id' => 'add_free_text', 'url' =>'javascript:;', 'label' => $langs->trans('AddFreeText'), 'perm' => 1],
+			], 'subtotal-actions-buttons-dropdown');
+
+		if(empty($jsData['conf']['groupBtn'])) {
+			$jsData['buttons'] = dolGetButtonAction($langs->trans('AddTitle'), '', 'default', 'javascript:;', 'add_title_line',1, ['attr' => [ 'rel' => 'add_title_line']]);
+			$jsData['buttons'].= dolGetButtonAction($langs->trans('AddSubTotal'), '', 'default', 'javascript:;', 'add_total_line',1, ['attr' => [ 'rel' => 'add_total_line']]);
+			$jsData['buttons'].= dolGetButtonAction($langs->trans('AddFreeText'), '', 'default', 'javascript:;', 'add_free_text',1, ['attr' => [ 'rel' => 'add_free_text']]);
+		}
+
+
 		?>
 			<!-- SubTotal action printNewFormat -->
 		 	<script type="text/javascript">
 				$(document).ready(function() {
 					let jsSubTotalData = <?php print json_encode($jsData); ?>;
 
-					$('div.fiche div.tabsAction').append('<br />');
+					if(jsSubTotalData.conf.groupBtn == 0){
+						$('div.fiche div.tabsAction').append('<br />');
+						$('div.fiche div.tabsAction').append(jsSubTotalData.buttons);
+					}else{
+						$(jsSubTotalData.buttons).insertBefore($("div.fiche div.tabsAction > .butAction").first());
+					}
 
-					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" rel="add_title_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddTitle' )?></a></div>');
-					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" rel="add_total_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubTotal')?></a></div>');
-					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_free_text" rel="add_free_text" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddFreeText')?></a></div>');
 
 
 					function updateAllMessageForms(){
@@ -4160,7 +4177,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			$parameters['object']->context['subtotalPdfModelInfo']->page_largeur 	= $pdfDoc->page_largeur;
 			$parameters['object']->context['subtotalPdfModelInfo']->page_hauteur 	= $pdfDoc->page_hauteur;
 			$parameters['object']->context['subtotalPdfModelInfo']->format 		= $pdfDoc->format;
-		    if (property_exists($pdfDoc, 'context') && is_object($pdfDoc->context['subtotalPdfModelInfo'])) {
+		    if (property_exists($pdfDoc, 'context') && array_key_exists('subtotalPdfModelInfo', $pdfDoc->context) && is_object($pdfDoc->context['subtotalPdfModelInfo'])) {
                 $parameters['object']->context['subtotalPdfModelInfo']->defaultTitlesFieldsStyle = $pdfDoc->context['subtotalPdfModelInfo']->defaultTitlesFieldsStyle;
                 $parameters['object']->context['subtotalPdfModelInfo']->defaultContentsFieldsStyle = $pdfDoc->context['subtotalPdfModelInfo']->defaultContentsFieldsStyle;
 		    }
