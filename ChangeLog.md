@@ -3,7 +3,8 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
-- NEW : Use v20 dropdown for action buttons & fix buttons orders - *01/10/2024* - 3.27.0
+- NEW : Use v20 dropdown for action buttons & fix buttons orders - *01/10/2024* - 3.27.0  
+     Use SUBTOTAL_FORCE_EXPLODE_ACTION_BTN hidden conf to disable behavior
 - FIX : Compat V20 : Document col missing for title for NC - *16/09/2024* - 3.26.1
 - NEW : Add more order to invoice massaction option - *04/09/2024* - 3.26.0  
   Allow adding list of shipping ref to title block 
