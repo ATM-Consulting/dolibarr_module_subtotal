@@ -340,10 +340,16 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
                             }
 
                             $label = str_replace(array('__REFORDER__', '__REFCUSTOMER__'), array($commande->ref, $commande->ref_client), $label);
+							$desc = '';
+
+							if(GETPOST('subtotal_add_shipping_list_to_title_desc', 'int')){
+								$desc = $this->getShippingList($commande->id);
+							}
+
 
                             if(!empty($current_fk_commande)) {
                                 $subtotal_skip = true;
-                                TSubtotal::addTitle($facture, $label, 1, $rang);
+                                TSubtotal::addTitle($facture, $label, 1, $rang, $desc);
                                 $rang++;
                             }
                         }
@@ -1010,4 +1016,91 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 
         return 0;
     }
+
+
+
+
+	/**
+	 *  List BL ref
+	 *  @param  int	$orderId
+	 *  @return	string
+	 */
+	private function getShippingList($orderId)
+	{
+		$refBlList = array();
+		$refExpList = array();
+
+		if(!function_exists('isModEnabled')){
+			return '';
+		}
+
+		if (!isModEnabled('expedition')) {
+			return '';
+		}
+
+		// LIST SHIPPING LINKED TO ORDER
+		$sqlShip = "SELECT fk_target FROM `".MAIN_DB_PREFIX."element_element` WHERE `targettype` = 'shipping' AND sourcetype = 'commande' AND fk_source=".intval($orderId)." ORDER BY `fk_source` ASC";
+
+		$resultShip = $this->db->query($sqlShip);
+		if ($resultShip)
+		{
+			while ($shipping = $this->db->fetch_object($resultShip) )
+			{
+
+				if (isModEnabled('delivery')) {
+
+					// SELECT LIVRAISON LINKED TO SHIPPING
+					$sqlBl = "SELECT liv.ref
+								FROM `".MAIN_DB_PREFIX."element_element`  el
+								JOIN `".MAIN_DB_PREFIX."livraison` liv ON ( el.fk_target = liv.rowid )
+								WHERE el.`targettype` = 'delivery'
+												AND el.sourcetype = 'shipping'
+												AND el.fk_source=".$shipping->fk_target."
+												AND liv.fk_statut = 1
+							ORDER BY el.`fk_target` ASC";
+
+					$resultDelivery = $this->db->query($sqlBl);
+					if ($resultDelivery)
+					{
+						while ($delivery = $this->db->fetch_object($resultDelivery) )
+						{
+							$refBlList[] = $delivery->ref;
+						}
+					}
+
+				}
+
+
+				// SELECT SHIPPING REF
+				$sqlExp = "SELECT exp.ref
+					FROM `" . MAIN_DB_PREFIX . "expedition`  exp
+					WHERE exp.`rowid` =" . $shipping->fk_target;
+
+				$resultExp = $this->db->query($sqlExp);
+				if ($resultExp) {
+					$exp = $this->db->fetch_object($resultExp);
+					$refExpList[] = $exp->ref;
+				}
+
+			}
+		}
+
+		global $langs;
+		$langs->load('subtotal@subtotal');
+		$refList = array_merge($refBlList,$refExpList);
+		$output = '';
+
+
+		if(!empty($refExpList)){
+			$objectLabel = count($refExpList)>1?$langs->trans('LinkedShippings'):$langs->trans('LinkedShipping');
+			$output.= (!empty($output)?'<br>':'').'<strong>'.$objectLabel.' :</strong> '.implode(', ', $refList) ;
+		}
+
+		if(!empty($refBlList)){
+			$objectLabel = count($refBlList)>1?$langs->trans('LinkedDeliveries'):$langs->trans('LinkedDelivery');
+			$output.= (!empty($output)?'<br>':'').'<strong>'.$objectLabel.' :</strong> '.implode(', ', $refList) ;
+		}
+
+		return $output;
+	}
 }

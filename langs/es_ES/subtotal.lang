@@ -131,3 +131,11 @@ SubtotalExperimentalZone = Configuraciones experimentales u obsoletas
 SUBTOTAL_HIDE_OPTIONS_TITLE=Ocultar opciones de título
 SUBTOTAL_HIDE_OPTIONS_BREAK_PAGE_BEFORE=Ocultar la opción de salto de página
 SUBTOTAL_HIDE_OPTIONS_BUILD_DOC=Ocultar las opciones de generación de documentos
+
+LinkedShippings = Órdenes de envío vinculadas
+LinkedShipping = Orden de envío vinculada
+LinkedDeliveries = Albaranes vinculados
+LinkedDelivery = Albarán vinculado
+SubtotalOptions = Opción Subtotal
+AddShippingListToTile = Añada la lista de referencia de los albaranes o notas de entrega relacionados a la descripción del bloque del título.
+UseHiddenConfToAutoCheck = Para preajustar la configuración por defecto, puede activar la configuración miscelánea

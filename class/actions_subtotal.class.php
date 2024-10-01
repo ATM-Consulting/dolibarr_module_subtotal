@@ -3786,12 +3786,17 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 							if ((typeof id != 'undefined' && id.indexOf('row-') == 0) || $(item).hasClass('liste_titre'))
 							{
-								$(item).children('td:last-child').before('<td class="subtotal_nc"></td>');
+								let tableNCColSelector = 'td';
+								if($(item).hasClass('liste_titre') && $(item).children('th:last-child').length > 0 &&  $(item).children('td:last-child').length == 0){
+									tableNCColSelector = 'th'; // In Dolibarr V20.0 title use th instead of td
+								}
+
+								$(item).children(`${tableNCColSelector}:last-child`).before(`<${tableNCColSelector} class="subtotal_nc"></${tableNCColSelector}>`);
 
 								if ($(item).attr('rel') != 'subtotal' && typeof $(item).attr('id') != 'undefined')
 								{
 									var idSplit = $(item).attr('id').split('-');
-									$(item).children('td.subtotal_nc').append($('<input type="checkbox" id="subtotal_nc-'+idSplit[1]+'" class="subtotal_nc_chkbx" data-lineid="'+idSplit[1]+'" value="1" '+(typeof subtotal_TSubNc[idSplit[1]] != 'undefined' && subtotal_TSubNc[idSplit[1]] == 1 ? 'checked="checked"' : '')+' />'));
+									$(item).children(`${tableNCColSelector}.subtotal_nc`).append($('<input type="checkbox" id="subtotal_nc-'+idSplit[1]+'" class="subtotal_nc_chkbx" data-lineid="'+idSplit[1]+'" value="1" '+(typeof subtotal_TSubNc[idSplit[1]] != 'undefined' && subtotal_TSubNc[idSplit[1]] == 1 ? 'checked="checked"' : '')+' />'));
 								}
 							}
 							else
@@ -4169,20 +4174,39 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	 */
 	private function _billOrdersAddCheckBoxForTitleBlocks()
 	{
-		global $delayedhtmlcontent, $langs;
+		global $delayedhtmlcontent, $langs, $conf;
+
 		ob_start();
+		$jsConf = array(
+			'langs'=>  array(
+				'AddTitleBlocFromOrdersToInvoice' => $langs->trans('subtotal_add_title_bloc_from_orderstoinvoice'),
+				'AddShippingListToTile' => $langs->trans('AddShippingListToTile'),
+				'SubtotalOptions' => $langs->trans('SubtotalOptions'),
+				'UseHiddenConfToAutoCheck' => $langs->trans('UseHiddenConfToAutoCheck'),
+			),
+			'isModShippingEnable' => !empty($conf->expedition->enabled),
+			'SUBTOTAL_DEFAULT_CHECK_SHIPPING_LIST_FOR_TITLE_DESC' => getDolGlobalInt('SUBTOTAL_DEFAULT_CHECK_SHIPPING_LIST_FOR_TITLE_DESC')
+		);
 		?>
 			<script type="text/javascript">
 				$(function() {
-					var tr = $("<tr><td><?php echo $langs->trans('subtotal_add_title_bloc_from_orderstoinvoice'); ?></td><td><input type='checkbox' value='1' name='subtotal_add_title_bloc_from_orderstoinvoice' checked='checked' /></td></tr>");
-					var $noteTextArea = $("textarea[name=note]");
+					let jsConf = <?php print json_encode($jsConf); ?>;
+
+					let tr = '<tr><td>'+jsConf.langs.SubtotalOptions+'</td><td>';
+					tr+= '<label><input type="checkbox" value="1" name="subtotal_add_title_bloc_from_orderstoinvoice" checked="checked" /> '+jsConf.langs.AddTitleBlocFromOrdersToInvoice+'</label>';
+					if(jsConf.isModShippingEnable){
+						tr+= '<br/><label><input type="checkbox" value="1" name="subtotal_add_shipping_list_to_title_desc" /> '+jsConf.langs.AddShippingListToTile+' <i class="fa fa-question-circle" title="'+jsConf.langs.UseHiddenConfToAutoCheck+' SUBTOTAL_DEFAULT_CHECK_SHIPPING_LIST_FOR_TITLE_DESC"></label>';
+					}
+					tr+= '<td></tr>';
+
+					let $noteTextArea = $("textarea[name=note]");
 					if ($noteTextArea.length === 1) {
-						$noteTextArea.closest('tr').after(tr);
+						$noteTextArea.closest($('tr')).after(tr);
 						return;
 					}
-					var $inpCreateBills = $("#validate_invoices");
+					let $inpCreateBills = $("#validate_invoices");
 					if ($inpCreateBills.length === 1) {
-						$inpCreateBills.closest('tr').after(tr);
+						$inpCreateBills.closest($('tr')).after(tr);
 					}
 				});
 			</script>

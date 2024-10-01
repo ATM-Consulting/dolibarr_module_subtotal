@@ -3,7 +3,9 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
-
+- FIX : Compat V20 : Document col missing for title for NC - *16/09/2024* - 3.26.1
+- NEW : Add more order to invoice massaction option - *04/09/2024* - 3.26.0  
+  Allow adding list of shipping ref to title block 
 
 # Release 3.25 - 24/07/2024
 
