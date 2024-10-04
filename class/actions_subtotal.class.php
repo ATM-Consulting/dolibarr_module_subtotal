@@ -338,22 +338,27 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			),
 			'langs' => array(
 				'Level' => $langs->trans('Level'),
-				'Position' => $langs->transnoentities('Position')
+				'Position' => $langs->transnoentities('Position'),
+				'AddTitle' => $langs->trans('AddTitle'),
+				'AddSubTotal' => $langs->trans('AddSubTotal'),
+				'AddFreeText' => $langs->trans('AddFreeText'),
 			)
 		);
 
 
 		$jsData['buttons'] = dolGetButtonAction('', $langs->trans('SubtotalsAndTitlesActionBtnLabel'), 'default', [
-				['params'=> ['attr' => [ 'rel' => 'add_title_line']], 'id' => 'add_title_line', 'url' =>'javascript:;', 'label' => $langs->trans('AddTitle'), 'perm' => 1],
-				['params'=> ['attr' => [ 'rel' => 'add_total_line']], 'id' => 'add_total_line', 'url' =>'javascript:;', 'label' => $langs->trans('AddSubTotal'), 'perm' => 1],
-				['params'=> ['attr' => [ 'rel' => 'add_free_text']], 'id' => 'add_free_text', 'url' =>'javascript:;', 'label' => $langs->trans('AddFreeText'), 'perm' => 1],
+				['attr' => [ 'rel' => 'add_title_line'], 'id' => 'add_title_line', 'urlraw' =>'#', 'label' => $langs->trans('AddTitle'), 'perm' => 1],
+				['attr' => [ 'rel' => 'add_total_line'], 'id' => 'add_total_line', 'urlraw' =>'#', 'label' => $langs->trans('AddSubTotal'), 'perm' => 1],
+				['attr' => [ 'rel' => 'add_free_text'], 'id' => 'add_free_text', 'urlraw' =>'#', 'label' => $langs->trans('AddFreeText'), 'perm' => 1],
 			], 'subtotal-actions-buttons-dropdown');
 
 		if(empty($jsData['conf']['groupBtn'])) {
-			$jsData['buttons'] = dolGetButtonAction($langs->trans('AddTitle'), '', 'default', 'javascript:;', 'add_title_line',1, ['attr' => [ 'rel' => 'add_title_line']]);
-			$jsData['buttons'].= dolGetButtonAction($langs->trans('AddSubTotal'), '', 'default', 'javascript:;', 'add_total_line',1, ['attr' => [ 'rel' => 'add_total_line']]);
-			$jsData['buttons'].= dolGetButtonAction($langs->trans('AddFreeText'), '', 'default', 'javascript:;', 'add_free_text',1, ['attr' => [ 'rel' => 'add_free_text']]);
+			$jsData['buttons'] = '<div class="inline-block divButAction"><a id="add_title_line" rel="add_title_line" href="javascript:;" class="butAction">'.$langs->trans('AddTitle').'</a></div>';
+			$jsData['buttons'].= '<div class="inline-block divButAction"><a id="add_total_line" rel="add_total_line" href="javascript:;" class="butAction">'.$langs->trans('AddSubTotal').'</a></div>';
+			$jsData['buttons'].= '<div class="inline-block divButAction"><a id="add_free_text" rel="add_free_text" href="javascript:;" class="butAction">'.$langs->trans('AddFreeText').'</a></div>';
 		}
+
+
 
 
 		?>
@@ -491,8 +496,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	                     });
 					}
 
-					$('a[rel=add_title_line]').click(function()
+					$('a[rel=add_title_line]').click(function(e)
 					{
+						e.preventDefault();
 						promptSubTotal('addTitle'
 							 , "<?php echo $langs->trans('YourTitleLabel') ?>"
 							 , "<?php echo $langs->trans('title'); ?>"
@@ -502,8 +508,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						);
 					});
 
-					$('a[rel=add_total_line]').click(function()
+					$('a[rel=add_total_line]').click(function(e)
 					{
+						e.preventDefault();
 						promptSubTotal('addSubtotal'
 							, '<?php echo $langs->trans('YourSubtotalLabel') ?>'
 							, '<?php echo $langs->trans('subtotal'); ?>'
@@ -514,8 +521,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						);
 					});
 
-					$('a[rel=add_free_text]').click(function()
+					$('a[rel=add_free_text]').click(function(e)
 					{
+						e.preventDefault();
 						promptSubTotal('addFreeTxt'
 							, "<?php echo $langs->transnoentitiesnoconv('YourTextLabel') ?>"
 							, "<?php echo $langs->trans('subtotalAddLineDescription'); ?>"
