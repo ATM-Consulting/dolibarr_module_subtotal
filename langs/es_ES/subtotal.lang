@@ -138,4 +138,4 @@ LinkedDeliveries = Albaranes vinculados
 LinkedDelivery = Albarán vinculado
 SubtotalOptions = Parámetros Subtotal
 AddShippingListToTile = Añada la lista de referencia de los albaranes o notas de entrega relacionados a la descripción del bloque del título.
-UseHiddenConfToAutoCheck = Para preajustar la configuración por defecto, puede activar la configuración miscelánea
+UseHiddenConfToAutoCheck = Para que la casilla se marque por defecto, puede activar el siguiente ajuste en "Ótras configuraciones"
