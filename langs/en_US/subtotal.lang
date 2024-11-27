@@ -140,7 +140,7 @@ LinkedShippings = Linked shipping orders
 LinkedShipping = Linked shipping order
 LinkedDeliveries = Linked delivery notes
 LinkedDelivery = Linked delivery note
-SubtotalOptions = Subtotal option
+SubtotalOptions = Subtotal options
 AddShippingListToTile = Add the reference list of related delivery or shipping notes to the title block description.
 UseHiddenConfToAutoCheck = To pre-set the default, you can activate the settings
 
