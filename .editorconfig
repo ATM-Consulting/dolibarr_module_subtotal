@@ -1,0 +1,37 @@
+# EditorConfig is awesome: https://editorconfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+
+[*.php]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+# fine-tuning php formatting
+ij_php_space_before_if_parentheses = true
+ij_php_space_before_for_parentheses = true
+ij_php_force_short_declaration_array_style = true
+
+[*.js]
+indent_style = space
+
+[*.css]
+indent_style = space
+
+[*.xml]
+indent_style = tab
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.sql]
+indent_style = space
+trim_trailing_whitespace = true
+indent_size = 4
