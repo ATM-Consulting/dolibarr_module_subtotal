@@ -254,7 +254,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						if(empty($title)) $title = $langs->trans('title');
 						$qty = $level<1 ? 1 : $level ;
 					}
-					else if($action=='add_free_text') {
+					elseif($action=='add_free_text') {
 						$title = GETPOST('title', 'restricthtml');
 
 						if (empty($title)) {
@@ -269,12 +269,12 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						if(empty($title)) $title = $langs->trans('subtotalAddLineDescription');
 						$qty = 50;
 					}
-					else if($action=='add_subtitle_line') {
+					elseif($action=='add_subtitle_line') {
 						$title = GETPOST('title', 'none');
 						if(empty($title)) $title = $langs->trans('subtitle');
 						$qty = 2;
 					}
-					else if($action=='add_subtotal_line') {
+					elseif($action=='add_subtotal_line') {
 						$title = $langs->trans('SubSubTotal');
 						$qty = 98;
 					}
@@ -294,7 +294,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						TSubtotal::addSubTotalLine($object, $title, $qty);
 					}
 				}
-				else if($action==='ask_deleteallline') {
+				elseif($action==='ask_deleteallline') {
 						$form=new Form($db);
 
 						$lineid = GETPOST('lineid','int');
@@ -778,7 +778,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				exit; // Surtout ne pas laisser Dolibarr faire du traitement sur le updateligne sinon ça plante les données de la ligne
 			}
 		}
-		else if($action === 'builddoc') {
+		elseif($action === 'builddoc') {
 
 			if (
 				in_array('invoicecard',              $contextArray)
@@ -858,7 +858,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	        }
 
 		}
-		else if($action === 'confirm_delete_all_lines' && GETPOST('confirm', 'none')=='yes') {
+		elseif($action === 'confirm_delete_all_lines' && GETPOST('confirm', 'none')=='yes') {
 			$error = 0;
 			$Tab = TSubtotal::getLinesFromTitleId($object, GETPOST('lineid', 'int'), true);
 			foreach($Tab as $line) {
@@ -872,22 +872,22 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				/**
 				 * @var $object Facture fournisseur
 				 */
-				else if($object->element=='invoice_supplier')
+				elseif($object->element=='invoice_supplier')
 				{
 					$result = $object->deleteline($idLine);
 				}
 				/**
 				 * @var $object Propal
 				 */
-				else if($object->element=='propal') $result = $object->deleteline($idLine);
+				elseif($object->element=='propal') $result = $object->deleteline($idLine);
 				/**
 				 * @var $object Propal Fournisseur
 				 */
-				else if($object->element=='supplier_proposal') $result = $object->deleteline($idLine);
+				elseif($object->element=='supplier_proposal') $result = $object->deleteline($idLine);
 				/**
 				 * @var $object Commande
 				 */
-				else if($object->element=='commande')
+				elseif($object->element=='commande')
 				{
 					if ((float) DOL_VERSION >= 5.0) $result = $object->deleteline($user, $idLine);
 					else $result = $object->deleteline($idLine);
@@ -895,18 +895,18 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				/**
 				 * @var $object Commande fournisseur
 				 */
-				else if($object->element=='order_supplier')
+				elseif($object->element=='order_supplier')
 				{
                     			$result = $object->deleteline($idLine);
 				}
 				/**
 				 * @var $object Facturerec
 				 */
-				else if($object->element=='facturerec') $result = $object->deleteline($idLine);
+				elseif($object->element=='facturerec') $result = $object->deleteline($idLine);
 				/**
 				 * @var $object Expedition
 				 */
-				else if($object->element=='shipping') $result = $object->deleteline($user, $idLine);
+				elseif($object->element=='shipping') $result = $object->deleteline($user, $idLine);
 
                 if ($result < 0) $error++;
 			}
@@ -922,7 +922,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			exit;
 
 		}
-		else if ($action == 'duplicate')
+		elseif ($action == 'duplicate')
 		{
 			$lineid = GETPOST('lineid', 'int');
 			$nbDuplicate = TSubtotal::duplicateLines($object, $lineid, true);
@@ -1688,7 +1688,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
-			else if((float)DOL_VERSION>=3.8) {
+			elseif((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 		}
@@ -1741,7 +1741,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			}
 		}
 		// Cache le prix pour les lignes standards dolibarr qui sont dans un ensemble
-		else if (!empty($hideprices))
+		elseif (!empty($hideprices))
 		{
 			// Check if a title exist for this line && if the title have subtotal
 			$lineTitle = (!empty($object->lines[$i])) ? TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang): '';
@@ -1800,7 +1800,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
-			else if((float)DOL_VERSION>=3.8) {
+			elseif((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 		}
@@ -1829,7 +1829,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
-			else if((float)DOL_VERSION>=3.8) {
+			elseif((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 		}
@@ -1874,7 +1874,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
-			else if((float)DOL_VERSION>=3.8) {
+			elseif((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 		}
@@ -1897,7 +1897,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		    }
 		}
 		// Cache le prix pour les lignes standards dolibarr qui sont dans un ensemble
-		else if (!empty($hideprices))
+		elseif (!empty($hideprices))
 		{
 
 		    // Check if a title exist for this line && if the title have subtotal
@@ -1942,7 +1942,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
-			else if((float)DOL_VERSION>=3.8) {
+			elseif((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 		}
@@ -1972,7 +1972,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
-			else if((float)DOL_VERSION>=3.8) {
+			elseif((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 		}
@@ -2008,7 +2008,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
-			else if((float)DOL_VERSION>=3.8) {
+			elseif((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 		}
@@ -2036,7 +2036,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		    }
 		}
 		// Cache le prix pour les lignes standards dolibarr qui sont dans un ensemble
-		else if (!empty($hideprices))
+		elseif (!empty($hideprices))
 		{
 
 		    // Check if a title exist for this line && if the title have subtotal
@@ -2063,7 +2063,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			if((float)DOL_VERSION<=3.6) {
 				return '';
 			}
-			else if((float)DOL_VERSION>=3.8) {
+			elseif((float)DOL_VERSION>=3.8) {
 				return 1;
 			}
 		}
@@ -2098,7 +2098,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				{
 					$TLineTitle[] = &$line;
 				}
-				else if ($line->id > 0 && TSubtotal::isSubtotal($line))
+				elseif ($line->id > 0 && TSubtotal::isSubtotal($line))
 				{
 					$TLineSubtotal[] = &$line;
 				}
@@ -2533,7 +2533,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 					$posy = $pdf->GetY();
 					return 1;
 				}
-				else if ($line->qty < 10) {
+				elseif ($line->qty < 10) {
 					if(!empty(getDolGlobalString('SUBTOTAL_DISABLE_FIX_TRANSACTION'))) {
 						/**
 						 * TCPDF::startTransaction() committe la transaction en cours s'il y en a une,
@@ -2737,7 +2737,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
             }
 			return 0;
 		}
-		else if (in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('invoicereccard',$contexts))
+		elseif (in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('invoicereccard',$contexts))
         {
 
 
@@ -2812,11 +2812,11 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 					if (!empty(getDolGlobalString('SUBTOTAL_USE_NEW_FORMAT')))
 					{
 						if($line->qty==99) print 'background:#adadcf';          // Sub-total level 1
-						else if($line->qty==98) print 'background:#ddddff;';    // Sub-total level 2
-						else if($line->qty<=97 && $line->qty>=91) print 'background:#eeeeff;';  // Sub-total level 3 to 9
-						else if($line->qty==1) print 'background:#adadcf;';     // Title level 1
-						else if($line->qty==2) print 'background:#ddddff;';     // Title level 2
-						else if($line->qty==50) print '';                       // Free text
+						elseif($line->qty==98) print 'background:#ddddff;';    // Sub-total level 2
+						elseif($line->qty<=97 && $line->qty>=91) print 'background:#eeeeff;';  // Sub-total level 3 to 9
+						elseif($line->qty==1) print 'background:#adadcf;';     // Title level 1
+						elseif($line->qty==2) print 'background:#ddddff;';     // Title level 2
+						elseif($line->qty==50) print '';                       // Free text
 						else print 'background:#eeeeff;';                       // Title level 3 to 9
 
 						// À compléter si on veut plus de nuances de couleurs avec les niveaux 4,5,6,7,8 et 9
@@ -2824,9 +2824,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 					else
 					{
 						if($line->qty==99) print 'background:#ddffdd';          // Sub-total level 1
-						else if($line->qty==98) print 'background:#ddddff;';    // Sub-total level 2
-						else if($line->qty==2) print 'background:#eeeeff; ';    // Title level 2
-						else if($line->qty==50) print '';                       // Free text
+						elseif($line->qty==98) print 'background:#ddddff;';    // Sub-total level 2
+						elseif($line->qty==2) print 'background:#eeeeff; ';    // Title level 2
+						elseif($line->qty==50) print '';                       // Free text
 						else print 'background:#eeffee;' ;                      // Title level 1 and 3 to 9
 					}
 
@@ -2882,7 +2882,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 							print img_picto('', 'subsubtotal@subtotal').'<span style="font-size:9px;margin-left:-3px;color:#0075DE;">'.$qty_displayed.'</span>&nbsp;&nbsp;';
 
 						}
-						else if (TSubtotal::isSubtotal($line))
+						elseif (TSubtotal::isSubtotal($line))
 						{
 							$qty_displayed = 100 - $line->qty;
 							print img_picto('', 'subsubtotal2@subtotal').'<span style="font-size:9px;margin-left:-1px;color:#0075DE;">'.$qty_displayed.'</span>&nbsp;&nbsp;';
@@ -2961,7 +2961,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
                             echo '<label for="subtotal-showReduc">'.$langs->trans('ShowReducOnSubtotalBlock').'</label>';
                             echo '</div>';
                         }
-                        else if ($isFreeText) echo TSubtotal::getFreeTextHtml($line, (bool) $readonlyForSituation);
+                        elseif ($isFreeText) echo TSubtotal::getFreeTextHtml($line, (bool) $readonlyForSituation);
 
                         if (TSubtotal::isSubtotal($line) && $show_qty_bu_deault = TSubtotal::showQtyForObject($object)) {
                             $line_show_qty = TSubtotal::showQtyForObjectLine($line, $show_qty_bu_deault);
@@ -3092,7 +3092,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						 else
 						 {
 							if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
-							else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+							elseif($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 						 }
 
 
@@ -3373,11 +3373,11 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 					if (getDolGlobalString('SUBTOTAL_USE_NEW_FORMAT'))
 					{
                         if($line->qty==99) print 'background:#adadcf';          // Sub-total level 1
-                        else if($line->qty==98) print 'background:#ddddff;';	// Sub-total level 2
-                        else if($line->qty<=97 && $line->qty>=91) print 'background:#eeeeff;';	// Sub-total level 3 to 9
-                        else if($line->qty==1) print 'background:#adadcf;';     // Title level 1
-                        else if($line->qty==2) print 'background:#ddddff;';     // Title level 2
-                        else if($line->qty==50) print '';                       // Free text
+                        elseif($line->qty==98) print 'background:#ddddff;';	// Sub-total level 2
+                        elseif($line->qty<=97 && $line->qty>=91) print 'background:#eeeeff;';	// Sub-total level 3 to 9
+                        elseif($line->qty==1) print 'background:#adadcf;';     // Title level 1
+                        elseif($line->qty==2) print 'background:#ddddff;';     // Title level 2
+                        elseif($line->qty==50) print '';                       // Free text
                         else print 'background:#eeeeff;';                       // Title level 3 to 9
 
 						// À compléter si on veut plus de nuances de couleurs avec les niveaux 4,5,6,7,8 et 9
@@ -3385,9 +3385,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 					else
 					{
                         if($line->qty==99) print 'background:#ddffdd';          // Sub-total level 1
-                        else if($line->qty==98) print 'background:#ddddff;';	// Sub-total level 2
-                        else if($line->qty==2) print 'background:#eeeeff; ';    // Title level 2
-                        else if($line->qty==50) print '';                       // Free text
+                        elseif($line->qty==98) print 'background:#ddddff;';	// Sub-total level 2
+                        elseif($line->qty==2) print 'background:#eeeeff; ';    // Title level 2
+                        elseif($line->qty==50) print '';                       // Free text
                         else print 'background:#eeffee;';                       // Title level 1 and 3 to 9
 					}
 
@@ -3409,7 +3409,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						 else
 						 {
 							if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
-							else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+							elseif($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 						 }
 
 
@@ -3498,11 +3498,11 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 					if (getDolGlobalString('SUBTOTAL_USE_NEW_FORMAT'))
 					{
                         if($line->qty==99) print 'background:#adadcf';          // Sub-total level 1
-                        else if($line->qty==98) print 'background:#ddddff;';	// Sub-total level 2
-                        else if($line->qty<=97 && $line->qty>=91) print 'background:#eeeeff;';	// Sub-total level 3 to 9
-                        else if($line->qty==1) print 'background:#adadcf;';     // Title level 1
-                        else if($line->qty==2) print 'background:#ddddff;';     // Title level 2
-                        else if($line->qty==50) print '';                       // Free text
+                        elseif($line->qty==98) print 'background:#ddddff;';	// Sub-total level 2
+                        elseif($line->qty<=97 && $line->qty>=91) print 'background:#eeeeff;';	// Sub-total level 3 to 9
+                        elseif($line->qty==1) print 'background:#adadcf;';     // Title level 1
+                        elseif($line->qty==2) print 'background:#ddddff;';     // Title level 2
+                        elseif($line->qty==50) print '';                       // Free text
                         else print 'background:#eeeeff;';                       // Title level 3 to 9
 
 						// À compléter si on veut plus de nuances de couleurs avec les niveaux 4,5,6,7,8 et 9
@@ -3510,9 +3510,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 					else
 					{
                         if($line->qty==99) print 'background:#ddffdd';          // Sub-total level 1
-                        else if($line->qty==98) print 'background:#ddddff;';	// Sub-total level 2
-                        else if($line->qty==2) print 'background:#eeeeff; ';	// Title level 2
-                        else if($line->qty==50) print '';                       // Free text
+                        elseif($line->qty==98) print 'background:#ddddff;';	// Sub-total level 2
+                        elseif($line->qty==2) print 'background:#eeeeff; ';	// Title level 2
+                        elseif($line->qty==50) print '';                       // Free text
                         else print 'background:#eeffee;';                       // Title level 1, Sub-total level 1 and 3 to 9
 					}
 
@@ -3542,7 +3542,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			else
 			{
 				if($line->qty<=1) print img_picto('', 'subtotal@subtotal');
-				else if($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+				elseif($line->qty==2) print img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 			}
 
 
@@ -3649,17 +3649,17 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 				$object->tpl['subtotal'] = $line->id;
 				if (TSubtotal::isTitle($line)) $object->tpl['sub-type'] = 'title';
-				else if (TSubtotal::isSubtotal($line)) $object->tpl['sub-type'] = 'total';
+				elseif (TSubtotal::isSubtotal($line)) $object->tpl['sub-type'] = 'total';
 
 				$object->tpl['sub-tr-style'] = '';
 				if (getDolGlobalString('SUBTOTAL_USE_NEW_FORMAT'))
 				{
                     if($line->qty==99) $object->tpl['sub-tr-style'].= 'background:#adadcf';         // Sub-total level 1
-                    else if($line->qty==98) $object->tpl['sub-tr-style'].= 'background:#ddddff;';	// Sub-total level 2
-                    else if($line->qty<=97 && $line->qty>=91) $object->tpl['sub-tr-style'].= 'background:#eeeeff;';	// Sub-total level 3 to 9
-                    else if($line->qty==1) $object->tpl['sub-tr-style'].= 'background:#adadcf;';	// Title level 1
-                    else if($line->qty==2) $object->tpl['sub-tr-style'].= 'background:#ddddff;';	// Title level 2
-                    else if($line->qty==50) $object->tpl['sub-tr-style'].= '';                      // Free text
+                    elseif($line->qty==98) $object->tpl['sub-tr-style'].= 'background:#ddddff;';	// Sub-total level 2
+                    elseif($line->qty<=97 && $line->qty>=91) $object->tpl['sub-tr-style'].= 'background:#eeeeff;';	// Sub-total level 3 to 9
+                    elseif($line->qty==1) $object->tpl['sub-tr-style'].= 'background:#adadcf;';	// Title level 1
+                    elseif($line->qty==2) $object->tpl['sub-tr-style'].= 'background:#ddddff;';	// Title level 2
+                    elseif($line->qty==50) $object->tpl['sub-tr-style'].= '';                      // Free text
                     else $object->tpl['sub-tr-style'].= 'background:#eeeeff;';                      // Sub-total level 1 and 3 to 9
 
 					// À compléter si on veut plus de nuances de couleurs avec les niveaux 4,5,6,7,8 et 9
@@ -3667,9 +3667,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				else
 				{
                     if($line->qty==99) $object->tpl['sub-tr-style'].= 'background:#ddffdd';         // Sub-total level 1
-                    else if($line->qty==98) $object->tpl['sub-tr-style'].= 'background:#ddddff;';	// Sub-total level 2
-                    else if($line->qty==2) $object->tpl['sub-tr-style'].= 'background:#eeeeff; ';	// Title level 2
-                    else if($line->qty==50) $object->tpl['sub-tr-style'].= '';                      // Free text
+                    elseif($line->qty==98) $object->tpl['sub-tr-style'].= 'background:#ddddff;';	// Sub-total level 2
+                    elseif($line->qty==2) $object->tpl['sub-tr-style'].= 'background:#eeeeff; ';	// Title level 2
+                    elseif($line->qty==50) $object->tpl['sub-tr-style'].= '';                      // Free text
                     else $object->tpl['sub-tr-style'].= 'background:#eeffee;';                      // Title level 1, Sub-total level 1 and 3 to 9
 				}
 
@@ -3692,7 +3692,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				{
 					$object->tpl["sublabel"] = '';
 					if($line->qty<=1) $object->tpl["sublabel"] = img_picto('', 'subtotal@subtotal');
-					else if($line->qty==2) $object->tpl["sublabel"] = img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+					elseif($line->qty==2) $object->tpl["sublabel"] = img_picto('', 'subsubtotal@subtotal').'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 				}
 				// Get display styles and apply them
 				$titleStyleItalic = strpos(getDolGlobalString('SUBTOTAL_TITLE_STYLE'), 'I') === false ? '' : ' font-style: italic;';
@@ -4450,7 +4450,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 												if($childLine.attr('data-folder-status') == "closed"){
 													doNotDisplayLines = doNotDisplayLines.concat(grandChildrenList);
 												}
-												else if(o.config.closeMode == 'keepTitle' && $childLine.attr('data-folder-status') == "open"){
+												elseif(o.config.closeMode == 'keepTitle' && $childLine.attr('data-folder-status') == "open"){
 													doNotHiddeLines = doNotDisplayLines.concat(grandChildrenList);
 												}
 											}
@@ -4458,7 +4458,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 											if (toggleStatus == 'closed') {
 												if(o.config.closeMode == 'keepTitle' && ($childLine.attr('data-issubtotal') == "title" || $childLine.attr('data-issubtotal') == "subtotal"  )){
 													$childLine.show();
-												}else if(!doNotHiddeLines.includes(childLineId)){
+												}elseif(!doNotHiddeLines.includes(childLineId)){
 													$childLine.hide();
 												}
 											} else {
