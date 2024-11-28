@@ -11,39 +11,31 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
 require_once __DIR__ . '/../backport/v19/core/class/commonhookactions.class.php';
 
-
 class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 {
-
-	/**
-	 * @var string $error
-	 */
-	public $error;
-
-	/**
-	 * @var array $errors
-	 */
-	public $errors = array();
-
+    /**
+     * @var string $error
+     */
+    public $error;
+    /**
+     * @var array $errors
+     */
+    public $errors = [];
     public $module_number = 104777;
-
     /**
      * @var int Subtotal current level
      */
     protected $subtotal_level_cur = 0;
-
     /**
      * @var bool Show subtotal qty by default
      */
     protected $subtotal_show_qty_by_default = false;
-
     /**
      * @var bool Determine if sum on subtotal qty is enabled
      */
     protected $subtotal_sum_qty_enabled = false;
 
-
-	function __construct($db)
+    function __construct($db)
 	{
 		global $langs;
 
@@ -73,7 +65,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 		return 0;
 	}
-
 
 	function editDictionaryFieldlist($parameters, &$object, &$action, $hookmanager)
 	{
@@ -139,6 +130,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 		return 0;
 	}
+
 	function createDictionaryFieldlist($parameters, &$object, &$action, $hookmanager)
 	{
 		global $conf;
@@ -538,7 +530,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		</script>
 		<?php
 	}
-
 
 	function formBuilddocOptions($parameters, &$object) {
 	/* Réponse besoin client */
@@ -1077,7 +1068,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 		return $Tab;
 	}
-
 
     //@TODO change all call to this method with the method in lib !!!!
 	/**
@@ -3622,7 +3612,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 	}
 
-
 	function printOriginObjectSubLine($parameters, &$object, &$action, $hookmanager)
 	{
         global $conf, $restrictlist, $selectedLines;
@@ -3937,7 +3926,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 	}
 
-
 	function implodeHtmlData($ThtmlData = array())
 	{
 	    $data = '';
@@ -4105,7 +4093,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 	}
 
-/**
+    /**
      * @param $parameters
      * @param $object
      * @param $action
