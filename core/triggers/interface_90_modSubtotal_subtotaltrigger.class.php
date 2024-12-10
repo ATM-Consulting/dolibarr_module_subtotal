@@ -178,7 +178,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 			$action = 'LINEBILL_SUPPLIER_MODIFY';
 		}
 		/* Refer to issue #379 */
-		if($action == 'LINEBILL_INSERT'){
+		if($action == 'LINEBILL_INSERT' || $action == 'LINEBILL_CREATE'){
 			static $TInvoices = array();
 			if (!array_key_exists($object->fk_facture, $TInvoices) || (array_key_exists($object->fk_facture, $TInvoices) && $TInvoices[$object->fk_facture] === null)) {
 				$staticInvoice = new Facture($this->db);
@@ -292,7 +292,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 		}
 
 
-        if ($action == 'LINEBILL_INSERT' || $action == 'LINEBILL_SUPPLIER_CREATE')
+        if ($action == 'LINEBILL_INSERT' || $action == 'LINEBILL_CREATE' || $action == 'LINEBILL_SUPPLIER_CREATE')
 		{
 		    $is_supplier = $action == 'LINEBILL_SUPPLIER_CREATE' ? true : false;
             /** @var bool $subtotal_skip Permet d'éviter de faire du traitement en double sur les titres est sous-totaux car ils ont automatiquement le bon rang, il ne faut donc pas faire un addline pour en suite update le rang ici */
@@ -649,7 +649,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
-        } elseif ($action == 'LINEORDER_INSERT') {
+        } elseif ($action == 'LINEORDER_INSERT' || $action == 'LINEORDER_CREATE') {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
@@ -679,8 +679,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
         }
 
         // Proposals
-        elseif ((floatval(DOL_VERSION) <= 7.0 && in_array($action, array('PROPAL_CLONE', 'ORDER_CLONE', 'BILL_CLONE'))) ||
-                (floatval(DOL_VERSION) >= 8.0 && ! empty($object->context) && in_array('createfromclone', $object->context) && in_array($action, array('PROPAL_CREATE', 'ORDER_CREATE', 'BILL_CREATE')))) {
+        elseif ((floatval(DOL_VERSION) >= 8.0 && ! empty($object->context) && in_array('createfromclone', $object->context) && in_array($action, array('PROPAL_CREATE', 'ORDER_CREATE', 'BILL_CREATE')))) {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
@@ -744,7 +743,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
-        } elseif ($action == 'LINEPROPAL_INSERT') {
+        } elseif ($action == 'LINEPROPAL_INSERT' || $action == 'LINEPROPAL_CREATE') {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
@@ -828,7 +827,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
-        } elseif ($action == 'LINEBILL_INSERT') {
+        } elseif ($action == 'LINEBILL_INSERT' || $action == 'LINEBILL_CREATE') {
         	dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
@@ -992,7 +991,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
             );
-        }elseif ($action == 'LINESHIPPING_INSERT') {
+        }elseif ($action == 'LINESHIPPING_INSERT' || $action == 'LINESHIPPING_CREATE') {
 
 				dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
 		}
