@@ -82,17 +82,12 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 		if ($parameters['tabname'] == $dictionnariesTablePrefix.'c_subtotal_free_text')
 		{
-			// Merci Dolibarr de remplacer les textarea par un input text
-			if ((float) DOL_VERSION >= 6.0)
-			{
-				$value = TSubtotal::getHtmlDictionnary();
-			}
+            $value = TSubtotal::getHtmlDictionnary();
+
 
 			?>
 			<script type="text/javascript">
 				$(function() {
-
-					<?php if ((float) DOL_VERSION >= 6.0) { ?>
 						if ($('input[name=content]').length > 0)
 						{
 							$('input[name=content]').each(function(i, item) {
@@ -114,22 +109,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 								});
 								<?php } ?>
 							}
-					<?php } else { ?>
-						// <= 5.0
-						// Le CKEditor est forcé sur la page dictionnaire, pas possible de mettre une valeur custom
-						// petit js qui supprimer le wysiwyg et affiche le textarea car avant la version 6.0 le wysiwyg sur une page de dictionnaire est inexploitable
-						<?php if (isModEnabled('fckeditor')) { ?>
-							CKEDITOR.on('instanceReady', function(ev) {
-								var editor = ev.editor;
-
-								if (editor.name == 'content') // Mon champ en bdd s'appel "content", pas le choix si je veux avoir un textarea sur une page de dictionnaire
-								{
-									editor.element.show();
-									editor.destroy();
-								}
-							});
-						<?php } ?>
-					<?php } ?>
 				});
 			</script>
 			<?php
@@ -146,16 +125,11 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 		if ($parameters['tabname'] == $dictionnariesTablePrefix.'c_subtotal_free_text')
 		{
-			// Merci Dolibarr de remplacer les textarea par un input text
-			if ((float) DOL_VERSION >= 6.0)
-			{
-				$value = TSubtotal::getHtmlDictionnary();
-			}
+            $value = TSubtotal::getHtmlDictionnary();
+
 			?>
 			<script type="text/javascript">
 				$(function() {
-
-					<?php if ((float) DOL_VERSION >= 6.0) { ?>
 					if ($('input[name=content]').length > 0)
 					{
 						$('input[name=content]').each(function(i, item) {
@@ -167,7 +141,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 							$(item).replaceWith($('<textarea name="content">'+value+'</textarea>'));
 						});
 
-						<?php if (!empty($conf->fckeditor->enabled) && getDolGlobalString('FCKEDITOR_ENABLE_DETAILS')) { ?>
+						<?php if (isModEnabled("fckeditor") && getDolGlobalString('FCKEDITOR_ENABLE_DETAILS')) { ?>
 						$('textarea[name=content]').each(function(i, item) {
 							CKEDITOR.replace(item, {
 								toolbar: 'dolibarr_notes',
@@ -177,22 +151,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						});
 						<?php } ?>
 					}
-					<?php } else { ?>
-					// <= 5.0
-					// Le CKEditor est forcé sur la page dictionnaire, pas possible de mettre une valeur custom
-					// petit js qui supprimer le wysiwyg et affiche le textarea car avant la version 6.0 le wysiwyg sur une page de dictionnaire est inexploitable
-					<?php if (!empty($conf->fckeditor->enabled)) { ?>
-					CKEDITOR.on('instanceReady', function(ev) {
-						var editor = ev.editor;
-
-						if (editor.name == 'content') // Mon champ en bdd s'appel "content", pas le choix si je veux avoir un textarea sur une page de dictionnaire
-						{
-							editor.element.show();
-							editor.destroy();
-						}
-					});
-					<?php } ?>
-					<?php } ?>
 				});
 			</script>
 			<?php
@@ -334,7 +292,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			'conf' => array(
 				'SUBTOTAL_USE_NEW_FORMAT' => getDolGlobalInt('SUBTOTAL_USE_NEW_FORMAT'),
 				'MAIN_VIEW_LINE_NUMBER' => getDolGlobalInt('MAIN_VIEW_LINE_NUMBER'),
-				'token' => ((float) DOL_VERSION < 11.0) ?  $_SESSION['newtoken'] : newToken()
+				'token' => newToken()
 			),
 			'langs' => array(
 				'Level' => $langs->trans('Level'),
@@ -677,56 +635,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		return 0;
 	}
 
-	function createFrom($parameters, &$object, $action, $hookmanager) {
-
-        if (version_compare(DOL_VERSION, '10.0.0', '>=')) {
-            return 0;
-        }
-
-		$contextArray = array();
-		if (!empty($parameters['context'])) $contextArray = explode(':', $parameters['context']);
-		if (
-				in_array('invoicecard',              $contextArray)
-		        || in_array('invoicesuppliercard',   $contextArray)
-				|| in_array('propalcard',            $contextArray)
-		        || in_array('supplier_proposalcard', $contextArray)
-				|| in_array('ordercard',             $contextArray)
-		        || in_array('ordersuppliercard',     $contextArray)
-				|| in_array('invoicereccard',        $contextArray)
-		) {
-
-			global $db;
-
-			$objFrom = $parameters['objFrom'];
-
-			if(empty($object->lines) && method_exists($object, 'fetch_lines')) $object->fetch_lines();
-
-			foreach($objFrom->lines as $k=> &$lineOld) {
-
-					if($lineOld->product_type == 9 && $lineOld->info_bits > 0 ) {
-
-							$line = & $object->lines[$k];
-
-							$idLine = (int) ($line->id ? $line->id : $line->rowid);
-
-							if($line->info_bits != $lineOld->info_bits) {
-								$db->query("UPDATE ".MAIN_DB_PREFIX.$line->table_element."
-								SET info_bits=".(int)$lineOld->info_bits."
-								WHERE rowid = ".$idLine."
-								");
-							}
-
-					}
-
-
-			}
-
-
-		}
-
-		return 0;
-	}
-
 	/**
 	 * @param array $parameters
 	 * @param CommonObject $object
@@ -889,8 +797,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				 */
 				else if($object->element=='commande')
 				{
-					if ((float) DOL_VERSION >= 5.0) $result = $object->deleteline($user, $idLine);
-					else $result = $object->deleteline($idLine);
+					$result = $object->deleteline($user, $idLine);
 				}
 				/**
 				 * @var $object Commande fournisseur
@@ -1512,7 +1419,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			$bgW = $pdf->page_largeur - $pdf->marge_droite;// historiquement ce sont ces valeurs, mais elles sont la plupart du temps vide
 
 			// POUR LES PDF DE TYPE PDF_EVOLUTION (ceux avec les colonnes configurables)
-			if(!empty($object->context['subtotalPdfModelInfo']->cols) && version_compare('11.0.0', DOL_VERSION, '<')){
+			if(!empty($object->context['subtotalPdfModelInfo']->cols)){
 				$bgStartX = $object->context['subtotalPdfModelInfo']->marge_droite;
 				$bgW = $object->context['subtotalPdfModelInfo']->page_largeur - $object->context['subtotalPdfModelInfo']->marge_gauche - $object->context['subtotalPdfModelInfo']->marge_droite;
 			}
@@ -1685,12 +1592,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 			$this->resprints = ' ';
 
-			if((float)DOL_VERSION<=3.6) {
-				return '';
-			}
-			else if((float)DOL_VERSION>=3.8) {
-				return 1;
-			}
+
+            return 1;
+
 		}
 		elseif (getDolGlobalString('SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS'))
 		{
@@ -1797,12 +1701,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 			$this->resprints = ' ';
 
-			if((float)DOL_VERSION<=3.6) {
-				return '';
-			}
-			else if((float)DOL_VERSION>=3.8) {
-				return 1;
-			}
+
+            return 1;
+
 		}
 
 		if(is_array($parameters)) $i = & $parameters['i'];
@@ -1826,12 +1727,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 
-			if((float)DOL_VERSION<=3.6) {
-				return '';
-			}
-			else if((float)DOL_VERSION>=3.8) {
-				return 1;
-			}
+            return 1;
+
 		}
 
 		if(is_array($parameters)) $i = & $parameters['i'];
@@ -1871,12 +1768,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
                 }
             }
 
-			if((float)DOL_VERSION<=3.6) {
-				return '';
-			}
-			else if((float)DOL_VERSION>=3.8) {
-				return 1;
-			}
+
+            return 1;
+
 		}
 
 		// Si la gestion C/NC est active et que je suis sur un ligne dont l'extrafield est coché
@@ -1939,12 +1833,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				}
             }
 
-			if((float)DOL_VERSION<=3.6) {
-				return '';
-			}
-			else if((float)DOL_VERSION>=3.8) {
-				return 1;
-			}
+
+            return 1;
+
 		}
 		elseif (!empty($hideprices)
 		        || (getDolGlobalString('SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS') && (!empty($object->lines[$i]->array_options['options_subtotal_nc']) || TSubtotal::hasNcTitle($object->lines[$i])) )
@@ -1969,12 +1860,10 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
-			if((float)DOL_VERSION<=3.6) {
-				return '';
-			}
-			else if((float)DOL_VERSION>=3.8) {
-				return 1;
-			}
+
+
+            return 1;
+
 		}
 
 		if(is_array($parameters)) $i = & $parameters['i'];
@@ -2004,13 +1893,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
+            return 1;
 
-			if((float)DOL_VERSION<=3.6) {
-				return '';
-			}
-			else if((float)DOL_VERSION>=3.8) {
-				return 1;
-			}
 		}
 
 		if(is_array($parameters)) $i = & $parameters['i'];
@@ -2060,12 +1944,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
-			if((float)DOL_VERSION<=3.6) {
-				return '';
-			}
-			else if((float)DOL_VERSION>=3.8) {
-				return 1;
-			}
+            return 1;
+
 		}
 
 		if(is_array($parameters)) $i = & $parameters['i'];
@@ -2174,7 +2054,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				$TTitle[$j]['numerotation'] = ($prefix_num == 0) ? $i : $prefix_num.'.'.$i;
 				//var_dump('Prefix == '.$prefix_num.' // '.$line->desc.' ==> numerotation == '.$TTitle[$j]['numerotation'].'   ###    '.$line->qty .'=='. $level);
 				if (empty($line->label) && (
-					(float)DOL_VERSION < 6 || in_array($line->element, $TLineElementsWithoutLabel)
+					in_array($line->element, $TLineElementsWithoutLabel)
 					)
 				) {
 					$line->label = !empty($line->desc) ? $line->desc : $line->description;
@@ -2740,45 +2620,20 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		else if (in_array('invoicecard',$contexts) || in_array('invoicesuppliercard',$contexts) || in_array('propalcard',$contexts) || in_array('supplier_proposalcard',$contexts) || in_array('ordercard',$contexts) || in_array('ordersuppliercard',$contexts) || in_array('invoicereccard',$contexts))
         {
 
-
-			if((float)DOL_VERSION <= 3.4)
-			{
-				?>
-				<script type="text/javascript">
-					$(document).ready(function() {
-						$('#tablelines tr[rel=subtotal]').mouseleave(function() {
-
-							id_line =$(this).attr('id');
-
-							$(this).find('td[rel=subtotal_total]').each(function() {
-								$.get(document.location.href, function(data) {
-									var total = $(data).find('#tablelines tr#'+id_line+' td[rel=subtotal_total]').html();
-
-									$('#tablelines tr#'+id_line+' td[rel=subtotal_total]').html(total);
-
-								});
-							});
-						});
-					});
-
-				</script>
-				<?php
-			}
-
 			if(empty($line->description)) $line->description = $line->desc;
 
             $TNonAffectedByMarge = array('order_supplier', 'invoice_supplier', 'supplier_proposal');
             $affectedByMarge = in_array($object->element, $TNonAffectedByMarge) ? 0 : 1;
 			$colspan = 5;
-			if($object->element == 'order_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 3 : $colspan = 6;
-			if($object->element == 'invoice_supplier') (float) DOL_VERSION < 7.0 ? $colspan = 4: $colspan = 7;
-			if($object->element == 'supplier_proposal') (float) DOL_VERSION < 6.0 ? $colspan = 4 : $colspan = 3;
+			if($object->element == 'order_supplier')  $colspan = 6;
+			if($object->element == 'invoice_supplier') $colspan = 7;
+			if($object->element == 'supplier_proposal') $colspan = 3;
 
 			if(DOL_VERSION > 16.0 && empty(getDolGlobalString('MAIN_NO_INPUT_PRICE_WITH_TAX'))) $colspan++; // Ajout de la colonne PU TTC
 
 			if($object->element == 'facturerec' ) $colspan = 5;
 
-			if(isModEnabled('multicurrency') && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+			if(isModEnabled('multicurrency') && ($object->multicurrency_code != $conf->currency)) {
 				$colspan++; // Colonne PU Devise
 			}
 			if($object->element == 'commande' && $object->statut < 3 && isModEnabled('shippableorder')) $colspan++;
@@ -2900,9 +2755,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						if($line->label=='' && !$isFreeText) {
 							if(TSubtotal::isSubtotal($line)) {
 								$newlabel = $line->description.' '.$this->getTitle($object, $line);
-								$line->description='';
-							} elseif( (float)DOL_VERSION < 6 ) {
-								$newlabel= $line->description;
 								$line->description='';
 							}
 						}
@@ -3152,12 +3004,12 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 					/* Total */
 					echo '<td class="linecolht nowrap" align="right" style="font-weight:bold;" rel="subtotal_total">'.price($total_line).'</td>';
-					if (isModEnabled('multicurrency') && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+					if (isModEnabled('multicurrency') && ($object->multicurrency_code != $conf->currency)) {
 						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 					}
 				} else {
 					echo '<td class="linecolht movetitleblock">&nbsp;</td>';
-					if (isModEnabled('multicurrency') && ((float) DOL_VERSION < 8.0 || $object->multicurrency_code != $conf->currency)) {
+					if (isModEnabled('multicurrency') && ($object->multicurrency_code != $conf->currency)) {
 						echo '<td class="linecoltotalht_currency">&nbsp;</td>';
 					}
 				}
@@ -3189,11 +3041,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
                             if(empty($line->fk_prev_id)) $line->fk_prev_id = null;
 							if(TSubtotal::isTitle($line) && ( $line->fk_prev_id === null )) {
 								echo '<a class="subtotal-line-action-btn" title="'.$langs->trans('CloneLSubtotalBlock').'" href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=duplicate&lineid='.$line->id.'&token='.$newToken.'" >';
-								if(intval(DOL_VERSION) < 8) {
-									echo img_picto($langs->trans('Duplicate'), 'duplicate@subtotal');
-								} else {
-									echo '<i class="fa fa-clone" aria-hidden="true"></i>';
-								}
+
+                                echo '<i class="fa fa-clone" aria-hidden="true"></i>';
+
 								echo '</a>';
 							}
 						}
@@ -3223,13 +3073,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 							if(TSubtotal::isTitle($line) && (!isset($line->fk_prev_id) || (isset($line->fk_prev_id) && ($line->fk_prev_id === null))) )
 							{
-								if ((float) DOL_VERSION >= 8.0) {
-									$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' style="color:#be3535 !important;" class="pictodelete pictodeleteallline"');
-								} elseif ((float) DOL_VERSION >= 3.8) {
-									$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal',' class="pictodelete" ');
-								} else {
-									$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal');
-								}
+
+                                $img_delete = img_delete($langs->trans('deleteWithAllLines'), ' style="color:#be3535 !important;" class="pictodelete pictodeleteallline"');
 
 								echo '<a class="subtotal-line-action-btn"  href="'.$_SERVER['PHP_SELF'].'?'.$idvar.'='.$object->id.'&action=ask_deleteallline&lineid='.$line->id.'&token='.$newToken.'">'.$img_delete.'</a>';
 							}
@@ -3592,13 +3437,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 				if(TSubtotal::isTitle($line) && ($line->fk_prev_id === null) )
 				{
-					if ((float) DOL_VERSION >= 8.0) {
-						$img_delete = img_delete($langs->trans('deleteWithAllLines'), ' style="color:#be3535 !important;" class="pictodelete pictodeleteallline"');
-					} elseif ((float) DOL_VERSION >= 3.8) {
-						$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all.3.8@subtotal',' class="pictodelete" ');
-					} else {
-						$img_delete = img_picto($langs->trans('deleteWithAllLines'), 'delete_all@subtotal');
-					}
+                    $img_delete = img_delete($langs->trans('deleteWithAllLines'), ' style="color:#be3535 !important;" class="pictodelete pictodeleteallline"');
 
 					echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=ask_deleteallline&amp;lineid='.$lineid.'&token='.$newToken.'">'.$img_delete.'</a>';
 				}
