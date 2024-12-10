@@ -9,8 +9,7 @@ dol_include_once('/comm/propal/class/propal.class.php');
 dol_include_once('/commande/class/commande.class.php');
 dol_include_once('/compta/facture/class/facture.class.php');
 
-if((float)DOL_VERSION >= 7)
-{
+
     print "Début de conversion des lignes de propale<br>";
     $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."propaldet WHERE special_code = 104777 AND qty != 50 AND product_type = 9 AND (label = '' OR label IS NULL)";
     $res = $db->query($sql);
@@ -80,4 +79,3 @@ if((float)DOL_VERSION >= 7)
         print $i." lignes converties<br>";
     }
     
-}

@@ -847,8 +847,8 @@ class pdf_azur_subtotal extends ModelePDFPropales
 			// Check a payment mode is defined
 			/* Not required on a proposal
 			if (empty($object->mode_reglement_code)
-			&& ! $conf->global->FACTURE_CHQ_NUMBER
-			&& ! $conf->global->FACTURE_RIB_NUMBER)
+			&& ! getDolGlobalInt('FACTURE_CHQ_NUMBER')
+			&& ! getDolGlobalString('FACTURE_RIB_NUMBER'))
 			{
 				$pdf->SetXY($this->marge_gauche, $posy);
 				$pdf->SetTextColor(200,0,0);
@@ -1535,7 +1535,7 @@ class pdf_azur_subtotal extends ModelePDFPropales
 	function _pagefoot(&$pdf,$object,$outputlangs,$hidefreetext=0)
 	{
 		$showdetails=0;
-		$free_text = (float)DOL_VERSION > 3.8 ? 'PROPOSAL_FREE_TEXT' : 'PROPALE_FREE_TEXT';
+		$free_text =  'PROPOSAL_FREE_TEXT';
 		return pdf_pagefoot($pdf,$outputlangs,$free_text,$this->emetteur,$this->marge_basse,$this->marge_gauche,$this->page_hauteur,$object,$showdetails,$hidefreetext);
 	}
 
