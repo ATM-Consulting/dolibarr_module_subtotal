@@ -292,7 +292,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			'conf' => array(
 				'SUBTOTAL_USE_NEW_FORMAT' => getDolGlobalInt('SUBTOTAL_USE_NEW_FORMAT'),
 				'MAIN_VIEW_LINE_NUMBER' => getDolGlobalInt('MAIN_VIEW_LINE_NUMBER'),
-				'token' => newToken()
+				'token' => newToken(),
 				'groupBtn' => intval(DOL_VERSION) < 20.0 || getDolGlobalInt('SUBTOTAL_FORCE_EXPLODE_ACTION_BTN') ? 0 : 1
 			),
 			'langs' => array(
