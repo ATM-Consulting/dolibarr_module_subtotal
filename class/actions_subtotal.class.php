@@ -293,12 +293,32 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				'SUBTOTAL_USE_NEW_FORMAT' => getDolGlobalInt('SUBTOTAL_USE_NEW_FORMAT'),
 				'MAIN_VIEW_LINE_NUMBER' => getDolGlobalInt('MAIN_VIEW_LINE_NUMBER'),
 				'token' => newToken()
+				'groupBtn' => intval(DOL_VERSION) < 20.0 || getDolGlobalInt('SUBTOTAL_FORCE_EXPLODE_ACTION_BTN') ? 0 : 1
 			),
 			'langs' => array(
 				'Level' => $langs->trans('Level'),
-				'Position' => $langs->transnoentities('Position')
+				'Position' => $langs->transnoentities('Position'),
+				'AddTitle' => $langs->trans('AddTitle'),
+				'AddSubTotal' => $langs->trans('AddSubTotal'),
+				'AddFreeText' => $langs->trans('AddFreeText'),
 			)
 		);
+
+
+		$jsData['buttons'] = dolGetButtonAction('', $langs->trans('SubtotalsAndTitlesActionBtnLabel'), 'default', [
+				['attr' => [ 'rel' => 'add_title_line'], 'id' => 'add_title_line', 'urlraw' =>'#', 'label' => $langs->trans('AddTitle'), 'perm' => 1],
+				['attr' => [ 'rel' => 'add_total_line'], 'id' => 'add_total_line', 'urlraw' =>'#', 'label' => $langs->trans('AddSubTotal'), 'perm' => 1],
+				['attr' => [ 'rel' => 'add_free_text'], 'id' => 'add_free_text', 'urlraw' =>'#', 'label' => $langs->trans('AddFreeText'), 'perm' => 1],
+			], 'subtotal-actions-buttons-dropdown');
+
+		if(empty($jsData['conf']['groupBtn'])) {
+			$jsData['buttons'] = '<div class="inline-block divButAction"><a id="add_title_line" rel="add_title_line" href="javascript:;" class="butAction">'.$langs->trans('AddTitle').'</a></div>';
+			$jsData['buttons'].= '<div class="inline-block divButAction"><a id="add_total_line" rel="add_total_line" href="javascript:;" class="butAction">'.$langs->trans('AddSubTotal').'</a></div>';
+			$jsData['buttons'].= '<div class="inline-block divButAction"><a id="add_free_text" rel="add_free_text" href="javascript:;" class="butAction">'.$langs->trans('AddFreeText').'</a></div>';
+		}
+
+
+
 
 		?>
 			<!-- SubTotal action printNewFormat -->
@@ -306,11 +326,13 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				$(document).ready(function() {
 					let jsSubTotalData = <?php print json_encode($jsData); ?>;
 
-					$('div.fiche div.tabsAction').append('<br />');
+					if(jsSubTotalData.conf.groupBtn == 0){
+						$('div.fiche div.tabsAction').append('<br />');
+						$('div.fiche div.tabsAction').append(jsSubTotalData.buttons);
+					}else{
+						$(jsSubTotalData.buttons).insertBefore($("div.fiche div.tabsAction > .butAction").first());
+					}
 
-					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_title_line" rel="add_title_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddTitle' )?></a></div>');
-					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_total_line" rel="add_total_line" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddSubTotal')?></a></div>');
-					$('div.fiche div.tabsAction').append('<div class="inline-block divButAction"><a id="add_free_text" rel="add_free_text" href="javascript:;" class="butAction"><?php echo  $langs->trans('AddFreeText')?></a></div>');
 
 
 					function updateAllMessageForms(){
@@ -433,8 +455,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	                     });
 					}
 
-					$('a[rel=add_title_line]').click(function()
+					$('a[rel=add_title_line]').click(function(e)
 					{
+						e.preventDefault();
 						promptSubTotal('addTitle'
 							 , "<?php echo $langs->trans('YourTitleLabel') ?>"
 							 , "<?php echo $langs->trans('title'); ?>"
@@ -444,8 +467,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						);
 					});
 
-					$('a[rel=add_total_line]').click(function()
+					$('a[rel=add_total_line]').click(function(e)
 					{
+						e.preventDefault();
 						promptSubTotal('addSubtotal'
 							, '<?php echo $langs->trans('YourSubtotalLabel') ?>'
 							, '<?php echo $langs->trans('subtotal'); ?>'
@@ -456,8 +480,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						);
 					});
 
-					$('a[rel=add_free_text]').click(function()
+					$('a[rel=add_free_text]').click(function(e)
 					{
+						e.preventDefault();
 						promptSubTotal('addFreeTxt'
 							, "<?php echo $langs->transnoentitiesnoconv('YourTextLabel') ?>"
 							, "<?php echo $langs->trans('subtotalAddLineDescription'); ?>"
@@ -3625,12 +3650,17 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 							if ((typeof id != 'undefined' && id.indexOf('row-') == 0) || $(item).hasClass('liste_titre'))
 							{
-								$(item).children('td:last-child').before('<td class="subtotal_nc"></td>');
+								let tableNCColSelector = 'td';
+								if($(item).hasClass('liste_titre') && $(item).children('th:last-child').length > 0 &&  $(item).children('td:last-child').length == 0){
+									tableNCColSelector = 'th'; // In Dolibarr V20.0 title use th instead of td
+								}
+
+								$(item).children(`${tableNCColSelector}:last-child`).before(`<${tableNCColSelector} class="subtotal_nc"></${tableNCColSelector}>`);
 
 								if ($(item).attr('rel') != 'subtotal' && typeof $(item).attr('id') != 'undefined')
 								{
 									var idSplit = $(item).attr('id').split('-');
-									$(item).children('td.subtotal_nc').append($('<input type="checkbox" id="subtotal_nc-'+idSplit[1]+'" class="subtotal_nc_chkbx" data-lineid="'+idSplit[1]+'" value="1" '+(typeof subtotal_TSubNc[idSplit[1]] != 'undefined' && subtotal_TSubNc[idSplit[1]] == 1 ? 'checked="checked"' : '')+' />'));
+									$(item).children(`${tableNCColSelector}.subtotal_nc`).append($('<input type="checkbox" id="subtotal_nc-'+idSplit[1]+'" class="subtotal_nc_chkbx" data-lineid="'+idSplit[1]+'" value="1" '+(typeof subtotal_TSubNc[idSplit[1]] != 'undefined' && subtotal_TSubNc[idSplit[1]] == 1 ? 'checked="checked"' : '')+' />'));
 								}
 							}
 							else
@@ -3995,7 +4025,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			$parameters['object']->context['subtotalPdfModelInfo']->page_largeur 	= $pdfDoc->page_largeur;
 			$parameters['object']->context['subtotalPdfModelInfo']->page_hauteur 	= $pdfDoc->page_hauteur;
 			$parameters['object']->context['subtotalPdfModelInfo']->format 		= $pdfDoc->format;
-		    if (property_exists($pdfDoc, 'context') && is_object($pdfDoc->context['subtotalPdfModelInfo'])) {
+		    if (property_exists($pdfDoc, 'context') && array_key_exists('subtotalPdfModelInfo', $pdfDoc->context) && is_object($pdfDoc->context['subtotalPdfModelInfo'])) {
                 $parameters['object']->context['subtotalPdfModelInfo']->defaultTitlesFieldsStyle = $pdfDoc->context['subtotalPdfModelInfo']->defaultTitlesFieldsStyle;
                 $parameters['object']->context['subtotalPdfModelInfo']->defaultContentsFieldsStyle = $pdfDoc->context['subtotalPdfModelInfo']->defaultContentsFieldsStyle;
 		    }
@@ -4008,20 +4038,39 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	 */
 	private function _billOrdersAddCheckBoxForTitleBlocks()
 	{
-		global $delayedhtmlcontent, $langs;
+		global $delayedhtmlcontent, $langs, $conf;
+
 		ob_start();
+		$jsConf = array(
+			'langs'=>  array(
+				'AddTitleBlocFromOrdersToInvoice' => $langs->trans('subtotal_add_title_bloc_from_orderstoinvoice'),
+				'AddShippingListToTile' => $langs->trans('AddShippingListToTile'),
+				'SubtotalOptions' => $langs->trans('SubtotalOptions'),
+				'UseHiddenConfToAutoCheck' => $langs->trans('UseHiddenConfToAutoCheck'),
+			),
+			'isModShippingEnable' => !empty($conf->expedition->enabled),
+			'SUBTOTAL_DEFAULT_CHECK_SHIPPING_LIST_FOR_TITLE_DESC' => getDolGlobalInt('SUBTOTAL_DEFAULT_CHECK_SHIPPING_LIST_FOR_TITLE_DESC')
+		);
 		?>
 			<script type="text/javascript">
 				$(function() {
-					var tr = $("<tr><td><?php echo $langs->trans('subtotal_add_title_bloc_from_orderstoinvoice'); ?></td><td><input type='checkbox' value='1' name='subtotal_add_title_bloc_from_orderstoinvoice' checked='checked' /></td></tr>");
-					var $noteTextArea = $("textarea[name=note]");
+					let jsConf = <?php print json_encode($jsConf); ?>;
+
+					let tr = '<tr><td>'+jsConf.langs.SubtotalOptions+'</td><td>';
+					tr+= '<label><input type="checkbox" value="1" name="subtotal_add_title_bloc_from_orderstoinvoice" checked="checked" /> '+jsConf.langs.AddTitleBlocFromOrdersToInvoice+'</label>';
+					if(jsConf.isModShippingEnable){
+						tr+= '<br/><label><input type="checkbox" value="1" name="subtotal_add_shipping_list_to_title_desc" /> '+jsConf.langs.AddShippingListToTile+' <i class="fa fa-question-circle" title="'+jsConf.langs.UseHiddenConfToAutoCheck+' SUBTOTAL_DEFAULT_CHECK_SHIPPING_LIST_FOR_TITLE_DESC"></label>';
+					}
+					tr+= '<td></tr>';
+
+					let $noteTextArea = $("textarea[name=note]");
 					if ($noteTextArea.length === 1) {
-						$noteTextArea.closest('tr').after(tr);
+						$noteTextArea.closest($('tr')).after(tr);
 						return;
 					}
-					var $inpCreateBills = $("#validate_invoices");
+					let $inpCreateBills = $("#validate_invoices");
 					if ($inpCreateBills.length === 1) {
-						$inpCreateBills.closest('tr').after(tr);
+						$inpCreateBills.closest($('tr')).after(tr);
 					}
 				});
 			</script>
