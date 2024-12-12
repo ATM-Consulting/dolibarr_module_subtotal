@@ -2974,8 +2974,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 
 						 // Get display styles and apply them
-                        $style = '';
-						$style =  getDolGlobalString('SUBTOTAL_TITLE_STYLE', '');
+                         $style = '';
+						 $style  =  TSubtotal::isFreeText($line) ? getDolGlobalString('SUBTOTAL_TEXT_LINE_STYLE', '') : getDolGlobalString('SUBTOTAL_TITLE_STYLE', '');
 						 $titleStyleItalic = strpos($style, 'I') === false ? '' : ' font-style: italic;';
 						 $titleStyleBold =  strpos($style, 'B') === false ? '' : ' font-weight:bold;';
 						 $titleStyleUnderline =  strpos($style, 'U') === false ? '' : ' text-decoration: underline;';

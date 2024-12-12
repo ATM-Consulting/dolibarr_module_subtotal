@@ -67,7 +67,9 @@ class modSubtotal extends DolibarrModules
         // Possible values for version are: 'development', 'experimental' or version
 
 
+
         $this->version = '3.27.0';
+
 
 
 		// Url to the file with your last numberversion of this module
