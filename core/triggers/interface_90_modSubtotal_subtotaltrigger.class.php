@@ -475,10 +475,8 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 					if (! isset($line->special_code)) {
 						//  récuperation  de la commande generée par Trigger
 						if (count($object->linkedObjectsIds['commande']) == 1) {
-							if (! isset($cmd)) {
-								$cmd = new Commande($this->db);
-								$res = $cmd->fetch(current($object->linkedObjectsIds['commande']));
-							}
+							$cmd = new Commande($this->db);
+							$res = $cmd->fetch(array_pop($object->linkedObjectsIds['commande']));
 							if ($res > 0) {
 								$resLines = $cmd->fetch_lines();
 								if ($resLines > 0) {
