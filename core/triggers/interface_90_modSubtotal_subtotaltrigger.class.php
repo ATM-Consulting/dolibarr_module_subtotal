@@ -454,54 +454,67 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 			// on recupere la commande
 			$object->fetchObjectLinked();
 
+			// TODO: pas le temps maintenant dans le cadre du ticket DA025864, mais il faut absolument refacto
+			//       ce trigger-là.
+			//       1) on fait 2 fois le foreach, une fois pour la conf NO_TITLE_SHOW_ON_EXPED_GENERATION, une
+			//          autre fois pour supprimer les blocs sans ligne de produit.
+			//       2) on re-fetche la même commande X fois (pour chaque ligne).
+			//       3) je ne comprends pas à quoi sert le bloc à la fin du premier foreach, mais qui s'exécute
+			//          même quand la conf NO_TITLE_SHOW_ON_EXPED_GENERATION est désactivée.
 			foreach ($object->lines as &$line) {
 				$orderline = new OrderLine($this->db);
 				$orderline->fetch($line->origin_line_id);
-				// si la conf pas d'affichage des titres  et consorts (sous total )
-				//on supprime la ligne de sous total
-				if (getDolGlobalString('NO_TITLE_SHOW_ON_EXPED_GENERATION')){
-					// le special code n'est pas tranmit dans l'expedition
-					// @todo voir plus tard pourquoi nous n'avons pas cette information dans la ligne d'expedition
-					if (empty($line->special_code)){
-						//  récuperation  de la facture generé par Trigger
 
+				if (getDolGlobalString('NO_TITLE_SHOW_ON_EXPED_GENERATION')) {
+					// conf "Ne pas reporter les lignes de titre lors de la génération d’expédition"
+					// => suppression des lignes qui correspondent à un titre ou sous-total
+
+					// comme les lignes d'expédition n'ont pas d'attribut `special_code`, on doit le
+					// récupérer depuis les lignes de la commande.
+					// @todo voir plus tard pourquoi nous n'avons pas cette information dans la ligne d'expedition
+					if (! isset($line->special_code)) {
+						//  récuperation  de la commande generée par Trigger
 						if (count($object->linkedObjectsIds['commande']) == 1) {
-							$cmd = new Commande($this->db);
-							$res = $cmd->fetch(array_pop($object->linkedObjectsIds['commande']));
-							if ($res > 0  ){
+							if (! isset($cmd)) {
+								$cmd = new Commande($this->db);
+								$res = $cmd->fetch(current($object->linkedObjectsIds['commande']));
+							}
+							if ($res > 0) {
 								$resLines = $cmd->fetch_lines();
-								if ($resLines > 0 ) {
-									foreach ($cmd->lines as $cmdLine){
-										if ($cmdLine->id == $line->origin_line_id){
+								if ($resLines > 0) {
+									foreach ($cmd->lines as $cmdLine) {
+										if ($cmdLine->id == $line->origin_line_id) {
 											$line->special_code = $cmdLine->special_code;
 											break;
 										}
 									}
-								} else{
+								} else {
 									//error
-									setEventMessage($langs->trans("ErrorLoadingLinesFromLinkedOrder"),'errors');
+									setEventMessage($langs->trans("ErrorLoadingLinesFromLinkedOrder"), 'errors');
 								}
-							} else{
+							} else {
 								//error
-								setEventMessage($langs->trans("ErrorLoadingLinkedOrder"),'errors');
+								setEventMessage($langs->trans("ErrorLoadingLinkedOrder"), 'errors');
 							}
 						}
-
 					}
 
-						if(TSubtotal::isModSubtotalLine($line)) {
-							$resdelete = $line->delete($user);
-							if ($resdelete < 0){
-								setEventMessage($langs->trans('Error_subtotal_delete_line'),'errors');
-							}
+					if (TSubtotal::isModSubtotalLine($line)) {
+						$resdelete = $line->delete($user);
+						if ($resdelete < 0) {
+							setEventMessage($langs->trans('Error_subtotal_delete_line'), 'errors');
 						}
+					}
 				}
 
-				if(TSubtotal::isModSubtotalLine($orderline)) { // Nous sommes sur une ligne titre, si la ligne précédente est un titre de même niveau, on supprime la ligne précédente
+				// TODO: ce `if` est à clarifier, sa pertinence à réévaluer
+				if (TSubtotal::isModSubtotalLine($orderline)) {
+					// Nous sommes sur une ligne titre, si la ligne précédente est un titre de même niveau, on supprime la ligne précédente
 					$line->special_code = TSubtotal::$module_number;
-
 				}
 			}
+
+			// suppression des blocs qui ne contiennent aucune ligne de produit
 			$TLinesToDelete = array();
 			foreach ($object->lines as &$line) {
 				if(TSubtotal::isTitle($line)) {
