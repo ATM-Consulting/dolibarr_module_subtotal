@@ -167,6 +167,9 @@ $item = $formSetup->newItem('SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE')->helpText
 
 // Style des titres (B = gras, U = souligné, I = italique)
 $item = $formSetup->newItem('SUBTOTAL_TITLE_STYLE');
+$item->fieldAttr['placeholder'] = 'BU';
+
+$item = $formSetup->newItem('SUBTOTAL_TEXT_LINE_STYLE');
 $item->fieldAttr['placeholder'] = '';
 
 // Style des titres (B = gras, U = souligné, I = italique)
