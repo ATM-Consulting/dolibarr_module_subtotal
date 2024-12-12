@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 
 # Release 3.25 - 24/07/2024
-
+- FIX : DA025861 Provide an option in the heading style configuration to have no styling at all - *12/12/2024* - 3.25.4  
 - FIX DA025399 : GETPOST type integer n'existe pas - *22/08/2024* - 3.25.3
 - FIX : CKeditor no check version to avoid the error message  - *20/08/2024* - 3.25.2
 - FIX : Title summary - *24/07/2024* - 3.25.1
