@@ -135,3 +135,13 @@ SUBTOTAL_DISABLE_SUMMARY = Disable document "quick summary menu" (appears in lef
 Subtotal_HideAll=Hide all lines
 Subtotal_ShowAll=Show all lines
 DISPLAY_MARGIN_ON_SUBTOTALS=Displays margin on subtotals lines
+
+LinkedShippings = Linked shipping orders
+LinkedShipping = Linked shipping order
+LinkedDeliveries = Linked delivery notes
+LinkedDelivery = Linked delivery note
+SubtotalOptions = Subtotal options
+AddShippingListToTile = Add the reference list of related delivery or shipping notes to the title block description.
+UseHiddenConfToAutoCheck = To pre-set the default, you can activate the settings
+
+SubtotalsAndTitlesActionBtnLabel = Title & Sub total

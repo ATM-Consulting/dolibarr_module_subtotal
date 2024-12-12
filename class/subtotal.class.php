@@ -101,6 +101,7 @@ class TSubtotal {
 	 * @param string       $label
 	 * @param int          $qty
 	 * @param int          $rang
+	 * @param string $desc
 	 * @return int
 	 *
 	 */
@@ -245,16 +246,17 @@ class TSubtotal {
 		}
 	}
 
-	public static function addTitle(&$object, $label, $level, $rang=-1)
+	public static function addTitle(&$object, $label, $level, $rang=-1, $desc = '')
 	/**
 	 * @param CommonObject $object
 	 * @param string       $label
 	 * @param int          $level
 	 * @param int          $rang
+	 * @param string       $desc
 	 * @return int
 	 */
 	{
-		return self::addSubTotalLine($object, $label, $level, $rang);
+		return self::addSubTotalLine($object, $label, $level, $rang, $desc);
 	}
 
 	public static function addTotal(&$object, $label, $level, $rang=-1)
