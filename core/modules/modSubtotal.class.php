@@ -67,9 +67,7 @@ class modSubtotal extends DolibarrModules
         // Possible values for version are: 'development', 'experimental' or version
 
 
-
         $this->version = '3.27.0';
-
 
 
 		// Url to the file with your last numberversion of this module
@@ -262,10 +260,10 @@ class modSubtotal extends DolibarrModules
         //// Permission by default for new user (0/1)
         //$this->rights[$r][3] = 1;
         //// In php code, permission will be checked by test
-        //// if ($user->rights->permkey->level1->level2)
+        //// if ($user->hasRight("permkey", "level1", "level2"))
         //$this->rights[$r][4] = 'level1';
         //// In php code, permission will be checked by test
-        //// if ($user->rights->permkey->level1->level2)
+        //// if ($user->hasRight("permkey", "level1", "level2"))
         //$this->rights[$r][5] = 'level2';
         //$r++;
         // Main menu entries
