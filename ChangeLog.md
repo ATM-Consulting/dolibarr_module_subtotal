@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 
 # Release 3.25 - 24/07/2024
+- NEW : TK2501-3506 - Created conf SUBTOTAL_HIDE_FOLDERS_BY_DEFAULT to hide folders by default - *14/01/2025* - 3.35.6
 - FIX: DA025864: conf `NO_TITLE_SHOW_ON_EXPED_GENERATION` should delete all 
   title/free/subtotal lines from the shipment but doesn't - *12/12/2024* - 3.25.5
 - FIX : DA025861 Provide an option in the heading style configuration to have no styling at all - *12/12/2024* - 3.25.4  
