@@ -4175,6 +4175,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 				$jsConf = array(
 					'linesToHide' => $TBlocksToHide,
+					'hideFoldersByDefault' => getDolGlobalInt('SUBTOTAL_HIDE_FOLDERS_BY_DEFAULT'),
 					'closeMode' => $hideMode, // default, keepTitle
 					'interfaceUrl'=> dol_buildpath('/subtotal/script/interface.php', 1),
 					'element' => $element,
@@ -4395,7 +4396,11 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 									if(o.config.linesToHide.includes(lineId)){
 										o.toggleChildFolderStatusDisplay(lineId, 'closed');
 									}else{
-										o.toggleChildFolderStatusDisplay(lineId, 'open');
+										if (o.config.hideFoldersByDefault == 1) {
+											o.toggleChildFolderStatusDisplay(lineId, 'closed');
+										} else {
+											o.toggleChildFolderStatusDisplay(lineId, 'open');
+										}
 									}
 								}
 							});

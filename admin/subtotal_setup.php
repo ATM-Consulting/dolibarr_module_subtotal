@@ -151,6 +151,8 @@ if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
 
 	// L'ajout sous un titre se fera en fin de section
 	$formSetup->newItem('SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK')->setAsYesNo();
+
+	$formSetup->newItem('SUBTOTAL_HIDE_FOLDERS_BY_DEFAULT')->setAsYesNo();
 }
 
 // Cacher les options du titre

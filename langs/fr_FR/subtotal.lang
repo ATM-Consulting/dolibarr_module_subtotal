@@ -25,6 +25,7 @@ SubtotalLineShowQty = Afficher la quantité du sous-total
 Level = Niveau
 SubtotalLabel = <b>Sous-total : </b>
 
+SUBTOTAL_HIDE_FOLDERS_BY_DEFAULT=Par défaut, plier les dossiers
 SUBTOTAL_USE_NEW_FORMAT=Activer l'utilisation avancée
 SUBTOTAL_USE_NUMEROTATION=Activer la numérotation automatique sur le PDF
 SUBTOTAL_ALLOW_ADD_BLOCK=Autoriser l'ajout d'un titre et sous-total
