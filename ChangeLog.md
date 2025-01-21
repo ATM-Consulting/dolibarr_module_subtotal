@@ -3,9 +3,14 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+## Release 3.28
 - NEW : TK2501-3506 - Created conf SUBTOTAL_HIDE_FOLDERS_BY_DEFAULT to hide folders by default - *14/01/2025* - 3.28.0
+
+## Release 3.27
 - NEW : Use v20 dropdown for action buttons & fix buttons orders - *01/10/2024* - 3.27.0  
   Use SUBTOTAL_FORCE_EXPLODE_ACTION_BTN hidden conf to disable behavior
+
+## Release 3.26
 - FIX : Compat V20 : Document col missing for title for NC - *16/09/2024* - 3.26.1
 - NEW : Add more order to invoice massaction option - *04/09/2024* - 3.26.0  
   Allow adding list of shipping ref to title block
