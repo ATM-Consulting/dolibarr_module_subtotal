@@ -1519,7 +1519,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
      * @return int
      */
 	function pdf_getlineqty($parameters=array(), &$object, &$action='') {
-		global $conf,$hideprices;
+		global $conf,$hideprices, $hidedetails;
 
         $i = intval($parameters['i']);
         $line = isset($object->lines[$i]) ? $object->lines[$i] : null ;
@@ -1574,17 +1574,23 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
                     }
                 }
             }
-
             if (!empty($hideprices) && !empty($object->lines[$parameters['i']]) && property_exists($object->lines[$parameters['i']], 'qty')) {
                 $this->resprints = $object->lines[$parameters['i']]->qty;
                 return 1;
             } elseif (getDolGlobalString('SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY')) {
                 $hideInnerLines = GETPOST('hideInnerLines', 'int');
                 $hidedetails = GETPOST('hidedetails', 'int');
-                if (empty($hideInnerLines) && !empty($hidedetails)) {
+				if (empty($hideInnerLines) && !empty($hidedetails)) {
                     $this->resprints = $object->lines[$parameters['i']]->qty;
                 }
             }
+			else if (!empty($hidedetails))
+			{
+				$lineTitle = (!empty($object->lines[$i])) ? TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang): '';
+				if (!($lineTitle && TSubtotal::titleHasTotalLine($object, $lineTitle, true))) {
+					$this->resprints = $object->lines[$parameters['i']]->qty;
+				}
+			}
         }
 
 		if(is_array($parameters)) $i = & $parameters['i'];
@@ -1608,7 +1614,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	}
 
 	function pdf_getlinetotalexcltax($parameters=array(), &$object, &$action='') {
-	    global $conf, $hideprices, $hookmanager;
+	    global $conf, $hideprices, $hookmanager, $hidedetails, $langs;
 
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
@@ -1681,6 +1687,16 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 				// currentcontext à modifier celon l'appel
 				$params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlinetotalexcltax', 'currentcontext'=>'subtotal_hideprices', 'i' => $i);
+				return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
+			}
+		}
+		else if (!empty($hidedetails))
+		{
+			$lineTitle = (!empty($object->lines[$i])) ? TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang): '';
+			if (!($lineTitle && TSubtotal::titleHasTotalLine($object, $lineTitle, true))) {
+				$this->resprints = price($object->lines[$i]->total_ht,0,$langs);
+				$params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlinetotalexcltax', 'currentcontext' => 'subtotal_hidedetails', 'i' => $i);
+
 				return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
 			}
 		}
@@ -1772,7 +1788,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	}
 
 	function pdf_getlineupexcltax($parameters=array(), &$object, &$action='') {
-	    global $conf,$hideprices,$hookmanager;
+	    global $conf,$hideprices,$hookmanager, $hidedetails, $langs;
 
 		if(is_array($parameters)) $i = & $parameters['i'];
 		else $i = (int)$parameters;
@@ -1830,13 +1846,22 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		        $params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlineupexcltax', 'currentcontext'=>'subtotal_hideprices', 'i' => $i);
 		        return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
 		    }
+		} elseif (!empty($hidedetails))
+		{
+			$lineTitle = (!empty($object->lines[$i])) ? TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang): '';
+			if (!($lineTitle && TSubtotal::titleHasTotalLine($object, $lineTitle, true))) {
+				$this->resprints = price($object->lines[$i]->subprice,0,$langs);
+				$params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlineupexcltax', 'currentcontext' => 'subtotal_hidedetails', 'i' => $i);
+
+				return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
+			}
 		}
 
 		return 0;
 	}
 
 	function pdf_getlineremisepercent($parameters=array(), &$object, &$action='') {
-	    global $conf,$hideprices,$hookmanager;
+	    global $conf,$hideprices,$hookmanager, $hidedetails, $langs;
 
         if(is_array($parameters)) $i = & $parameters['i'];
         else $i = (int) $parameters;
@@ -1876,12 +1901,20 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 					}
 		        }
 		    }
+        elseif (!empty($hidedetails))
+		{
+			$lineTitle = (!empty($object->lines[$i])) ? TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang): '';
+			if (!($lineTitle && TSubtotal::titleHasTotalLine($object, $lineTitle, true))) {
+				$this->resprints = dol_print_reduction($object->lines[$i]->remise_percent, $langs);
+				return 1;
+			}
+		}
 
 		return 0;
 	}
 
 	function pdf_getlineupwithtax($parameters=array(), &$object, &$action='') {
-		global $conf,$hideprices;
+		global $conf,$hideprices, $hidedetails;
 
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
@@ -1909,7 +1942,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	}
 
 	function pdf_getlinevatrate($parameters=array(), &$object, &$action='') {
-	    global $conf,$hideprices,$hookmanager;
+	    global $conf,$hideprices,$hookmanager, $hidedetails;
 
 //		// Dans le cas des notes de frais report ne pas traiter
 //		// TODO : peut être faire l'inverse : limiter à certains elements plutot que le faire pour tous ... à voir si un autre PB du genre apparait.
@@ -1959,6 +1992,15 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		        $params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlinevatrate', 'currentcontext'=>'subtotal_hideprices', 'i' => $i);
 		        return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
 		    }
+		}
+        elseif (!empty($hidedetails))
+		{
+			$lineTitle = (!empty($object->lines[$i])) ? TSubtotal::getParentTitleOfLine($object, $object->lines[$i]->rang): '';
+			if (!($lineTitle && TSubtotal::titleHasTotalLine($object, $lineTitle, true))) {
+				$this->resprints = vatrate($object->lines[$i]->tva_tx, true);
+				$params = array('parameters' => $parameters, 'currentmethod' => 'pdf_getlinevatrate', 'currentcontext'=>'subtotal_hidedetails', 'i' => $i);
+				return $this->callHook($object, $hookmanager, $action, $params); // return 1 (qui est la valeur par défaut) OU -1 si erreur OU overrideReturn (contient -1 ou 0 ou 1)
+			}
 		}
 
 		return 0;
@@ -2167,6 +2209,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				unset($l->qty_asked, $l->qty_shipped, $l->volume, $l->weight);
 			}
         }
+
 
 		$hideInnerLines = GETPOST('hideInnerLines', 'int');
 		$hidedetails = GETPOST('hidedetails', 'int');
