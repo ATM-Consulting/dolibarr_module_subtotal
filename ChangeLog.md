@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 # [Unreleased]
 
 ## Release 3.28
+
+- FIX : DA026204 - Hide the price of set items option was not correctly applied during PDF generation - *10/03/2025* - 3.28.2
 - FIX : DA026083 - Display details if not in a subtotal bloc - *21/02/2025* - 3.28.1
 - NEW : TK2501-3506 - Created conf SUBTOTAL_HIDE_FOLDERS_BY_DEFAULT to hide folders by default - *14/01/2025* - 3.28.0
 
