@@ -17,7 +17,7 @@ All notable changes to this project will be documented in this file.
 - Ajout du hook pdfgeneration dans la liste des hooks accepté par le module - *12/07/2024* - 3.25.0
 
 # Release 3.24 - 08/04/2024
-
+- FIX : Global $object variable was being reassigned causing CRON job crashes (and possibly more) - *18/04/2024* - 3.24.7
 - FIX : Retour montée de version   - *27/09/2024* - 3.24.6
 - FIX : DA024845 : Le module sous total amène des erreurs dans les sauts de page lorsque l'on arrive tout juste en bas de page. - *24/07/2024* - 3.24.5
 - FIX : Module_number missed in subTotal class. function  addSubTotalLine function  in test order_supplier - *26/06/2024* - 3.24.4  
