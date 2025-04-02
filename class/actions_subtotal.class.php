@@ -326,14 +326,30 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				$(document).ready(function() {
 					let jsSubTotalData = <?php print json_encode($jsData); ?>;
 
-					if(jsSubTotalData.conf.groupBtn == 0){
-						$('div.fiche div.tabsAction').append('<br />');
-						$('div.fiche div.tabsAction').append(jsSubTotalData.buttons);
-					}else{
-						$(jsSubTotalData.buttons).insertBefore($("div.fiche div.tabsAction > .butAction").first());
+					if (jsSubTotalData.conf.groupBtn == 0) {
+
+						let targetContainer;
+
+						if ($("div.fiche div.tabsAction > .butAction").length) {
+							targetContainer = $("div.fiche div.tabsAction");
+						} else {
+							targetContainer = $("div.fiche div.tabsAction > .divButAction").length
+								? $("div.fiche div.tabsAction")
+								: $("div.fiche div.tabsAction");
+						}
+						targetContainer.append('<br />');
+						targetContainer.append(jsSubTotalData.buttons);
+
+					} else {
+
+						let elementsButon;
+
+						elementsButon = $("div.fiche div.tabsAction > .butAction").length
+							? $("div.fiche div.tabsAction > .butAction")
+							: $("div.fiche div.tabsAction > .divButAction");
+
+						$(jsSubTotalData.buttons).insertBefore(elementsButon.first());
 					}
-
-
 
 					function updateAllMessageForms(){
 				         for (instance in CKEDITOR.instances) {
@@ -3757,7 +3773,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 		print '<script type="text/javascript"> if (typeof subtotalSummaryJsConf === undefined) { var subtotalSummaryJsConf = {}; } subtotalSummaryJsConf = '.json_encode($jsConfig).'; </script>'; // used also for subtotal.lib.js
 
-
 		if(!getDolGlobalString('SUBTOTAL_DISABLE_SUMMARY')){
 			$jsConfig = array(
 				'langs' => array(
@@ -3765,7 +3780,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				),
 				'useOldSplittedTrForLine' => intval(DOL_VERSION) < 16 ? 1 : 0
 			);
-
 			print '<link rel="stylesheet" type="text/css" href="'.dol_buildpath('subtotal/css/summary-menu.css', 1).'">';
 			print '<script type="text/javascript" src="'.dol_buildpath('subtotal/js/summary-menu.js', 1).'"></script>';
 		}
