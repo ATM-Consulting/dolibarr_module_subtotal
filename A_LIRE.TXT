@@ -1,1 +1,0 @@
-Un bug existe dans la version 3.8, il vous faudra donc remplacer certains fichiers de Dolibarr par le contenu de htdocs_38
