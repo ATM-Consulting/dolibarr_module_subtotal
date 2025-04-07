@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 # [Unreleased]
 
 
+
+## Version 3.14 PI 
+
+- FIX : PHP 8 Compatibility - *19/10/2022* - 3.14.7
+- FIX : Remove transaction in  pdf_writelinedesc *10/11/2022* - 3.14.6 
+- FIX : PHP 8 Compatibility - *13/07/2022* - 3.14.5
+- FIX : Admin déplacement de l'option de récap en zone expérimentale *11/07/2022* 3.14.4
+- FIX : html tag missing for style *11/07/2022* 3.14.3
+- FIX duplicate origin lines on create from proposal *11/07/2022* 3.14.2 [PR #273 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/273)
+  when you create an invoice or order from a proposal you got duplicate lines if there are "Ouvrage" (or other external modules with product type "9") lines in proposal
+- FIX : Compatibility V16 Dictionnaries *14/06/2022* - 3.14.1
+- NEW : Refonte page setup avec class setup de Dolibarr V15 *11/05/2022* 3.14.0
+- NEW : Ajout de la class TechATM pour l'affichage de la page "A propos" *10/05/2022* 3.13.0
+- NEW : Add total_ht on originproductline tpl if available + add class td identification + add data-id tr identification *07/04/2022* - 3.12.0
+
 ## Version 3.11
 - FIX : FIX DOUBLE PARENTHESIS - *15/05/2023* - 3.11.13  
 - FIX : COMPAT V16 family - *02/06/2022)* - 3.11.12  

@@ -58,7 +58,10 @@ class ActionsSubtotal
 	{
 		global $conf;
 
-		if ($parameters['tabname'] == MAIN_DB_PREFIX.'c_subtotal_free_text')
+		$dictionnariesTablePrefix = '';
+		if (intval(DOL_VERSION)< 16) $dictionnariesTablePrefix =  MAIN_DB_PREFIX;
+
+		if ($parameters['tabname'] == $dictionnariesTablePrefix.'c_subtotal_free_text')
 		{
 			// Merci Dolibarr de remplacer les textarea par un input text
 			if ((float) DOL_VERSION >= 6.0)
@@ -237,7 +240,6 @@ class ActionsSubtotal
 	function printNewFormat(&$object, &$conf, &$langs, $idvar)
 	{
 		if (empty($conf->global->SUBTOTAL_ALLOW_ADD_BLOCK)) return false;
-		if ($line->fk_prev_id != null && !empty($line->fk_prev_id)) return false; // Si facture de situation
 
 		$jsData = array(
 			'conf' => array(
@@ -638,7 +640,7 @@ class ActionsSubtotal
 
 		$showBlockExtrafields = GETPOST('showBlockExtrafields', 'none');
 
-		if($object->element=='facture') $idvar = 'facid';
+		if(isset($object->element) && $object->element=='facture') $idvar = 'facid';
 		else $idvar = 'id';
 
 		if ($action == 'updateligne' || $action == 'updateline')
@@ -964,7 +966,12 @@ class ActionsSubtotal
 			if ($l->product_type != 9) {
                     		$total += $l->total_ht;
                     		$total_tva += $l->total_tva;
+
+                            if(! isset($TTotal_tva[$l->tva_tx])) {
+                                $TTotal_tva[$l->tva_tx] = 0;
+                            }
                     		$TTotal_tva[$l->tva_tx] += $l->total_tva;
+
                     		$total_ttc += $l->total_ttc;
 			}
                 }
@@ -992,6 +999,8 @@ class ActionsSubtotal
 		$subtotalDefaultBottomPadding = 1;
 		$subtotalDefaultLeftPadding = 0.5;
 		$subtotalDefaultRightPadding = 0.5;
+        $backgroundCellHeightOffset = 0;
+        $backgroundCellPosYOffset = 0;
 
 		$fillBackground = false;
 		if(!empty($conf->global->SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR)
@@ -1002,8 +1011,6 @@ class ActionsSubtotal
 		){
 			$fillBackground = true;
 
-			$backgroundCellHeightOffset = 0;
-			$backgroundCellPosYOffset = 0;
 
 			// add here special PDF compatibility modifications
 			// mais avant d'ajouter une exeption ici verifier si il ne faut pas plutôt effectuer un fix sur le PDF
@@ -1025,18 +1032,18 @@ class ActionsSubtotal
 		}
 
 		// POUR LES PDF DE TYPE PDF_EVOLUTION (ceux avec les colonnes configurables)
-		$pdfModelUseColSystem = !empty($object->subtotalPdfModelInfo->cols); // justilise une variable au cas ou le test evolue
+		$pdfModelUseColSystem = !empty($object->context['subtotalPdfModelInfo']->cols); // justilise une variable au cas ou le test evolue
 		if($pdfModelUseColSystem){
 
 			include_once __DIR__ . '/staticPdf.model.php';
 			$staticPdfModel = new ModelePDFStatic($object->db);
-			$staticPdfModel->marge_droite 	= $object->subtotalPdfModelInfo->marge_droite;
-			$staticPdfModel->marge_gauche 	= $object->subtotalPdfModelInfo->marge_gauche;
-			$staticPdfModel->page_largeur 	= $object->subtotalPdfModelInfo->page_largeur;
-			$staticPdfModel->page_hauteur 	= $object->subtotalPdfModelInfo->page_hauteur;
-			$staticPdfModel->cols 			= $object->subtotalPdfModelInfo->cols;
-			$staticPdfModel->defaultTitlesFieldsStyle 	= $object->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
-			$staticPdfModel->defaultContentsFieldsStyle = $object->subtotalPdfModelInfo->defaultContentsFieldsStyle;
+			$staticPdfModel->marge_droite 	= $object->context['subtotalPdfModelInfo']->marge_droite;
+			$staticPdfModel->marge_gauche 	= $object->context['subtotalPdfModelInfo']->marge_gauche;
+			$staticPdfModel->page_largeur 	= $object->context['subtotalPdfModelInfo']->page_largeur;
+			$staticPdfModel->page_hauteur 	= $object->context['subtotalPdfModelInfo']->page_hauteur;
+			$staticPdfModel->cols 			= $object->context['subtotalPdfModelInfo']->cols;
+			$staticPdfModel->defaultTitlesFieldsStyle 	= $object->context['subtotalPdfModelInfo']->defaultTitlesFieldsStyle;
+			$staticPdfModel->defaultContentsFieldsStyle = $object->context['subtotalPdfModelInfo']->defaultContentsFieldsStyle;
 			$staticPdfModel->prepareArrayColumnField($object, $langs);
 
 			if(isset($staticPdfModel->cols['totalexcltax']['content']['padding'][0])){
@@ -1109,8 +1116,8 @@ class ActionsSubtotal
 			if ($fillBackground) {
 				$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
 			}
-			$pdf->SetXY($object->subtotalPdfModelInfo->marge_droite, $posy+$backgroundCellPosYOffset);
-			$pdf->MultiCell($object->subtotalPdfModelInfo->page_largeur - $object->subtotalPdfModelInfo->marge_gauche - $object->subtotalPdfModelInfo->marge_droite, $cell_height, '', 0, '', 1);
+			$pdf->SetXY($object->context['subtotalPdfModelInfo']->marge_droite, $posy+$backgroundCellPosYOffset);
+			$pdf->MultiCell($object->context['subtotalPdfModelInfo']->page_largeur - $object->context['subtotalPdfModelInfo']->marge_gauche - $object->context['subtotalPdfModelInfo']->marge_droite, $cell_height, '', 0, '', 1);
 		}
 		else{
 			$pdf->SetXY($posx, $posy+$backgroundCellPosYOffset); //-1 to take into account the entire height of the row
@@ -1293,9 +1300,9 @@ class ActionsSubtotal
 			$bgW = $pdf->page_largeur - $pdf->marge_droite;// historiquement ce sont ces valeurs, mais elles sont la plupart du temps vide
 
 			// POUR LES PDF DE TYPE PDF_EVOLUTION (ceux avec les colonnes configurables)
-			if(!empty($object->subtotalPdfModelInfo->cols) && version_compare('11.0.0', DOL_VERSION, '<')){
-				$bgStartX = $object->subtotalPdfModelInfo->marge_droite;
-				$bgW = $object->subtotalPdfModelInfo->page_largeur - $object->subtotalPdfModelInfo->marge_gauche - $object->subtotalPdfModelInfo->marge_droite;
+			if(!empty($object->context['subtotalPdfModelInfo']->cols) && version_compare('11.0.0', DOL_VERSION, '<')){
+				$bgStartX = $object->context['subtotalPdfModelInfo']->marge_droite;
+				$bgW = $object->context['subtotalPdfModelInfo']->page_largeur - $object->context['subtotalPdfModelInfo']->marge_gauche - $object->context['subtotalPdfModelInfo']->marge_droite;
 			}
 
 			$pdf->SetFillColor($backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
@@ -1745,6 +1752,11 @@ class ActionsSubtotal
 	function pdf_getlinevatrate($parameters=array(), &$object, &$action='') {
 	    global $conf,$hideprices,$hookmanager;
 
+//		// Dans le cas des notes de frais report ne pas traiter
+//		// TODO : peut être faire l'inverse : limiter à certains elements plutot que le faire pour tous ... à voir si un autre PB du genre apparait.
+//		$TContext	= explode(':', $parameters['context']);
+//		if (in_array('expensereportcard', $TContext))	return 0;
+
 		if($this->isModSubtotalLine($parameters,$object) ){
 			$this->resprints = ' ';
 
@@ -1960,18 +1972,26 @@ class ActionsSubtotal
 		 */
 		global $pdf,$conf, $langs;
 
-        if (TSubtotal::showQtyForObject($object) === true) {
-            $this->subtotal_sum_qty_enabled = true;
-            $this->subtotal_show_qty_by_default = true;
-        }
+		if (TSubtotal::showQtyForObject($object) === true) {
+			$this->subtotal_sum_qty_enabled = true;
+			$this->subtotal_show_qty_by_default = true;
+		}
 
-		$object->subtotalPdfModelInfo = new stdClass(); // see defineColumnFiel method in this class
-		$object->subtotalPdfModelInfo->cols = false;
+		// for compatibility dolibarr < 15
+		if(!empty($object->context)){ $object->context = array(); }
+		$object->context['subtotalPdfModelInfo'] = new stdClass(); // see defineColumnFiel method in this class
+		$object->context['subtotalPdfModelInfo']->cols = false;
+
+
 
 		// var_dump($object->lines);
 		dol_include_once('/subtotal/class/subtotal.class.php');
 
-		$i = $parameters['i'];
+        $i = 0;
+        if(isset($parameters['i'])) {
+            $i = $parameters['i'];
+        }
+
 		foreach($parameters as $key=>$value) {
 			${$key} = $value;
 		}
@@ -2167,7 +2187,6 @@ class ActionsSubtotal
 		if($this->isModSubtotalLine($parameters,$object) ){
 
 				global $hideprices;
-
 				if(!empty($hideprices)) {
 					foreach($object->lines as &$line) {
 						if($line->fk_product_type!=9) $line->fk_parent_line = -1;
@@ -2193,27 +2212,53 @@ class ActionsSubtotal
 				}
 
 				if($line->qty>90) {
-					if ($conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL)	$label .= ' '.$this->getTitle($object, $line);
+					if (!empty($conf->global->CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL)) {
+                        $label .= ' '.$this->getTitle($object, $line);
+                    }
+					/**
+					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
+					 * cette pr fait suite à un bug chez Le client SECP
+					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
+					 * chez le client. il faudra voir avec le client si le problème revient.
+					 *
+					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
+					 * il a était convenu de commenter  les transactions  dans cette partie du code
+					 * TCPDF ne gère pas les transactions dans des trasactions.
+					 *
+					 */
+                   // $pdf->startTransaction();
 
-                    $pdf->startTransaction();
-					$pageBefore = $pdf->getPage();
+				   // $pageBefore = $pdf->getPage();
 					$this->pdf_add_total($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-					$pageAfter = $pdf->getPage();
-
-					if($pageAfter>$pageBefore) {
+				   // $pageAfter = $pdf->getPage();
+					/**
+					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
+					 * cette pr fait suite à un bug chez Le client SECP
+					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
+					 * chez le client. il faudra voir avec le client si le problème revient.
+					 *
+					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
+					 * il a était convenu de commenter  les transactions  dans cette partie du code
+					 * TCPDF ne gère pas les transactions dans des trasactions.
+					 *
+					 */
+					 //
+					/*if($pageAfter>$pageBefore) {
 						//print "ST $pageAfter>$pageBefore<br>";
-						$pdf->rollbackTransaction(true);
+						//$pdf->rollbackTransaction(true);
 						$pdf->addPage('', '', true);
 						$posy = $pdf->GetY();
 						$this->pdf_add_total($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
 						$posy = $pdf->GetY();
 						//print 'add ST'.$pdf->getPage().'<br />';
+
 					}
                     else	// No pagebreak
                     {
                         $pdf->commitTransaction();
-                    }
-
+                    }*/
+					// FIN REMOVE
+					//
 					// On delivery PDF, we don't want quantities to appear and there are no hooks => setting text color to background color;
 					if($object->element == 'delivery')
 					{
@@ -2238,26 +2283,49 @@ class ActionsSubtotal
 					return 1;
 				}
 				else if ($line->qty < 10) {
+					/**
+					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
+					 * cette pr fait suite à un bug chez Le client SECP
+					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
+					 * chez le client. il faudra voir avec le client si le problème revient.
+					 *
+					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
+					 * il a était convenu de commenter  les transactions  dans cette partie du code
+					 * TCPDF ne gère pas les transactions dans des trasactions.
+					 *
+					 */
+                    //$pdf->startTransaction();
 
-                    $pdf->startTransaction();
-					$pageBefore = $pdf->getPage();
+					//$pageBefore = $pdf->getPage();
 					$this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
-					$pageAfter = $pdf->getPage();
+					//$pageAfter = $pdf->getPage();
 
-                    if($pageAfter>$pageBefore) {
+					/**
+					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
+					 * cette pr fait suite à un bug chez Le client SECP
+					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
+					 * chez le client. il faudra voir avec le client si le problème revient.
+					 *
+					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
+					 * il a était convenu de commenter  les transactions  dans cette partie du code
+					 * TCPDF ne gère pas les transactions dans des trasactions.
+					 *
+					 */
+                    /*if($pageAfter>$pageBefore) {
                         //print "ST $pageAfter>$pageBefore<br>";
-                        $pdf->rollbackTransaction(true);
+                       // $pdf->rollbackTransaction(true);
                         $pdf->addPage('', '', true);
                         $posy = $pdf->GetY();
                         $this->pdf_add_title($pdf,$object, $line, $label, $description,$posx, $posy, $w, $h);
                         $posy = $pdf->GetY();
                         //print 'add ST'.$pdf->getPage().'<br />';
+
                     }
                     else    // No pagebreak
                     {
                         $pdf->commitTransaction();
-                    }
-
+                    }*/
+					// FIN REMOVE
 
 					if($object->element == 'delivery')
 					{
@@ -2271,13 +2339,34 @@ class ActionsSubtotal
 					$labelproductservice = pdf_getlinedesc($object, $i, $outputlangs, $parameters['hideref'], $parameters['hidedesc'], $parameters['issupplierline']);
 
 					$labelproductservice = preg_replace('/(<img[^>]*src=")([^"]*)(&amp;)([^"]*")/', '\1\2&\4', $labelproductservice, -1, $nbrep);
-
-                    $pdf->startTransaction();
-                    $pageBefore = $pdf->getPage();
+					/**
+					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
+					 * cette pr fait suite à un bug chez Le client SECP
+					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
+					 * chez le client. il faudra voir avec le client si le problème revient.
+					 *
+					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
+					 * il a était convenu de commenter  les transactions  dans cette partie du code
+					 * TCPDF ne gère pas les transactions dans des trasactions.
+					 *
+					 */
+                   // $pdf->startTransaction();
+                    //$pageBefore = $pdf->getPage();
                     $pdf->writeHTMLCell($parameters['w'], $parameters['h'], $parameters['posx'], $posy, $outputlangs->convToOutputCharset($labelproductservice), 0, 1, false, true, 'J', true);
-                    $pageAfter = $pdf->getPage();
+                    //$pageAfter = $pdf->getPage();
 
-                    if($pageAfter>$pageBefore) {
+					/**
+					 * https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/271
+					 * cette pr fait suite à un bug chez Le client SECP
+					 * le bug qu'il corrige n'a pas etait reproduit par quentin avec les même informations
+					 * chez le client. il faudra voir avec le client si le problème revient.
+					 *
+					 * Suite à un bug rencontré avec plusieurs clients suite à la PR ci-dessus
+					 * il a était convenu de commenter  les transactions  dans cette partie du code
+					 * TCPDF ne gère pas les transactions dans des trasactions.
+					 *
+					 */
+                    /*if($pageAfter>$pageBefore) {
                         //print "ST $pageAfter>$pageBefore<br>";
                         $pdf->rollbackTransaction(true);
                         $pdf->addPage('', '', true);
@@ -2290,7 +2379,7 @@ class ActionsSubtotal
                     else    // No pagebreak
                     {
                         $pdf->commitTransaction();
-                    }
+                    }*/
 
 					return 1;
 				}
@@ -2349,6 +2438,8 @@ class ActionsSubtotal
 		$contexts = explode(':',$parameters['context']);
 		if($parameters['currentcontext'] === 'paiementcard') return 0;
 		$originline = null;
+
+        $newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 
 		$createRight = $user->rights->{$object->element}->creer;
 		if($object->element == 'facturerec' )
@@ -2644,7 +2735,7 @@ class ActionsSubtotal
 					}
 					else {
 
-						 if ($conf->global->SUBTOTAL_USE_NEW_FORMAT)
+						 if (!empty($conf->global->SUBTOTAL_USE_NEW_FORMAT))
 						 {
 							if(TSubtotal::isTitle($line) || TSubtotal::isSubtotal($line))
 							{
@@ -2676,7 +2767,7 @@ class ActionsSubtotal
 								print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
 							}
 							else{
-								print '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+								print '<span class="subtotal_label classfortooltip" style=" '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
 							}
 
 						 }
@@ -2939,7 +3030,7 @@ class ActionsSubtotal
 								print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
 							}
 							else{
-								print '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+								print '<span class="subtotal_label classfortooltip" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
 							}
 
 						 }
@@ -3059,7 +3150,7 @@ class ActionsSubtotal
 					print '<span class="subtotal_label" style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" >'.$line->label.'</span><br><div class="subtotal_desc">'.dol_htmlentitiesbr($line->description).'</div>';
 				}
 				else{
-					print '<span class="subtotal_label classfortooltip '.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
+					print '<span class="subtotal_label classfortooltip " style="'.$titleStyleItalic.$titleStyleBold.$titleStyleUnderline.'" title="'.$line->description.'">'.$line->label.'</span>';
 				}
 			}
 			//if($line->qty>90) print ' : ';
@@ -3122,12 +3213,9 @@ class ActionsSubtotal
 
 	function printOriginObjectSubLine($parameters, &$object, &$action, $hookmanager)
 	{
-		global $conf,$langs,$user,$db,$bc, $restrictlist, $selectedLines;
+        global $conf, $restrictlist, $selectedLines;
 
 		$line = &$parameters['line'];
-		$i = &$parameters['i'];
-
-		$var = &$parameters['var'];
 
 		$contexts = explode(':',$parameters['context']);
 
@@ -3217,19 +3305,19 @@ class ActionsSubtotal
 					$object->tpl["sublabel"].= ' : <b>'.$total.'</b>';
 				}
 
+                $object->printOriginLine($line, '', $restrictlist, '/core/tpl', $selectedLines);
+
+                unset($object->tpl["sublabel"]);
+                unset($object->tpl['sub-td-style']);
+                unset($object->tpl['sub-tr-style']);
+                unset($object->tpl['sub-type']);
+                unset($object->tpl['subtotal']);
+
+                return 1;
 			}
-
-
-			$object->printOriginLine($line, '', $restrictlist, '/core/tpl', $selectedLines);
-
-			unset($object->tpl["sublabel"]);
-			unset($object->tpl['sub-td-style']);
-			unset($object->tpl['sub-tr-style']);
-			unset($object->tpl['sub-type']);
-			unset($object->tpl['subtotal']);
 		}
 
-        return 1;
+        return 0;
 	}
 
     /**
@@ -3515,7 +3603,8 @@ class ActionsSubtotal
 									table_element_line: "<?php echo $table_element_line; ?>",
 									fk_element: "<?php echo $fk_element; ?>",
 									element_id: "<?php echo $id; ?>",
-									filepath: "<?php echo urlencode($filepath); ?>"
+									filepath: "<?php echo urlencode($filepath); ?>",
+									token: "<?php echo currentToken(); ?>"
 								},
 			    	            type: 'POST',
 			    	            url: '<?php echo DOL_URL_ROOT; ?>/core/ajax/row.php',
@@ -3648,16 +3737,16 @@ class ActionsSubtotal
 	{
 
 		// If this model is column field compatible it will add info to change subtotal behavior
-		$parameters['object']->subtotalPdfModelInfo->cols = $pdfDoc->cols;
+		$parameters['object']->context['subtotalPdfModelInfo']->cols = $pdfDoc->cols;
 
 		// HACK Pour passer les paramettres du model dans les hooks sans infos
-		$parameters['object']->subtotalPdfModelInfo->marge_droite 	= $pdfDoc->marge_droite;
-		$parameters['object']->subtotalPdfModelInfo->marge_gauche 	= $pdfDoc->marge_gauche;
-		$parameters['object']->subtotalPdfModelInfo->page_largeur 	= $pdfDoc->page_largeur;
-		$parameters['object']->subtotalPdfModelInfo->page_hauteur 	= $pdfDoc->page_hauteur;
-		$parameters['object']->subtotalPdfModelInfo->format 		= $pdfDoc->format;
-		$parameters['object']->subtotalPdfModelInfo->defaultTitlesFieldsStyle = $pdfDoc->subtotalPdfModelInfo->defaultTitlesFieldsStyle;
-		$parameters['object']->subtotalPdfModelInfo->defaultContentsFieldsStyle = $pdfDoc->subtotalPdfModelInfo->defaultContentsFieldsStyle;
+		$parameters['object']->context['subtotalPdfModelInfo']->marge_droite 	= $pdfDoc->marge_droite;
+		$parameters['object']->context['subtotalPdfModelInfo']->marge_gauche 	= $pdfDoc->marge_gauche;
+		$parameters['object']->context['subtotalPdfModelInfo']->page_largeur 	= $pdfDoc->page_largeur;
+		$parameters['object']->context['subtotalPdfModelInfo']->page_hauteur 	= $pdfDoc->page_hauteur;
+		$parameters['object']->context['subtotalPdfModelInfo']->format 		= $pdfDoc->format;
+		$parameters['object']->context['subtotalPdfModelInfo']->defaultTitlesFieldsStyle = $pdfDoc->context['subtotalPdfModelInfo']->defaultTitlesFieldsStyle;
+		$parameters['object']->context['subtotalPdfModelInfo']->defaultContentsFieldsStyle = $pdfDoc->context['subtotalPdfModelInfo']->defaultContentsFieldsStyle;
 
 	}
 
