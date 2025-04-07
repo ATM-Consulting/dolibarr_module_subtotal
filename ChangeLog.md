@@ -53,6 +53,7 @@ All notable changes to this project will be documented in this file.
 - NEW : Can select sub-total lines in supplier order and invoice  *10/12/2021* - 3.8.0 [PR #226 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/226)
 
 ## Version 3.7
+- FIX : Missing CKEditor parameters allowing to browse URL *07/04/2025* - 3.7.6
 - FIX : typo dans hook ODTSubstitutionLine *30/10/2023* - 3.7.5
 - FIX : object was never fetch *07/02/2022* - 3.7.4
 - FIX : Fix compatibility 11.0 pdfEvolution *19/01/2022* - 3.7.3
