@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 
 
 
+# Release 3.24 - 08/04/2024
+- FIX : Global $object variable was being reassigned causing CRON job crashes (and possibly more) - *18/04/2024* - 3.24.7
+- FIX : Retour montée de version   - *27/09/2024* - 3.24.6
+- FIX : DA024845 : Le module sous total amène des erreurs dans les sauts de page lorsque l'on arrive tout juste en bas de page. - *24/07/2024* - 3.24.5
+- FIX : Module_number missed in subTotal class. function  addSubTotalLine function  in test order_supplier - *26/06/2024* - 3.24.4  
+- FIX : display totalht ligne 'non compris' - *12/04/2024* - 3.24.3  
+- FIX : Title extrafields wasn't working - *12/04/2024* - 3.24.2  
+- FIX : doublon affichage label description lors de la création de facture depuis un objet (propal/commande ...)  - *03/04/2024* - 3.24.1  
+- NEW : Ajout des quantités par sous totaux sur l'interface - *27/03/2024* - 3.24.0
+
 # Release 3.23 - 18/12/2023
 - FIX : Dans le dictionnaire "Ligne de texte prédéfini" du module Sous total, si je tente d'éditer le contenu d'un texte, cela s'affiche en code HTML au lieu d'un champ d'édition WYSIWYG  - *27/09/2024* - 3.23.11
 - FIX : DA024939 - Added static method hasBreakPage to check if a line has a break page or not - *17/05/2024* - 3.23.10

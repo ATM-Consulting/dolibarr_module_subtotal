@@ -57,8 +57,7 @@ if ($this->tpl['subtotal'] != $this->tpl['id'] || !in_array($this->tpl['sub-type
 }
 else
 {
-
-    $colspan = 6;
+	$colspan = 6;
     if($conf->multicurrency->enabled) $colspan++;
     if(getDolGlobalString('PRODUCT_USE_UNITS')) $colspan++;
 	print '<tr class="oddeven'.(empty($this->tpl['strike'])?'':' strikefordisabled').'" '.(!empty($this->tpl['sub-tr-style']) ? 'style="'.$this->tpl['sub-tr-style'].'"' : '').'>';
@@ -69,6 +68,7 @@ else
 	print '<input id="cb'.$this->tpl['id'].'" class="flat checkforselect" type="checkbox" name="toselect[]" value="'.$this->tpl['id'].'"'.($selected?' checked="checked"':'').'>';
 	print '</td>';
 	print '</tr>'."\n";
+
 }
 ?>
 <!-- END PHP TEMPLATE originproductline.tpl.php -->
