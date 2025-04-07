@@ -5,6 +5,90 @@ class TSubtotal {
 
 	static $module_number = 104777;
 
+    /**
+     * Init subtotal qty list by level
+     *
+     * @param   CommonObject    $object     Object
+     * @param   int             $level      [=0] Sub-total level
+     */
+    static function initSubtotalQtyForObject($object, $level = 0)
+    {
+        if (!isset($object->TSubtotalQty)) {
+            $object->TSubtotalQty = array();
+        }
+        if (!isset($object->TSubtotalQty[$level])) {
+            $object->TSubtotalQty[$level] = 0;
+        }
+    }
+
+    /**
+     * Set subtotal quantity in list by level
+     *
+     * @param   CommonObject    $object Object
+     * @param   int             $level  Subtotal level
+     * @param   int             $qty    [=0] Subtotal qty
+     */
+    static function setSubtotalQtyForObject($object, $level, $qty = 0)
+    {
+        self::initSubtotalQtyForObject($object, $level);
+        $object->TSubtotalQty[$level] = $qty;
+    }
+
+    /**
+     * Add subtotal quantity in list by level
+     *
+     * @param   CommonObject    $object Object
+     * @param   int             $level  Subtotal level
+     * @param   int             $qty    [=0] Subtotal qty
+     */
+    static function addSubtotalQtyForObject($object, $level, $qty = 0)
+    {
+        self::initSubtotalQtyForObject($object, $level);
+        $object->TSubtotalQty[$level] += $qty;
+    }
+
+    /**
+     * Determine to show subtotal line qty by default for this object
+     *
+     * @param   CommonObject    $object Object
+     * @return  bool            False no show subtotal qty for this object else True
+     */
+    static function showQtyForObject($object)
+    {
+        global $conf;
+
+        $show = false;
+        if (!empty($conf->global->SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS) && in_array($object->element, explode(',', $conf->global->SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS))) {
+            $show = true;
+        }
+
+        return $show;
+    }
+
+    /**
+     * Determine to show subtotal line qty by default for this object line
+     *
+     * @param   Object  $line               Object line
+     * @param   bool    $show_by_default    [=false] Not to show by default
+     * @return  bool    False no show subtotal qty for this object line else True
+     */
+    static function showQtyForObjectLine($line, $show_by_default = false) {
+        if ($show_by_default === false) {
+            $line_show_qty = false;
+            if (isset($line->array_options['options_subtotal_show_qty']) && $line->array_options['options_subtotal_show_qty'] > 0) {
+                $line_show_qty = true;
+            }
+        } else {
+            $line_show_qty = true;
+            if (isset($line->array_options['options_subtotal_show_qty']) && $line->array_options['options_subtotal_show_qty'] < 0) {
+                $line_show_qty = false;
+            }
+        }
+
+        return $line_show_qty;
+    }
+
+
 	/**
 	 * @param CommonObject $object
 	 * @param string       $label

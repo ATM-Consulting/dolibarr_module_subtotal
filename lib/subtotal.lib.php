@@ -134,6 +134,7 @@ function _updateSubtotalLine(&$object, &$line)
 	$pagebreak = GETPOST('line-pagebreak', 'int');
     $showTotalHT = GETPOST('line-showTotalHT', 'int');
     $showReduc = GETPOST('line-showReduc', 'int');
+    $showQty = GETPOSTISSET('line-showQty') ? GETPOST('line-showQty', 'int') : -1;
 
 	$level = GETPOST('subtotal_level', 'int');
 	if (!empty($level))
@@ -143,6 +144,7 @@ function _updateSubtotalLine(&$object, &$line)
 	}
     $line->array_options['options_show_total_ht'] = $showTotalHT;
     $line->array_options['options_show_reduc'] = $showReduc;
+    $line->array_options['options_subtotal_show_qty'] = $showQty;
 
 	$res = TSubtotal::doUpdateLine($object, $line->id, $description, 0, $line->qty, 0, '', '', 0, 9, 0, 0, 'HT', $pagebreak, 0, 1, null, 0, $label, TSubtotal::$module_number, $line->array_options);
 

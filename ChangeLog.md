@@ -3,6 +3,29 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 
+
+## Version 3.11
+- FIX : FIX DOUBLE PARENTHESIS - *15/05/2023* - 3.11.13  
+- FIX : COMPAT V16 family - *02/06/2022)* - 3.11.12  
+- FIX : TRIGGER UPDATE AND MODIFY - *02/06/2022)* - 3.11.11 
+- FIX : description - *02/06/2022)* - 3.11.10  
+- FIX : $pdf->rollbackTransaction without start *29/06/2022* - 3.11.9
+- FIX : colspan 4 to 5 to fix view of propal and bill *07/04/2022* - 3.11.8
+- FIX : title and subtotal padding *30/03/2022* - 3.11.7
+- FIX : title and text offset position *29/03/2022* - 3.11.6
+- FIX : background Color position *17/03/2022* - 3.11.5
+- FIX : remove useless retrocompatibility file and change module min compatibility version to Dolibarr 7.0 and PHP 5.4  *08/03/2022* - 3.11.4
+- FIX : all table class oddeven *08/03/2022* - 3.11.3
+- FIX : Module logo and setup table class *07/03/2022* - 3.11.2
+- FIX : Advanced setup option not used correctly *07/03/2022* - 3.11.1
+- NEW : Add new conf to remove strange behavior on PDF subtotal line. Subtotal label always contain title label, it's possible to disable this behavior. *07/03/2022* - 3.11.0
+- NEW : Option to set background color of title and subtotal *04/03/2022* - 3.10.0 [PR #216 gdesnoues](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/216)
+- NEW : Sum qty in each subtotal line  *10/12/2021* - 3.9.0 [PR #222 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/222)  
+  
+  Apport de possibilité du choix du modèle de docuement dans la configuration du module.
+  Les options sur les sous-totaux ont été mises sur les lignes de sous-totaux pour simplification du code et éviter de parcourir toutes les lignes afin de retrouver le titre parent.
+- NEW : Can select sub-total lines in supplier order and invoice  *10/12/2021* - 3.8.0 [PR #226 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/226)
+
 ## Version 3.7
 - FIX : Missing CKEditor parameters allowing to browse URL *07/04/2025* - 3.7.6
 - FIX : typo dans hook ODTSubstitutionLine *30/10/2023* - 3.7.5
