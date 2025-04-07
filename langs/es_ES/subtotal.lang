@@ -1,16 +1,133 @@
 Module104777Name = SubTotal
-Module104777Desc = Le permite agregar títulos y subtotales de las propuestas de negocios, pedidos y facturas
-ATMAbout = This module has been developed by <a href="http://www.atm-consulting.fr" target="_blank">ATM Consulting</a><br>You can find the documentation on our <a href="http://wiki.atm-consulting.fr/index.php/Accueil" target="_blank">wiki</a><br><br>For any question or feedback, contact us on <a href="mailto:support@atm-consulting.fr">support@atm-consulting.fr</a><br><br>For any commercial question, contact us on <a href="mailto:contact@atm-consulting.fr">contact@atm-consulting.fr</a> or at +33 9 77 19 50 70<br><br>Find our other modules on <a href="http://www.dolistore.com/search.php?orderby=position&orderway=desc&search_query=atm&submit_search=Rechercher" target="_blank">Dolistore</a>
-title=Título del grupo 
-subtitle=Subgrupo título 
-AddTitle = Ajouter un titre
+Module104777Desc = Permite agregar títulos y subtotales a los presupuestos, pedidos y facturas
+
+ATMAbout = Este módulo se ha desarrolado por <a href="http://www.atm-consulting.fr" target="_blank">ATM Consulting</a><br>Puedes encontrar la documentación en la <a href="http://wiki.atm-consulting.fr/index.php/Accueil" target="_blank">wiki</a><br><br>Para cualquier pregunta o sugerencia, contáctanos en <a href="mailto:support@atm-consulting.fr">support@atm-consulting.fr</a><br><br>Para cualquier pregunta comercial, contáctanos en <a href="mailto:contact@atm-consulting.fr">contact@atm-consulting.fr</a> o en el teléfono +33 9 77 19 50 70<br><br>Encuentra otros módulos en <a href="http://www.dolistore.com/search.php?orderby=position&orderway=desc&search_query=atm&submit_search=Rechercher" target="_blank">Dolistore</a>
+
+title = Título del grupo
+subtotal = Subtotal
+subtotalAddLineDescription = Descripción...
+subtitle = Subtítulo del grupo 
+AddTitle = Añadir un título
 SubSubTotal = Sub-Total parcial
 AddSubTotal = Añadir subtotal 
-AddSubTitle = Agregar un título 
-AddSubSubTotal = Agregar un subtotal 
-HideInnerLines = Ocultar Detalles conjuntos 
-SubTotalhidedetails = líneas precios Ocultar conjuntos 
-YourTitleLabel=Ingrese su título
-deleteWithAllLines=Eliminar todas las líneas con contenido
-ConfirmDeleteAllThisLines=¿Confirma usted la supresión de líneas% s?
-AddBreakPageBeforeAñadir salto de página delante.
+AddSubTitle = Añadir un título 
+AddSubSubTotal = Añadir un Sub-Total parcial 
+HideInnerLines = Ocultar líneas en los grupos 
+SubTotalhidedetails = Ocultar detalles en los grupos
+SubTotalhidePrice = Ocultar precios en los grupos 
+YourTitleLabel = Añadir título
+YourSubtotalLabel = Añadir subtotal
+YourTextLabel = Añadir descripción
+deleteWithAllLines = Eliminar todas las líneas con contenido
+ConfirmDeleteAllThisLines = ¿Confirma la eliminación de líneas% s?
+AddBreakPageBefore = Añadir un salto de página delante.
+
+SubtotalLineShowQty = Mostrar cantidad en subtotal
+Level = Nivel
+SubtotalLabel = <b>Subtotal : </b>
+
+SUBTOTAL_USE_NEW_FORMAT=Activar ajustes avanzados
+SUBTOTAL_USE_NUMEROTATION=Habilitar numeración automática en PDF
+SUBTOTAL_ALLOW_ADD_BLOCK=Permitir agregar un título y un subtotal
+SUBTOTAL_ALLOW_EDIT_BLOCK=Permitir editar un título y un subtotal
+SUBTOTAL_ALLOW_REMOVE_BLOCK=Permitir borrar un título o un subtotal
+SUBTOTAL_ALLOW_DUPLICATE_BLOCK=Permitir duplicar bloques
+SUBTOTAL_ALLOW_DUPLICATE_LINE=Permitir duplicar líneas
+SUBTOTAL_ALLOW_ADD_LINE_UNDER_TITLE=Permitir agregar una línea libre y/o un producto directamente bajo un título
+subtotal_title_to_add_under_title=Añadir debajo
+SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE=Texto de los títulos a facturar en la pestaña de cliente -> botón Facturar "Facturar pedido"
+SUBTOTAL_TEXT_FOR_TITLE_ORDETSTOINVOICE_info=Claves de reemplazo :<br /><b>__REFORDER__</b> = Referencia del pedido<br /><b>__REFCUSTOMER__</b> = Referencia de pedido del cliente
+subtotal_add_title_bloc_from_orderstoinvoice=Añadir un bloque de título y subtotal entre cada comando
+SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK=El agregado de título se hara al final de la sección 
+SUBTOTAL_TITLE_STYLE=Estilo de los títulos (B = negrita, U = subrayado, I = cursiva)
+SUBTOTAL_TITLE_SIZE=Tamaño de los títulos
+SUBTOTAL_TITLE_SIZE_info=Igual a 9 si no se especifica
+SUBTOTAL_SUBTOTAL_STYLE=Estilo de los subtotales (B = negrita, U = subrayado, I = cursiva)
+SUBTOTAL_ONE_LINE_IF_HIDE_INNERLINES=Sólo una línea de título , total si se usa la opción "%s" (experimental)
+SUBTOTAL_REPLACE_WITH_VAT_IF_HIDE_INNERLINES=Reemplazar con los detalles de IVA si se usa la opción "%s" (experimental)
+SUBTOTAL_HIDE_PRICE_DEFAULT_CHECKED=Marcar por defecto, la casilla "Ocultar el precio de las líneas" al generar archivos PDF
+Duplicate=Duplicar
+subtotal_duplicate_success=%d líneas duplicadas
+subtotal_duplicate_lineid_not_found=Imposible duplicar el bloque, no se ha encontrado la línea
+subtotal_duplicate_error=Duplicación fallida
+subtotal_apply_default_tva=Aplicar un impuesto al bloque
+subtotal_apply_default_tva_help=Permite definir un impuesto general a todas las líneas del bloque
+subtotal_apply_progress=Aplicar un progreso al bloque
+subtotal_success_updated_line=Líneas actualizadas : %d
+subtotal_error_updated_line=Error : %d líneas no actualizadas
+subtotal_nb_progress_not_updated=Atención : Progreso no actualizado para %d líneas (progreso anterior menor que el nuevo índice)
+subtotal_update_nc_success=Total actualizadas
+subtotal_update_nc_error=Error : total no actualizado
+subtotal_nc_title=NC
+subtotal_nc_title_help=Administración de bloques no incluidos en el cálculo del total
+SUBTOTAL_MANAGE_COMPRIS_NONCOMPRIS=Activar la gestión de los bloques "No Incluídos" para excluir del total
+SUBTOTAL_TFIELD_TO_KEEP_WITH_NC=Columnas para mostrar en las líneas marcadas como "No Incluídas"
+subtotalRecap=Resumen
+subtotalPropalTitle=Cotización %s %s
+subtotalCommandeTitle=Pedido %s %s
+subtotalInvoiceTitle=Factura %s %s
+subtotalRecapLot=RResumen del lote
+RecapGeneration=Generar un resumen por título
+SUBTOTAL_KEEP_RECAP_FILE=Conservar el PDF de resumen despues de la fusión
+SUBTOTAL_PROPAL_ADD_RECAP=Activar la generación de un resumen en los presupuestos
+SUBTOTAL_COMMANDE_ADD_RECAP=Activar la generación de un resumen en los pedidos
+SUBTOTAL_INVOICE_ADD_RECAP=Activar la generación de un resumen en las facturas
+warning_subtotal_recap_object_element_unknown=No se pudo generar el resumen, elemento desconocido : %s
+subtotal_add_recap=Agregar resumen
+AddFreeText = Añadir una línea de texto libre
+SUBTOTAL_AUTO_ADD_SUBTOTAL_ON_ADDING_NEW_TITLE=Al agregar un título, agrega los subtotales faltantes
+SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS=Activar la visualización de la suma de cantidades en las líneas de subtotal para las plantillas de documentos :
+SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS_info=Habilita la visualización de la suma de cantidades en las líneas de subtotal para las plantillas de documentos seleccionadas
+SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE=Permitir la visualización de los campos adicionales en los títulos (los datos registrados, se completarán en las líneas del bloque)
+subtotalFreeLineDictionary=Línea de texto predefinido
+subtotalLabelForUnderTitle=Añadir al bloque :
+subtotalLabelForFreeText=Texto predefinido :
+subtotalFreeTextOrDesc=O añadir una descripción...
+showExtrafields=Editar los atributos complementarios
+hideExtrafields=Ocultar los atributos complementarios
+AmountBeforeTaxesSubjectToVATX%=Importe sin impuesto sujeto a %s (%s %%)
+MoveTitleBlock=Movel el bloque de título completo
+ShowTotalHTOnSubtotalBlock=Mostrar precio unitario sin IVA en línea de subtotal
+ShowReducOnSubtotalBlock=Mostrar descuento en línea de subtotal
+SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT=La gestion de no-incluidos borra el precio de coste
+SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT_info=Atención, si devuelves la línea incluida, tendrás que volver a introducir el precio de coste
+addLineTitle_in_order_shippable=Añadir las líneas título, total y descuento a pedidos enviables (tendrá que eliminar las líneas de subtotal manualmente en caso necesario )
+addLineTitle_in_order_shippable_TITLE=Parámetros de la opción de gestión de línea para pedidos enviables
+SUBTOTAL_SHIPPABLE_ORDER = Parámetros de la opción de gestión de línea para pedidos enviables
+
+CloneLSubtotalBlock = Clonar el título/bloque subtotal
+
+NO_TITLE_SHOW_ON_EXPED_GENERATION=No reportar líneas de título al generar el envío
+Error_subtotal_delete_line=Error eliminando línea del módulo subtotal
+ErrorLoadingLinesFromLinkedOrder=Error cargando líneas de pedido asociadas con el envío
+ErrorLoadingLinkedOrder=Error cargando el pedido asociado al envío
+ErrorNoLinkedOrder=Ningún comando asociado
+
+SUBTOTAL_TITLE_BACKGROUNDCOLOR = Color de fondo para los campos de título en PDF
+SUBTOTAL_SUBTOTAL_BACKGROUNDCOLOR = Color de fondo para los campos de subtotal en PDF
+SUBTOTAL_USE_NEW_FORMAT_HELP = Activando esta opción, aparecerán nuevas funcionalidades y comportamientos.<br/>Entre las nuevas opciones : <ul><li>Agrega el concepto en el título de subtotal</li></ul>
+SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET = Campos adicionales disponibles en los títulos de presupuestos a clientes
+SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET = Campos adicionales disponibles en los títulos de pedidos de clientes
+SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET = Campos adicionales disponibles en los títulos de facturas a clientes
+CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL = Agregar la etiqueta de título a las líneas del subtotal del PDF.
+
+SubtotalSetup = Ajustes de módulo subtotal
+SubTotalSetupPage = Ajustes de módulo subtotal
+EXPERIMENTAL=Experimental
+ManageNonCompris = Gestión de "no incluidos"
+SetupForExtrafields = Parámetros relacionados con campos adicionales
+SetupForSubBlocs = Parámetros de la opción "Ocultar precio de los grupos"
+SUBTOTAL_HIDE_DOCUMENT_TOTAL = Ocultar totales
+SUBTOTAL_IF_HIDE_PRICES_SHOW_QTY = Mostrar unidades en las líneas de productos
+
+
+# Spé clients à delete
+SUBTOTAL_SHOW_QTY_ON_TITLES = Mostrar cantidades en líneas de subtotal (Solo en caso de producto virtual)
+SUBTOTAL_ONLY_HIDE_SUBPRODUCTS_PRICES =  Ocultar solamente los precios de los productos en un grupo
+
+SubtotalExperimentalZone = Configuraciones experimentales u obsoletas
+
+
+SUBTOTAL_HIDE_OPTIONS_TITLE=Ocultar opciones de título
+SUBTOTAL_HIDE_OPTIONS_BREAK_PAGE_BEFORE=Ocultar la opción de salto de página
+SUBTOTAL_HIDE_OPTIONS_BUILD_DOC=Ocultar las opciones de generación de documentos

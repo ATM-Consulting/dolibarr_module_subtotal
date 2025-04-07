@@ -60,7 +60,8 @@ function getHtmlSelectTitle(&$object, $showLabel=false)
 	$nbsp = '&nbsp;';
 	foreach ($TTitle as &$line)
 	{
-		$str = str_repeat($nbsp, ($line->qty - 1) * 3);
+		$str = '';
+		if($line->qty > 1) $str = str_repeat($nbsp, (floatval($line->qty) - 1) * 3);
 		$html .= '<option value="'.$line->rang.'">'.$str.(!empty($line->label) ? $line->label : dol_trunc($line->desc, 30)).'</option>';
 	}
 
@@ -149,9 +150,9 @@ function _updateSubtotalLine(&$object, &$line)
 	$res = TSubtotal::doUpdateLine($object, $line->id, $description, 0, $line->qty, 0, '', '', 0, 9, 0, 0, 'HT', $pagebreak, 0, 1, null, 0, $label, TSubtotal::$module_number, $line->array_options);
 
 	$TKey = null;
-	if ($line->element == 'propaldet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET);
-	elseif ($line->element == 'commandedet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET);
-	elseif ($line->element == 'facturedet') $TKey = explode(',', $conf->global->SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET);
+	if ($line->element == 'propaldet' && getDolGlobalString('SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET')) $TKey = explode(',', getDolGlobalString('SUBTOTAL_LIST_OF_EXTRAFIELDS_PROPALDET'));
+	elseif ($line->element == 'commandedet' && getDolGlobalString('SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET')) $TKey = explode(',', getDolGlobalString('SUBTOTAL_LIST_OF_EXTRAFIELDS_COMMANDEDET'));
+	elseif ($line->element == 'facturedet' && getDolGlobalString('SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET')) $TKey = explode(',', getDolGlobalString('SUBTOTAL_LIST_OF_EXTRAFIELDS_FACTUREDET'));
 	// TODO ajouter la partie fournisseur
 
 	// TODO remove "true"
@@ -203,7 +204,7 @@ function _updateSubtotalBloc($object, $line)
 
 				if (!empty($showBlockExtrafields)) $line->array_options = $array_options;
 				if ($subtotal_tva_tx == '') $subtotal_tva_tx = $line->tva_tx;
-				if ($object->element == 'facture' && !empty($conf->global->INVOICE_USE_SITUATION) && $object->type == Facture::TYPE_SITUATION)
+				if ($object->element == 'facture' && getDolGlobalString('INVOICE_USE_SITUATION') && $object->type == Facture::TYPE_SITUATION)
 				{
 					$subtotal_progress = $subtotal_progress_init;
 					if ($subtotal_progress == '') $subtotal_progress = $line->situation_percent;
@@ -356,8 +357,8 @@ function doUpdate(&$object, &$line, $subtotal_nc, $notrigger = 0)
 	// Update extrafield et total
 	if(! empty($subtotal_nc)) {
 		$line->total_ht = $line->total_tva = $line->total_ttc = $line->total_localtax1 = $line->total_localtax2 =
-			$line->multicurrency_total_ht = $line->multicurrency_total_tva = $line->multicurrency_total_ttc = 0;
-		if(!empty($conf->global->SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT)) $line->pa_ht = '0';
+			$line->multicurrency_total_ht = $line->multicurrency_total_tva = $line->multicurrency_total_ttc = $line->remise = 0;
+		if(getDolGlobalString('SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT')) $line->pa_ht = '0';
 
 		$line->array_options['options_subtotal_nc'] = 1;
 
@@ -412,7 +413,7 @@ function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=
 
 
 	$sign=1;
-	if (isset($object->type) && $object->type == 2 && ! empty($conf->global->INVOICE_POSITIVE_CREDIT_NOTE)) $sign=-1;
+	if (isset($object->type) && $object->type == 2 && getDolGlobalString('INVOICE_POSITIVE_CREDIT_NOTE')) $sign=-1;
 
 	if (GETPOST('action', 'none') == 'builddoc') $builddoc = true;
 	else $builddoc = false;
