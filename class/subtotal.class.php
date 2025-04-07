@@ -1,4 +1,9 @@
 <?php
+/**
+* SPDX-License-Identifier: GPL-3.0-or-later
+* This file is part of Dolibarr module Subtotal
+*/
+
 
 
 class TSubtotal {
@@ -103,67 +108,50 @@ class TSubtotal {
 
 		$res = 0;
 
-		if( (float)DOL_VERSION <= 3.4 ) {
-			/**
-			 * @var $object Facture
-			 */
-			if($object->element=='facture') $res =  $object->addline($object->id, $label, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,-1, TSubtotal::$module_number);
-			/**
-			 * @var $object Propal
-			 */
-			else if($object->element=='propal') $res =  $object->addline($object->id,$label, 0,$qty,0,0,0,0,0,'HT',0,0,9,-1, TSubtotal::$module_number);
-			/**
-			 * @var $object Commande
-			 */
-			else if($object->element=='commande') $res =  $object->addline($object->id,$label, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,-1, TSubtotal::$module_number);
+		$desc = '';
 
+		$TNotElements = array ('invoice_supplier', 'order_supplier');
+		if ($qty==50 && !in_array($object->element, $TNotElements)) {
+			$desc = $label;
+			$label = '';
 		}
-		else {
-			$desc = '';
 
-			$TNotElements = array ('invoice_supplier', 'order_supplier');
-			if ((float) DOL_VERSION < 6  || $qty==50 && !in_array($object->element, $TNotElements)) {
-				$desc = $label;
-				$label = '';
-			}
-
-			if($object->element=='facture')
-            {
-                /** @var Facture $object */
-                $res =  $object->addline($desc, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,$rang, TSubtotal::$module_number, '', 0, 0, null, 0, $label);
-            }
-			elseif($object->element=='invoice_supplier') {
-                /** @var FactureFournisseur $object */
-			    $object->special_code = TSubtotal::$module_number;
-                if( (float)DOL_VERSION < 6 ) $rang = $object->line_max() + 1;
-			    $res = $object->addline($label,0,0,0,0,$qty,0,0,'','',0,0,'HT',9,$rang,false,0,null,0,0,'',TSubtotal::$module_number);
-			}
-			/**
-			 * @var $object Propal
-			 */
-			else if($object->element=='propal') $res = $object->addline($desc, 0,$qty,0,0,0,0,0,'HT',0,0,9,$rang, TSubtotal::$module_number, 0, 0, 0, $label);
-			/**
-			 * @var $object Propal Fournisseur
-			 */
-			else if($object->element=='supplier_proposal') $res = $object->addline($desc, 0,$qty,0,0,0,0,0,'HT',0,0,9,$rang, TSubtotal::$module_number, 0, 0, 0, $label);
-
-			/**
-			 * @var $object Commande
-			 */
-			else if($object->element=='commande') $res =  $object->addline($desc, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,$rang, TSubtotal::$module_number, 0, null, 0, $label);
-			/**
-			 * @var $object Commande fournisseur
-			 */
-			else if($object->element=='order_supplier') {
-				$object->special_code = TSubtotal::$module_number; // à garder pour la rétrocompatibilité
-			    $res = $object->addline($label, 0,$qty,0,0,0,0,0,'',0,'HT', 0, 9, 0, false, null, null, 0, null, 0, '', 0, -1, TSubtotal::$module_number);
-			}
-			/**
-			 * @var $object Facturerec
-			 */
-			else if($object->element=='facturerec') $res =  $object->addline($desc, 0,$qty, 0, 0, 0, 0, 0, 'HT', 0, '', 0, 9, $rang, TSubtotal::$module_number,$label);
-
+		if($object->element=='facture')
+		{
+			/** @var Facture $object */
+			$res =  $object->addline($desc, 0,$qty,0,0,0,0,0,'','',0,0,'','HT',0,9,$rang, TSubtotal::$module_number, '', 0, 0, null, 0, $label);
 		}
+		elseif($object->element=='invoice_supplier') {
+			/** @var FactureFournisseur $object */
+			$object->special_code = TSubtotal::$module_number;
+			$res = $object->addline($label,0,0,0,0,$qty,0,0,'','',0,0,'HT',9,$rang,false,0,null,0,0,'',TSubtotal::$module_number);
+		}
+		/**
+		 * @var $object Propal
+		 */
+		else if($object->element=='propal') $res = $object->addline($desc, 0,$qty,0,0,0,0,0,'HT',0,0,9,$rang, TSubtotal::$module_number, 0, 0, 0, $label);
+		/**
+		 * @var $object Propal Fournisseur
+		 */
+		else if($object->element=='supplier_proposal') $res = $object->addline($desc, 0,$qty,0,0,0,0,0,'HT',0,0,9,$rang, TSubtotal::$module_number, 0, 0, 0, $label);
+
+		/**
+		 * @var $object Commande
+		 */
+		else if($object->element=='commande') $res =  $object->addline($desc, 0,$qty,0,0,0,0,0,0,0,'HT',0,'','',9,$rang, TSubtotal::$module_number, 0, null, 0, $label);
+		/**
+		 * @var $object Commande fournisseur
+		 */
+		else if($object->element=='order_supplier') {
+			$object->special_code = TSubtotal::$module_number; // à garder pour la rétrocompatibilité
+			$res = $object->addline($label, 0,$qty,0,0,0,0,0,'',0,'HT', 0, 9, 0, false, null, null, 0, null, 0, '', 0, -1, TSubtotal::$module_number);
+		}
+		/**
+		 * @var $object Facturerec
+		 */
+		else if($object->element=='facturerec') $res =  $object->addline($desc, 0,$qty, 0, 0, 0, 0, 0, 'HT', 0, '', 0, 9, $rang, TSubtotal::$module_number,$label);
+
+
 
 		self::generateDoc($object);
 
@@ -194,16 +182,9 @@ class TSubtotal {
 			}
 
 			$ret = $object->fetch($object->id); // Reload to get new records
-			if ((float) DOL_VERSION <= 3.6)
-			{
-				if ($object->element == 'propal') propale_pdf_create($db, $object, $object->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
-				elseif ($object->element == 'commande') commande_pdf_create($db, $object, $object->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
-				elseif ($object->element == 'facture') facture_pdf_create($db, $object, $object->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
-			}
-			else
-			{
-				if ($object->element!= 'facturerec') $object->generateDocument($object->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
-			}
+
+			if ($object->element!= 'facturerec') $object->generateDocument($object->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
+
 		}
 	}
 
@@ -1124,9 +1105,6 @@ class TSubtotal {
 
 				// Print: Designation
 				$label = $line->label;
-				if( (float)DOL_VERSION < 6 ) {
-					$label = !empty($line->label) ? $line->label : $line->desc;
-				}
 
 
 				$pdf->startTransaction();
@@ -1418,7 +1396,7 @@ class TSubtotal {
 		$pdf->SetXY($col1x, $tab2_top + 0);
 		$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalHT"), 0, 'L', 1);
 
-		// $total_ht = ($conf->multicurrency->enabled && $object->mylticurrency_tx != 1) ? $TTot['multicurrency_total_ht'] : $TTot['total_ht'];
+		// $total_ht = (isModEnabled('multicurrency') && $object->mylticurrency_tx != 1) ? $TTot['multicurrency_total_ht'] : $TTot['total_ht'];
 		$total_ht = $TTot['total_ht'];
 		$pdf->SetXY($col2x, $tab2_top + 0);
 		$pdf->MultiCell($largcol2, $tab2_hl, price($total_ht, 0, $outputlangs), 0, 'R', 1);
@@ -1458,7 +1436,7 @@ class TSubtotal {
 		$pdf->SetFillColor(224,224,224);
 		$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalTTC"), $useborder, 'L', 1);
 
-		// $total_ttc = ($conf->multicurrency->enabled && $object->multiccurency_tx != 1) ? $TTot['multicurrency_total_ttc'] : $TTot['total_ttc'];
+		// $total_ttc = (isModEnabled('multicurrency') && $object->multiccurency_tx != 1) ? $TTot['multicurrency_total_ttc'] : $TTot['total_ttc'];
 		$total_ttc = $TTot['total_ttc'];
 		$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
 		$pdf->MultiCell($largcol2, $tab2_hl, price($total_ttc, 0, $outputlangs), $useborder, 'R', 1);

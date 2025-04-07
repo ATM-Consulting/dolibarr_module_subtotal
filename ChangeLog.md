@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 
 
 
+# Release 3.25 - 24/07/2024
+- FIX: DA025864: conf `NO_TITLE_SHOW_ON_EXPED_GENERATION` should delete all 
+  title/free/subtotal lines from the shipment but doesn't - *12/12/2024* - 3.25.5
+- FIX : DA025861 Provide an option in the heading style configuration to have no styling at all - *12/12/2024* - 3.25.4  
+- FIX DA025399 : GETPOST type integer n'existe pas - *22/08/2024* - 3.25.3
+- FIX : CKeditor no check version to avoid the error message  - *20/08/2024* - 3.25.2
+- FIX : Title summary - *24/07/2024* - 3.25.1
+- FIX : Compat v20 
+  Changed Dolibarr compatibility range to 16 min - 20 max - *11/07/2024* - 3.25.0
+- Ajout du hook pdfgeneration dans la liste des hooks accepté par le module - *12/07/2024* - 3.25.0
+
 # Release 3.24 - 08/04/2024
 - FIX : Global $object variable was being reassigned causing CRON job crashes (and possibly more) - *18/04/2024* - 3.24.7
 - FIX : Retour montée de version   - *27/09/2024* - 3.24.6

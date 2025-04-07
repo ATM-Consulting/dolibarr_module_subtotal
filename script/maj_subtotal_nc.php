@@ -1,4 +1,9 @@
 <?php
+/**
+* SPDX-License-Identifier: GPL-3.0-or-later
+* This file is part of Dolibarr module Subtotal
+*/
+
 require '../config.php';
 
 dol_include_once('/subtotal/lib/subtotal.lib.php');
