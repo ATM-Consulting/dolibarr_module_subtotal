@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - NEW : Ajout des quantités par sous totaux sur l'interface - *27/03/2024* - 3.24.0
 
 # Release 3.23 - 18/12/2023
+- FIX : Dans le dictionnaire "Ligne de texte prédéfini" du module Sous total, si je tente d'éditer le contenu d'un texte, cela s'affiche en code HTML au lieu d'un champ d'édition WYSIWYG  - *27/09/2024* - 3.23.11
 - FIX : DA024939 - Added static method hasBreakPage to check if a line has a break page or not - *17/05/2024* - 3.23.10
 - FIX : DA024587 - Les totaux remisés sur le PDF Sponge sont erronés  - *20/03/2024* - 3.23.9
 - FIX : Suite a l'issue #379, la création de facture d'acompte avec un montant variable change les qté des lignes générées par le module donc on utilise un trigger pour remettre les bonnes qtés - *18/03/2024* - 3.23.8
@@ -124,7 +125,8 @@ Changed Dolibarr compatibility range to 15 min - 19 max
   Les options sur les sous-totaux ont été mises sur les lignes de sous-totaux pour simplification du code et éviter de parcourir toutes les lignes afin de retrouver le titre parent.
 - NEW : Can select sub-total lines in supplier order and invoice  *10/12/2021* - 3.8.0 [PR #226 OpenDsi](https://github.com/ATM-Consulting/dolibarr_module_subtotal/pull/226)
 
-## Release 3.7
+## Version 3.7
+- FIX : Missing CKEditor parameters allowing to browse URL *07/04/2025* - 3.7.6
 - FIX : typo dans hook ODTSubstitutionLine *30/10/2023* - 3.7.5
 - FIX : object was never fetch *07/02/2022* - 3.7.4
 - FIX : Fix compatibility 11.0 pdfEvolution *19/01/2022* - 3.7.3

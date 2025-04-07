@@ -417,7 +417,23 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						{
 							if (typeof use_textarea != 'undefined' && use_textarea && typeof CKEDITOR == "object" && typeof CKEDITOR.instances != "undefined" )
 							{
-								 CKEDITOR.replace( 'sub-total-title', {toolbar: 'dolibarr_details', versionCheck: false, toolbarStartupExpanded: false} );
+								CKEDITOR.replace('sub-total-title', {
+									toolbar: 'dolibarr_details',
+									versionCheck: false,
+									toolbarStartupExpanded: false,
+
+									// Intégration du filemanager via les variables JS de Dolibarr
+									filebrowserBrowseUrl: ckeditorFilebrowserBrowseUrl,
+									filebrowserImageBrowseUrl: ckeditorFilebrowserImageBrowseUrl,
+									// filebrowserUploadUrl: DOL_URL_ROOT + '/includes/fckeditor/editor/filemanagerdol/connectors/php/upload.php?Type=File',
+									// filebrowserImageUploadUrl: DOL_URL_ROOT + '/includes/fckeditor/editor/filemanagerdol/connectors/php/upload.php?Type=Image',
+
+									// Dimensions des fenêtres popup
+									filebrowserWindowWidth: '900',
+									filebrowserWindowHeight: '500',
+									filebrowserImageWindowWidth: '900',
+									filebrowserImageWindowHeight: '500'
+								});
 							}
 						}
 						<?php } ?>
