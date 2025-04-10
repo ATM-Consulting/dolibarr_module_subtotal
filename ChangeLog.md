@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
   Allow adding list of shipping ref to title block
 
 # Release 3.25 - 24/07/2024
+- FIX : DA025895 Refactored SHIPPING_CREATE trigger - *2025-03-26* - 3.25.6
 - FIX: DA025864: conf `NO_TITLE_SHOW_ON_EXPED_GENERATION` should delete all
   title/free/subtotal lines from the shipment but doesn't - *12/12/2024* - 3.25.5
 - FIX : DA025861 Provide an option in the heading style configuration to have no styling at all - *12/12/2024* - 3.25.4
