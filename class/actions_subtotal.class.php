@@ -2141,7 +2141,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 		$this->add_numerotation($object);
 
-        foreach($object->lines as $k => &$l) {
+        foreach($object->lines ?? [] as $k => &$l) {
             if(TSubtotal::isSubtotal($l)) {
                 $parentTitle = TSubtotal::getParentTitleOfLine($object, $l->rang);
                 if(is_object($parentTitle) && empty($parentTitle->array_options)) $parentTitle->fetch_optionals();

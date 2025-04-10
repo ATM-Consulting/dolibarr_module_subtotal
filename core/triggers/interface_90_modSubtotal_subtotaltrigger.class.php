@@ -456,15 +456,15 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 
 			// Fetch the linked order once
 			$cmd = null;
-			if (count($object->linkedObjectsIds['commande']) == 1) {
+			if (count($object->linkedObjectsIds['commande'] ?? []) === 1) {
 				$cmd = new Commande($this->db);
 				$res = $cmd->fetch(current($object->linkedObjectsIds['commande']));
 				if ($res <= 0) {
-					setEventMessage($langs->trans("ErrorLoadingLinkedOrder"), 'errors');
+					setEventMessage($langs->trans('ErrorLoadingLinkedOrder'), 'errors');
 				} else {
 					$resLines = $cmd->fetch_lines();
 					if ($resLines <= 0) {
-						setEventMessage($langs->trans("ErrorLoadingLinesFromLinkedOrder"), 'errors');
+						setEventMessage($langs->trans('ErrorLoadingLinesFromLinkedOrder'), 'errors');
 					}
 				}
 			}
@@ -476,6 +476,10 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 				$orderline->fetch($line->origin_line_id);
 
 				if (getDolGlobalString('NO_TITLE_SHOW_ON_EXPED_GENERATION')) {
+					// conf "Ne pas reporter les lignes de titre lors de la génération d’expédition"
+					// => suppression des lignes qui correspondent à un titre ou sous-total
+					// comme les lignes d'expédition n'ont pas d'attribut `special_code`, on doit le
+					// récupérer depuis les lignes de la commande.
 					if (!isset($line->special_code) && $cmd) {
 						foreach ($cmd->lines as $cmdLine) {
 							if ($cmdLine->id == $line->origin_line_id) {
