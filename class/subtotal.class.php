@@ -531,7 +531,7 @@ class TSubtotal {
 	 */
 	public static function hasBreakPage($line)
 	{
-		return $line->info_bits == 8;
+		return property_exists($line, 'info_bits') && $line->info_bits == 8;
 	}
 
 	/**
