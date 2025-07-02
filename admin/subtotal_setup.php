@@ -76,12 +76,8 @@ $value = GETPOST('value', 'alpha');
 $label = GETPOST('label', 'alpha');
 
 if(!class_exists('FormSetup')){
-	// une Pr est en cour pour fixer certains elements de la class en V16 (car c'est des fix/new)
-	if (versioncompare(explode('.' , DOL_VERSION), array(16)) < 0 && !class_exists('FormSetup')){
-		require_once __DIR__.'/../backport/v16/core/class/html.formsetup.class.php';
-	} else {
-		require_once DOL_DOCUMENT_ROOT.'/core/class/html.formsetup.class.php';
-	}
+
+	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formsetup.class.php';
 }
 
 $formSetup = new FormSetup($db);
@@ -119,7 +115,7 @@ $formSetup->newItem('SUBTOTAL_MYPARAM7')->setAsProduct();
 */
 
 // Activer l'utilisation avancée
-if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
+if(!in_array($action, array('edit', 'update'))) {
 	$item = $formSetup->newItem('SUBTOTAL_USE_NEW_FORMAT');
 	$item->setAsYesNo();
 	$item->helpText = $langs->transnoentities('SUBTOTAL_USE_NEW_FORMAT_HELP');
@@ -238,7 +234,7 @@ $TField = array(
 $item->setAsMultiSelect($TField);
 
 
-if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
+if(!in_array($action, array('edit', 'update'))) {
 	// La gestion des non-compris vide aussi le prix de revient
 	$item = $formSetup->newItem('SUBTOTAL_NONCOMPRIS_UPDATE_PA_HT');
 	$item->setAsYesNo();
@@ -251,7 +247,7 @@ if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
 
 $formSetup->newItem('SetupForExtrafields')->setAsTitle();
 
-if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
+if(!in_array($action, array('edit', 'update'))) {
 	// Autoriser l'affichage des extrafields sur les titres (les données enregistrées seront alors peuplées sur les lignes du bloc)
 	$formSetup->newItem('SUBTOTAL_ALLOW_EXTRAFIELDS_ON_TITLE')->setAsYesNo();
 }
@@ -293,7 +289,7 @@ $item->setAsMultiSelect($TField);
 $item->helpText = $langs->transnoentities('SUBTOTAL_DEFAULT_DISPLAY_QTY_FOR_SUBTOTAL_ON_ELEMENTS_info');
 
 // Ne pas reporter les lignes de titre lors de la génération d’expédition
-if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
+if(!in_array($action, array('edit', 'update'))) {
 	$formSetup->newItem('NO_TITLE_SHOW_ON_EXPED_GENERATION')->setAsYesNo();
 }
 
@@ -301,7 +297,7 @@ if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
  * Génération d'un récapitulatif par titre
  */
 
-if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
+if(!in_array($action, array('edit', 'update'))) {
 	$formSetup->newItem('RecapGeneration')->setAsTitle();
 
 	// Conserver le PDF de récapitulation après la fusion
@@ -317,7 +313,7 @@ if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
 /*
  * Paramètrage de l'option "Cacher le prix des lignes des ensembles"
  */
-if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
+if(!in_array($action, array('edit', 'update'))) {
 	$formSetup->newItem('SetupForSubBlocs')->setAsTitle();
 
 	// Par defaut, cocher la case "Cacher le prix des lignes des ensembles" lors de la génération des PDF
@@ -349,7 +345,7 @@ if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
  */
 
 
-if(!in_array($action, array('edit', 'update')) || (float)DOL_VERSION < 17) {
+if(!in_array($action, array('edit', 'update'))) {
 	$formSetup->newItem('SubtotalExperimentalZone')->setAsTitle();
 
 
