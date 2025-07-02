@@ -1743,7 +1743,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	private function callHook(&$object, &$hookmanager, $action, $params, $defaultReturn = 1)
 	{
 		$reshook=$hookmanager->executeHooks('subtotalHidePrices',$params, $object, $action);
-		$reshook = 2;
 		if ($reshook < 0)
 		{
 			$this->error = $hookmanager->error;
