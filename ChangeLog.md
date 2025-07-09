@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
 - Ajout du hook pdfgeneration dans la liste des hooks accepté par le module - *12/07/2024* - 3.25.0
 
 # Release 3.24 - 08/04/2024
+- FIX : Backward compatibility with Dolibarr 15 and 16 for supplier orders: some parameters were passed to `CommandeFournisseur::addline()` but they were introduced in v16 and v17 respectively. - *09/07/2025* - 3.24.8
 - FIX : Global $object variable was being reassigned causing CRON job crashes (and possibly more) - *18/04/2024* - 3.24.7
 - FIX : Retour montée de version   - *27/09/2024* - 3.24.6
 - FIX : DA024845 : Le module sous total amène des erreurs dans les sauts de page lorsque l'on arrive tout juste en bas de page. - *24/07/2024* - 3.24.5
