@@ -145,7 +145,11 @@ class TSubtotal {
 		 */
 		else if($object->element=='order_supplier') {
 			$object->special_code = TSubtotal::$module_number; // à garder pour la rétrocompatibilité
-			$res = $object->addline($label, 0,$qty,0,0,0,0,0,'',0,'HT', 0, 9, 0, false, null, null, 0, null, 0, '', 0, -1, TSubtotal::$module_number);
+			if ((int) DOL_VERSION < 17) {
+				$res = $object->addline($label, 0, $qty, 0, 0, 0, 0, 0, '', 0, 'HT', 0, 9);
+			} else {
+				$res = $object->addline($label, 0,$qty,0,0,0,0,0,'',0,'HT', 0, 9, 0, false, null, null, 0, null, 0, '', 0, -1, TSubtotal::$module_number);
+			}
 		}
 		/**
 		 * @var $object Facturerec
