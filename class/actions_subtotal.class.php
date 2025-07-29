@@ -2038,8 +2038,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		return 0;
 	}
 
-
-
 	function pdf_getlineprogress($parameters=array(), &$object, &$action) {
 		global $conf;
 
@@ -4705,7 +4703,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		$contexts = explode(':',$parameters['context']);
 
 		if (in_array('checkmarginlist', $contexts)){
-			$this->resprints = " AND d.product_type != 9 ";
+			$this->resprints = " AND d.product_type != 9 AND d.special_code != 104777";
 		}
 		return 0; // succès
 	}
