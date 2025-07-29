@@ -2038,6 +2038,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		return 0;
 	}
 
+
+
 	function pdf_getlineprogress($parameters=array(), &$object, &$action) {
 		global $conf;
 
@@ -4690,5 +4692,21 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				<?php
 			}
         return 0;
+	}
+	/**
+	 * @param $parameters
+	 * @param $object
+	 * @param $action
+	 * @return int
+	 */
+	public function printFieldListWhere(&$parameters, &$object, &$action, $hookmanager)
+	{
+
+		$contexts = explode(':',$parameters['context']);
+
+		if (in_array('checkmarginlist', $contexts)){
+			$this->resprints = " AND d.product_type != 9 ";
+		}
+		return 0; // succès
 	}
 }
