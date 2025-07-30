@@ -4691,4 +4691,20 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			}
         return 0;
 	}
+
+	/**
+	 * @param $parameters
+	 * @param $object
+	 * @param $action
+	 * @return int
+	 */
+	public function printFieldListWhere(&$parameters, &$object, &$action, $hookmanager)
+	{
+
+		$contexts = explode(':',$parameters['context']);
+		if (in_array('checkmarginlist', $contexts)){
+			$this->resprints = " AND  d.special_code != 104777";
+		}
+		return 0; // succès
+	}
 }
