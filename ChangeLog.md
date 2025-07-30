@@ -3,9 +3,10 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 - NEW : COMPAT 22 - *02/07/2025* - 3.29.0
-- NEW : hook printfieldlistWhere handler - 3.29.0
+
 
 ## Release 3.28
+- FIX : hook printfieldlistWhere handler used to remove subtotalLine in checkmargin  - 3.28.5
 - FIX : remove warning - *27/05/2025* - 3.28.4  
 - FIX : DA026337 - Fix buttons on supplier object - *02/04/2025* - 3.28.3
 - FIX : DA026204 - Hide the price of set items option was not correctly applied during PDF generation - *10/03/2025* - 3.28.2

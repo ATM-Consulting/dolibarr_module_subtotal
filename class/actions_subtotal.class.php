@@ -4701,7 +4701,6 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	{
 
 		$contexts = explode(':',$parameters['context']);
-
 		if (in_array('checkmarginlist', $contexts)){
 			$this->resprints = " AND  d.special_code != 104777";
 		}
