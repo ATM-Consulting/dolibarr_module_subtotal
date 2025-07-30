@@ -2,6 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 # [Unreleased]
+- NEW : COMPAT 22 - *02/07/2025* - 3.29.0
 
 ## Release 3.28
 - FIX : hook printfieldlistWhere handler used to remove subtotalLine in checkmargin  - 3.28.5
