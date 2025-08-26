@@ -3641,7 +3641,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 				if (empty($line->label)) {
 					if ($line->qty >= 91 && $line->qty <= 99 && getDolGlobalString('CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL')) $object->tpl["sublabel"].=  $line->description.' '.$this->getTitle($object, $line);
-					else $object->tpl["sublabel"].=  $line->description;
+					else $object->tpl["sublabel"] = ($object->tpl["sublabel"] ?? '') . $line->description;
 				}
 				else {
 
