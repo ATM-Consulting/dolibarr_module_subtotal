@@ -2,6 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 # [Unreleased]
+- NEW : COMPAT 22 - *02/07/2025* - 3.29.0
 
 ## Release 3.28
 - FIX : DA026403 - when creating a document from another (e.g. an invoice from an order), the custom template for displaying origin product lines didn't handle free text lines + there were colspan issues - *20/05/2025* - 3.28.6
