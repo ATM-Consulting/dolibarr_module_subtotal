@@ -815,7 +815,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 				}
 
 				// ne pas utiliser $object->setFinal ne peut pas marcher
-				$sql = 'UPDATE ' . MAIN_DB_PREFIX . 'facture SET situation_final = ' . $object->situation_final . ' WHERE rowid = ' . $object->id;
+				$sql = 'UPDATE ' . $this->db->prefix() . 'facture SET situation_final = ' . $object->situation_final . ' WHERE rowid = ' . $object->id;
 				$resql = $object->db->query($sql);
             }
 

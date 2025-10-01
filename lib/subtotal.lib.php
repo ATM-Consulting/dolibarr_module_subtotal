@@ -484,11 +484,17 @@ function getLineCurrentProgress($db, $factureid, $line)
 {
 	$previous_progress = $line->getAllPrevProgress($factureid);
 	$parent = new Facture($db);
-	$parent->fetch($factureid);
+	$res = $parent->fetch($factureid);
 
-	if ($parent->type == Facture::TYPE_CREDIT_NOTE) {
-		return $previous_progress;
+	if ($res) {
+		if ($parent->type == Facture::TYPE_CREDIT_NOTE) {
+			return $previous_progress;
+		}
+		return $previous_progress + floatval($line->situation_percent);
+	} else {
+		dol_syslog($parent->error, LOG_ERR);
+		return 0;
 	}
-	return $previous_progress + floatval($line->situation_percent);
+
 }
 
