@@ -7,7 +7,6 @@ All notable changes to this project will be documented in this file.
 
 ## Release 3.28
 - FIX : Prevent creating a new situation invoice when all lines have 100% progress- *01/10/2025* - 3.29.1
-
 - FIX : DA026403 - when creating a document from another (e.g. an invoice from an order), the custom template for displaying origin product lines didn't handle free text lines + there were colspan issues - *20/05/2025* - 3.28.6
 - FIX : hook printfieldlistWhere handler used to remove subtotalLine in checkmargin  - 3.28.5
 - FIX : remove warning - *27/05/2025* - 3.28.4  
