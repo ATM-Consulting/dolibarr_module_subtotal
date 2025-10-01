@@ -30,6 +30,8 @@
  * 				- The name property name must be Mytrigger
  */
 
+include_once __DIR__ . '/../../lib/subtotal.lib.php';
+
 /**
  * Trigger class
  */
@@ -801,16 +803,20 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 
             if (getDolGlobalString('INVOICE_USE_SITUATION') && $object->element == 'facture' && $object->type == Facture::TYPE_SITUATION)
             {
-                $object->situation_final = 1;
-                foreach($object->lines as $i => $line) {
-                    if(!TSubtotal::isModSubtotalLine($line) && $line->situation_percent != 100){
-                        $object->situation_final = 0;
-                        break;
-                    }
-                }
-                // ne pas utiliser $object->setFinal ne peut pas marcher
-                $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'facture SET situation_final = ' . $object->situation_final . ' where rowid = ' . $object->id;
-                $resql=$object->db->query($sql);
+				$object->situation_final = 1;
+
+				foreach ($object->lines as $line) {
+					$progress = getLineCurrentProgress($object->db, $object->id, $line);
+
+					if (!TSubtotal::isModSubtotalLine($line) && $progress < 100) {
+						$object->situation_final = 0;
+						break;
+					}
+				}
+
+				// ne pas utiliser $object->setFinal ne peut pas marcher
+				$sql = 'UPDATE ' . MAIN_DB_PREFIX . 'facture SET situation_final = ' . $object->situation_final . ' WHERE rowid = ' . $object->id;
+				$resql = $object->db->query($sql);
             }
 
 

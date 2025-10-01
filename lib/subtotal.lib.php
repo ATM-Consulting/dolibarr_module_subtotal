@@ -468,3 +468,27 @@ function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=
 	if (!$return_all) return $total;
 	else return array($total, $total_tva, $total_ttc, $TTotal_tva);
 }
+
+/**
+ * Retourne le progrès actuel d'une ligne de facture de situation.
+ *
+ * Cette fonction additionne le progrès précédent et le pourcentage de la ligne,
+ * sauf si la facture est un avoir, auquel cas elle retourne seulement le progrès précédent.
+ *
+ * @param FactureLigne $line L'objet ligne de facture
+ * @param int          $factureid ID de la facture
+ * @param DoliDB       $db Objet base de données Dolibarr
+ * @return float Progrès actuel en pourcentage (0 à 100)
+ */
+function getLineCurrentProgress($db, $factureid, $line)
+{
+	$previous_progress = $line->getAllPrevProgress($factureid);
+	$parent = new Facture($db);
+	$parent->fetch($factureid);
+
+	if ($parent->type == Facture::TYPE_CREDIT_NOTE) {
+		return $previous_progress;
+	}
+	return $previous_progress + floatval($line->situation_percent);
+}
+
