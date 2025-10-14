@@ -2196,6 +2196,12 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		 */
 		global $pdf,$conf, $langs;
 
+		// Guard: ignore non-commercial objects (e.g., equipement alarm/video) to avoid incompatibilities
+		$allowedElements = array('propal','commande','facture','order_supplier','invoice_supplier','supplier_proposal','shipping','delivery');
+		if (empty($object->element) || !in_array($object->element, $allowedElements, true)) {
+			return 0;
+		}
+
 		if (TSubtotal::showQtyForObject($object) === true) {
 			$this->subtotal_sum_qty_enabled = true;
 			$this->subtotal_show_qty_by_default = true;
@@ -3810,6 +3816,12 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 		$object = $parameters['object'];
 
+		// Guard: ignore non-commercial objects
+		$allowedElements = array('propal','commande','facture','order_supplier','invoice_supplier','supplier_proposal','shipping','delivery');
+		if (empty($object->element) || !in_array($object->element, $allowedElements, true)) {
+			return 0;
+		}
+
 		if ((getDolGlobalString('SUBTOTAL_PROPAL_ADD_RECAP') && $object->element == 'propal') || (getDolGlobalString('SUBTOTAL_COMMANDE_ADD_RECAP') && $object->element == 'commande') || (getDolGlobalString('SUBTOTAL_INVOICE_ADD_RECAP') && $object->element == 'facture'))
 		{
 			if (GETPOST('subtotal_add_recap', 'none')) {
@@ -4088,6 +4100,12 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	 */
 	public function defineColumnField($parameters, &$pdfDoc, &$action, $hookmanager)
 	{
+		// Guard: ignore non-commercial objects
+		if (empty($parameters['object']) || empty($parameters['object']->element)) return 0;
+		$allowedElements = array('propal','commande','facture','order_supplier','invoice_supplier','supplier_proposal','shipping','delivery');
+		if (!in_array($parameters['object']->element, $allowedElements, true)) {
+			return 0;
+		}
 
 		// If this model is column field compatible it will add info to change subtotal behavior
 		$parameters['object']->context['subtotalPdfModelInfo']->cols = $pdfDoc->cols;
@@ -4100,8 +4118,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 			$parameters['object']->context['subtotalPdfModelInfo']->page_hauteur 	= $pdfDoc->page_hauteur;
 			$parameters['object']->context['subtotalPdfModelInfo']->format 		= $pdfDoc->format;
 		    if (property_exists($pdfDoc, 'context') && array_key_exists('subtotalPdfModelInfo', $pdfDoc->context) && is_object($pdfDoc->context['subtotalPdfModelInfo'])) {
-                $parameters['object']->context['subtotalPdfModelInfo']->defaultTitlesFieldsStyle = $pdfDoc->context['subtotalPdfModelInfo']->defaultTitlesFieldsStyle;
-                $parameters['object']->context['subtotalPdfModelInfo']->defaultContentsFieldsStyle = $pdfDoc->context['subtotalPdfModelInfo']->defaultContentsFieldsStyle;
+		        $parameters['object']->context['subtotalPdfModelInfo']->defaultTitlesFieldsStyle = $pdfDoc->context['subtotalPdfModelInfo']->defaultTitlesFieldsStyle;
+		        $parameters['object']->context['subtotalPdfModelInfo']->defaultContentsFieldsStyle = $pdfDoc->context['subtotalPdfModelInfo']->defaultContentsFieldsStyle;
 		    }
 		return 0;
 	}
