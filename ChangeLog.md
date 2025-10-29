@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 ## Release 3.29
+- FIX : query sql to order line when create invoice from order  - *29/10/2025* - 3.29.1
 - NEW : COMPAT 22 - *02/07/2025* - 3.29.0
 
 ## Release 3.28
