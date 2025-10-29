@@ -1516,7 +1516,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		{
 			dol_include_once('/commande/class/commande.class.php');
 			$line = new OrderLine($object->db);
-			$line->fetch($object->lines[$i]->fk_elementdet ?? $object->lines[$i]->fk_origin_line);
+			$line->fetch($object->lines[$i]->fk_elementdet ?? $object->lines[$i]->fk_elementdet);
 		}
 
 
@@ -1757,10 +1757,10 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		{
 			$this->resprints = $hookmanager->resprints;
 
-			// override return (use  $this->results['overrideReturn'] or $this->resArray['overrideReturn'] in other module action_xxxx.class.php )
-			if(isset($hookmanager->resArray['overrideReturn']))
+			// override return (use $this->results['overrideReturn'] or $this->resArray['overrideReturn'] in other module action_xxxx.class.php )
+			if(isset($this->results['overrideReturn']))
 			{
-				return $hookmanager->resArray['overrideReturn'];
+				return $this->results['overrideReturn'];
 			}
 		}
 
@@ -2425,7 +2425,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				$line = &$object->lines[$i];
 
 				// Unset on Dolibarr < 20.0
-				if($object->element == 'delivery' && ! empty($object->commande->expeditions[$line->fk_origin_line])) unset($object->commande->expeditions[$line->fk_origin_line]);
+				if($object->element == 'delivery' && ! empty($object->commande->expeditions[$line->fk_elementdet])) unset($object->commande->expeditions[$line->fk_elementdet]);
 				// Unset on Dolibarr >= 20.0
 				if($object->element == 'delivery' && ! empty($object->commande->expeditions[$line->fk_elementdet])) unset($object->commande->expeditions[$line->fk_elementdet]);
 
@@ -2678,13 +2678,13 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		}
 		elseif($object->element == 'shipping' || $object->element == 'delivery')
 		{
-			if(empty($line->origin_line_id) && (! empty($line->fk_origin_line || ! empty($line->fk_elementdet))))
+			if(empty($line->origin_line_id) && (! empty($line->fk_elementdet || ! empty($line->fk_elementdet))))
 			{
-				$line->origin_line_id = $line->fk_elementdet ?? $line->fk_origin_line;
+				$line->origin_line_id = $line->fk_elementdet ?? $line->fk_elementdet;
 			}
 
 			$originline = new OrderLine($db);
-			$originline->fetch($line->fk_elementdet ?? $line->fk_origin_line);
+			$originline->fetch($line->fk_elementdet ?? $line->fk_elementdet);
 
 			foreach(get_object_vars($line) as $property => $value)
 			{
@@ -3524,7 +3524,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 					foreach($object->lines as $shipmentLine) {
 						if((!empty($shipmentLine->fk_elementdet)) && $shipmentLine->fk_origin == 'orderline' && $shipmentLine->fk_elementdet == $line->id) {
 							$lineid = $shipmentLine->id;
-						} elseif((!empty($shipmentLine->fk_origin_line)) && $shipmentLine->fk_origin == 'orderline' && $shipmentLine->fk_origin_line == $line->id) {
+						} elseif((!empty($shipmentLine->fk_elementdet)) && $shipmentLine->fk_origin == 'orderline' && $shipmentLine->fk_elementdet == $line->id) {
 							$lineid = $shipmentLine->id;
 						}
 					}
@@ -3589,6 +3589,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				$object->tpl['subtotal'] = $line->id;
 				if (TSubtotal::isTitle($line)) $object->tpl['sub-type'] = 'title';
 				else if (TSubtotal::isSubtotal($line)) $object->tpl['sub-type'] = 'total';
+				else if (TSubtotal::isFreeText($line)) $object->tpl['sub-type'] = 'freetext';
 
 				$object->tpl['sub-tr-style'] = '';
 				if (getDolGlobalString('SUBTOTAL_USE_NEW_FORMAT'))
@@ -3640,7 +3641,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 
 				if (empty($line->label)) {
 					if ($line->qty >= 91 && $line->qty <= 99 && getDolGlobalString('CONCAT_TITLE_LABEL_IN_SUBTOTAL_LABEL')) $object->tpl["sublabel"].=  $line->description.' '.$this->getTitle($object, $line);
-					else $object->tpl["sublabel"].=  $line->description;
+					else $object->tpl["sublabel"] = ($object->tpl["sublabel"] ?? '') . $line->description;
 				}
 				else {
 
@@ -3874,7 +3875,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	    if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 	    if ($reshook>0)
 	    {
-	        $ThtmlData = $hookmanager->resArray;
+	        $ThtmlData = $this->results;
 	    }
 
 	    return $this->implodeHtmlData($ThtmlData);
