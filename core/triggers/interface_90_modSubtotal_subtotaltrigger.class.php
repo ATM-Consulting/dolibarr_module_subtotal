@@ -364,7 +364,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 					    {
                             $subtotal_skip = true;
                             $subtotal_bloc_already_add_st = 1;
-							$rang += 2; // pour eviter un bug de décalage ou le sous total ce retrouve apres le nouveau titre : dug constaté en V16 ne doit pas avoir d'impact sur les anciennes versions
+							$rang += 2; // pour eviter un bug de décalage ou le sous total ce retrouve apres le nouveau titre : bug constaté en V16 ne doit pas avoir d'impact sur les anciennes versions
                             TSubtotal::addTotal($facture, $langs->trans('SubTotal'), 1, $rang);
                             $subtotal_bloc_already_add_st = 0;
                             $rang++;
