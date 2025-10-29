@@ -423,12 +423,15 @@ class TSubtotal {
 	 */
 	public static function getOrderIdFromLineId(&$db, $fk_commandedet, $supplier = false)
 	{
+
+		global $db;
+
 		if (empty($fk_commandedet)) return false;
 
 		$table = 'commandedet';
 		if ($supplier) $table = 'commande_fournisseurdet';
 
-		$sql = 'SELECT fk_commande FROM '.MAIN_DB_PREFIX.$table.' WHERE rowid = '.$fk_commandedet;
+		$sql = 'SELECT fk_commande FROM '. $db->prefix() . $table.' WHERE rowid = '.$fk_commandedet;
 		$resql = $db->query($sql);
 
 		if ($resql && ($row = $db->fetch_object($resql))) return $row->fk_commande;
@@ -448,9 +451,8 @@ class TSubtotal {
         $table = 'commandedet';
         if ($supplier) $table = 'commande_fournisseurdet';
 
-		$sql = 'SELECT rowid FROM '.MAIN_DB_PREFIX.$table.' WHERE fk_commande = '.$fk_commande.' ORDER BY rang DESC LIMIT 1';
+		$sql = 'SELECT rowid FROM '.MAIN_DB_PREFIX.$table.' WHERE fk_commande = '.$fk_commande.' ORDER BY rang DESC, rowid DESC LIMIT 1';
 		$resql = $db->query($sql);
-
 		if ($resql && ($row = $db->fetch_object($resql))) return (int) $row->rowid;
 		else return false;
 	}

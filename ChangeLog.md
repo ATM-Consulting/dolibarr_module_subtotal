@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 # [Unreleased]
 
 ## Release 3.28
+- FIX : query sql to order line when crate invoice from order  - *29/10/2025* - 3.28.6
 - FIX : hook printfieldlistWhere handler used to remove subtotalLine in checkmargin  - 3.28.5
 - FIX : remove warning - *27/05/2025* - 3.28.4  
 - FIX : DA026337 - Fix buttons on supplier object - *02/04/2025* - 3.28.3
