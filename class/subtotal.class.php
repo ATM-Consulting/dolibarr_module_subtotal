@@ -446,12 +446,14 @@ class TSubtotal {
 	 */
 	public static function getLastLineOrderId(&$db, $fk_commande, $supplier = false)
 	{
+		global $db;
+
 		if (empty($fk_commande)) return false;
 
         $table = 'commandedet';
         if ($supplier) $table = 'commande_fournisseurdet';
 
-		$sql = 'SELECT rowid FROM '.MAIN_DB_PREFIX.$table.' WHERE fk_commande = '.$fk_commande.' ORDER BY rang DESC, rowid DESC LIMIT 1';
+		$sql = 'SELECT rowid FROM '. $db->prefix() . $table.' WHERE fk_commande = '.$fk_commande.' ORDER BY rang DESC, rowid DESC LIMIT 1';
 		$resql = $db->query($sql);
 		if ($resql && ($row = $db->fetch_object($resql))) return (int) $row->rowid;
 		else return false;
