@@ -19,7 +19,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	 * @var string $error
 	 */
 	public $error;
-
+//Test
 	/**
 	 * @var array $errors
 	 */
