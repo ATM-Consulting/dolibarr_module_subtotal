@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 # [Unreleased]
 ## Release 3.29
 - FIX : query sql to order line when create invoice from order  - *29/10/2025* - 3.29.1
+- FIX : Prevent creating a new situation invoice when all lines have 100% progress- *01/10/2025* - 3.29.1
 - NEW : COMPAT 22 - *02/07/2025* - 3.29.0
 
 ## Release 3.28
-- FIX : Prevent creating a new situation invoice when all lines have 100% progress- *01/10/2025* - 3.29.1
+- FIX : DA027316 - when creating an invoice from shipments, `special_code` was not set on the subtotal invoice lines (because shipment lines don't have a `special_code` attribute so we need to get it from the original order line) - *25/11/2025* - 3.28.7
 - FIX : DA026403 - when creating a document from another (e.g. an invoice from an order), the custom template for displaying origin product lines didn't handle free text lines + there were colspan issues - *20/05/2025* - 3.28.6
 - FIX : hook printfieldlistWhere handler used to remove subtotalLine in checkmargin  - 3.28.5
 - FIX : remove warning - *27/05/2025* - 3.28.4  
@@ -200,4 +201,3 @@ All notable changes to this project will be documented in this file.
 - FIX: invoice creation: title/subtotal/free text lines coming from shipments or deliveries not imported with special code (MDLL) - *17/11/2021* - 3.5.8
 - FIX : Text or title line break PDF *15/04/2021* - 3.5.7
 - NEW Ajouter les lignes 'Titre' , 'total' , 'libre' aux generation d'expedition de commandes expédiables (il faudra supprimer les lignes de sous-total à la main si le besoin s'en fait sentir ) [2021-02-03]
-
