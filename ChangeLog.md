@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 # [Unreleased]
 
 ## Release 3.28
+- FIX : DA027316 - when creating an invoice from shipments, `special_code` was not set on the subtotal invoice lines (because shipment lines don't have a `special_code` attribute so we need to get it from the original order line) - *25/11/2025* - 3.28.7
 - FIX : DA026403 - when creating a document from another (e.g. an invoice from an order), the custom template for displaying origin product lines didn't handle free text lines + there were colspan issues - *20/05/2025* - 3.28.6
 - FIX : hook printfieldlistWhere handler used to remove subtotalLine in checkmargin  - 3.28.5
 - FIX : remove warning - *27/05/2025* - 3.28.4  
