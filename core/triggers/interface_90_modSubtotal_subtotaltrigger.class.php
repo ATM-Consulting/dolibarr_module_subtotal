@@ -180,23 +180,47 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 		/* Refer to issue #379 */
 		if($action == 'LINEBILL_INSERT' || $action == 'LINEBILL_CREATE'){
 			static $TInvoices = array();
-			if (!array_key_exists($object->fk_facture, $TInvoices) || (array_key_exists($object->fk_facture, $TInvoices) && $TInvoices[$object->fk_facture] === null)) {
+
+			/** @var FactureLigne $object */
+			// DA027316: if the invoice line originates from a shipment line, since
+			// shipment lines don't have a special_code, we need to get back one step
+			// further, up to the order line, to make sure the subtotal invoice lines
+			// are clearly identified as such
+			if ($object->origin_id > 0 && $object->origin === 'shipping') {
+				require_once DOL_DOCUMENT_ROOT.'/expedition/class/expedition.class.php';
+				$originLine = new ExpeditionLigne($object->db);
+				if (($resFetch = $originLine->fetch($object->origin_id)) > 0 && $originLine->element_type === 'commande') {
+					require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
+					$originOriginLine = new OrderLine($object->db);
+					if ($originOriginLine->fetch($originLine->fk_elementdet) > 0) {
+						if (TSubtotal::isModSubtotalLine($originOriginLine)) {
+							$object->special_code = TSubtotal::$module_number;
+							$object->update($user, 1);
+						}
+					}
+				}
+			}
+
+			if (!array_key_exists($object->fk_facture, $TInvoices) || $TInvoices[$object->fk_facture] === null) {
 				$staticInvoice = new Facture($this->db);
-				if ($staticInvoice->fetch($object->fk_facture) < 0){
+				if ($staticInvoice->fetch($object->fk_facture) < 0) {
 					$object->error = $staticInvoice->error;
-					$object->errors []= $staticInvoice->errors;
+					$object->errors [] = $staticInvoice->errors;
+
 					return -1;
 				}
 				$isEligible = $staticInvoice->type == Facture::TYPE_DEPOSIT && GETPOST('typedeposit', 'aZ09') == "variablealllines";
 				$TInvoices[$object->fk_facture] = $isEligible;
 			}
+
 			if ($TInvoices[$object->fk_facture]) {
-				if (!empty($object->origin) && !empty($object->origin_id) && $object->special_code == TSubtotal::$module_number){
+				if (! empty($object->origin) && ! empty($object->origin_id) && $object->special_code == TSubtotal::$module_number) {
 					$valuedeposit = price2num(str_replace('%', '', GETPOST('valuedeposit', 'alpha')), 'MU');
 					$object->qty = 100 * $object->qty / $valuedeposit;
-					if ($object->update('', 1) < 0){
+					if ($object->update('', 1) < 0) {
 						$object->error = $object->error;
-						$object->errors []= $object->errors;
+						$object->errors [] = $object->errors;
+
 						return -1;
 					}
 				}
