@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 - FIX : query sql to order line when create invoice from order  - *29/10/2025* - 3.29.1
 - FIX : Prevent creating a new situation invoice when all lines have 100% progress- *01/10/2025* - 3.29.1
 - NEW : COMPAT 22 - *02/07/2025* - 3.29.0
+- FIX : DA027405 - legacy calculation method still used for situation total lines even when the new method is set up (`INVOICE_USE_SITUATION === 2`) - *02/12/2025* - 3.29.2
 
 ## Release 3.28
 - FIX : DA027316 - when creating an invoice from shipments, `special_code` was not set on the subtotal invoice lines (because shipment lines don't have a `special_code` attribute so we need to get it from the original order line) - *25/11/2025* - 3.28.7

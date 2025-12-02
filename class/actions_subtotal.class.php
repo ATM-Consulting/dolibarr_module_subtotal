@@ -1054,10 +1054,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	 * @return array|float|int
 	 */
 	function getTotalLineFromObject(&$object, &$line, $use_level=false, $return_all=0) {
-		global $conf;
-
 		$rang = $line->rang;
-		$qty_line = $line->qty;
 		$lvl = 0;
         if (TSubtotal::isSubtotal($line)) $lvl = TSubtotal::getNiveau($line);
 
@@ -1069,65 +1066,66 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
         $total_qty = 0;
 		$TTotal_tva = array();
 
-
 		$sign=1;
 		if (isset($object->type) && $object->type == 2 && getDolGlobalString('INVOICE_POSITIVE_CREDIT_NOTE')) $sign=-1;
-
-		if (GETPOST('action', 'none') == 'builddoc') $builddoc = true;
-		else $builddoc = false;
 
 		dol_include_once('/subtotal/class/subtotal.class.php');
 
 		$TLineReverse = array_reverse($object->lines);
 
+		// loop over the lines above the current total line
 		foreach($TLineReverse as $l)
 		{
 			$l->total_ttc = doubleval($l->total_ttc);
 			$l->total_ht = doubleval($l->total_ht);
 
-			//print $l->rang.'>='.$rang.' '.$total.'<br/>';
             if ($l->rang>=$rang) continue;
             if (!empty($title_break) && $title_break->id == $l->id) break;
             elseif (!TSubtotal::isModSubtotalLine($l))
             {
                 $total_qty += $l->qty;
-                // TODO retirer le test avec $builddoc quand Dolibarr affichera le total progression sur la card et pas seulement dans le PDF
-                if ($builddoc && $object->element == 'facture' && $object->type==Facture::TYPE_SITUATION)
+                if ($object->element == 'facture' && $object->type==Facture::TYPE_SITUATION)
                 {
+					// 1 = (legacy mode): situation_percent is cumulative (state at situation)
+					// 2 = (new mode): situation_percent is non-cumulative (delta of current situation)
+					$isCumulative = getDolGlobalInt('INVOICE_USE_SITUATION') === 1;
+
                     if ($l->situation_percent > 0 && !empty($l->total_ht))
                     {
-                        $prev_progress = 0;
-                        $progress = 1;
-                        if (method_exists($l, 'get_prev_progress'))
-                        {
-                            $prev_progress = $l->get_prev_progress($object->id);
-                            $progress = ($l->situation_percent - $prev_progress) / 100;
-                        }
+                        $prev_progress = method_exists($l, 'get_prev_progress') ? $l->get_prev_progress($object->id) : 0;
 
-                        $result = $sign * ($l->total_ht / ($l->situation_percent / 100)) * $progress;
-                        $total+= $result;
-                        // TODO check si les 3 lignes du dessous sont corrects
-                        $total_tva += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
-                        $TTotal_tva[$l->tva_tx] += $sign * ($l->total_tva / ($l->situation_percent / 100)) * $progress;
-                        $total_ttc += $sign * ($l->total_tva / ($l->total_ttc / 100)) * $progress;
-
+						if ($isCumulative) {
+							// legacy mode: $l->situation_percent = cumulative progress within the cycle
+							$progressState = $l->situation_percent;
+							$progressDelta = $progressState - $prev_progress;
+							$progressRatio = $progressDelta / $progressState;
+							$lineTotalHT = $sign * $l->total_ht * $progressRatio;
+							$lineTotalTVA = $sign * $l->total_tva * $progressRatio;
+							$lineTotalTTC = $sign * $l->total_ttc * $progressRatio;
+						} else {
+							// new mode: $l->situation_percent = progress delta of this situation invoice
+							// the delta (=non-cumulative) values are stored directly on the line
+							$lineTotalHT = $l->total_ht;
+							$lineTotalTVA = $l->total_tva;
+							$lineTotalTTC = $l->total_ttc;
+						}
+                        $total += $lineTotalHT;
+						$total_tva += $lineTotalTVA;
+						$total_ttc += $lineTotalTTC;
+						$TTotal_tva[$l->tva_tx] += $lineTotalTVA;
                     }
-                }
-                else
-                {
-			if ($l->product_type != 9) {
-                    		$total += $l->total_ht;
-                    		$total_tva += $l->total_tva;
+                } elseif ($l->product_type != 9) {
+					$total += $l->total_ht;
+					$total_tva += $l->total_tva;
 
-                            if(! isset($TTotal_tva[$l->tva_tx])) {
-                                $TTotal_tva[$l->tva_tx] = 0;
-                            }
-                    		$TTotal_tva[$l->tva_tx] += $l->total_tva;
+					if (! isset($TTotal_tva[$l->tva_tx])) {
+						$TTotal_tva[$l->tva_tx] = 0;
+					}
+					$TTotal_tva[$l->tva_tx] += $l->total_tva;
 
-                    		$total_ttc += $l->total_ttc;
+					$total_ttc += $l->total_ttc;
+				}
 			}
-                }
-            }
 		}
 		if (!$return_all) return $total;
 		else return array($total, $total_tva, $total_ttc, $TTotal_tva, $total_qty);
