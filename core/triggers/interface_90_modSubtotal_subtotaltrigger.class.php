@@ -179,7 +179,7 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 			// shipment lines don't have a special_code, we need to get back one step
 			// further, up to the order line, to make sure the subtotal invoice lines
 			// are clearly identified as such
-			if ($object->origin_id > 0 && $object->origin === 'shipping') {
+			if ($object->origin_id > 0) {
 				require_once DOL_DOCUMENT_ROOT.'/expedition/class/expedition.class.php';
 				$originLine = new ExpeditionLigne($object->db);
 				if (($resFetch = $originLine->fetch($object->origin_id)) > 0 && $originLine->element_type === 'commande') {
