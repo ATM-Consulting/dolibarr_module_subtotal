@@ -1493,6 +1493,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		$line = isset($object->lines[$i]) ? $object->lines[$i] : null;
 
 		if ($this->isModSubtotalLine($parameters, $object)) {
+			if ($line && $line->qty == -99) { $this->resprints = ' '; return 1; }
+
 			if ($this->subtotal_sum_qty_enabled === true) {
 				$line_qty = intval($line->qty);
 
@@ -1580,10 +1582,11 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	{
 		global $conf, $hideprices, $hookmanager, $hidedetails, $langs;
 
-		if (is_array($parameters)) $i = &$parameters['i'];
-		else $i = (int)$parameters;
+		$i = intval($parameters['i']);
+		$line = isset($object->lines[$i]) ? $object->lines[$i] : null;
 
 		if ($this->isModSubtotalLine($parameters, $object)) {
+			if ($line && $line->qty == -99) { $this->resprints = ' '; return 1; }
 
 			$this->resprints = ' ';
 
@@ -1684,7 +1687,11 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	{
 		global $conf;
 
+		$i = intval($parameters['i']);
+		$line = isset($object->lines[$i]) ? $object->lines[$i] : null;
+
 		if ($this->isModSubtotalLine($parameters, $object)) {
+			if ($line && $line->qty == -99) { $this->resprints = ' '; return 1; }
 
 			$this->resprints = ' ';
 
@@ -1710,7 +1717,11 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	{
 		global $conf;
 
+		$i = intval($parameters['i']);
+		$line = isset($object->lines[$i]) ? $object->lines[$i] : null;
+
 		if ($this->isModSubtotalLine($parameters, $object)) {
+			if ($line && $line->qty == -99) { $this->resprints = ' '; return 1; }
 			$this->resprints = ' ';
 
 			return 1;
@@ -1734,13 +1745,12 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	{
 		global $conf, $hideprices, $hookmanager, $hidedetails, $langs;
 
-		if (is_array($parameters)) $i = &$parameters['i'];
-		else $i = (int)$parameters;
+		$i = intval($parameters['i']);
+		$line = isset($object->lines[$i]) ? $object->lines[$i] : null;
 
 		if ($this->isModSubtotalLine($parameters, $object)) {
+			if ($line && $line->qty == -99) { $this->resprints = ' '; return 1; }
 			$this->resprints = ' ';
-
-			$line = $object->lines[$i];
 
 			// On récupère les montants du bloc pour les afficher dans la ligne de sous-total
 			if (TSubtotal::isSubtotal($line)) {
@@ -1802,13 +1812,12 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	{
 		global $conf, $hideprices, $hookmanager, $hidedetails, $langs;
 
-		if (is_array($parameters)) $i = &$parameters['i'];
-		else $i = (int)$parameters;
+		$i = intval($parameters['i']);
+		$line = isset($object->lines[$i]) ? $object->lines[$i] : null;
 
 		if ($this->isModSubtotalLine($parameters, $object)) {
+			if ($line && $line->qty == -99) { $this->resprints = ' '; return 1; }
 			$this->resprints = ' ';
-
-			$line = $object->lines[$i];
 
 			// Affichage de la remise
 			if (TSubtotal::isSubtotal($line)) {
@@ -1851,7 +1860,11 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	{
 		global $conf, $hideprices, $hidedetails;
 
+		$i = intval($parameters['i']);
+		$line = isset($object->lines[$i]) ? $object->lines[$i] : null;
+
 		if ($this->isModSubtotalLine($parameters, $object)) {
+			if ($line && $line->qty == -99) { $this->resprints = ' '; return 1; }
 			$this->resprints = ' ';
 
 
@@ -1878,12 +1891,16 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	{
 		global $conf, $hideprices, $hookmanager, $hidedetails;
 
+		$i = intval($parameters['i']);
+		$line = isset($object->lines[$i]) ? $object->lines[$i] : null;
+
 //		// Dans le cas des notes de frais report ne pas traiter
 //		// TODO : peut être faire l'inverse : limiter à certains elements plutot que le faire pour tous ... à voir si un autre PB du genre apparait.
 //		$TContext	= explode(':', $parameters['context']);
 //		if (in_array('expensereportcard', $TContext))	return 0;
 
 		if ($this->isModSubtotalLine($parameters, $object)) {
+			if ($line && $line->qty == -99) { $this->resprints = ' '; return 1; }
 			$this->resprints = ' ';
 			return 1;
 
@@ -1937,7 +1954,11 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	{
 		global $conf;
 
+		$i = intval($parameters['i']);
+		$line = isset($object->lines[$i]) ? $object->lines[$i] : null;
+
 		if ($this->isModSubtotalLine($parameters, $object)) {
+			if ($line && $line->qty == -99) { $this->resprints = ' '; return 1; }
 			$this->resprints = ' ';
 			return 1;
 

@@ -589,10 +589,10 @@ class pdf_crabe_subtotal extends ModelePDFFactures
 
 					if (!empty($object->lines[$i]->TTotal_tva))
 					{
-						foreach ($object->lines[$i]->TTotal_tva as $vatrate => $tvaligne)
+						foreach ($object->lines[$i]->TTotal_tva as $sub_vatrate => $sub_tvaligne)
 						{
-							if (!isset($this->tva[$vatrate]) || $this->tva[$vatrate] === '') $this->tva[$vatrate] = 0;
-							$this->tva[$vatrate] += $tvaligne;
+							if (!isset($this->tva[$sub_vatrate]) || $this->tva[$sub_vatrate] === '') $this->tva[$sub_vatrate] = 0;
+							$this->tva[$sub_vatrate] += $sub_tvaligne;
 						}
 					}
 					else {

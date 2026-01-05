@@ -537,9 +537,9 @@ class pdf_einstein_subtotal extends ModelePDFCommandes
 						if (! isset($this->tva[$vatrate])) $this->tva[$vatrate] = 0;
 
 						if (! empty($object->lines[$i]->TTotal_tva)) {
-							foreach ($object->lines[$i]->TTotal_tva as $vatrate => $tvaligne) {
-								if (!isset($this->tva[$vatrate]) || $this->tva[$vatrate] === '') $this->tva[$vatrate] = 0;
-								$this->tva[$vatrate] += $tvaligne;
+							foreach ($object->lines[$i]->TTotal_tva as $sub_vatrate => $sub_tvaligne) {
+								if (!isset($this->tva[$sub_vatrate]) || $this->tva[$sub_vatrate] === '') $this->tva[$sub_vatrate] = 0;
+								$this->tva[$sub_vatrate] += $sub_tvaligne;
 							}
 						} else {
 							// standard
