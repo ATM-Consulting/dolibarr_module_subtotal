@@ -2607,7 +2607,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 				}
 
 
-				$this->pdf_add_total($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
+				$this->pdfAddTotal($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
 
 				if (!empty(getDolGlobalString('SUBTOTAL_DISABLE_FIX_TRANSACTION'))) {
 					$pageAfter = $pdf->getPage();
@@ -2617,7 +2617,7 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						$pdf->rollbackTransaction(true);
 						$pdf->addPage('', '', true);
 						$posy = $pdf->GetY();
-						$this->pdf_add_total($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
+						$this->pdfAddTotal($pdf, $object, $line, $label, $description, $posx, $posy, $w, $h);
 						$posy = $pdf->GetY();
 						//print 'add ST'.$pdf->getPage().'<br />';
 					} else // No pagebreak

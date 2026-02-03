@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 ## Release 3.29
+- FIX : DA027702 - *03/02/2026* - 3.29.5
 - FIX : COMPAT V23 - *02/12/2025* - 3.29.4
 - FIX : DA027547 - Correct VAT display in PDFs with hideInnerLineschecked - *05/01/2026* - 3.29.3
     Addresses issue where VAT lines were missing in generated PDFs when the "hide inner lines" option was active.
