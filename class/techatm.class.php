@@ -1,17 +1,30 @@
 <?php
-/**
-* SPDX-License-Identifier: GPL-3.0-or-later
-* This file is part of Dolibarr module Subtotal
+/* Copyright (C) 2025 ATM Consulting <support@atm-consulting.fr>
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+SPDX-License-Identifier: GPL-3.0-or-later
+This file is part of Dolibarr module Subtotal
 */
 
+namespace subtotal;
 
 /**
  * Class TechATM
  * Class utilisée pour des mises à jours technique du module
+ * @package subtotal
  */
-
-namespace subtotal;
-
 class TechATM
 {
 
@@ -32,20 +45,25 @@ class TechATM
 	public $errors = array();
 
 	/**
-	 * @var reponse_code  a http_response_header parsed reponse code
+	 * @var int  a http_response_header parsed reponse code
 	 */
 	public $reponse_code;
 
 	/**
-	 * @var http_response_header  the last call $http_response_header
+	 * @var array  the last call $http_response_header
 	 */
 
 	public $http_response_header;
 
 	/**
-	 * @var TResponseHeader  the last call $http_response_header parsed <- for most common usage (see self::parseHeaders() function)
+	 * @var array  the last call $http_response_header parsed <- for most common usage (see self::parseHeaders() function)
 	 */
 	public $TResponseHeader;
+
+	/**
+	 * @var mixed Data returned by the last call
+	 */
+	public $data;
 
 	/**
 	 * url vers le domaine des appels techniques
@@ -63,17 +81,22 @@ class TechATM
 	/**
 	 *  Constructor
 	 *
-	 *  @param DoliDB $db
+	 *  @param DoliDB $db Database handler
 	 */
-	function __construct($db)
+	public function __construct($db)
 	{
 		$this->db = $db;
 	}
 
 	/**
-	 * @param DolibarrModules $moduleDescriptor
+	 * Get the HTML content of the About page for a module.
+	 *
+	 * @param DolibarrModules $moduleDescriptor Module descriptor object
+	 * @param bool            $useCache         Use local cache if available
+	 * @return string                          HTML content of the about page
 	 */
-	function getAboutPage($moduleDescriptor, $useCache = true){
+	public function getAboutPage($moduleDescriptor, $useCache = true)
+	{
 		global $langs;
 
 		$url = self::ATM_TECH_URL.'/modules/modules-page-about.php';
@@ -87,11 +110,11 @@ class TechATM
 		$cacheFileName = dol_sanitizeFileName($moduleDescriptor->name.'_'.$langs->defaultlang).'.html';
 		$cacheFilePath = $cachePath.'/'.$cacheFileName;
 
-		if($useCache && is_readable($cacheFilePath)){
+		if ($useCache && is_readable($cacheFilePath)) {
 			$lastChange = filemtime($cacheFilePath);
-			if($lastChange > time() - 86400){
+			if ($lastChange > time() - 86400) {
 				$content = @file_get_contents($cacheFilePath);
-				if($content !== false){
+				if ($content !== false) {
 					return $content;
 				}
 			}
@@ -99,7 +122,7 @@ class TechATM
 
 		$content = $this->getContents($url);
 
-		if(!$content){
+		if (!$content) {
 			$content = '';
 			// About page goes here
 			$content.= '<div style="float: left;"><img src="../img/Dolibarr_Preferred_Partner_logo.png" /></div>';
@@ -109,14 +132,14 @@ class TechATM
 			$content.= '</center>';
 		}
 
-		if($useCache){
-			if(!is_dir($cachePath)){
+		if ($useCache) {
+			if (!is_dir($cachePath)) {
 				$res = dol_mkdir($cachePath, DOL_DATA_ROOT);
-			}else{
+			} else {
 				$res = true;
 			}
 
-			if($res){
+			if ($res) {
 				$comment = '<!-- Generated from '.$url.' -->'."\r\n";
 
 				file_put_contents(
@@ -130,18 +153,26 @@ class TechATM
 	}
 
 	/**
-	 * @param string $moduleTechMane
+	 * Get URL to the documentation page of a module.
+	 *
+	 * @param string $moduleTechMane Name of the technical module
+	 * @return string                URL to the module documentation
 	 */
-	public static function getModuleDocUrl($moduleTechMane){
+	public static function getModuleDocUrl($moduleTechMane)
+	{
 		$url = self::ATM_TECH_URL.'/modules/doc-redirect.php';
 		$url.= '?module='.$moduleTechMane;
 		return $url;
 	}
 
 	/**
-	 * @param DolibarrModules $moduleDescriptor
+	 * Build the URL to fetch the latest version of a module.
+	 *
+	 * @param DolibarrModules $moduleDescriptor Module descriptor object
+	 * @return string                           URL to retrieve latest module version info
 	 */
-	public static function getLastModuleVersionUrl($moduleDescriptor){
+	public static function getLastModuleVersionUrl($moduleDescriptor)
+	{
 		$url = self::ATM_TECH_URL.'/modules/modules-last-version.php';
 		$url.= '?module='.$moduleDescriptor->name;
 		$url.= '&number='.$moduleDescriptor->numero;
@@ -153,17 +184,18 @@ class TechATM
 
 
 	/**
-	 * @param $url
+	 * @param string $url Url to fetch
 	 * @return false|object
 	 */
-	public function getJsonData($url){
+	public function getJsonData($url)
+	{
 		$this->data = false;
 		$res = @file_get_contents($url);
 		$this->http_response_header = $http_response_header;
 		$this->TResponseHeader = self::parseHeaders($http_response_header);
-		if($res !== false){
+		if ($res !== false) {
 			$pos = strpos($res, '{');
-			if($pos > 0){
+			if ($pos > 0) {
 				// cela signifie qu'il y a une erreur ou que la sortie n'est pas propre
 				$res = substr($res, $pos);
 			}
@@ -175,24 +207,30 @@ class TechATM
 	}
 
 	/**
-	 * @param $url
+	 * @param string $url Url to fetch
 	 * @return false|string
 	 */
-	public function getContents($url){
+	public function getContents($url)
+	{
 		$this->data = false;
 		$res = @file_get_contents($url);
 		$this->http_response_header = $http_response_header;
 		$this->TResponseHeader = self::parseHeaders($http_response_header);
-		if($res !== false){
+		if ($res !== false) {
 			$this->data = $res;
 		}
 		return $this->data;
 	}
 
-	public static function http_response_code_msg($code = NULL)
+	/**
+	 * Get message from HTTP code
+	 *
+	 * @param int $code HTTP code
+	 * @return string Message
+	 */
+	public static function httpResponseCodeMsg($code = null)
 	{
-		if ($code !== NULL) {
-
+		if ($code !== null) {
 			switch ($code) {
 				case 100:
 					$text = 'Continue';
@@ -311,32 +349,34 @@ class TechATM
 			}
 
 			return $text;
-
 		} else {
 			return $text = 'Unknown http status code NULL';
 		}
 	}
 
-	public static function parseHeaders( $headers )
+	/**
+	 * Parse headers
+	 *
+	 * @param array $headers Headers
+	 * @return array Parsed headers
+	 */
+	public static function parseHeaders($headers)
 	{
 		$head = array();
-		if(!is_array($headers)){
+		if (!is_array($headers)) {
 			return $head;
 		}
 
-		foreach( $headers as $k=>$v )
-		{
-			$t = explode( ':', $v, 2 );
-			if( isset( $t[1] ) )
-				$head[ trim($t[0]) ] = trim( $t[1] );
-			else
-			{
+		foreach ($headers as $k=>$v) {
+			$t = explode(':', $v, 2);
+			if ( isset($t[1]) )
+				$head[ trim($t[0]) ] = trim($t[1]);
+			else {
 				$head[] = $v;
-				if( preg_match( "#HTTP/[0-9\.]+\s+([0-9]+)#",$v, $out ) )
+				if ( preg_match("#HTTP/[0-9\.]+\s+([0-9]+)#", $v, $out) )
 					$head['reponse_code'] = intval($out[1]);
 			}
 		}
 		return $head;
 	}
-
 }

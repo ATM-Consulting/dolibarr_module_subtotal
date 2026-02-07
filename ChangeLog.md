@@ -3,9 +3,24 @@ All notable changes to this project will be documented in this file.
 
 # [Unreleased]
 ## Release 3.29
+- FIX : DA027702 - *03/02/2026* - 3.29.5
+- FIX : COMPAT V23 - *02/12/2025* - 3.29.4
+- FIX : DA027547 - Correct VAT display in PDFs with hideInnerLineschecked - *05/01/2026* - 3.29.3
+    Addresses issue where VAT lines were missing in generated PDFs when the "hide inner lines" option was active.
+    Corrected VAT accumulation logic in `pdf_crabe_subtotal.modules.php` and `pdf_einstein_subtotal.modules.php` to properly sum VAT from subtotal lines.
+ + Modified `actions_subtotal.class.php` to:
+        Ensure `TTotal_tva` is populated for all relevant subtotal levels, not just level 1.
+        Inject invisible VAT lines when `hideInnerLines` is active, allowing standard Dolibarr PDFs to correctly calculate VAT totals.
+        Updated PDF hooks to prevent these invisible lines from being displayed.
+ + Renamed variables in `foreach` loops (`$sub_vatrate`, `$sub_tvaligne`) within these PDF models to avoid variable shadowing and potential confusion with outer-scope variables.
+ + DA027316 - FIX title convert in product from expedition to invoice  
+- FIX : DA027405 - legacy calculation method still used for situation total lines even when the new method is set up (`INVOICE_USE_SITUATION === 2`) - *02/12/2025* - 3.29.2
+- FIX : query sql to order line when create invoice from order  - *29/10/2025* - 3.29.1
+- FIX : Prevent creating a new situation invoice when all lines have 100% progress- *01/10/2025* - 3.29.1
 - NEW : COMPAT 22 - *02/07/2025* - 3.29.0
 
 ## Release 3.28
+- FIX : DA027316 - when creating an invoice from shipments, `special_code` was not set on the subtotal invoice lines (because shipment lines don't have a `special_code` attribute so we need to get it from the original order line) - *25/11/2025* - 3.28.7
 - FIX : DA026403 - when creating a document from another (e.g. an invoice from an order), the custom template for displaying origin product lines didn't handle free text lines + there were colspan issues - *20/05/2025* - 3.28.6
 - FIX : hook printfieldlistWhere handler used to remove subtotalLine in checkmargin  - 3.28.5
 - FIX : remove warning - *27/05/2025* - 3.28.4  
@@ -198,4 +213,3 @@ All notable changes to this project will be documented in this file.
 - FIX: invoice creation: title/subtotal/free text lines coming from shipments or deliveries not imported with special code (MDLL) - *17/11/2021* - 3.5.8
 - FIX : Text or title line break PDF *15/04/2021* - 3.5.7
 - NEW Ajouter les lignes 'Titre' , 'total' , 'libre' aux generation d'expedition de commandes expédiables (il faudra supprimer les lignes de sous-total à la main si le besoin s'en fait sentir ) [2021-02-03]
-
