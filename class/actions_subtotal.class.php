@@ -1175,6 +1175,9 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 						$total += $lineTotalHT;
 						$total_tva += $lineTotalTVA;
 						$total_ttc += $lineTotalTTC;
+						if (!isset($TTotal_tva[$l->tva_tx])) {
+							$TTotal_tva[$l->tva_tx] = 0;
+						}
 						$TTotal_tva[$l->tva_tx] += $lineTotalTVA;
 					}
 				} else {
