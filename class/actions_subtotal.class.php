@@ -59,6 +59,8 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 	 */
 	protected $subtotal_sum_qty_enabled = false;
 
+	public static $is_title_line_static = false;
+
 
 	/**
 	 * Constructor
@@ -4773,5 +4775,48 @@ public function printObjectLine($parameters, &$object, &$action, $hookmanager)
 			$this->resprints = " AND  d.special_code != 104777";
 		}
 		return 0; // succès
+	}
+	/**
+	 * Hook to identify if the current line is a title or subtotal.
+	 * Sets a static flag to be used by subsequent column rendering hooks.
+	 *
+	 * @param array{i:int, object:Facture} $parameters Hook parameters containing line index and object
+	 * @param pdf_octopus $object The PDF model instance
+	 * @param string $action Current action
+	 * @param HookManager $hookmanager Hook manager
+	 * @return int 0
+	 */
+	public function beforePrintPDFline(&$parameters, &$object, &$action, $hookmanager)
+	{
+		$facture = $parameters['object'];
+		$i = $parameters['i'];
+		$line = $facture->lines[$i];
+		self::$is_title_line_static = false;
+		if (TSubtotal::isModSubtotalLine($line)) {
+			self::$is_title_line_static = true;
+		}
+		return 0;
+	}
+	/**
+	 * Hook to clear specific BTP/Situation columns for title and subtotal lines.
+	 * Uses the static flag set in beforePrintPDFline to empty column content.
+	 *
+	 * @param array{colKey:string, columnText:string} $parameters Hook parameters including column key and text (by reference)
+	 * @param pdf_octopus $object The PDF model instance
+	 * @param string $action Current action
+	 * @param HookManager $hookmanager Hook manager
+	 * @return int 0 if normal line, 1 if column content was cleared
+	 */
+	public function printStdColumnContent(&$parameters, &$object, &$action, $hookmanager)
+	{
+		if (self::$is_title_line_static === true) {
+			$colKey = $parameters['colKey'];
+			$btp_cols = array('btpsomme','progress_amount','prev_progress','prev_progress_amount','progress','vat','subprice','qty','totalexcltax');
+			if (in_array($colKey, $btp_cols)) {
+				$parameters['columnText'] = ' ';
+				return 1;
+			}
+		}
+		return 0;
 	}
 }
