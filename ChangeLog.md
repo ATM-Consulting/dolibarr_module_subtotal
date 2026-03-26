@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 
 ## Release 3.29
+- FIX : Clear BTP/Situation columns on title and subtotal lines (Octopus model) - 26/03/2026 - 3.29.7
 - FIX : Warning "Undefined array key" on situation invoices - *23/03/2026* - 3.29.6
     + Added isset() check before accessing $TTotal_tva array to prevent PHP warnings
 - FIX : DA027702 - *03/02/2026* - 3.29.5
