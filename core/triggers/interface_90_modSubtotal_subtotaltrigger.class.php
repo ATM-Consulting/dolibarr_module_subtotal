@@ -297,7 +297,6 @@ class Interfacesubtotaltrigger extends DolibarrTriggers
 						$parent = $object;
 						break;
 				}
-
 				if (getDolGlobalString('SUBTOTAL_ADD_LINE_UNDER_TITLE_AT_END_BLOCK')) self::addToEnd($parent, $object, $rang);
 				else self::addToBegin($parent, $object, $rang);
 			}
