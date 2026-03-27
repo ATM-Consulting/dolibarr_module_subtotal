@@ -2328,6 +2328,12 @@ class ActionsSubtotal extends \subtotal\RetroCompatCommonHookActions
 		 */
 		global $pdf, $conf, $langs;
 
+		// Guard: ignore non-commercial objects (e.g., equipement alarm/video) to avoid incompatibilities
+		$allowedElements = array('propal','commande','facture','order_supplier','invoice_supplier','supplier_proposal','shipping','delivery');
+		if (empty($object->element) || !in_array($object->element, $allowedElements, true)) {
+			return 0;
+		}
+
 		if (TSubtotal::showQtyForObject($object) === true) {
 			$this->subtotal_sum_qty_enabled = true;
 			$this->subtotal_show_qty_by_default = true;
@@ -4151,7 +4157,7 @@ public function printObjectLine($parameters, &$object, &$action, $hookmanager)
 			$parameters['object']->context['subtotalPdfModelInfo']->cols = $pdfDoc->cols;
 
 			$parameters['object']->context['subtotalPdfModelInfo']->cols = $pdfDoc->cols;
-			// HACK Pour passer les paramettres du model dans les hooks sans infos
+			// HACK Pour passer les parametres du model dans les hooks sans infos
 			$parameters['object']->context['subtotalPdfModelInfo']->marge_droite 	= $pdfDoc->marge_droite;
 			$parameters['object']->context['subtotalPdfModelInfo']->marge_gauche 	= $pdfDoc->marge_gauche;
 			$parameters['object']->context['subtotalPdfModelInfo']->page_largeur 	= $pdfDoc->page_largeur;
